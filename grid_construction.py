@@ -58,10 +58,22 @@ def gadget_logical_generate(sdir,snum):
 
     dustmass = m * z * 1.e10 * 0.4
 
+
     
     x = pos[:,0]
     y = pos[:,1]
     z = pos[:,2]
+
+
+   
+    #DEBUG 071613
+   
+    n_particles = 100000
+    x = x[0:n_particles]
+    y = y[0:n_particles]
+    z = z[0:n_particles]
+    hsml = hsml[0:n_particles]
+
 
     #construct the octree based on the current gadget grid
     mastercell=[0] #the master cell we'll loop through in the recursive construct_octree
@@ -75,24 +87,54 @@ def gadget_logical_generate(sdir,snum):
     print 'constructing the octree: starting at ',str(datetime.now())
     t1 = datetime.now()
 
-    refined = construct_octree(x,y,z,hsml,coordinates,mastercell,refined)
+    octree_return = construct_octree(x,y,z,hsml,coordinates,mastercell,refined)
+    refined = octree_return[0]
+    coordinates = octree_return[1]
 
     t2 = datetime.now()
     print 'total time taken for octree construction: '+str(t2-t1)
+
     
+    
+   
+    
+
+
+    #file I/O
+    print 'Writing Out the Coordinates and Logical Tables'
+
+    coordinates_Table = Table([coordinates[:,0],coordinates[:,1],coordinates[:,2],
+                              coordinates[:,3],coordinates[:,4],coordinates[:,5]],
+                              names = ['xmin','xmax','ymin','ymax','zmin','zmax'])
+    
+    ascii.write(coordinates_Table,par.Auto_positions_file)
+
+    logical_Table = Table([refined[:]],names=['logical'])
+    ascii.write(logical_Table,par.Auto_TF_file)
+
+
     pdb.set_trace()
     return refined
 
 
 def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
-                     refined=[True,False,False,False,False,False,False,False,False]):
+                     refined=[True,False,False,False,False,False,False,False,False],
+                     refined_levels = 0):
 
 
     global coordinates
     coordinates = coordinates_in
 
+  
+
     for subcell in range(8):
+     
+        if par.VERBOSE:
+            if refined_levels > 10: print 'refined_levels = ',refined_levels
        
+
+       
+
         mastercell[0] += 1
 
         #criteria for subdividing
@@ -122,34 +164,46 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
         
       
         
-
-       #we do mastercell[0] -1 since on the first loop through,
-       #mastercell = 1 (which is done since the first element of
-       #'refined' is the master grid, which we ignore henceforth).
-       #The coordinates array is len(refined)-1 rows long, since it
-       #doesn't include the master grid
-
+        
+        #we do mastercell[0] -1 since on the first loop through,
+        #mastercell = 1 (which is done since the first element of
+        #'refined' is the master grid, which we ignore henceforth).
+        #The coordinates array is len(refined)-1 rows long, since it
+        #doesn't include the master grid
+        
         piic = np.where((x > coordinates[mastercell[0]-1][0]) &
-                        (x < coordinates[mastercell[0]-1][1]) & 
+                    (x < coordinates[mastercell[0]-1][1]) & 
                         (y > coordinates[mastercell[0]-1][2]) & 
                         (y < coordinates[mastercell[0]-1][3]) & 
                         (z > coordinates[mastercell[0]-1][4]) & 
                         (z < coordinates[mastercell[0]-1][5]))[0]
         
+        
+        #pdb.set_trace()
+        
         #if there are particles inside the cell
         if len(piic) != 0:
-            #if none of those particles extend beyond the cell wall
-            if np.where((x[piic]-hsml[piic] > coordinates[mastercell[0]-1][0]) &
-                        (x[piic]+hsml[piic] < coordinates[mastercell[0]-1][1]) & 
-                        (y[piic]-hsml[piic] > coordinates[mastercell[0]-1][2]) &
-                        (y[piic]+hsml[piic] < coordinates[mastercell[0]-1][3]) &
-                        (z[piic]-hsml[piic] > coordinates[mastercell[0]-1][4]) &
-                        (z[piic]+hsml[piic] < coordinates[mastercell[0]-1][5])):
 
-        
-                print mastercell
-                print 'len(refined) = ',len(refined)
-        
+            #what is the size of the particles within the current
+            #cell?  do they extend past the wall?  if so, add them to
+            #the particles_that_are_too_small array
+
+            particles_that_are_too_small = np.where((x[piic]-hsml[piic] > coordinates[mastercell[0]-1][0]) |
+                                                    (x[piic]+hsml[piic] < coordinates[mastercell[0]-1][1]) | 
+                                                    (y[piic]-hsml[piic] > coordinates[mastercell[0]-1][2]) |
+                                                    (y[piic]+hsml[piic] < coordinates[mastercell[0]-1][3]) |
+                                                    (z[piic]-hsml[piic] > coordinates[mastercell[0]-1][4]) |
+                                                    (z[piic]+hsml[piic] < coordinates[mastercell[0]-1][5]))[0]
+            
+
+            #if there are any particles that are too small (that fit wholly within the cell) then refine
+            if len(particles_that_are_too_small) != 0:
+                if par.VERBOSE: 
+                    print 'len (particles_that_are_too_small) = ',len(particles_that_are_too_small)
+
+                    print mastercell
+                    print 'len(refined) = ',len(refined)
+                    
                
                 refined[mastercell[0]] = True
                 for i in range(1,9): refined.insert(mastercell[0]+i,False)
@@ -182,10 +236,11 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
 
                
 
-                construct_octree(x,y,z,hsml,coordinates,mastercell,refined)
+
+                construct_octree(x,y,z,hsml,coordinates,mastercell,refined,refined_levels+1)
 
 
-    return refined
+    return refined,coordinates
 
 
 
