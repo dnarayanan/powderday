@@ -58,7 +58,7 @@ def gadget_logical_generate(sdir,snum):
 
     dustmass = m * z * 1.e10 * 0.4
 
-
+    
     
     x = pos[:,0]
     y = pos[:,1]
@@ -66,13 +66,15 @@ def gadget_logical_generate(sdir,snum):
 
 
    
-    #DEBUG 071613
-   
-    n_particles = 100000
+    #DEBUG 071713
+
+    n_particles = 20000
     x = x[0:n_particles]
     y = y[0:n_particles]
     z = z[0:n_particles]
     hsml = hsml[0:n_particles]
+
+
 
 
     #construct the octree based on the current gadget grid
@@ -95,8 +97,15 @@ def gadget_logical_generate(sdir,snum):
     print 'total time taken for octree construction: '+str(t2-t1)
 
     
+
+    #particle smoothing
+
+    print 'smoothing particles on to grid'
+    t1 = datetime.now()
+    mass_grid = particle_smooth(x,y,z,hsml,coordinates,pos,m,refined)
+    t2 = datetime.now()
+    print 'total time for particle smoothing: '+str(t2-t1)
     
-   
     
 
 
@@ -111,6 +120,13 @@ def gadget_logical_generate(sdir,snum):
 
     logical_Table = Table([refined[:]],names=['logical'])
     ascii.write(logical_Table,par.Auto_TF_file)
+
+
+
+
+
+
+
 
 
     pdb.set_trace()
@@ -179,7 +195,7 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
                         (z < coordinates[mastercell[0]-1][5]))[0]
         
         
-        #pdb.set_trace()
+
         
         #if there are particles inside the cell
         if len(piic) != 0:
@@ -244,161 +260,78 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
 
 
 
-'''
-def construct_octree2(pos,hsml,mastercell,
-                     refined=[True,False,False,False,False,False,False,False,False]):
-
-   
-
-    #debug
-    print len(refined)
-    print 'mastercell = ',mastercell
 
 
-    x = pos[:,0]
-    y = pos[:,1]
-    z = pos[:,2]
-
-    refined_nomaster = refined[1::] #this is the refined array without the
-                               #first "True" representing the master
-                               #grid in it.  We need this for looping
-                               #through the oct, though need a copy
-                               #with the master 'True' in it for the
-                               #location calculation.
-
-    #this is the index that we march through in the refined array (and
-    #refined_nomaster) as we examine the refined criteria for each
-    #cell.  we start with value -1 because we increment early, before
-    #we actually start examining individual cells.
-
-   
-    if mastercell[0] > 220: 
-        print '================'
-        print 'mastercell 1 = ',mastercell[0]
-
-    for subcell in range(8):
-        
-        mastercell[0] += 1
-
-        #======================================================
-        #criteria for subdivisions - swap this out if you like
-        #======================================================
-
-
-        #divide = random.random() < 0.12
-
-       
-
-        coordinates = position_calculate(-1.*par.dx,par.dx,
-                                         -1.*par.dy,par.dy,
-                                         -1.*par.dz,par.dz,
-                                         refined)
-
-        if mastercell[0] > 220: 
-            print len(refined)
-            print len(refined_nomaster)
-            print 'mastercell 2 = ',mastercell[0]
-
- #if the sizes of any particles that are in the cell are
-        #smaller than the cell, subdivide
-
-        #find the list of particles that are in the current mastercell
-        if mastercell[0] == 289: pdb.set_trace()
-        #piic = particle indices inside cell 
-
-
-        piic = np.where((x > coordinates[mastercell[0]][0]) &
-                 (x < coordinates[mastercell[0]][1]) & 
-                 (y > coordinates[mastercell[0]][2]) & 
-                 (y < coordinates[mastercell[0]][3]) & 
-                 (z > coordinates[mastercell[0]][4]) & 
-                 (z < coordinates[mastercell[0]][5]))[0]
-        
-
-        #if there are particles inside the cell
-        if len(piic) != 0:
-            #if none of those particles extend beyond the cell wall
-            if np.where((x[piic]-hsml[piic] > coordinates[mastercell[0]][0]) &
-                        (x[piic]+hsml[piic] < coordinates[mastercell[0]][1]) & 
-                        (y[piic]-hsml[piic] > coordinates[mastercell[0]][2]) &
-                        (y[piic]+hsml[piic] < coordinates[mastercell[0]][3]) &
-                        (z[piic]-hsml[piic] > coordinates[mastercell[0]][4]) &
-                        (z[piic]+hsml[piic] < coordinates[mastercell[0]][5])):
-                
-                
-                #======================================================
-                #END criteria for subdivisions 
-                #====================================================== 
-
-                if mastercell[0] > 200: print 'mastercell 3 = ',mastercell[0]
-
-
-                #we have passed the criteria for subdivisoins: add 8
-                #subcells in the refined list, and change the existing
-                #boolean that we're on to a True. When adding 8
-                #subcell booleans, we add Falses by default, then
-                #switch them to True if necessary later.
-
-
-                refined_nomaster[mastercell[0]] = True
-                
-                for i in range(1,9):
-                    refined_nomaster.insert(mastercell[0]+i,False)
-                    if mastercell[0] > 220: print 'mastercell 4 = ',mastercell[0]
-
-                if mastercell[0] >= 288: pdb.set_trace()
-                    #refined[1::] = refined_nomaster
-                refined = [True] + refined_nomaster
-                if mastercell[0] >= 288: pdb.set_trace()
-                
-                if mastercell[0] > 220: 
-                    print 'bottom pdb'
-                    print len(refined)
-                    print 'mastercell 5 = ',mastercell[0]
-
-                
-
-                #since we're subdividing, we need to recursively refine
-                construct_octree(pos,hsml,mastercell,refined)
-
-       
-       
-   
-       
-    
-    return refined
-        
-
-'''
-
-
-
-
-
-
-
-
-'''MASTER COPY OF CONSTRUCT_OCTREE
-def construct_octree(refined = [True]):
-    
-    for subcell in range(8):
-        
-        #criteria for subdivisions
-        divide = random.random() < 0.12
-         
-        #append the boolean to the refined list
-        refined.append(divide)
-         
-         
-        #if the cell is subdivided, recursively refine
-         
-        if divide:
-            construct_octree(refined)
-            
-    return refined
+def particle_smooth(x,y,z,hsml,coordinates,pos,m,refined):
  
+    #define the grid in terms of refined_nomaster, to get the
+    #dimensions right with respect to the coordinates array.  then,
+    #later, we'll add a '0' back in the place of the base grid in
+    #the final mass_grid
 
-'''
+
+    refined_nomaster = refined[1::]
+
+    mass_grid = np.zeros(len(refined_nomaster))
+
+    wTrue = np.where(np.array(refined_nomaster) == True)[0]
+
+    #loop through the particles and see which cells correspond to
+    #being within 3 smoothing lengths of the center of the particle.
+    #we ignore any True in the refined list, since this doesn't hold
+    #data. but we hvae to include it, because Hyperion expects a value
+    #(of 0) in the True spaces.
+
+
+
+    for p in range(len(x)): 
+        dist = np.sqrt( (coordinates[:,0]-x[p])**2. +
+                        (coordinates[:,1]-y[p])**2. +
+                        (coordinates[:,2]-z[p])**2. )
+        
+
+        a_norm = m[p]
+        mass_gauss = a_norm * np.exp( (-1. * (dist**2.))/(2. * (hsml[p]**2.)))
+        
+        #any True's have to have 0 for data
+        mass_gauss[wTrue] = 0 
+
+        
+
+        #normalize so that the total mass == the mass of the particle.
+        #just in case the distance to the nearest cell is so large
+        #that no smoothing is possible (too small values in the
+        #gaussian), we assign all of the mass to the nearest cell
+
+        if sum(mass_gauss) != 0:
+            mass_gauss /= ((sum(mass_gauss))/m[p])  
+
+        else:
+            w = np.where(dist == min(dist))
+            mass_gauss[w[0]] = m[p]/len(w[0]) #/len(w) just in case a few cells fit the minimum distance criteria
+           
+        
+        
+            
+        assert(np.isnan(sum(mass_gauss)) == False)
+                                            
+        
+        mass_grid = mass_grid+mass_gauss
+
+      
+        assert( (sum(mass_grid)/sum(m[0:p+1]) < 1.01) & (sum(mass_grid)/sum(m[0:p+1]) > 0.99))
+        assert( (sum(mass_gauss)/m[p] < 1.01) & (sum(mass_gauss)/m[p] > 0.99))
+
+    #append a 0 to the beginning to account for the base grid
+    mass_grid = np.insert(mass_grid,0,0,0)
+
+
+        
+ 
+    return mass_grid
+    
+    
+
 
 
 
@@ -550,3 +483,33 @@ def recursive_refine(positions,base_number,minx,maxx,miny,maxy,minz,maxz,refined
 #    return(x_min_out,x_max_out,y_min_out,y_max_out,z_min_out,z_max_out)
 
         
+
+
+
+
+
+
+
+
+'''MASTER COPY OF CONSTRUCT_OCTREE
+def construct_octree(refined = [True]):
+    
+    for subcell in range(8):
+        
+        #criteria for subdivisions
+        divide = random.random() < 0.12
+         
+        #append the boolean to the refined list
+        refined.append(divide)
+         
+         
+        #if the cell is subdivided, recursively refine
+         
+        if divide:
+            construct_octree(refined)
+            
+    return refined
+ 
+
+'''
+
