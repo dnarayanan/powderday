@@ -8,12 +8,13 @@ Gadget_dir = '/Users/desika/powderday/grid_data/'
 Gadget_snap_num = 006
 
 #file for writing the grid if it doesn't already exist
-
+'''
 Auto_TF_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.pd.logical'
 Auto_positions_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.pd.positions'
+'''
 
-
-
+Auto_TF_file = 'junk.logical'
+Auto_positions_file = 'junk.positions'
 
 
 #DUST INFORMATION
