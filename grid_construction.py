@@ -66,14 +66,14 @@ def gadget_logical_generate(sdir,snum):
 
 
    
-    #DEBUG 071713
 
+    '''
     n_particles = 20000
     x = x[0:n_particles]
     y = y[0:n_particles]
     z = z[0:n_particles]
     hsml = hsml[0:n_particles]
-
+    '''
 
 
 
