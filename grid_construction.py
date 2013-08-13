@@ -30,6 +30,7 @@ from datetime import datetime
 from astropy.table import Table
 from astropy.io import ascii
 
+import constants as const
 
 random.seed('octree-demo')
  
@@ -50,13 +51,13 @@ def gadget_logical_generate(sdir,snum):
     #get the dust mass
     #dust mass is the gas mass * gadgetunits * metallicity * 0.4 (= dust to metals ratio)
 
-    z = gas_dict['z']
-    z = z[:,0]
+    metals = gas_dict['z']
+    metals = metals[:,0]
     m = gas_dict['m']
     pos = gas_dict['p']
     hsml = gas_dict['h']
 
-    dustmass = m * z * 1.e10 * 0.4
+    dustmass = m * metals * 1.e10 * 0.4
 
     
     
@@ -65,15 +66,14 @@ def gadget_logical_generate(sdir,snum):
     z = pos[:,2]
 
 
-   
 
-    '''
-    n_particles = 20000
+
+    n_particles = 1000
     x = x[0:n_particles]
     y = y[0:n_particles]
     z = z[0:n_particles]
     hsml = hsml[0:n_particles]
-    '''
+   
 
 
 
@@ -100,15 +100,25 @@ def gadget_logical_generate(sdir,snum):
 
     #particle smoothing
 
+
+
     print 'smoothing particles on to grid'
     t1 = datetime.now()
-    mass_grid = particle_smooth(x,y,z,hsml,coordinates,pos,m,refined)
+    dust_mass_grid = particle_smooth(x,y,z,hsml,coordinates,pos,dustmass,refined)
+    
+    volume = ((coordinates[:,1]-coordinates[:,0])*const.pc*1.e3)*((coordinates[:,3]-coordinates[:,2])*const.pc*1.e3)*((coordinates[:,5]-coordinates[:,4])*const.pc*1.e3)
+    
+
+    base_grid_volume = ((float(par.dx) * const.pc * 1.e3) * (float(par.dy) * const.pc * 1.e3) * (float(par.dz) * const.pc * 1.e3))
+
+    volume = np.insert(volume,0,base_grid_volume) #put the base grid in 
+    dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
+
+   
     t2 = datetime.now()
     print 'total time for particle smoothing: '+str(t2-t1)
     
     
-
-
     #file I/O
     print 'Writing Out the Coordinates and Logical Tables'
 
@@ -122,6 +132,8 @@ def gadget_logical_generate(sdir,snum):
     ascii.write(logical_Table,par.Auto_TF_file)
 
 
+    dust_dens_Table = Table([dust_density_grid[:]],names=['dust density'])
+    ascii.write(dust_dens_Table,par.Auto_dustdens_file)
 
 
 
@@ -129,7 +141,7 @@ def gadget_logical_generate(sdir,snum):
 
 
 
-    pdb.set_trace()
+
     return refined
 
 
@@ -295,14 +307,25 @@ def particle_smooth(x,y,z,hsml,coordinates,pos,m,refined):
         
         #any True's have to have 0 for data
         mass_gauss[wTrue] = 0 
-
         
+
+        #we go ahead and blank out any values that are super
+        #small. the reason is that if we end up randomly with a
+        #gaussian smoothing where ALL the values are really small
+        #(<<1e-100), when we try to normalize, the small number
+        #calculations will screw up and later mess up the assert
+        #statement; better to blank out the grid since its so small
+        #and then just assign the mass of the particle of interest to
+        #the nearest cell.
+
+        mass_gauss[np.where(mass_gauss < 1e-100)] = 0
 
         #normalize so that the total mass == the mass of the particle.
         #just in case the distance to the nearest cell is so large
         #that no smoothing is possible (too small values in the
         #gaussian), we assign all of the mass to the nearest cell
 
+        
         if sum(mass_gauss) != 0:
             mass_gauss /= ((sum(mass_gauss))/m[p])  
 
@@ -319,6 +342,8 @@ def particle_smooth(x,y,z,hsml,coordinates,pos,m,refined):
         mass_grid = mass_grid+mass_gauss
 
       
+        #if (sum(mass_gauss)/m[p] > 1.01) | (sum(mass_gauss)/m[p] < 0.99): pdb.set_trace()
+
         assert( (sum(mass_grid)/sum(m[0:p+1]) < 1.01) & (sum(mass_grid)/sum(m[0:p+1]) > 0.99))
         assert( (sum(mass_gauss)/m[p] < 1.01) & (sum(mass_gauss)/m[p] > 0.99))
 

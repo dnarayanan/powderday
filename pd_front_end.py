@@ -28,41 +28,43 @@ import random
 import pfh_readsnap
 from grid_construction import *
 
-
+import os.path
 #=========================================================
 #GRIDDING
 #=========================================================
 
+if os.path.isfile(par.Auto_TF_file) == False:
+    #only create the grid if the grid T/F file doesn't exist already
 
-if par.Manual_TF: 
-    print 'Grid is coming from a Manually Set T/F Octree'
-    refined = np.genfromtxt(par.Manual_TF_file,dtype = 'str')
-    dustdens = np.loadtxt(par.Manual_density_file,dtype='float')
+    if par.Manual_TF == True: 
+        print 'Grid is coming from a Manually Set T/F Octree'
+        refined = np.genfromtxt(par.Manual_TF_file,dtype = 'str')
+        dustdens = np.loadtxt(par.Manual_density_file,dtype='float')
 
-    #change refined T's to Trues and F's to Falses
+        #change refined T's to Trues and F's to Falses
     
-    refined2 = []
-
-    for i in range(len(refined)):
-        if refined[i] == 'T':refined2.append(True)
-        if refined[i] == 'F':refined2.append(False)
+        refined2 = []
         
-    refined = refined2
+        for i in range(len(refined)):
+            if refined[i] == 'T':refined2.append(True)
+            if refined[i] == 'F':refined2.append(False)
+        
+            refined = refined2
 
-    print 'Manual grid finished reading in '
+            print 'Manual grid finished reading in '
+
+
+    else:
+        print 'Grid is being generated from the Gadget Snapshot'
+        
+        refined = gadget_logical_generate(par.Gadget_dir,par.Gadget_snap_num)
+        
+  
+
 
 
 else:
-    print 'Grid is being generated from the Gadget Snapshot'
-    
-    refined = gadget_logical_generate(par.Gadget_dir,par.Gadget_snap_num)
-
-
-    print 'pdb.set_trace() at end of pd_front_end'
-    pdb.set_trace()
-
-
-
+    print 'Grid already exists - no need to recreate it: '+ str(par.Auto_TF_file)
 
 
 
@@ -70,6 +72,9 @@ else:
 #end gridding
 
 
+      
+print 'pdb.set_trace() at end of pd_front_end'
+pdb.set_trace()
 
 
 

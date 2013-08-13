@@ -1,6 +1,6 @@
 #GRIDDING PARAMETERS
 
-Manual_TF = 0
+Manual_TF = False
 Manual_TF_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.logical'
 Manual_density_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.dens'
 
@@ -15,6 +15,10 @@ Auto_positions_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.pd.positi
 
 Auto_TF_file = 'junk.logical'
 Auto_positions_file = 'junk.positions'
+Auto_dustdens_file = 'junk.dustdens'
+
+
+
 
 
 #DUST INFORMATION
