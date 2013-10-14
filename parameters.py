@@ -4,20 +4,28 @@ Manual_TF = False
 Manual_TF_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.logical'
 Manual_density_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.dens'
 
+GADGET_octree_gen = False
 Gadget_dir = '/Users/desika/powderday/grid_data/'
 Gadget_snap_num = 006
+Gadget_snap_name = '/Users/desika/powderday/grid_data/snapshot_006.hdf5'
+
+
+
 
 #file for writing the grid if it doesn't already exist
-'''
-Auto_TF_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.pd.logical'
-Auto_positions_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.pd.positions'
-'''
 
 Auto_TF_file = 'junk.logical'
 Auto_positions_file = 'junk.positions'
 Auto_dustdens_file = 'junk.dustdens'
 
 
+YT_octree_gen = True
+
+
+#===============================================
+#PARTICLE SMOOTHING PARAMETERS
+#===============================================
+NCHUNK = 10. #number of particles per chunk 
 
 
 

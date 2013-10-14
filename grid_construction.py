@@ -1,27 +1,3 @@
-#When I restart in Aspen:
-
-#1. Run the grid as follows in ipython
-#    a. from grid_construction import *
-#    b. positions = {}
-#    c. refined = [True (8 falses)]
-#    d. refineddict={0:0}
-#    dum = recursive_refine(positions,1,0,1,0,1,0,1,refined,0,refineddict)
-
-#this should give us the positions of the 8 subcells (though not the base grid).
-
-#To do:
-
-#the refined index returns back to the master value when we're done
-#recursively refining, which is not right and will cause cellvar
-#assignment 
-
-
-
-#turn the mastercell into [0]
-#turn refined into combining with refined_nomaster by refined = [True] + refined_nomaster
-
-
-
 import random
 import numpy as np
 import pfh_readsnap
@@ -35,6 +11,134 @@ import constants as const
 random.seed('octree-demo')
  
 import pdb
+
+
+
+def yt_octree_generate(fname,sdir,snum):
+   
+    from yt.mods import *
+    from yt.geometry.oct_container import OctreeContainer
+    from yt.geometry.selection_routines import AlwaysSelector
+
+
+    #first get the bounding box size
+    ptype = 0 #for gas
+    print 'in yt_octree_generate: reading in the snapshot with pfh_readsnap'
+    gas_dict = pfh_readsnap.readsnap(sdir,snum,ptype)
+    
+
+    metals = gas_dict['z']
+    metals = metals[:,0]
+    m = gas_dict['m']
+    pos = gas_dict['p']
+    hsml = gas_dict['h']
+
+    dustmass = m * metals * 1.e10 * 0.4
+
+    
+    x = pos[:,0]
+    y = pos[:,1]
+    z = pos[:,2]
+
+
+    #the bounding box needs to be a good bit bigger than the actual
+    #min/maxes of the particle locations for constructing the octree
+    bbox = [[min(x)*2,max(x)*2],
+            [min(y)*2,max(y)*2],
+            [min(z)*2,max(z)*2]]
+
+
+    unit_base = {'UnitLength_in_cm'         : 3.08568e+21,
+                 'UnitMass_in_g'            :   1.989e+43,
+                 'UnitVelocity_in_cm_per_s' :      100000}
+
+    print 'NOTE: this assumes the following Gaget parameters which are hard-coded into yt_octree_generate:'
+    print unit_base
+
+    #==================================
+    #turk's code
+    #==================================
+    oref = 0
+    nz = (1 << (oref*3))
+    
+
+    pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=oref)
+    
+    from yt.data_objects.particle_unions import ParticleUnion
+    pu = ParticleUnion("all", list(pf.particle_types_raw))
+    
+    saved = pf.h.oct_handler.save_octree()
+    
+    always = AlwaysSelector(None)
+    ir1 = pf.h.oct_handler.ires(always)  #refinement levels
+    fc1 = pf.h.oct_handler.fcoords(always)  #coordinates in kpc
+    fw1 = pf.h.oct_handler.fwidth(always)  #width of cell in kpc
+
+
+    #==================================
+
+
+
+    refined = saved['octree']
+    refined2 = []
+    
+    for i in range(len(refined)):
+        if refined[i] == 1: refined2.append(True)
+        if refined[i] == 0: refined2.append(False)
+
+    refined = refined2
+
+
+
+
+    #smooth the data on to the octree
+
+
+    #    import particle_smooth_cython as psnc
+    #    dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
+
+
+    
+    
+    volume = np.zeros(len(refined))
+    wTrue = np.where(np.array(refined) == True)[0]
+    wFalse = np.where(np.array(refined) == False)[0]
+    volume[wFalse] = (fw1 * const.pc * 1.e3)**3.
+    
+    
+    import smooth_operator
+    
+
+
+    #get the dust mass
+    dust_mass_grid = smooth_operator.particle_smooth_linalg(x,y,z,hsml,fc1,pos,dustmass,refined)
+    dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
+
+
+
+     #file I/O
+    print 'Writing Out the Coordinates and Logical Tables'
+
+    coordinates_Table = Table([fc1[:,0]-fw1[:,0],fc1[:,0]+fw1[:,0],fc1[:,1]-fw1[:,1],
+                               fc1[:,1]+fw1[:,1],fc1[:,2]-fw1[:,2],fc1[:,2]+fw1[:,2]],
+                              names = ['xmin','xmax','ymin','ymax','zmin','zmax'])
+    
+    ascii.write(coordinates_Table,par.Auto_positions_file)
+
+    logical_Table = Table([refined[:]],names=['logical'])
+    ascii.write(logical_Table,par.Auto_TF_file)
+
+
+    dust_dens_Table = Table([dust_density_grid[:]],names=['dust density'])
+    ascii.write(dust_dens_Table,par.Auto_dustdens_file)
+        
+    return refined
+
+
+
+
+
+
 
 
 def gadget_logical_generate(sdir,snum):
@@ -68,7 +172,7 @@ def gadget_logical_generate(sdir,snum):
 
 
 
-    n_particles = 1000
+    n_particles = 5000
     x = x[0:n_particles]
     y = y[0:n_particles]
     z = z[0:n_particles]
@@ -200,12 +304,15 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
         #doesn't include the master grid
         
         piic = np.where((x > coordinates[mastercell[0]-1][0]) &
-                    (x < coordinates[mastercell[0]-1][1]) & 
+                        (x < coordinates[mastercell[0]-1][1]) & 
                         (y > coordinates[mastercell[0]-1][2]) & 
                         (y < coordinates[mastercell[0]-1][3]) & 
                         (z > coordinates[mastercell[0]-1][4]) & 
                         (z < coordinates[mastercell[0]-1][5]))[0]
         
+       
+
+
         
 
         
@@ -216,6 +323,7 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
             #cell?  do they extend past the wall?  if so, add them to
             #the particles_that_are_too_small array
 
+
             particles_that_are_too_small = np.where((x[piic]-hsml[piic] > coordinates[mastercell[0]-1][0]) |
                                                     (x[piic]+hsml[piic] < coordinates[mastercell[0]-1][1]) | 
                                                     (y[piic]-hsml[piic] > coordinates[mastercell[0]-1][2]) |
@@ -223,6 +331,8 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
                                                     (z[piic]-hsml[piic] > coordinates[mastercell[0]-1][4]) |
                                                     (z[piic]+hsml[piic] < coordinates[mastercell[0]-1][5]))[0]
             
+           
+
 
             #if there are any particles that are too small (that fit wholly within the cell) then refine
             if len(particles_that_are_too_small) != 0:
@@ -269,6 +379,17 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
 
 
     return refined,coordinates
+
+
+
+
+
+
+
+
+
+
+
 
 
 
