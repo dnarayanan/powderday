@@ -94,11 +94,6 @@ def yt_octree_generate(fname,sdir,snum):
     #smooth the data on to the octree
 
 
-    #    import particle_smooth_cython as psnc
-    #    dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
-
-
-    
     
     volume = np.zeros(len(refined))
     wTrue = np.where(np.array(refined) == True)[0]
@@ -111,7 +106,19 @@ def yt_octree_generate(fname,sdir,snum):
 
 
     #get the dust mass
-    dust_mass_grid = smooth_operator.particle_smooth_linalg(x,y,z,hsml,fc1,pos,dustmass,refined)
+    #    dust_mass_grid = smooth_operator.particle_smooth_linalg(x,y,z,hsml,fc1,pos,dustmass,refined)
+
+    
+    import particle_smooth_cython as psnc
+    #mass_grid is the smoothed mass_grid
+    mass_grid = np.zeros(len(refined))
+
+   
+    dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
+
+    
+    pdb.set_trace()
+
     dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
 
 
