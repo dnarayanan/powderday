@@ -7,7 +7,8 @@ from astropy.table import Table
 from astropy.io import ascii
 import constants as const
 import pdb
-
+import math
+import sys
 
 def chunks(l, n):
     return [l[i:i+n] for i in range(0, len(l), n)]
@@ -37,9 +38,11 @@ def particle_smooth_linalg(x,y,z,hsml,coordinates,pos,m,refined):
     print 'in smooth_operator.particle_smooth_linalg: dividing the particles into '+str(nparticles/par.NCHUNK)+' chunks'
 
     chunk_counter=0
+    t1 = datetime.now()
     for chunk_list in master_chunk_array:
         print 'chunk_counter = '+str(chunk_counter)
 
+      
         print 'assigning distance arrays'
         dumpos=pos[chunk_list]
     
@@ -54,7 +57,7 @@ def particle_smooth_linalg(x,y,z,hsml,coordinates,pos,m,refined):
         distance = np.sqrt(dx**2.+dy**2.+dz**2.)
  
         
-        t1 = datetime.now()
+       
 
         #p is the particle number
         for p in chunk_list:
@@ -79,12 +82,15 @@ def particle_smooth_linalg(x,y,z,hsml,coordinates,pos,m,refined):
            
             
       
-            chunk_counter += 1
+        chunk_counter += 1
 
 
             
-    t2 = datetime.now()
-    print 'in smooth_operator.particle_smooth_linalg: time taken for kernel smoothing = '+str(t2-t1)
+        t2 = datetime.now()
+        print 'in smooth_operator.particle_smooth_linalg: time taken for kernel smoothing = '+str(t2-t1)
+
+    
+    pdb.set_trace()
 
     #normalize to conserve mass in the smoothing
     mass_grid /= sum(mass_grid)/sum(m)
