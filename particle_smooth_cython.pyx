@@ -37,12 +37,15 @@ def particle_smooth_new(np.ndarray[double] x,
     cdef int counter=0
 
     cdef int i
+    cdef int j
+
     cdef double a_norm
     cdef double hsml_var
 
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
     
+    cdef int refined_len = len(refined)
     cdef int g_len = len(wFalse)
     cdef int nparticles = len(x)
     cdef double *kernel_sum = <double *>malloc(g_len *sizeof(double))
@@ -92,29 +95,36 @@ def particle_smooth_new(np.ndarray[double] x,
 
             #kernel_sum[g] += a_norm * exp( (-1. * (dist**2.))/(2. * (hsml_var**2.)))
 
-            kernel_sum[i] += sph_kernel(dist)
+            kernel_sum[g] += sph_kernel(dist)
 
-        
-
-       
+         
           
 
 
             
+
+    
+
+
     t2 = datetime.now()
     print 'particle_smooth_cython: time for kernel smoothing  = '+str(t2-t1)
 
-    #normalize to conserve mass in the smoothing
-    
     print 'particle_smooth_cython: summing the kernel_sum'
-    for i from 0<=i<=g_len:
+   
+    
+    for i from 0<=i<g_len:
         total_kernel_sum += kernel_sum[i]
+      
 
+
+    print 'particle_smooth_cython: total_kernel_sum in code units = '+str(total_kernel_sum)
 
     print 'particle_smooth_cython: returning unnormalized kernel_sum to main'
     #copy the kernel sum over to the mass_grid
     for i from 0<=i<g_len:
         mass_grid[i] = kernel_sum[i]
+        
+
      
 
     free(kernel_sum)
@@ -128,6 +138,7 @@ def particle_smooth_new(np.ndarray[double] x,
   
 ##############################################
 #Standard SPH kernel for use with the Grid method
+#Written by Bobby Thompson
 cdef double sph_kernel(double x) nogil:
     cdef double kernel
     if x <= 0.5:

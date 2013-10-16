@@ -26,7 +26,7 @@ YT_octree_gen = True
 #PARTICLE SMOOTHING PARAMETERS
 #===============================================
 NCHUNK = 10. #number of particles per chunk 
-NPARTICLES_DEBUG = 1e5 #ONLY FOR DEBUGGING. if set, we set this to be
+NPARTICLES_DEBUG = 2e3 #ONLY FOR DEBUGGING. if set, we set this to be
                        #the number of particles that we smooth onto
                        #the grid. this needs to be set to -1 for all
                        #production runs.  if this happens to be > the

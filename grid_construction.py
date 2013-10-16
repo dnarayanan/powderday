@@ -110,18 +110,33 @@ def yt_octree_generate(fname,sdir,snum):
 
     
     import particle_smooth_cython as psnc
-    #mass_grid is the smoothed mass_grid
-    mass_grid = np.zeros(len(refined))
+
+    #mass_grid is the smoothed mass_grid; this is just a dummy array
+    #that has to get fed into psnc.particle_smooth_new
+
+    mass_grid = np.zeros(len(wFalse))
+
 
    
-    dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
+    temp_dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
     #normalizing for mass conservation
-    dust_mass_grid /= sum(dust_mass_grid)/sum(m)
+    pdb.set_trace()
+    temp_dust_mass_grid /= sum(temp_dust_mass_grid)/sum(m)
     
+    #copy over the temp_mass_grid to a grid that is as big as refined
+    #(and not just as big as wFalse) for the hyperion calculation
+    #(which requires the octree grid include the True's)
+
+    dust_mass_grid = np.zeros(len(refined))
+    dust_mass_grid[wFalse] = temp_dust_mass_grid
 
 
+
+  
     dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
-
+    #since volume = 0 where there's a True, dust_density_grid is nan
+    #where there's trues, so we have to fix this
+    dust_density_grid[wTrue] = 0
 
 
      #file I/O
