@@ -56,8 +56,24 @@ def particle_smooth_new(np.ndarray[double] x,
 
     #for each particle
     t1 = datetime.now()
+    print 'particle_smooth_cython beginning at time: '+str(t1)
+
+
+    if par.NPARTICLES_DEBUG != -1:
+        print'================================================================='
+        print 'WARNING WARNING WARNING WARNING WARNING'
+        print'================================================================='
+        print 'NPARTICLES_DEBUG IS SET TO A REAL NUMBER'
+        print'================================================================='
+
+
+        if par.NPARTICLES_DEBUG < nparticles: nparticles = par.NPARTICLES_DEBUG
+        
+    print 'particle_smooth_cython: using nparticles = '+str(nparticles)
+
+   
     for p from 0<=p<nparticles:
-        print p
+ 
         a_norm = m[p]
         hsml_var = hsml[p]
         
@@ -86,21 +102,25 @@ def particle_smooth_new(np.ndarray[double] x,
 
             
     t2 = datetime.now()
-    print 'time for kernel smoothing in particle_smooth_cython = '+str(t2-t1)
+    print 'particle_smooth_cython: time for kernel smoothing  = '+str(t2-t1)
 
     #normalize to conserve mass in the smoothing
     
-
+    print 'particle_smooth_cython: summing the kernel_sum'
     for i from 0<=i<=g_len:
         total_kernel_sum += kernel_sum[i]
 
 
+    print 'particle_smooth_cython: returning unnormalized kernel_sum to main'
     #copy the kernel sum over to the mass_grid
     for i from 0<=i<g_len:
-        kernel_sum[i] /= total_kernel_sum/sum(m)
         mass_grid[i] = kernel_sum[i]
+     
+
     free(kernel_sum)
   
+
+    
     return mass_grid
   
     

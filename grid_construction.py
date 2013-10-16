@@ -105,7 +105,7 @@ def yt_octree_generate(fname,sdir,snum):
     
 
 
-    #get the dust mass
+    #get the dust mass via smooth_operator linalg 
     #    dust_mass_grid = smooth_operator.particle_smooth_linalg(x,y,z,hsml,fc1,pos,dustmass,refined)
 
     
@@ -115,9 +115,10 @@ def yt_octree_generate(fname,sdir,snum):
 
    
     dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
-
+    #normalizing for mass conservation
+    dust_mass_grid /= sum(dust_mass_grid)/sum(m)
     
-    pdb.set_trace()
+
 
     dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
 
