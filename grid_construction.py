@@ -63,7 +63,6 @@ def yt_octree_generate(fname,sdir,snum):
     
 
     pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=oref)
-    
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))
     
@@ -120,7 +119,7 @@ def yt_octree_generate(fname,sdir,snum):
    
     temp_dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
     #normalizing for mass conservation
-    pdb.set_trace()
+    
     temp_dust_mass_grid /= sum(temp_dust_mass_grid)/sum(m)
     
     #copy over the temp_mass_grid to a grid that is as big as refined

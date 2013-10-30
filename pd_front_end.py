@@ -20,6 +20,7 @@ from hyperion.model import Model
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from hyperion.model import ModelOutput
+import h5py
 
 import constants as const
 import parameters as par
@@ -27,6 +28,7 @@ import parameters as par
 import random
 import pfh_readsnap
 from grid_construction import *
+from SED_gen import *
 
 import os.path
 #=========================================================
@@ -70,7 +72,37 @@ if os.path.isfile(par.Auto_TF_file) == False:
 
 else:
     print 'Grid already exists - no need to recreate it: '+ str(par.Auto_TF_file)
+    print 'Instead - reading in the grid.'
 
+    #read in the grid if the grid already exists.
+    #reading in the refined:
+    refined = np.genfromtxt(par.Auto_TF_file,dtype = 'str',skiprows=1)
+    pos_data = np.loadtxt(par.Auto_positions_file,skiprows=1)
+    xmin = pos_data[:,0]
+    xmax = pos_data[:,1]
+    ymin = pos_data[:,2]
+    ymax = pos_data[:,3]
+    zmin = pos_data[:,4]
+    zmax = pos_data[:,5]
+    
+    xcent = np.mean([min(xmin),max(xmax)])
+    ycent = np.mean([min(ymin),max(ymax)])
+    zcent = np.mean([min(zmin),max(zmax)])
+
+    dx = max(xmax)-min(xmin)
+    dy = max(ymax)-min(ymin)
+    dz = max(zmax)-min(zmin)
+                
+
+    dustdens_data = np.loadtxt(par.Auto_dustdens_file,skiprows=1)
+    dustdens = dustdens_data[:]
+
+    #change refined T's to Trues and F's to Falses
+    refined2 = []
+    for i in range(len(refined)):
+        if refined[i] == 'True':refined2.append(True)
+        if refined[i] == 'False':refined2.append(False)
+    refined = refined2
 
 
 
@@ -78,6 +110,84 @@ else:
 
 
       
+#generate the SEDs 
+
+#stellar_nu,fnu are of shape (nstars,nlambda);
+#stellar_mass is the mass of the star particles, and therefore
+#(nstars) big.
+#stellar_pos is (nstars,3) big
+
+stellar_pos,stellar_masses,stellar_nu,stellar_fnu= new_sed_gen(par.Gadget_dir,par.Gadget_snap_num)
+#generate the stellar masses and sizes 
+
+
+nstars = stellar_nu.shape[0]
+
+
+
+
+#========================================================================
+#Initialize Hyperion Model
+#========================================================================
+
+m = Model()
+if par.Grid_Type == 'Octree':
+    m.set_octree_grid(xcent,ycent,zcent,dx,dy,dz,refined)
+
+m.add_density_grid(dustdens,par.dustfile)
+
+#if par.Grid_Type == 'Cart'
+    
+
+
+
+
+
+
+#generate dust model. This needs to preceed the generation of sources
+#for hyperion since the wavelengths of the SEDs need to fit in the dust opacities.
+
+df = h5py.File(par.dustfile,'r')
+o = df['optical_properties']
+df_nu = o['nu']
+df_chi = o['chi']
+
+df.close()
+
+
+
+
+#add sources to hyperion
+
+for i in range(nstars):
+    nu = stellar_nu[i,:]
+    fnu = stellar_fnu[i,:]
+
+
+    nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
+    nu_inrange = np.where(nu_inrange == True)[0]
+    nu = nu[nu_inrange]
+
+    #reverse the arrays for hyperion
+    nu = nu[::-1]
+    fnu = fnu[::-1]
+
+    #DEBUG - does fnu need to be scaled by the stellar mass since it's normalized for a single solar mass?
+    fnu = fnu[nu_inrange]
+
+    lum = np.absolute(np.trapz(fnu,x=nu))*stellar_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
+    
+    m.add_spherical_source(luminosity = lum,
+                           spectrum = (nu,fnu),
+                           position = (stellar_pos[i,0],stellar_pos[i,1],stellar_pos[i,2]),
+                           radius = par.stellar_softening_length*const.pc*1.e3)
+
+
+
+
+
+
+
 print 'pdb.set_trace() at end of pd_front_end'
 pdb.set_trace()
 
