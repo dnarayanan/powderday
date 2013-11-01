@@ -4,13 +4,13 @@ Grid_Type = 'Octree'  #your choices here are 'Octree' and 'Cart'; we'll work mor
 
 
 Manual_TF = False
-Manual_TF_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.logical'
-Manual_density_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.dens'
+Manual_TF_file = '/Users/dnarayanan/powderday/grid_data/mw_18_6.snap6.logical'
+Manual_density_file = '/Users/dnarayanan/powderday/grid_data/mw_18_6.snap6.dens'
 
 GADGET_octree_gen = False
-Gadget_dir = '/Users/desika/powderday/grid_data/'
+Gadget_dir = '/Users/dnarayanan/powderday/grid_data/'
 Gadget_snap_num = 006
-Gadget_snap_name = '/Users/desika/powderday/grid_data/snapshot_006.hdf5'
+Gadget_snap_name = '/Users/dnarayanan/powderday/grid_data/snapshot_006.hdf5'
 
 YT_octree_gen = True
 
@@ -49,6 +49,12 @@ stellar_softening_length = 0.005 #kpc - typically the softening length in your S
 unit_mass = 1.e10 #msun
 unit_length = 1. #kpc
 
+
+#===============================================
+#IMAGES AND SED
+#===============================================
+
+NTHETA = 1
 
 
 #GRID INFORMATION

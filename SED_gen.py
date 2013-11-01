@@ -24,6 +24,7 @@ def new_sed_gen(sdir,snum):
     metals = stars_dict['z']
     positions = stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
 
+
     
     age = stars_dict['age'] #Gyr (per phopkins)
 

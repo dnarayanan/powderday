@@ -28,7 +28,9 @@ import parameters as par
 import random
 import pfh_readsnap
 from grid_construction import *
+
 from SED_gen import *
+import sys
 
 import os.path
 #=========================================================
@@ -78,20 +80,21 @@ else:
     #reading in the refined:
     refined = np.genfromtxt(par.Auto_TF_file,dtype = 'str',skiprows=1)
     pos_data = np.loadtxt(par.Auto_positions_file,skiprows=1)
-    xmin = pos_data[:,0]
-    xmax = pos_data[:,1]
-    ymin = pos_data[:,2]
-    ymax = pos_data[:,3]
-    zmin = pos_data[:,4]
-    zmax = pos_data[:,5]
+    xmin = pos_data[:,0]*const.pc*1.e3
+    xmax = pos_data[:,1]*const.pc*1.e3
+    ymin = pos_data[:,2]*const.pc*1.e3
+    ymax = pos_data[:,3]*const.pc*1.e3
+    zmin = pos_data[:,4]*const.pc*1.e3
+    zmax = pos_data[:,5]*const.pc*1.e3
     
     xcent = np.mean([min(xmin),max(xmax)])
     ycent = np.mean([min(ymin),max(ymax)])
     zcent = np.mean([min(zmin),max(zmax)])
 
-    dx = max(xmax)-min(xmin)
-    dy = max(ymax)-min(ymin)
-    dz = max(zmax)-min(zmin)
+    #dx,dy,dz are the edges of the parent grid
+    dx = (max(xmax)-min(xmin))/2.
+    dy = (max(ymax)-min(ymin))/2.
+    dz = (max(zmax)-min(zmin))/2.
                 
 
     dustdens_data = np.loadtxt(par.Auto_dustdens_file,skiprows=1)
@@ -105,7 +108,6 @@ else:
     refined = refined2
 
 
-
 #end gridding
 
 
@@ -116,6 +118,8 @@ else:
 #stellar_mass is the mass of the star particles, and therefore
 #(nstars) big.
 #stellar_pos is (nstars,3) big
+
+
 
 stellar_pos,stellar_masses,stellar_nu,stellar_fnu= new_sed_gen(par.Gadget_dir,par.Gadget_snap_num)
 #generate the stellar masses and sizes 
@@ -132,13 +136,14 @@ nstars = stellar_nu.shape[0]
 
 m = Model()
 if par.Grid_Type == 'Octree':
-    m.set_octree_grid(xcent,ycent,zcent,dx,dy,dz,refined)
+    m.set_octree_grid(xcent,ycent,zcent,
+                      dx,dy,dz,refined)
+
 
 m.add_density_grid(dustdens,par.dustfile)
 
 #if par.Grid_Type == 'Cart'
     
-
 
 
 
@@ -181,6 +186,27 @@ for i in range(nstars):
                            spectrum = (nu,fnu),
                            position = (stellar_pos[i,0],stellar_pos[i,1],stellar_pos[i,2]),
                            radius = par.stellar_softening_length*const.pc*1.e3)
+
+print 'Done adding Sources'
+
+print 'Setting up Model'
+#set up the SEDs and images
+m.set_raytracing(True)
+m.set_n_photons(initial=1.e6,imaging=1.e6,
+                raytracing_sources=1.e6,raytracing_dust=1.e6)
+m.set_n_initial_iterations(5)
+
+
+image = m.add_peeled_images(sed = True,image=False)
+image.set_wavelength_range(250,0.01,5000.)
+image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
+image.set_track_origin('basic')
+
+print 'Beginning RT Stage'
+#Run the Model
+m.write('example.rtin')
+m.run('example.rtout',mpi=True,n_processes=2)
+
 
 
 
