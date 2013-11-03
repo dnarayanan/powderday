@@ -56,6 +56,13 @@ unit_length = 1. #kpc
 
 NTHETA = 1
 
+#===============================================
+#DEBUGGING
+#===============================================
+
+SOURCES_IN_CENTER = True
+
+
 
 #GRID INFORMATION
 #size in kpc: note - the parent grid corners are [-dx,dx; -dy,dy; -dz,dz]

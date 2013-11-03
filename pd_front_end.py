@@ -128,6 +128,12 @@ stellar_pos,stellar_masses,stellar_nu,stellar_fnu= new_sed_gen(par.Gadget_dir,pa
 nstars = stellar_nu.shape[0]
 
 
+#debugging parameter
+if par.SOURCES_IN_CENTER == True:
+    for i in range(nstars):
+        stellar_pos[:,0] = xcent
+        stellar_pos[:,1] = ycent
+        stellar_pos[:,2] = zcent
 
 
 #========================================================================
