@@ -61,7 +61,7 @@ NTHETA = 1
 #===============================================
 
 SOURCES_IN_CENTER = True
-
+STELLAR_SED_WRITE = True
 
 
 #GRID INFORMATION

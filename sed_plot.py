@@ -22,5 +22,5 @@ ax.set_ylabel(r'$\lambda F_\lambda$ [erg/s/cm$^2$]')
 ax.set_xlim(0.1,5000)
 
 
-fig.savefig('junk.png')
+fig.savefig('/Users/desika/Dropbox/junk.png')
 

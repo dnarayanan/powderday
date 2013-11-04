@@ -61,7 +61,7 @@ def yt_octree_generate(fname,sdir,snum):
     oref = 0
     nz = (1 << (oref*3))
     
-
+    #set n_ref here to a number to decrease cell numbers (default 64)
     pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=oref)
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))
