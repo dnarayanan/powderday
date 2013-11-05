@@ -4,13 +4,13 @@ Grid_Type = 'Octree'  #your choices here are 'Octree' and 'Cart'; we'll work mor
 
 
 Manual_TF = False
-Manual_TF_file = '/Users/dnarayanan/powderday/grid_data/mw_18_6.snap6.logical'
-Manual_density_file = '/Users/dnarayanan/powderday/grid_data/mw_18_6.snap6.dens'
+Manual_TF_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.logical'
+Manual_density_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.dens'
 
 GADGET_octree_gen = False
-Gadget_dir = '/Users/dnarayanan/powderday/grid_data/'
+Gadget_dir = '/Users/desika/powderday/grid_data/'
 Gadget_snap_num = 006
-Gadget_snap_name = '/Users/dnarayanan/powderday/grid_data/snapshot_006.hdf5'
+Gadget_snap_name = '/Users/desika/powderday/grid_data/snapshot_006.hdf5'
 
 YT_octree_gen = True
 
@@ -18,6 +18,7 @@ YT_octree_gen = True
 #file for writing the grid if it doesn't already exist
 
 Auto_TF_file = 'grid_data/mw_18_6.snap6.logical'
+#Auto_TF_file='grid_data/junk.logical'
 Auto_positions_file = 'grid_data/mw_18_6.snap6.positions'
 Auto_dustdens_file = 'grid_data/mw_18_6.snap6.dustdens'
 
@@ -34,6 +35,7 @@ NPARTICLES_DEBUG = -1 #ONLY FOR DEBUGGING. if set, we set this to be
                        #production runs.  if this happens to be > the
                        #the number of actual particles, the number of
                        #actual particles is what will be used.
+
 
 #===============================================
 #DUST INFORMATION
@@ -54,7 +56,7 @@ unit_length = 1. #kpc
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 1
+NTHETA = 5
 
 #===============================================
 #DEBUGGING
@@ -62,7 +64,8 @@ NTHETA = 1
 
 SOURCES_IN_CENTER = True
 STELLAR_SED_WRITE = True
-
+SUPER_SIMPLE_SED = True
+SKIP_GRID_READIN = False
 
 #GRID INFORMATION
 #size in kpc: note - the parent grid corners are [-dx,dx; -dy,dy; -dz,dz]

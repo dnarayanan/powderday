@@ -40,13 +40,21 @@ def yt_octree_generate(fname,sdir,snum):
     y = pos[:,1]
     z = pos[:,2]
 
-
+    bbox_lim = max([np.absolute(min(x)),np.absolute(max(x)),
+                    np.absolute(min(y)),np.absolute(max(y)),
+                    np.absolute(min(z)),np.absolute(max(z))])
+    
     #the bounding box needs to be a good bit bigger than the actual
     #min/maxes of the particle locations for constructing the octree
-    bbox = [[min(x)*2,max(x)*2],
-            [min(y)*2,max(y)*2],
-            [min(z)*2,max(z)*2]]
+ #   bbox = [[min(x)*2,max(x)*2],
+ #           [min(y)*2,max(y)*2],
+ #           [min(z)*2,max(z)*2]]
 
+    bbox = [[-2*bbox_lim,2*bbox_lim],
+            [-2*bbox_lim,2*bbox_lim],
+            [-2*bbox_lim,2*bbox_lim]]
+             
+    
 
     unit_base = {'UnitLength_in_cm'         : 3.08568e+21,
                  'UnitMass_in_g'            :   1.989e+43,
@@ -62,6 +70,7 @@ def yt_octree_generate(fname,sdir,snum):
     nz = (1 << (oref*3))
     
     #set n_ref here to a number to decrease cell numbers (default 64)
+    #- n_ref is the max number of particles in a cell
     pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=oref)
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))
@@ -72,6 +81,8 @@ def yt_octree_generate(fname,sdir,snum):
     ir1 = pf.h.oct_handler.ires(always)  #refinement levels
     fc1 = pf.h.oct_handler.fcoords(always)  #coordinates in kpc
     fw1 = pf.h.oct_handler.fwidth(always)  #width of cell in kpc
+
+
 
 
     #==================================
