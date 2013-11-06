@@ -116,7 +116,7 @@ if par.SKIP_GRID_READIN == False:
             #end gridding
                 
 
-pdb.set_trace()
+
 #generate the SEDs 
 
 #stellar_nu,fnu are of shape (nstars,nlambda);

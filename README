@@ -1,0 +1,18 @@
+INSTALLATION NOTES:
+
+1. have powderday in your PYTHONPATH
+2. Install Hyperion
+3. Install astropy
+4. Install yt
+5. Install FSPS
+6. Install f2py
+7. Install python-fsps
+
+THINGS TO INCLUDE IN INSTALLATION
+
+1. dust files
+
+POTENTIAL PROBLEMS:
+
+1. If there's an error with -fPIC in building python-fsps, then try
+include that flag in the FSPS makefile

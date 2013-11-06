@@ -18,7 +18,6 @@ YT_octree_gen = True
 #file for writing the grid if it doesn't already exist
 
 Auto_TF_file = 'grid_data/mw_18_6.snap6.logical'
-#Auto_TF_file='grid_data/junk.logical'
 Auto_positions_file = 'grid_data/mw_18_6.snap6.positions'
 Auto_dustdens_file = 'grid_data/mw_18_6.snap6.dustdens'
 
