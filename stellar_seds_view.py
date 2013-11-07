@@ -18,7 +18,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 
 for i in range(nstars):
-    ax.plot(lambda_micron[i,:],stellar_fnu[i,:])
+    ax.plot(lambda_micron[:],stellar_fnu[i,:])
 
 ax.set_xscale('log')
 ax.set_yscale('log')

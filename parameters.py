@@ -72,8 +72,8 @@ NTHETA = 5
 SOURCES_IN_CENTER = False
 STELLAR_SED_WRITE = True
 SUPER_SIMPLE_SED = False
-SKIP_GRID_READIN = False
-NEW_STARS_ONLY = True # if set, we don't use oldstars and disk stars
+SKIP_GRID_READIN = True
+NEW_STARS_ONLY = False # if set, we don't use oldstars and disk stars
 
 #GRID INFORMATION
 #size in kpc: note - the parent grid corners are [-dx,dx; -dy,dy; -dz,dz]

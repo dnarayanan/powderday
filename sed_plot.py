@@ -19,8 +19,8 @@ ax.set_ylabel(r'$\lambda F_\lambda$ [erg/s/cm$^2$]')
 
 #set axis limits
 
-ax.set_xlim(0.1,5000)
-ax.set_ylim(1e-11,2e-3)
+#ax.set_xlim(0.1,5000)
+#ax.set_ylim(1e-11,2e-3)
 
 
 fig.savefig('junk.png')

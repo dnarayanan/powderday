@@ -1,8 +1,7 @@
 
-
-#1. center should be 0,0,0 to avoid photon problems (maybe)
-#2. why are dx,dy,dz,different sizes?  this seems to cause problems with photons going the wrong way 
-#3. when the grid becomes very big, all optical emission goes away.  does distributed luminosity sources fix this?
+#1. can we make stellar_nu 1D?
+#2. check SEDs for bulge_fnu and disk_fnu
+#3. add the spherical sources that correspond to the disk and bulge stars and run
 
 #Code:  pd_front_end.py
 
@@ -127,13 +126,14 @@ if par.SKIP_GRID_READIN == False:
 
 
 #generate teh stellar masses, positions and spectra
-stellar_pos,stellar_masses,stellar_nu,stellar_fnu= new_sed_gen(par.Gadget_dir,par.Gadget_snap_num)
+stellar_pos,disk_positions,bulge_positions,stellar_masses,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu= new_sed_gen(par.Gadget_dir,par.Gadget_snap_num)
+pdb.set_trace()
 
-nstars = stellar_nu.shape[0]
+nstars = stellar_fnu.shape[0]
 
 #potentially write the stellar SEDs to a npz file
 if par.STELLAR_SED_WRITE == True:
-    np.savez('stellar_seds.npz',stellar_nu,stellar_fnu)
+    np.savez('stellar_seds.npz',stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
 
 
 #debugging parameter
@@ -206,7 +206,7 @@ df.close()
 #add sources to hyperion
 
 for i in range(nstars):
-    nu = stellar_nu[i,:]
+    nu = stellar_nu[:]
     fnu = stellar_fnu[i,:]
 
 
