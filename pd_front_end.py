@@ -145,7 +145,7 @@ if par.SOURCES_IN_CENTER == True:
 
 
 
-
+pdb.set_trace()
 
 #========================================================================
 #Initialize Hyperion Model

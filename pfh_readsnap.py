@@ -59,6 +59,8 @@ def readsnap(sdir,snum,ptype,
     flag_stellarage = header_toparse["Flag_StellarAge"]
     flag_metals = header_toparse["Flag_Metals"]
 
+
+
     hinv=1.
     if (h0==1):
         hinv=1./hubble
@@ -142,6 +144,7 @@ def readsnap(sdir,snum,ptype,
             metal[nL:nR,:]=metal_t
         if (ptype==4) and (flag_sfr>0) and (flag_stellarage>0):
             stellage[nL:nR]=input_struct[bname+"StellarFormationTime"]
+        
         if (ptype==5) and (skip_bh==0):
             bhmass[nL:nR]=input_struct[bname+"BH_Mass"]
             bhmdot[nL:nR]=input_struct[bname+"BH_Mdot"]

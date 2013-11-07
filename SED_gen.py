@@ -15,20 +15,46 @@ import fsps
 def new_sed_gen(sdir,snum):
     print 'reading in stars particles for SPS calculation'
 
-    #DEBUG DEBUG DEBUG
-    #for now we just read in the new stars; in principle, we need to
-    #add in disk and bulge stars as well.  
-    stars_dict = pfh_readsnap.readsnap(sdir,snum,4)
+    #NEW STARS
+    new_stars_dict = pfh_readsnap.readsnap(sdir,snum,4)
+    mass = new_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+    metals = new_stars_dict['z']
+    positions = new_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+    age = new_stars_dict['age'] #Gyr (per phopkins)
 
-    mass = stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
-    metals = stars_dict['z']
-    positions = stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+    median_metallicity = np.median(metals)
+   
+
+    if par.NEW_STARS_ONLY == False:
+        #DISK STARS
+        disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
+        nstars_disk = len(disk_stars_dict['m'])
+
+        mass = np.append(mass,disk_stars_dict['m']*par.unit_mass*const.msun) #g (as par.unit_mass is in msun)
+        metals = np.append(metals,np.repeat(median_metallicity,nstars_disk))
+        positions = np.concatenate((positions,disk_stars_dict['p']*par.unit_length*const.pc*1.e3)) #cm (as par.unit_length is kpc)
+        age = np.append(age,np.repeat(par.disk_stars_age,nstars_disk))
+        
+        #BULGE STARS
+        bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
+        nstars_bulge = len(bulge_stars_dict['m'])
+
+        mass = np.append(mass,bulge_stars_dict['m']*par.unit_mass*const.msun) #g (as par.unit_mass is in msun)
+        metals = np.append(metals,np.repeat(median_metallicity,nstars_bulge))
+        positions = np.concatenate((positions,bulge_stars_dict['p']*par.unit_length*const.pc*1.e3)) #cm (as par.unit_length is kpc)
+        age = np.append(age,np.repeat(par.bulge_stars_age,nstars_bulge))
+
+
 
 
     
-    age = stars_dict['age'] #Gyr (per phopkins)
+
+
 
     nstars = len(age)
+
+
+   
 
     print 'generating stellar SEDs'
 

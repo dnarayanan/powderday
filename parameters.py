@@ -52,6 +52,14 @@ unit_length = 1. #kpc
 
 
 #===============================================
+#OLD STARS INFO
+#===============================================
+disk_stars_age = 1 #Gyr
+bulge_stars_age = 1 #Gyr
+
+
+
+#===============================================
 #IMAGES AND SED
 #===============================================
 
@@ -61,10 +69,11 @@ NTHETA = 5
 #DEBUGGING
 #===============================================
 
-SOURCES_IN_CENTER = True
+SOURCES_IN_CENTER = False
 STELLAR_SED_WRITE = True
-SUPER_SIMPLE_SED = True
+SUPER_SIMPLE_SED = False
 SKIP_GRID_READIN = False
+NEW_STARS_ONLY = True # if set, we don't use oldstars and disk stars
 
 #GRID INFORMATION
 #size in kpc: note - the parent grid corners are [-dx,dx; -dy,dy; -dz,dz]
