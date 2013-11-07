@@ -1,6 +1,6 @@
 
-#1. can we make stellar_nu 1D?
-#2. check SEDs for bulge_fnu and disk_fnu
+#--1. can we make stellar_nu 1D?
+#--2. check SEDs for bulge_fnu and disk_fnu
 #3. add the spherical sources that correspond to the disk and bulge stars and run
 
 #Code:  pd_front_end.py
@@ -127,7 +127,7 @@ if par.SKIP_GRID_READIN == False:
 
 #generate teh stellar masses, positions and spectra
 stellar_pos,disk_positions,bulge_positions,stellar_masses,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu= new_sed_gen(par.Gadget_dir,par.Gadget_snap_num)
-pdb.set_trace()
+
 
 nstars = stellar_fnu.shape[0]
 
