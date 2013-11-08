@@ -126,10 +126,13 @@ if par.SKIP_GRID_READIN == False:
 
 
 #generate teh stellar masses, positions and spectra
-stellar_pos,disk_positions,bulge_positions,stellar_masses,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu= new_sed_gen(par.Gadget_dir,par.Gadget_snap_num)
+stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu= new_sed_gen(par.Gadget_dir,par.Gadget_snap_num)
 
 
 nstars = stellar_fnu.shape[0]
+nstars_disk = disk_pos.shape[0]
+nstars_bulge = disk_pos.shape[0]
+
 
 #potentially write the stellar SEDs to a npz file
 if par.STELLAR_SED_WRITE == True:
@@ -145,7 +148,7 @@ if par.SOURCES_IN_CENTER == True:
 
 
 
-pdb.set_trace()
+
 
 #========================================================================
 #Initialize Hyperion Model
@@ -205,42 +208,74 @@ df.close()
 
 #add sources to hyperion
 
-for i in range(nstars):
-    nu = stellar_nu[:]
-    fnu = stellar_fnu[i,:]
+
+if par.SUPER_SIMPLE_SED == False:
 
 
-    nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
-    nu_inrange = np.where(nu_inrange == True)[0]
-    nu = nu[nu_inrange]
+    print 'adding new stars to the grid'
+    for i in range(nstars):
+        nu = stellar_nu[:]
+        fnu = stellar_fnu[i,:]
+    
 
-    #reverse the arrays for hyperion
-    nu = nu[::-1]
-    fnu = fnu[::-1]
+        nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
+        nu_inrange = np.where(nu_inrange == True)[0]
+        nu = nu[nu_inrange]
 
-    fnu = fnu[nu_inrange]
+        #reverse the arrays for hyperion
+        nu = nu[::-1]
+        fnu = fnu[::-1]
+        
+        fnu = fnu[nu_inrange]
 
-    lum = np.absolute(np.trapz(fnu,x=nu))*stellar_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
+        lum = np.absolute(np.trapz(fnu,x=nu))*stellar_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
 
 
-
-    if par.SUPER_SIMPLE_SED == False:
+      
+  
+        #add new stars
         m.add_spherical_source(luminosity = lum,
                                spectrum = (nu,fnu),
                                position = (stellar_pos[i,0],stellar_pos[i,1],stellar_pos[i,2]),
                                radius = par.stellar_softening_length*const.pc*1.e3)
-    else:
+        
+
+
+
+
+    print 'adding disk stars to the grid'    
+    for i in range(nstars_disk):
+        fnu = disk_fnu[:]
+        fnu = fnu[::-1]
+        fnu = fnu[nu_inrange]
+        
+
+        lum = np.absolute(np.trapz(fnu,x=nu))*disk_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
+
+        m.add_spherical_source(luminosity = lum,
+                               spectrum = (nu,fnu),
+                               position = (disk_pos[i,0],disk_pos[i,1],disk_pos[i,2]),
+                               radius = par.stellar_softening_length*const.pc*1.e3)
+        
+        
+
+else:
 
        
-      
-        posx = ((-1.)**i)*random.random()*dx
-        posy = ((-1.)**(i+1))*random.random()*dy
-        posz = ((-1.)**i)*random.random()*dz
-            
+    
+    posx = ((-1.)**i)*random.random()*dx
+    posy = ((-1.)**(i+1))*random.random()*dy
+    posz = ((-1.)**i)*random.random()*dz
+    
             
         
-        m.add_spherical_source(luminosity = 1.e3*const.lsun,spectrum = (nu,fnu), radius = 10.*const.rsun,position=(posx,posy,posz))
+    m.add_spherical_source(luminosity = 1.e3*const.lsun,spectrum = (nu,fnu), radius = 10.*const.rsun,position=(posx,posy,posz))
        
+
+
+
+
+
 
 
 

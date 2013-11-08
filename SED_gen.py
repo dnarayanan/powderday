@@ -31,12 +31,13 @@ def new_sed_gen(sdir,snum):
         disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
         nstars_disk = len(disk_stars_dict['m'])
         disk_positions = disk_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+        disk_masses = disk_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
         
         #BULGE STARS
         bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
         nstars_bulge = len(bulge_stars_dict['m'])
         bulge_positions = bulge_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-
+        bulge_masses = bulge_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
 
    
 
@@ -95,4 +96,4 @@ def new_sed_gen(sdir,snum):
 
     
 
-    return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
+    return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
