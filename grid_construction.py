@@ -66,7 +66,7 @@ def yt_octree_generate(fname,sdir,snum):
     #==================================
     #turk's code
     #==================================
-    oref = 0
+    oref = 1
     nz = (1 << (oref*3))
     
     #set n_ref here to a number to decrease cell numbers (default 64)
@@ -91,7 +91,8 @@ def yt_octree_generate(fname,sdir,snum):
 
     refined = saved['octree']
     refined2 = []
-    
+
+ 
     for i in range(len(refined)):
         if refined[i] == 1: refined2.append(True)
         if refined[i] == 0: refined2.append(False)
@@ -127,7 +128,7 @@ def yt_octree_generate(fname,sdir,snum):
     mass_grid = np.zeros(len(wFalse))
 
 
-   
+
     temp_dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
     #normalizing for mass conservation
     

@@ -51,6 +51,9 @@ def particle_smooth_new(np.ndarray[double] x,
     cdef double *kernel_sum = <double *>malloc(g_len *sizeof(double))
     cdef double total_kernel_sum = 0.
 
+   
+
+
 
     #zero out the kernel_sum
     for i from 0<=i<g_len:
@@ -75,12 +78,17 @@ def particle_smooth_new(np.ndarray[double] x,
     print 'particle_smooth_cython: using nparticles = '+str(nparticles)
 
    
+   
+
     for p from 0<=p<nparticles:
  
         a_norm = m[p]
         hsml_var = hsml[p]
         
+
         for g from 0<=g<g_len:
+
+	    
             
             dist = ( (coordinates[g,0]-x[p])**2. +
                      (coordinates[g,1]-y[p])**2. +

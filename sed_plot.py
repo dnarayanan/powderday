@@ -8,7 +8,7 @@ m = ModelOutput('example.rtout')
 
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1)
-wav,nufnu = m.get_sed(inclination = 'all',aperture = -1, distance = 300.*const.pc)
+wav,nufnu = m.get_sed(inclination = 'all',aperture = -1)
 
 
 for i in range(nufnu.shape[0]):

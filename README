@@ -12,7 +12,26 @@ THINGS TO INCLUDE IN INSTALLATION
 
 1. dust files
 
-POTENTIAL PROBLEMS:
+=========================================
+TROUBLE SHOOTING
+=========================================
 
-1. If there's an error with -fPIC in building python-fsps, then try
-include that flag in the FSPS makefile
+
+1. If you have errors installing python-fsps:
+
+1.a make sure you have the latest version of fsps installed 
+
+1.b  If there's an error with -fPIC in building python-fsps, then try
+include that flag in the FSPS makefile.  You can do this by adding
+-fPIC to the F90FLAGS in the Makefile for FSPS, i.e.
+
+>F90FLAGS = -O -cpp -fPIC
+
+1.c to install python-fsps, you need to have f2py installed.  this
+comes with the yt installation, but is named f2py2.7 and is in:
+
+/Users/desika/yt-x86_64/bin
+
+so, simply go to that directory and do:
+
+> ln -s f2py2.7 f2py

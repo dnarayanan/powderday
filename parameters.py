@@ -71,8 +71,10 @@ NTHETA = 5
 
 SOURCES_IN_CENTER = False
 STELLAR_SED_WRITE = True
-SUPER_SIMPLE_SED = False
-SKIP_GRID_READIN = True
+SUPER_SIMPLE_SED = False #just generate 1 oct of 100 pc on a side,
+                         #centered on [0,0,0].  sources are added at
+                         #random positions.
+SKIP_GRID_READIN = False
 NEW_STARS_ONLY = False # if set, we don't use oldstars and disk stars
 
 #GRID INFORMATION

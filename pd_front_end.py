@@ -1,8 +1,10 @@
 
 #--1. can we make stellar_nu 1D?
 #--2. check SEDs for bulge_fnu and disk_fnu
-#3. add the spherical sources that correspond to the disk and bulge stars and run
+#--3. add the spherical sources that correspond to the disk and bulge stars and run
 
+#the issue we face now, is that a million+ sources require too much
+#memory...we could downsample the SEDs, mostly in the long wavelngth regime to make them not as 
 #Code:  pd_front_end.py
 
 #=========================================================
@@ -10,6 +12,9 @@
 #=========================================================
 
 import numpy as np
+import scipy.interpolate
+import scipy.ndimage
+
 from hyperion.model import Model
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -21,6 +26,8 @@ import parameters as par
 import sys
 import random
 
+
+
 from astropy.table import Table
 from astropy.io import ascii
 
@@ -29,7 +36,7 @@ from astropy.io import ascii
 import pfh_readsnap
 from grid_construction import *
 from SED_gen import *
-
+from find_order import *
 
 import os.path
 #=========================================================
@@ -116,6 +123,28 @@ if par.SKIP_GRID_READIN == False:
                 
 
 
+
+#Tom Robitaille's conversion from z-first ordering (yt's default) to
+#x-first ordering (the script should work both ways)
+
+
+refined_array = np.array(refined)
+refined_array = np.squeeze(refined_array)
+order = find_order(refined_array)
+refined_reordered = np.zeros(len(order))
+dustdens_reordered = np.zeros(len(order))
+for i in range(len(order)): 
+    refined_reordered[i] = refined[order[i]]
+    dustdens_reordered[i] = dustdens[order[i]]
+
+refined = refined_reordered
+dustdens=dustdens_reordered
+
+
+
+
+
+
 #generate the SEDs 
 
 #stellar_nu,fnu are of shape (nstars,nlambda);
@@ -131,7 +160,44 @@ stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses
 
 nstars = stellar_fnu.shape[0]
 nstars_disk = disk_pos.shape[0]
-nstars_bulge = disk_pos.shape[0]
+nstars_bulge = bulge_pos.shape[0]
+
+
+#downsample the stellar SEDs
+lambda_cgs = const.c/stellar_nu
+lambda_micron = lambda_cgs*1.e4
+w_long = np.where(lambda_micron > 1)[0]
+w_short = np.where(lambda_micron <= 1)[0]
+stellar_nu_short = scipy.ndimage.interpolation.zoom(stellar_nu[w_short],0.5)
+stellar_nu_long = scipy.ndimage.interpolation.zoom(stellar_nu[w_long],0.1)
+disk_fnu_short = scipy.ndimage.interpolation.zoom(disk_fnu[w_short],0.5)
+disk_fnu_long = scipy.ndimage.interpolation.zoom(disk_fnu[w_long],0.1)
+bulge_fnu_short = scipy.ndimage.interpolation.zoom(bulge_fnu[w_short],0.5)
+bulge_fnu_long = scipy.ndimage.interpolation.zoom(bulge_fnu[w_long],0.1)
+
+
+#the stellar fnu's need to be resampled
+nshort_lam = stellar_nu_short.shape[0]
+nlong_lam = stellar_nu_long.shape[0]
+stellar_fnu_short = np.zeros([stellar_fnu.shape[0],nshort_lam])
+stellar_fnu_long = np.zeros([stellar_fnu.shape[0],nlong_lam])
+
+for i in range(nstars):
+    stellar_fnu_short[i,:] = scipy.ndimage.interpolation.zoom(stellar_fnu[i,w_short],0.5)
+    stellar_fnu_long[i,:] = scipy.ndimage.interpolation.zoom(stellar_fnu[i,w_long],0.1)
+
+
+
+stellar_nu = np.append(stellar_nu_short,stellar_nu_long)
+
+
+
+
+print 'Done downsampling the stellar SEDs'
+
+#debug
+#stellar_nu = scipy.ndimage.interpolation.zoom(stellar_nu,0.25)
+#stellar_fnu = scipy.ndimage.interpolation.zoom(stellar_fnu,0.25)
 
 
 #potentially write the stellar SEDs to a npz file
@@ -155,6 +221,8 @@ if par.SOURCES_IN_CENTER == True:
 #========================================================================
 if par.SUPER_SIMPLE_SED == False:
     m = Model()
+    
+
     if par.Grid_Type == 'Octree':
         m.set_octree_grid(xcent,ycent,zcent,
                           dx,dy,dz,refined)
@@ -205,7 +273,6 @@ df.close()
 
 
 
-
 #add sources to hyperion
 
 
@@ -243,21 +310,19 @@ if par.SUPER_SIMPLE_SED == False:
 
 
 
-    print 'adding disk stars to the grid'    
-    for i in range(nstars_disk):
-        fnu = disk_fnu[:]
-        fnu = fnu[::-1]
-        fnu = fnu[nu_inrange]
-        
+    print 'adding disk stars to the grid: adding as a point source collection'   
+    disksource = m.add_point_source_collection()
+    disk_lum = np.absolute(np.trapz(fnu,x=nu))*disk_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
 
-        lum = np.absolute(np.trapz(fnu,x=nu))*disk_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
+    disksource.luminosity = np.repeat(disk_lum,nstars_disk)
+    disksource.position=disk_pos
+    
+    fnu = disk_fnu[:]
+    fnu = fnu[::-1]
+    fnu = fnu[nu_inrange]
+    disksource.spectrum = (nu,fnu)
+ 
 
-        m.add_spherical_source(luminosity = lum,
-                               spectrum = (nu,fnu),
-                               position = (disk_pos[i,0],disk_pos[i,1],disk_pos[i,2]),
-                               radius = par.stellar_softening_length*const.pc*1.e3)
-        
-        
 
 else:
 
