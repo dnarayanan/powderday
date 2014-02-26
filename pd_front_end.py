@@ -128,11 +128,15 @@ if par.SKIP_GRID_READIN == False:
 #x-first ordering (the script should work both ways)
 
 
+refined.insert(0,True) #hyperion expects an extra True at the beginning to establish the first refining
 refined_array = np.array(refined)
 refined_array = np.squeeze(refined_array)
 order = find_order(refined_array)
 refined_reordered = np.zeros(len(order))
 dustdens_reordered = np.zeros(len(order))
+
+
+dustdens = np.insert(dustdens,0,0) #to match the size of the new refined
 for i in range(len(order)): 
     refined_reordered[i] = refined[order[i]]
     dustdens_reordered[i] = dustdens[order[i]]
@@ -142,7 +146,7 @@ dustdens=dustdens_reordered
 
 
 
-
+pdb.set_trace()
 
 
 #generate the SEDs 
