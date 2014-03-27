@@ -4,13 +4,13 @@ Grid_Type = 'Octree'  #your choices here are 'Octree' and 'Cart'; we'll work mor
 
 
 Manual_TF = False
-Manual_TF_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.logical'
-Manual_density_file = '/Users/desika/powderday/grid_data/mw_18_6.snap6.dens'
+Manual_TF_file = '/Users/desika/Dropbox/powderday/grid_data/sunrise_logical.6.temp_interpolate.dat2'
+Manual_density_file = '/Users/desika/Dropbox/powderday/grid_data/mw_18_6.snap6.dustdens'
 
 GADGET_octree_gen = False
-Gadget_dir = '/Users/desika/powderday/grid_data/'
-Gadget_snap_num = 006
-Gadget_snap_name = '/Users/desika/powderday/grid_data/snapshot_006.hdf5'
+Gadget_dir = '/Users/desika/Dropbox/powderday/grid_data/'
+Gadget_snap_num = 6
+Gadget_snap_name = '/Users/desika/Dropbox/powderday/grid_data/snapshot_006.hdf5'
 
 YT_octree_gen = True
 
@@ -63,7 +63,7 @@ bulge_stars_age = 1 #Gyr
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 5
+NTHETA = 2
 
 #===============================================
 #DEBUGGING
@@ -77,7 +77,15 @@ SUPER_SIMPLE_SED = False #just generate 1 oct of 100 pc on a side,
 SKIP_GRID_READIN = False
 NEW_STARS_ONLY = False # if set, we don't use oldstars and disk stars
 
+CONSTANT_DUST_GRID = True #if set, then we don't create a dust grid by
+                          #smoothing, but rather just make it the same
+                          #size as the octree with a constant value of
+                          #4e-20
+
+#===============================================
 #GRID INFORMATION
+#===============================================
+
 #size in kpc: note - the parent grid corners are [-dx,dx; -dy,dy; -dz,dz]
 dx = 100
 dy = 100

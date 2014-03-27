@@ -18,7 +18,6 @@ import fsps
 def new_sed_gen(sdir,snum):
     print 'reading in stars particles for SPS calculation'
 
-    pdb.set_trace()
     #NEW STARS
     new_stars_dict = pfh_readsnap.readsnap(sdir,snum,4)
     mass = new_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)

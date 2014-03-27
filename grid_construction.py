@@ -5,6 +5,7 @@ import parameters as par
 from datetime import datetime
 from astropy.table import Table
 from astropy.io import ascii
+import hyperion_octree_stats as hos
 
 import constants as const
 
@@ -26,7 +27,6 @@ def yt_octree_generate(fname,sdir,snum):
     print 'in yt_octree_generate: reading in the snapshot with pfh_readsnap'
     gas_dict = pfh_readsnap.readsnap(sdir,snum,ptype)
     
-
     metals = gas_dict['z']
     metals = metals[:,0]
     m = gas_dict['m']
@@ -66,21 +66,23 @@ def yt_octree_generate(fname,sdir,snum):
     #==================================
     #turk's code
     #==================================
-    oref = 1
-    nz = (1 << (oref*3))
+#    nz = (1 << (oref*3))
     
+
     #set n_ref here to a number to decrease cell numbers (default 64)
     #- n_ref is the max number of particles in a cell
-    pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=oref)
+
+    #DEBUG
+    pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=0,n_ref=8192)
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))
     
-    saved = pf.h.oct_handler.save_octree()
+    saved = pf.index.oct_handler.save_octree(always_descend=True)
     
     always = AlwaysSelector(None)
-    ir1 = pf.h.oct_handler.ires(always)  #refinement levels
-    fc1 = pf.h.oct_handler.fcoords(always)  #coordinates in kpc
-    fw1 = pf.h.oct_handler.fwidth(always)  #width of cell in kpc
+    ir1 = pf.index.oct_handler.ires(always)  #refinement levels
+    fc1 = pf.index.oct_handler.fcoords(always)  #coordinates in kpc
+    fw1 = pf.index.oct_handler.fwidth(always)  #width of cell in kpc
 
 
 
@@ -128,30 +130,45 @@ def yt_octree_generate(fname,sdir,snum):
     mass_grid = np.zeros(len(wFalse))
 
 
-
-    temp_dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
-    #normalizing for mass conservation
+    if par.CONSTANT_DUST_GRID == False: #this is the default; if True is set, then we'll 
+        print 'Entering psnc.particle_smooth_new'
+        temp_dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
+        #normalizing for mass conservation
+        
+        temp_dust_mass_grid /= sum(temp_dust_mass_grid)/sum(m)
     
-    temp_dust_mass_grid /= sum(temp_dust_mass_grid)/sum(m)
-    
-    #copy over the temp_mass_grid to a grid that is as big as refined
-    #(and not just as big as wFalse) for the hyperion calculation
-    #(which requires the octree grid include the True's)
-
-    dust_mass_grid = np.zeros(len(refined))
-    dust_mass_grid[wFalse] = temp_dust_mass_grid
-
+        #copy over the temp_mass_grid to a grid that is as big as refined
+        #(and not just as big as wFalse) for the hyperion calculation
+        #(which requires the octree grid include the True's)
+        
+        dust_mass_grid = np.zeros(len(refined))
+        dust_mass_grid[wFalse] = temp_dust_mass_grid
+        
 
 
   
-    dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
-    #since volume = 0 where there's a True, dust_density_grid is nan
-    #where there's trues, so we have to fix this
-    dust_density_grid[wTrue] = 0
-
+        dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
+        #since volume = 0 where there's a True, dust_density_grid is nan
+        #where there's trues, so we have to fix this
+        dust_density_grid[wTrue] = 0
+        
+    else:
+        print 'par.CONSTANT_DUST_GRID=True'
+        print 'setting constant dust grid to 4.e-20'
+        dust_density_grid = np.zeros(len(refined))+4.e-22
+        #since volume = 0 where there's a True, dust_density_grid is nan
+        #where there's trues, so we have to fix this
+        dust_density_grid[wTrue] = 0
 
      #file I/O
     print 'Writing Out the Coordinates and Logical Tables'
+
+    xmin = fc1[:,0]-fw1[:,0]
+    xmax = fc1[:,0]+fw1[:,0]
+    ymin = fc1[:,1]-fw1[:,1]
+    ymax = fc1[:,1]+fw1[:,1]
+    zmin = fc1[:,2]-fw1[:,2]
+    zmax = fc1[:,2]+fw1[:,2]
 
     coordinates_Table = Table([fc1[:,0]-fw1[:,0],fc1[:,0]+fw1[:,0],fc1[:,1]-fw1[:,1],
                                fc1[:,1]+fw1[:,1],fc1[:,2]-fw1[:,2],fc1[:,2]+fw1[:,2]],
@@ -166,7 +183,8 @@ def yt_octree_generate(fname,sdir,snum):
     dust_dens_Table = Table([dust_density_grid[:]],names=['dust density'])
     ascii.write(dust_dens_Table,par.Auto_dustdens_file)
         
-    return refined
+
+    return refined,dust_density_grid,xmin,xmax,ymin,ymax,zmin,zmax
 
 
 
