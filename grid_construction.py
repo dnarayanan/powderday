@@ -66,14 +66,9 @@ def yt_octree_generate(fname,sdir,snum):
     #==================================
     #turk's code
     #==================================
-#    nz = (1 << (oref*3))
-    
-
-    #set n_ref here to a number to decrease cell numbers (default 64)
-    #- n_ref is the max number of particles in a cell
 
     #DEBUG
-    pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=0,n_ref=8192)
+    pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=0)
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))
     
@@ -101,20 +96,16 @@ def yt_octree_generate(fname,sdir,snum):
 
     refined = refined2
 
-
-
-
     #smooth the data on to the octree
-
-
     
     volume = np.zeros(len(refined))
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
     volume[wFalse] = (fw1 * const.pc * 1.e3)**3.
     
+
+   
     
-    import smooth_operator
     
 
 
@@ -131,6 +122,9 @@ def yt_octree_generate(fname,sdir,snum):
 
 
     if par.CONSTANT_DUST_GRID == False: #this is the default; if True is set, then we'll 
+
+
+        '''PSNC.PARTICLE_SMOOTH_NEW STUFF
         print 'Entering psnc.particle_smooth_new'
         temp_dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
         #normalizing for mass conservation
@@ -144,21 +138,38 @@ def yt_octree_generate(fname,sdir,snum):
         dust_mass_grid = np.zeros(len(refined))
         dust_mass_grid[wFalse] = temp_dust_mass_grid
         
-
-
-  
         dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
         #since volume = 0 where there's a True, dust_density_grid is nan
         #where there's trues, so we have to fix this
         dust_density_grid[wTrue] = 0
+        '''
+
+
+        '''USING YT SMOOTHING'''
+
+        from particle_smooth_yt import yt_smooth
+        metallicity_smoothed,mass_smoothed = yt_smooth(pf)
+        dust_smoothed = np.zeros(len(refined))
+        dust_smoothed[wFalse] = mass_smoothed * metallicity_smoothed * par.dusttometals_ratio
+         
+        dust_density_grid = dust_smoothed/volume #in gm/cm^-3       
+        #since volume = 0 where there's a True, dust_density_grid is nan        
+        #where there's trues, so we have to fix this                            
+        dust_density_grid[wTrue] = 0
+         
         
     else:
         print 'par.CONSTANT_DUST_GRID=True'
-        print 'setting constant dust grid to 4.e-20'
-        dust_density_grid = np.zeros(len(refined))+4.e-22
+        print 'setting constant dust grid to 4.e-22'
+        dust_density_grid = np.zeros(len(refined))+4.e-27
         #since volume = 0 where there's a True, dust_density_grid is nan
         #where there's trues, so we have to fix this
         dust_density_grid[wTrue] = 0
+
+
+
+
+
 
      #file I/O
     print 'Writing Out the Coordinates and Logical Tables'

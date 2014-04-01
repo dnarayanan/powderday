@@ -40,7 +40,7 @@ NPARTICLES_DEBUG = -1 #ONLY FOR DEBUGGING. if set, we set this to be
 #DUST INFORMATION
 #===============================================
 dustfile = 'dustfiles/kmh_lite.hdf5'
-
+dusttometals_ratio = 0.4
 
 #===============================================
 #HYDRO CODE UNITS
@@ -77,7 +77,7 @@ SUPER_SIMPLE_SED = False #just generate 1 oct of 100 pc on a side,
 SKIP_GRID_READIN = False
 NEW_STARS_ONLY = False # if set, we don't use oldstars and disk stars
 
-CONSTANT_DUST_GRID = True #if set, then we don't create a dust grid by
+CONSTANT_DUST_GRID = False #if set, then we don't create a dust grid by
                           #smoothing, but rather just make it the same
                           #size as the octree with a constant value of
                           #4e-20

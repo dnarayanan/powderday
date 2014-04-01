@@ -168,8 +168,12 @@ dustdens=dustdens_reordered
 hos.hyperion_octree_stats(refined)
 pto.test_octree(refined)
 
-
-
+'''
+#DEBUG
+wz = np.where(dustdens == 0)[0]
+wnz = np.where(dustdens > 0)[0]
+dustdens[wz] = np.max(dustdens[wnz])*1.e4
+'''
 
 
 np.save('refined.npy',refined)
@@ -185,14 +189,15 @@ np.save('density.npy',dustdens)
 
 
 #generate the stellar masses, positions and spectra
-stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu= new_sed_gen(par.Gadget_dir,par.Gadget_snap_num)
 
+
+stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu= new_sed_gen(par.Gadget_dir,par.Gadget_snap_num)
 
 nstars = stellar_fnu.shape[0]
 nstars_disk = disk_pos.shape[0]
 nstars_bulge = bulge_pos.shape[0]
 
-
+'''
 #downsample the stellar SEDs
 lambda_cgs = const.c/stellar_nu
 lambda_micron = lambda_cgs*1.e4
@@ -204,7 +209,7 @@ disk_fnu_short = scipy.ndimage.interpolation.zoom(disk_fnu[w_short],0.5)
 disk_fnu_long = scipy.ndimage.interpolation.zoom(disk_fnu[w_long],0.1)
 bulge_fnu_short = scipy.ndimage.interpolation.zoom(bulge_fnu[w_short],0.5)
 bulge_fnu_long = scipy.ndimage.interpolation.zoom(bulge_fnu[w_long],0.1)
-
+pdb.set_trace()
 
 #the stellar fnu's need to be resampled
 nshort_lam = stellar_nu_short.shape[0]
@@ -220,19 +225,21 @@ for i in range(nstars):
 
 stellar_nu = np.append(stellar_nu_short,stellar_nu_long)
 
-
-
-
 print 'Done downsampling the stellar SEDs'
+'''
 
 #debug
 #stellar_nu = scipy.ndimage.interpolation.zoom(stellar_nu,0.25)
 #stellar_fnu = scipy.ndimage.interpolation.zoom(stellar_fnu,0.25)
 
 
+
+
+
 #potentially write the stellar SEDs to a npz file
 if par.STELLAR_SED_WRITE == True:
     np.savez('stellar_seds.npz',stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
+
 
 
 #debugging parameter
@@ -278,15 +285,6 @@ else:
     x = dx/2.
     y = dy/2.
     z = dz/2.
-
-    #dx = 7.e23
-    #dy = 7.e23
-    #dz = 7.e23
-
-    #refined = [True,False,False,False,False,False,False,False,False]
-
-    #define the grid
-    #m.set_octree_grid(x,y,z,dx,dy,dz,refined)
 
     m.set_octree_grid(xcent,ycent,zcent,
                       dx,dy,dz,refined)
@@ -344,11 +342,14 @@ if par.SUPER_SIMPLE_SED == False:
         
 
 
-
-
+        
+    
     print 'adding disk stars to the grid: adding as a point source collection'   
     disksource = m.add_point_source_collection()
-    disk_lum = np.absolute(np.trapz(fnu,x=nu))*disk_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
+    disk_lum = np.absolute(np.trapz(fnu,x=nu))*disk_masses[i]/const.msun
+    #since stellar masses are in cgs, and we need them to be in msun - we
+    #multiply by mass to get the *total* luminosity of the stellar
+    #cluster since int(nu,fnu) is just the luminosity of a 1 Msun single star
 
     disksource.luminosity = np.repeat(disk_lum,nstars_disk)
     disksource.position=disk_pos
@@ -357,7 +358,12 @@ if par.SUPER_SIMPLE_SED == False:
     fnu = fnu[::-1]
     fnu = fnu[nu_inrange]
     disksource.spectrum = (nu,fnu)
- 
+    
+
+
+    m.set_sample_sources_evenly(True)
+
+
 
 
 else:
@@ -443,19 +449,19 @@ m.set_raytracing(True)
 m.set_n_photons(initial=1.e7,imaging=1.e7,
                 raytracing_sources=1.e7,raytracing_dust=1.e7)
 #m.set_n_initial_iterations(7)
-m.set_convergence(True,percentile=99.,absolute=1,relative=1.01)
+m.set_convergence(True,percentile=99.,absolute=1.1,relative=1.02)
 
 
 image = m.add_peeled_images(sed = True,image=False)
 image.set_wavelength_range(250,0.01,5000.)
 image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
-#image.set_track_origin('basic')
+image.set_track_origin('basic')
 
 
 print 'Beginning RT Stage'
 #Run the Model
 m.write('example.rtin',overwrite=True)
-m.run('example.rtout',mpi=True,n_processes=3)
+m.run('example.rtout',mpi=True,n_processes=4)
 
 
 

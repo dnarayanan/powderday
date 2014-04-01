@@ -20,8 +20,12 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 
 for i in range(nstars):
+    #y = stellar_fnu[:,i]
+    #x = lambda_micron[:]
     if i == 0: ax.plot(lambda_micron[:],stellar_fnu[i,:],label='newstars')
     if i > 0:  ax.plot(lambda_micron[:],stellar_fnu[i,:])
+ 
+
 #ax.plot(lambda_micron[:],disk_fnu[:],color='red',lw=10,label='disk')
 #ax.plot(lambda_micron[:],bulge_fnu[:],color='blue',lw=10,label='bulge')
 
