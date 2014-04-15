@@ -9,8 +9,10 @@ def yt_smooth(pf):
     pf.index
     ad = pf.all_data()
     
+    #Metallicity_00
+
     metal_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
-                                                  "SmoothingLength", "Density","Metallicity",
+                                                  "SmoothingLength", "Density","Metallicity_00",
                                                   pf.field_info)
 
     mass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",

@@ -12,21 +12,30 @@ import constants as const
 random.seed('octree-demo')
  
 import pdb
+import os.path
+import sys
 
 
 
-def yt_octree_generate(fname,sdir,snum):
+def yt_octree_generate():
     
     from yt.mods import *
     from yt.geometry.oct_container import OctreeContainer
     from yt.geometry.selection_routines import AlwaysSelector
 
 
+    fname = par.hydro_dir+par.Gadget_snap_name
+
+    
     #first get the bounding box size
     ptype = 0 #for gas
     print 'in yt_octree_generate: reading in the snapshot with pfh_readsnap'
 
 
+    
+
+    sdir = par.hydro_dir
+    snum = par.Gadget_snap_num
     gas_dict = pfh_readsnap.readsnap(sdir,snum,ptype)
     
 
@@ -72,6 +81,7 @@ def yt_octree_generate(fname,sdir,snum):
     #==================================
 
     #DEBUG
+
     pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=0)
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))
@@ -190,14 +200,14 @@ def yt_octree_generate(fname,sdir,snum):
                                fc1[:,1]+fw1[:,1],fc1[:,2]-fw1[:,2],fc1[:,2]+fw1[:,2]],
                               names = ['xmin','xmax','ymin','ymax','zmin','zmax'])
     
-    ascii.write(coordinates_Table,par.Auto_positions_file)
+    ascii.write(coordinates_Table,par.PD_output_dir+par.Auto_positions_file)
 
     logical_Table = Table([refined[:]],names=['logical'])
-    ascii.write(logical_Table,par.Auto_TF_file)
+    ascii.write(logical_Table,par.PD_output_dir+par.Auto_TF_file)
 
 
     dust_dens_Table = Table([dust_density_grid[:]],names=['dust density'])
-    ascii.write(dust_dens_Table,par.Auto_dustdens_file)
+    ascii.write(dust_dens_Table,par.PD_output_dir+par.Auto_dustdens_file)
         
 
     return refined,dust_density_grid,xmin,xmax,ymin,ymax,zmin,zmax
@@ -298,14 +308,14 @@ def gadget_logical_generate(sdir,snum):
                               coordinates[:,3],coordinates[:,4],coordinates[:,5]],
                               names = ['xmin','xmax','ymin','ymax','zmin','zmax'])
     
-    ascii.write(coordinates_Table,par.Auto_positions_file)
+    ascii.write(coordinates_Table,par.PD_output_dir+par.Auto_positions_file)
 
     logical_Table = Table([refined[:]],names=['logical'])
-    ascii.write(logical_Table,par.Auto_TF_file)
+    ascii.write(logical_Table,par.PD_output_dir+par.Auto_TF_file)
 
 
     dust_dens_Table = Table([dust_density_grid[:]],names=['dust density'])
-    ascii.write(dust_dens_Table,par.Auto_dustdens_file)
+    ascii.write(dust_dens_Table,par.PD_output_dir+par.Auto_dustdens_file)
 
 
 

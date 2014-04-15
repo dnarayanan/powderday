@@ -1,31 +1,24 @@
 #GRIDDING PARAMETERS
 
-Grid_Type = 'Octree'  #your choices here are 'Octree' and 'Cart'; we'll work more in in time.
-
-
-Manual_TF = False
-Manual_TF_file = '/Users/desika/Dropbox/powderday/grid_data/sunrise_logical.6.temp_interpolate.dat2'
-Manual_density_file = '/Users/desika/Dropbox/powderday/grid_data/sbw_mergers/mw_e_hr/mw_18_6.snap6.dustdens'
+#snapshot parameters
 
 GADGET_octree_gen = False
-Gadget_dir = '/Users/desika/Dropbox/powderday/grid_data/sbw_mergers/mw_e_hr/'
-Gadget_snap_num = 12
-Gadget_snap_name = '/Users/desika/Dropbox/powderday/grid_data/sbw_mergers/mw_e_hr/snapshot_012.hdf5'
+hydro_dir = '/Users/desika/gadgetruns/m12qq_hr_Dec16_2013/snapdir_426/'
+Gadget_snap_num = 426
+Gadget_snap_name = 'snapshot_426.0.hdf5'
 
 YT_octree_gen = True
 
 
-#file for writing the grid if it doesn't already exist
 
-Auto_TF_file = 'grid_data/sbw_mergers/mw_e_hr/mw_e.snap12.logical'
-Auto_positions_file = 'grid_data/sbw_mergers/mw_e_hr/mw_e.snap12.positions'
-Auto_dustdens_file = 'grid_data/sbw_mergers/mw_e_hr/mw_e.snap12.dustdens'
+#where the files should go
 
-'''
-Auto_TF_file = 'grid_data/mw_18_6.snap6.logical'
-Auto_positions_file = 'grid_data/mw_18_6.snap6.positions'
-Auto_dustdens_file = 'grid_data/mw_18_6.snap6.dustdens'
-'''
+PD_output_dir = '/Users/desika/Dropbox/powderday/pd_runs/m12qq_hr_Dec16_2013/'
+
+Auto_TF_file = 'snap426.logical'
+Auto_positions_file = 'snap426.positions'
+Auto_dustdens_file = 'snap426.dustdens'
+
 
 
 

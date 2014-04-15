@@ -15,8 +15,11 @@ import scipy.ndimage
 import fsps 
 
 
-def new_sed_gen(sdir,snum):
+def new_sed_gen():
     print 'reading in stars particles for SPS calculation'
+
+    sdir = par.hydro_dir
+    snum = par.Gadget_snap_num
 
     #NEW STARS
     new_stars_dict = pfh_readsnap.readsnap(sdir,snum,4)
