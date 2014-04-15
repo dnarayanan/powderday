@@ -28,6 +28,7 @@ def new_sed_gen(sdir,snum):
     median_metallicity = np.median(metals)
    
     nstars = len(age)
+    print 'number of new stars =',nstars
     
     if par.NEW_STARS_ONLY == False:
         #DISK STARS
@@ -45,7 +46,6 @@ def new_sed_gen(sdir,snum):
    
 
 
-   
 
     print 'generating stellar SEDs'
 

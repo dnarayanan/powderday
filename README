@@ -35,3 +35,16 @@ comes with the yt installation, but is named f2py2.7 and is in:
 so, simply go to that directory and do:
 
 > ln -s f2py2.7 f2py
+
+
+
+2. Compiling Hyperion:
+
+2a.  if you get an error "ld: library not found for -lcrt1.10.5.o" and
+you run mac os x, it could be that you have issues with the command
+line tools installation (especially with mavericks).  if you run
+mavericks, do:
+
+>sudo xcode-select --install
+
+and wait 30 minutes while it downloads and installs command line tools!

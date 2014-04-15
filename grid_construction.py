@@ -16,7 +16,7 @@ import pdb
 
 
 def yt_octree_generate(fname,sdir,snum):
-   
+    
     from yt.mods import *
     from yt.geometry.oct_container import OctreeContainer
     from yt.geometry.selection_routines import AlwaysSelector
@@ -25,8 +25,12 @@ def yt_octree_generate(fname,sdir,snum):
     #first get the bounding box size
     ptype = 0 #for gas
     print 'in yt_octree_generate: reading in the snapshot with pfh_readsnap'
+
+
     gas_dict = pfh_readsnap.readsnap(sdir,snum,ptype)
     
+
+
     metals = gas_dict['z']
     metals = metals[:,0]
     m = gas_dict['m']
@@ -96,6 +100,7 @@ def yt_octree_generate(fname,sdir,snum):
 
     refined = refined2
 
+
     #smooth the data on to the octree
     
     volume = np.zeros(len(refined))
@@ -104,7 +109,7 @@ def yt_octree_generate(fname,sdir,snum):
     volume[wFalse] = (fw1 * const.pc * 1.e3)**3.
     
 
-   
+    max_level = pf.index.oct_handler.max_level
     
     
 

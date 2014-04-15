@@ -40,5 +40,6 @@ def hyperion_octree_stats(refined):
     print("Array is self-consistent for Hyperion : {0}".format("yes" if consistent else "no"))
     print("Maximum number of levels              : {0}".format(max_level))
 
+    return max_level
 if __name__ == "__main__":
     hyperion_octree_stats([True, False, False, False, False, False, False, False, False])

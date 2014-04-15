@@ -5,22 +5,27 @@ Grid_Type = 'Octree'  #your choices here are 'Octree' and 'Cart'; we'll work mor
 
 Manual_TF = False
 Manual_TF_file = '/Users/desika/Dropbox/powderday/grid_data/sunrise_logical.6.temp_interpolate.dat2'
-Manual_density_file = '/Users/desika/Dropbox/powderday/grid_data/mw_18_6.snap6.dustdens'
+Manual_density_file = '/Users/desika/Dropbox/powderday/grid_data/sbw_mergers/mw_e_hr/mw_18_6.snap6.dustdens'
 
 GADGET_octree_gen = False
-Gadget_dir = '/Users/desika/Dropbox/powderday/grid_data/'
-Gadget_snap_num = 6
-Gadget_snap_name = '/Users/desika/Dropbox/powderday/grid_data/snapshot_006.hdf5'
+Gadget_dir = '/Users/desika/Dropbox/powderday/grid_data/sbw_mergers/mw_e_hr/'
+Gadget_snap_num = 12
+Gadget_snap_name = '/Users/desika/Dropbox/powderday/grid_data/sbw_mergers/mw_e_hr/snapshot_012.hdf5'
 
 YT_octree_gen = True
 
 
 #file for writing the grid if it doesn't already exist
 
+Auto_TF_file = 'grid_data/sbw_mergers/mw_e_hr/mw_e.snap12.logical'
+Auto_positions_file = 'grid_data/sbw_mergers/mw_e_hr/mw_e.snap12.positions'
+Auto_dustdens_file = 'grid_data/sbw_mergers/mw_e_hr/mw_e.snap12.dustdens'
+
+'''
 Auto_TF_file = 'grid_data/mw_18_6.snap6.logical'
 Auto_positions_file = 'grid_data/mw_18_6.snap6.positions'
 Auto_dustdens_file = 'grid_data/mw_18_6.snap6.dustdens'
-
+'''
 
 
 
@@ -39,7 +44,8 @@ NPARTICLES_DEBUG = -1 #ONLY FOR DEBUGGING. if set, we set this to be
 #===============================================
 #DUST INFORMATION
 #===============================================
-dustfile = 'dustfiles/kmh_lite.hdf5'
+#dustfile = 'dustfiles/kmh_lite.hdf5'
+dustfile = '/Users/desika/hyperion-dust-0.1.0/dust_files/d03_4.0_4.0_A.hdf5'
 dusttometals_ratio = 0.4
 
 #===============================================
@@ -63,7 +69,7 @@ bulge_stars_age = 1 #Gyr
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 2
+NTHETA = 10
 
 #===============================================
 #DEBUGGING
@@ -106,7 +112,6 @@ z_cent = 0
 
 #SED INFORMATION
 
-CALCULATE_SED  = 1 #if set to 0, no SED is calculated
 N_viewing_angles = 10
 n_wav = 250    # number of wavelengths in SED
 wav_min = 0.01 # min wavelength for SED in micron
