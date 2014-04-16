@@ -3,9 +3,9 @@
 #snapshot parameters
 
 GADGET_octree_gen = False
-hydro_dir = '/Users/desika/gadgetruns/m12qq_hr_Dec16_2013/snapdir_426/'
-Gadget_snap_num = 426
-Gadget_snap_name = 'snapshot_426.0.hdf5'
+hydro_dir = '/Users/desika/gadgetruns/sbw_tests/mw_18_6_hr_hightimeres/'
+Gadget_snap_num = 6
+Gadget_snap_name = 'snapshot_006.hdf5'
 
 YT_octree_gen = True
 
@@ -13,11 +13,11 @@ YT_octree_gen = True
 
 #where the files should go
 
-PD_output_dir = '/Users/desika/Dropbox/powderday/pd_runs/m12qq_hr_Dec16_2013/'
+PD_output_dir = '/Users/desika/Dropbox/powderday/pd_runs/sbw_tests/mw_18_6_hr_hightimeres/'
 
-Auto_TF_file = 'snap426.logical'
-Auto_positions_file = 'snap426.positions'
-Auto_dustdens_file = 'snap426.dustdens'
+Auto_TF_file = 'snap6.logical'
+Auto_positions_file = 'snap6.positions'
+Auto_dustdens_file = 'snap6.dustdens'
 
 
 
@@ -51,10 +51,13 @@ unit_length = 1. #kpc
 
 
 #===============================================
-#OLD STARS INFO
+#STELLAR SEDS INFO
 #===============================================
-disk_stars_age = 1 #Gyr
-bulge_stars_age = 1 #Gyr
+
+COSMOFLAG = False
+
+disk_stars_age = 1 #Gyr ;meaningless if COSMOFLAG = True
+bulge_stars_age = 1 #Gyr ; meaningless if COSMOFLAG = True
 
 
 
@@ -74,7 +77,6 @@ SUPER_SIMPLE_SED = False #just generate 1 oct of 100 pc on a side,
                          #centered on [0,0,0].  sources are added at
                          #random positions.
 SKIP_GRID_READIN = False
-NEW_STARS_ONLY = False # if set, we don't use oldstars and disk stars
 
 CONSTANT_DUST_GRID = False #if set, then we don't create a dust grid by
                           #smoothing, but rather just make it the same

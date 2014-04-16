@@ -222,7 +222,7 @@ print 'Done downsampling the stellar SEDs'
 
 #potentially write the stellar SEDs to a npz file
 if par.STELLAR_SED_WRITE == True:
-    np.savez('stellar_seds.npz',stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
+    np.savez('stellar_seds.npz',par.COSMOFLAG,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
 
 
 
@@ -326,63 +326,47 @@ if par.SUPER_SIMPLE_SED == False:
 
 
 
-        print lum
+
 
 
         
         
     
 
+    if par.COSMOFLAG == False:
+        
+        print 'Non-Cosmological Simulation: Adding Disk and Bulge Stars:'
 
-
-    print 'adding disk stars to the grid: adding as a point source collection'   
-    disksource = m.add_point_source_collection()
-    disk_lum = np.absolute(np.trapz(fnu,x=nu))*disk_masses[i]/const.msun
-    #since stellar masses are in cgs, and we need them to be in msun - we
-    #multiply by mass to get the *total* luminosity of the stellar
-    #cluster since int(nu,fnu) is just the luminosity of a 1 Msun single star
-    disk_lum *= const.lsun
+        print 'adding disk stars to the grid: adding as a point source collection'   
+        disksource = m.add_point_source_collection()
+        disk_lum = np.absolute(np.trapz(fnu,x=nu))*disk_masses[i]/const.msun
+        #since stellar masses are in cgs, and we need them to be in msun - we
+        #multiply by mass to get the *total* luminosity of the stellar
+        #cluster since int(nu,fnu) is just the luminosity of a 1 Msun single star
+        disk_lum *= const.lsun
 
    
-    disksource.luminosity = np.repeat(disk_lum,nstars_disk)
-    disksource.position=disk_pos
+        disksource.luminosity = np.repeat(disk_lum,nstars_disk)
+        disksource.position=disk_pos
     
-    fnu = disk_fnu[:]
-    fnu = fnu[::-1]
-    fnu = fnu[nu_inrange]
-    disksource.spectrum = (nu,fnu)
+        fnu = disk_fnu[:]
+        fnu = fnu[::-1]
+        fnu = fnu[nu_inrange]
+        disksource.spectrum = (nu,fnu)
    
-
-    '''
-    disksource.luminosity = np.repeat(1.e5*const.lsun,nstars_disk)
-    disksource.temperature = 6000.
-    disksource.position = disk_pos
-    '''
-
+        print 'adding bulge stars to the grid: adding as a point source collection'
+        bulgesource = m.add_point_source_collection()
+        bulge_lum = np.absolute(np.trapz(fnu,x=nu))*bulge_masses[i]/const.msun
+        bulge_lum *= const.lsun
+        bulgesource.luminosity = np.repeat(disk_lum,nstars_disk)
+        bulgesource.position=disk_pos
     
-    print 'adding bulge stars to the grid: adding as a point source collection'
-    bulgesource = m.add_point_source_collection()
-    bulge_lum = np.absolute(np.trapz(fnu,x=nu))*bulge_masses[i]/const.msun
-    bulge_lum *= const.lsun
-    bulgesource.luminosity = np.repeat(disk_lum,nstars_disk)
-    bulgesource.position=disk_pos
+        fnu = disk_fnu[:]
+        fnu = fnu[::-1]
+        fnu = fnu[nu_inrange]
+        bulgesource.spectrum = (nu,fnu)
     
-    fnu = disk_fnu[:]
-    fnu = fnu[::-1]
-    fnu = fnu[nu_inrange]
-    bulgesource.spectrum = (nu,fnu)
-    
-    '''
-    #DEBUG
-    bulgesource.luminosity = np.repeat(1.e5*const.lsun,nstars_bulge)
-    bulgesource.temperature = 6000.
-    bulgesource.position = bulge_pos
-    '''
-
-
-
-
-    m.set_sample_sources_evenly(True)
+        m.set_sample_sources_evenly(True)
 
 
 
@@ -437,8 +421,8 @@ print 'Done adding Sources'
 print 'Setting up Model'
 #set up the SEDs and images
 m.set_raytracing(True)
-m.set_n_photons(initial=1.e7,imaging=1.e7,
-                raytracing_sources=1.e7,raytracing_dust=1.e7)
+m.set_n_photons(initial=1.e6,imaging=1.e6,
+                raytracing_sources=1.e6,raytracing_dust=1.e6)
 #m.set_n_initial_iterations(7)
 m.set_convergence(True,percentile=99.,absolute=1.1,relative=1.02)
 

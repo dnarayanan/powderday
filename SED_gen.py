@@ -33,18 +33,7 @@ def new_sed_gen():
     nstars = len(age)
     print 'number of new stars =',nstars
     
-    if par.NEW_STARS_ONLY == False:
-        #DISK STARS
-        disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
-        nstars_disk = len(disk_stars_dict['m'])
-        disk_positions = disk_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-        disk_masses = disk_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
-        
-        #BULGE STARS
-        bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
-        nstars_bulge = len(bulge_stars_dict['m'])
-        bulge_positions = bulge_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-        bulge_masses = bulge_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+  
 
    
 
@@ -85,6 +74,30 @@ def new_sed_gen():
         stellar_nu[:] = 1.e8*const.c/spec[0]
         stellar_fnu[i,:] = spec[1]
 
+
+
+
+        
+    if par.COSMOFLAG == False: 
+
+        #DISK STARS
+        disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
+        nstars_disk = len(disk_stars_dict['m'])
+        disk_positions = disk_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+        disk_masses = disk_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+    
+        #BULGE STARS
+        bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
+        nstars_bulge = len(bulge_stars_dict['m'])
+        bulge_positions = bulge_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+        bulge_masses = bulge_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+        
+    else: 
+        #we just assign bogus values to the disk and bulge masses: equate them to the newstar values
+        disk_masses = mass
+        disk_fnu = stellar_fnu
+        bulge_masses = mass
+        bulge_fnu = fnu
 
 
 
