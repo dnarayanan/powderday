@@ -35,7 +35,7 @@ from astropy.io import ascii
 
 import pfh_readsnap
 from grid_construction import *
-from SED_gen import *
+import SED_gen as sg
 from find_order import *
 import powderday_test_octree as pto
 
@@ -175,7 +175,7 @@ np.save('density.npy',dustdens)
 #generate the stellar masses, positions and spectra
 
 
-stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu= new_sed_gen()
+stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu= sg.allstars_sed_gen()
 
 nstars = stellar_fnu.shape[0]
 nstars_disk = disk_pos.shape[0]
