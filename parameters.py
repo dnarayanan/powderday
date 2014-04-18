@@ -20,7 +20,11 @@ Auto_positions_file = 'snap6.positions'
 Auto_dustdens_file = 'snap6.dustdens'
 
 
+#===============================================
+#PARALLELIZATION
+#===============================================
 
+n_processes = 4
 
 #===============================================
 #PARTICLE SMOOTHING PARAMETERS

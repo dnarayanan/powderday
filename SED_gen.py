@@ -1,18 +1,17 @@
-import random
 import numpy as np
 import pfh_readsnap
 import parameters as par
-from datetime import datetime
 from astropy.table import Table
 from astropy.io import ascii
 import constants as const
 import pdb
 import sys
 
-import scipy.interpolate
-import scipy.ndimage
-
 import fsps 
+from datetime import datetime
+from datetime import timedelta
+
+
 from multiprocessing import Pool
 
 
@@ -26,8 +25,10 @@ class Stars:
     def info(self):
         return(self.mass,self.metals,self.positions,self.age)
 
-
-
+    '''
+    def __getitem__(self,item):
+        return (self.mass,self.metals,self.positions,self.age)[item]
+    '''
 def allstars_sed_gen():
 
 
@@ -61,47 +62,71 @@ def allstars_sed_gen():
 
   
 
-
-    print 'generating stellar SEDs'
-
-
-    '''
-    #first figure out how many wavelengths there are
-    sp = fsps.StellarPopulation(tage=age[0],imf_type=1,sfh=0)
-    spec = sp.get_spectrum(tage=age[0])
+    #get just the wavelength array
+    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0)
+    spec = sp.get_spectrum(tage=stars_list[0].age)
     nu = 1.e8*const.c/spec[0]
-    fnu = spec[1]
-
     nlam = len(nu)
 
-    stellar_nu = np.zeros([nlam])
-    stellar_fnu = np.zeros([nstars,nlam])
-    
-    disk_fnu = np.zeros(nlam)
-    bulge_fnu = np.zeros(nlam)
-    
-    #DEBUG DEBUG DEBUG 
-    #for now we don't have a metallicity in the sps calculations
-    print '========================='
-    print 'WARNING: METALLICITIES NOT ACCOUNTED FOR IN STELLAR SEDS'
-    print '========================'
-    
-    newstars_gen(age)
 
-    #calculate the SEDs for new stars
-    for i in range(nstars):
-        
-        sp = fsps.StellarPopulation(tage=age[i],imf_type=1,sfh=0)
-        spec = sp.get_spectrum(tage=age[i])
 
-        stellar_nu[:] = 1.e8*const.c/spec[0]
-        stellar_fnu[i,:] = spec[1]
+    #initialize the process pool and build the chunks
+    p = Pool(processes = par.n_processes)
+    nchunks = par.n_processes
 
+
+    chunk_start_indices = []
+    chunk_start_indices.append(0) #the start index is obviously 0
+
+    delta_chunk_indices = int(nstars / nchunks)
+    print 'delta_chunk_indices = ',delta_chunk_indices
+    
+    for n in range(1,nchunks):
+        chunk_start_indices.append(chunk_start_indices[n-1]+delta_chunk_indices)
 
     '''
+    chunk_start_indices = list(np.fix(np.arange(0,nstars,np.fix(nstars/nchunks))))
+    #because this can result in too many chunks sometimes given the number of processors:
+    chunk_start_indices = chunk_start_indices[0:nchunks]
+    '''
+    list_of_chunks = []
+    for n in range(nchunks):
+        stars_list_chunk = stars_list[chunk_start_indices[n]:chunk_start_indices[n]+delta_chunk_indices]
+        #if we're on the last chunk, we might not have the full list included, so need to make sure that we have that here
+        if n == nchunks-1: 
+            stars_list_chunk = stars_list[chunk_start_indices[n]::]
 
-    stellar_nu,stellar_fnu = newstars_gen(stars_list)
+        list_of_chunks.append(stars_list_chunk)
+
+
+
+    print 'Entering Pool.map multiprocessing'
+    t1=datetime.now()
+    chunk_sol = p.map(newstars_gen, [arg for arg in list_of_chunks])
+    t2=datetime.now()
+    print 'Execution time for SED generation in Pool.map multiprocessing = '+str(t2-t1)
+
     
+    stellar_fnu = np.zeros([nstars,nlam])
+    star_counter=0
+    for i in range(nchunks):
+        fnu_list = chunk_sol[i] #this is a list of the stellar_fnu's returned by that chunk
+        for j in range(len(fnu_list)):
+            stellar_fnu[star_counter,:] = fnu_list[j,:]
+            star_counter+=1
+
+
+
+
+    p.close()
+    p.terminate()
+    p.join()
+
+
+    stellar_nu = nu
+
+   
+
         
     if par.COSMOFLAG == False: 
 
@@ -138,7 +163,6 @@ def allstars_sed_gen():
     bulge_fnu = spec[1]
     
 
-    
 
     return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
 
@@ -149,9 +173,6 @@ def newstars_gen(stars_list):
     #stars) are calculated in a separate function with just one argument so that it is can be fed 
     #into pool.map for multithreading.
     
-
-    
-
 
     #first figure out how many wavelengths there are
     sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0)
@@ -183,4 +204,4 @@ def newstars_gen(stars_list):
         stellar_nu[:] = 1.e8*const.c/spec[0]
         stellar_fnu[i,:] = spec[1]
 
-    return stellar_nu,stellar_fnu
+    return stellar_fnu

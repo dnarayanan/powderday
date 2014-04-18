@@ -177,6 +177,8 @@ np.save('density.npy',dustdens)
 
 stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu= sg.allstars_sed_gen()
 
+
+
 nstars = stellar_fnu.shape[0]
 nstars_disk = disk_pos.shape[0]
 nstars_bulge = bulge_pos.shape[0]
@@ -251,8 +253,6 @@ if par.SUPER_SIMPLE_SED == False:
     m.add_density_grid(dustdens,par.dustfile)
         
 
-
-
 else:
 
     m = Model()
@@ -298,8 +298,11 @@ if par.SUPER_SIMPLE_SED == False:
 
 
     print 'adding new stars to the grid'
+  
     for i in range(nstars):
+       
         nu = stellar_nu[:]
+                
         fnu = stellar_fnu[i,:]
     
 
@@ -310,13 +313,17 @@ if par.SUPER_SIMPLE_SED == False:
         #reverse the arrays for hyperion
         nu = nu[::-1]
         fnu = fnu[::-1]
-        
+
+
         fnu = fnu[nu_inrange]
 
         lum = np.absolute(np.trapz(fnu,x=nu))*stellar_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
         lum *= const.lsun #to get in cgs
 
   
+
+        print i,lum
+
         #add new stars
         
         '''
@@ -332,30 +339,44 @@ if par.SUPER_SIMPLE_SED == False:
         
         
     
-
+    pdb.set_trace()
     if par.COSMOFLAG == False:
         
         print 'Non-Cosmological Simulation: Adding Disk and Bulge Stars:'
 
         print 'adding disk stars to the grid: adding as a point source collection'   
         disksource = m.add_point_source_collection()
+       
+
+
+
+   
+       
+    
+        fnu = disk_fnu[:]
+        fnu = fnu[::-1]
+        fnu = fnu[nu_inrange]
+
+
         disk_lum = np.absolute(np.trapz(fnu,x=nu))*disk_masses[i]/const.msun
         #since stellar masses are in cgs, and we need them to be in msun - we
         #multiply by mass to get the *total* luminosity of the stellar
         #cluster since int(nu,fnu) is just the luminosity of a 1 Msun single star
         disk_lum *= const.lsun
-
-   
         disksource.luminosity = np.repeat(disk_lum,nstars_disk)
         disksource.position=disk_pos
-    
-        fnu = disk_fnu[:]
-        fnu = fnu[::-1]
-        fnu = fnu[nu_inrange]
+
         disksource.spectrum = (nu,fnu)
    
         print 'adding bulge stars to the grid: adding as a point source collection'
+
+        
         bulgesource = m.add_point_source_collection()
+        
+        fnu = bulge_fnu[:]
+        fnu = fnu[::-1]
+        fnu = fnu[nu_inrange]
+
         bulge_lum = np.absolute(np.trapz(fnu,x=nu))*bulge_masses[i]/const.msun
         bulge_lum *= const.lsun
         bulgesource.luminosity = np.repeat(disk_lum,nstars_disk)
@@ -436,7 +457,7 @@ image.set_track_origin('basic')
 print 'Beginning RT Stage'
 #Run the Model
 m.write('example.rtin',overwrite=True)
-m.run('example.rtout',mpi=True,n_processes=3)
+m.run('example.rtout',mpi=True,n_processes=par.n_processes)
 
 
 
