@@ -22,6 +22,7 @@ class Stars:
         self.metals = metals
         self.positions = positions
         self.age = age
+
     def info(self):
         return(self.mass,self.metals,self.positions,self.age)
 
@@ -29,6 +30,36 @@ class Stars:
     def __getitem__(self,item):
         return (self.mass,self.metals,self.positions,self.age)[item]
     '''
+
+
+class BulgeStars:
+    
+    def __init__(self,mass,metals,positions,age):
+        self.mass = mass
+        self.metals = metals
+        self.positions = positions
+        self.age = age
+        
+    def info(self):
+        return(self.mass,self.metals,self.positions,self.age)
+
+
+class DiskStars:
+
+    def __init__(self,mass,metals,positions,age):
+        self.mass = mass
+        self.metals = metals
+        self.positions = positions
+        self.age = age
+        
+    def info(self):
+        return(self.mass,self.metals,self.positions,self.age)
+
+
+
+
+
+
 def allstars_sed_gen():
 
 
@@ -142,6 +173,10 @@ def allstars_sed_gen():
         bulge_positions = bulge_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
         bulge_masses = bulge_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
         
+       
+
+        
+
     else: 
         #we just assign bogus values to the disk and bulge masses: equate them to the newstar values
         disk_masses = mass
@@ -149,6 +184,16 @@ def allstars_sed_gen():
         bulge_masses = mass
         bulge_fnu = fnu
 
+
+
+    #create the bulge_list full of BulgeStars objects
+    bulgestars_list = []
+    for i in range(nstars_bulge):
+        bulgestars_list.append(BulgeStars(bulge_masses[i],0.02,bulge_positions[i],par.bulge_stars_age))
+
+    diskstars_list = []
+    for i in range(nstars_disk):
+        diskstars_list.append(DiskStars(disk_masses[i],0.02,disk_positions[i],par.disk_stars_age))
 
 
     #calculate the SED for disk stars
@@ -163,9 +208,8 @@ def allstars_sed_gen():
     bulge_fnu = spec[1]
     
 
-
-    return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
-
+    #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
+    return stars_list,bulgestars_list,diskstars_list,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
 
 
 def newstars_gen(stars_list):

@@ -175,13 +175,14 @@ np.save('density.npy',dustdens)
 #generate the stellar masses, positions and spectra
 
 
-stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu= sg.allstars_sed_gen()
+#stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu= sg.allstars_sed_gen()
+stars_list,bulgestars_list,diskstars_list,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu = sg.allstars_sed_gen()
 
 
 
-nstars = stellar_fnu.shape[0]
-nstars_disk = disk_pos.shape[0]
-nstars_bulge = bulge_pos.shape[0]
+nstars = len(stars_list)
+nstars_disk = len(diskstars_list)
+nstars_bulge = len(bulgestars_list)
 
 '''
 #downsample the stellar SEDs
@@ -228,14 +229,11 @@ if par.STELLAR_SED_WRITE == True:
 
 
 
-#debugging parameter
 if par.SOURCES_IN_CENTER == True:
     for i in range(nstars):
-        stellar_pos[:,0] = 0
-        stellar_pos[:,1] = 0
-        stellar_pos[:,2] = 0
-
-
+        stars_list[i].positions[:] = 0
+        bulgestars_list[i].positions[:] = 0
+        diskstars_list[i].positions[:] = 0 
 
 
 #========================================================================
@@ -296,101 +294,8 @@ df.close()
 
 if par.SUPER_SIMPLE_SED == False:
 
-
-    print 'adding new stars to the grid'
-  
-    for i in range(nstars):
-       
-        nu = stellar_nu[:]
-                
-        fnu = stellar_fnu[i,:]
-    
-
-        nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
-        nu_inrange = np.where(nu_inrange == True)[0]
-        nu = nu[nu_inrange]
-
-        #reverse the arrays for hyperion
-        nu = nu[::-1]
-        fnu = fnu[::-1]
-
-
-        fnu = fnu[nu_inrange]
-
-        lum = np.absolute(np.trapz(fnu,x=nu))*stellar_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
-        lum *= const.lsun #to get in cgs
-
-  
-
-        print i,lum
-
-        #add new stars
-        
-        '''
-        m.add_spherical_source(luminosity = 1.e4*const.lsun,temperature = 6000., radius = 10.*const.rsun,
-                               position = (stellar_pos[i,0],stellar_pos[i,1],stellar_pos[i,2]))
-        '''
-
-
-
-
-
-
-        
-        
-    
-    pdb.set_trace()
-    if par.COSMOFLAG == False:
-        
-        print 'Non-Cosmological Simulation: Adding Disk and Bulge Stars:'
-
-        print 'adding disk stars to the grid: adding as a point source collection'   
-        disksource = m.add_point_source_collection()
-       
-
-
-
-   
-       
-    
-        fnu = disk_fnu[:]
-        fnu = fnu[::-1]
-        fnu = fnu[nu_inrange]
-
-
-        disk_lum = np.absolute(np.trapz(fnu,x=nu))*disk_masses[i]/const.msun
-        #since stellar masses are in cgs, and we need them to be in msun - we
-        #multiply by mass to get the *total* luminosity of the stellar
-        #cluster since int(nu,fnu) is just the luminosity of a 1 Msun single star
-        disk_lum *= const.lsun
-        disksource.luminosity = np.repeat(disk_lum,nstars_disk)
-        disksource.position=disk_pos
-
-        disksource.spectrum = (nu,fnu)
-   
-        print 'adding bulge stars to the grid: adding as a point source collection'
-
-        
-        bulgesource = m.add_point_source_collection()
-        
-        fnu = bulge_fnu[:]
-        fnu = fnu[::-1]
-        fnu = fnu[nu_inrange]
-
-        bulge_lum = np.absolute(np.trapz(fnu,x=nu))*bulge_masses[i]/const.msun
-        bulge_lum *= const.lsun
-        bulgesource.luminosity = np.repeat(disk_lum,nstars_disk)
-        bulgesource.position=disk_pos
-    
-        fnu = disk_fnu[:]
-        fnu = fnu[::-1]
-        fnu = fnu[nu_inrange]
-        bulgesource.spectrum = (nu,fnu)
-    
-        m.set_sample_sources_evenly(True)
-
-
-
+    from source_creation import add_newstars
+    add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
 
 else:
     
@@ -410,7 +315,7 @@ else:
         
         fnu = fnu[nu_inrange]
         
-        lum = np.absolute(np.trapz(fnu,x=nu))*stellar_masses[i]/const.msun #since stellar masses are in cgs, and we need them to be in msun
+        lum = np.absolute(np.trapz(fnu,x=nu))*stars_list[i].mass/const.msun #since stellar masses are in cgs, and we need them to be in msun
 
         
         
@@ -418,25 +323,12 @@ else:
         posx = ((-1.)**i)*random.random()*dx
         posy = ((-1.)**(i+1))*random.random()*dy
         posz = ((-1.)**i)*random.random()*dz
-        #HERE m.add_spherical_source(luminosity = 1.e3*const.lsun,temperature = 6000., radius = 10.*const.rsun,
-        #                       position=(posx,posy,posz))
-        
-    
-    
+           
         m.add_spherical_source(luminosity = 1.e3, 
                                spectrum = (nu,fnu),
                                position = (posx,posy,posz),radius = 10.*const.rsun)
  
     
-       
-
-        #DEBUG 04/03/14 - leaving off here: the status is that the commented line that says "HERE' when added gives an SED that doesn't look like garbage.  so slowly vary parameters in that to see what fixes things!
-
-
-
-
-
-
 print 'Done adding Sources'
 
 print 'Setting up Model'
