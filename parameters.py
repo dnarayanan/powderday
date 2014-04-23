@@ -60,7 +60,7 @@ unit_length = 1. #kpc
 #STELLAR SEDS INFO
 #===============================================
 
-COSMOFLAG = False
+COSMOFLAG = True
 
 disk_stars_age = 1 #Gyr ;meaningless if COSMOFLAG = True
 bulge_stars_age = 1 #Gyr ; meaningless if COSMOFLAG = True
@@ -71,8 +71,8 @@ bulge_stars_age = 1 #Gyr ; meaningless if COSMOFLAG = True
 #reduction of memory load; see manual for details.
 
 N_METAL_BINS = 5
-N_STELLAR_AGE_BINS = 500
-N_MASS_BINS = 5  #these you want the most of for sure
+N_STELLAR_AGE_BINS = 20
+N_MASS_BINS = 3  #these you want the most of for sure
 
 
 

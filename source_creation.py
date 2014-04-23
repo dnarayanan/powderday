@@ -191,7 +191,12 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     print 'age_bins = ',age_bins
 
 
-    
+    #has_stellar_mass is a 3D boolean array that's [wz,wa,wm] big and
+    #says whether or not that bin is being used downstream for
+    #creating a point source collection (i.e. that it actually has at
+    #least one star cluster that falls into it)
+    has_stellar_mass = np.zeros([par.N_METAL_BINS+1,par.N_STELLAR_AGE_BINS+1,par.N_MASS_BINS+1],dtype=bool)
+
     for i in range(nstars):
         
         wz = find_nearest(metal_bins,stars_list[i].metals[0])
@@ -199,10 +204,14 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
         wm = find_nearest(mass_bins,stars_list[i].mass)
         
         stars_list[i].sed_bin = [wz,wa,wm]
+
+        has_stellar_mass[wz,wa,wm] = True
     
-        
+    
     print 'assigning stars to SED bins'
     sed_bins_list=[]
+    sed_bins_list_has_stellar_mass = []
+
 
 
     for wz in range(par.N_METAL_BINS+1):
@@ -210,13 +219,39 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
             for wm in range(par.N_MASS_BINS+1):
                 #sed_bins_list.append(Sed_Bins(metal_bins[wz],age_bins[wa],mass_bins[wm]))  
                 sed_bins_list.append(Sed_Bins(mass_bins[wm],metal_bins[wz],age_bins[wa]))
-
+                if has_stellar_mass[wz,wa,wm] == True:
+                    sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],metal_bins[wz],age_bins[wa]))
 
    
 
+    #sed_bins_list is a list of Sed_Bins objects that have the
+    #information about what mass bin, metal bin and age bin they
+    #correspond to.  It is unnecessary, and heavy computational work
+    #to re-create the SED for each of these bins - rather, we can just
+    #calculate the SED for the bins that have any actual stellar mass.
+            
     print 'Running SPS for Binned SEDs'
-    #note the disk and bulge stuff is unneccessary at this point
-    binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list,diskstars_list,bulgestars_list)
+
+    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,diskstars_list,bulgestars_list)
+
+    #since the binned_stellar_fnu_has_stellar_mass is now
+    #[len(sed_bins_list_has_stellar_mass),nlam)] big, we need to
+    #transform it back to the a larger array.  this is an ugly loop
+    #that could probably be prettier...but whatever.  this saves >an
+    #order of magnitude in time in SED gen.  
+    nlam = binned_stellar_nu.shape[0]
+    binned_stellar_fnu = np.zeros([len(sed_bins_list),nlam])
+
+    counter = 0
+    counter_has_stellar_mass = 0
+    for wz in range(par.N_METAL_BINS+1):
+        for wa in range(par.N_STELLAR_AGE_BINS+1):
+            for wm in range(par.N_MASS_BINS+1):
+                if has_stellar_mass[wz,wa,wm] == True:
+                    binned_stellar_fnu[counter,:] = binned_stellar_fnu_has_stellar_mass[counter_has_stellar_mass,:]
+                    counter_has_stellar_mass += 1 
+                counter+=1
+
 
     #now binned_stellar_nu and binned_stellar_fnu are the SEDs for the bins in order of wz, wa, wm 
     
@@ -258,9 +293,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     source.luminosity = np.repeat(lum,len(stars_in_bin))
             
                     
-                   
-                                                
-
 
                     pos = np.zeros([len(stars_in_bin),3])
                     for i in range(len(stars_in_bin)): pos[i,:] = stars_list[i].positions
@@ -274,13 +306,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     if par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
 
     m.set_sample_sources_evenly(True)
-
-
-
-
-                
-
-  
 
 
 
