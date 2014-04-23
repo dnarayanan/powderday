@@ -3,8 +3,9 @@
 #snapshot parameters
 
 GADGET_octree_gen = False
+#hydro_dir = '/Users/desika/gadgetruns/m12qq_hr_Dec16_2013/snapdir_420/'
 hydro_dir = '/Users/desika/gadgetruns/sbw_tests/mw_18_6_hr_hightimeres/'
-Gadget_snap_num = 6
+Gadget_snap_num = 006
 Gadget_snap_name = 'snapshot_006.hdf5'
 
 YT_octree_gen = True
@@ -13,6 +14,7 @@ YT_octree_gen = True
 
 #where the files should go
 
+#PD_output_dir = '/Users/desika/Dropbox/powderday/pd_runs/m12qq_hr_Dec16_2013/'
 PD_output_dir = '/Users/desika/Dropbox/powderday/pd_runs/sbw_tests/mw_18_6_hr_hightimeres/'
 
 Auto_TF_file = 'snap6.logical'
@@ -72,7 +74,7 @@ bulge_stars_age = 1 #Gyr ; meaningless if COSMOFLAG = True
 
 N_METAL_BINS = 5
 N_STELLAR_AGE_BINS = 20
-N_MASS_BINS = 3  #these you want the most of for sure
+N_MASS_BINS = 5  #these you want the most of for sure
 
 
 
