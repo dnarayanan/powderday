@@ -45,6 +45,8 @@ NPARTICLES_DEBUG = -1 #ONLY FOR DEBUGGING. if set, we set this to be
 dustfile = '/Users/desika/hyperion-dust-0.1.0/dust_files/d03_4.0_4.0_A.hdf5'
 dusttometals_ratio = 0.4
 
+
+
 #===============================================
 #HYDRO CODE UNITS
 #===============================================
@@ -62,6 +64,16 @@ COSMOFLAG = False
 
 disk_stars_age = 1 #Gyr ;meaningless if COSMOFLAG = True
 bulge_stars_age = 1 #Gyr ; meaningless if COSMOFLAG = True
+
+#bins for binning the stellar ages and metallicities for SED
+#assignments in cases of many (where many ==
+#>N_METALLICITY_BINS*N_STELLAR_AGE_BINS) stars; this is necessary for
+#reduction of memory load; see manual for details.
+
+N_METAL_BINS = 5
+N_STELLAR_AGE_BINS = 500
+N_MASS_BINS = 5  #these you want the most of for sure
+
 
 
 

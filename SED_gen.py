@@ -17,57 +17,23 @@ from multiprocessing import Pool
 
 
 class Stars:
-    def __init__(self,mass,metals,positions,age):
+    def __init__(self,mass,metals,positions,age,sed_bin=[-1,-1,-1],lum=-1):
         self.mass = mass
         self.metals = metals
         self.positions = positions
         self.age = age
+        self.sed_bin = sed_bin
+        self.lum = lum
 
     def info(self):
-        return(self.mass,self.metals,self.positions,self.age)
-
-    '''
-    def __getitem__(self,item):
-        return (self.mass,self.metals,self.positions,self.age)[item]
-    '''
-
-
-class BulgeStars:
-    
-    def __init__(self,mass,metals,positions,age):
-        self.mass = mass
-        self.metals = metals
-        self.positions = positions
-        self.age = age
-        
-    def info(self):
-        return(self.mass,self.metals,self.positions,self.age)
-
-
-class DiskStars:
-
-    def __init__(self,mass,metals,positions,age):
-        self.mass = mass
-        self.metals = metals
-        self.positions = positions
-        self.age = age
-        
-    def info(self):
-        return(self.mass,self.metals,self.positions,self.age)
+        return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum)
 
 
 
 
 
 
-def allstars_sed_gen():
-
-
-    #NOTE this part is just for the gadget simulations - this will
-    #eventually become obviated as it gets passed into a function to
-    #populate the stars_list with objects as we start to feed in new
-    #types of simulation results.
-
+def star_list_gen():
     print 'reading in stars particles for SPS calculation'
 
     sdir = par.hydro_dir
@@ -80,6 +46,7 @@ def allstars_sed_gen():
     positions = new_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
     age = new_stars_dict['age'] #Gyr (per phopkins)
 
+
     median_metallicity = np.median(metals)
   
     nstars = len(age)
@@ -91,7 +58,66 @@ def allstars_sed_gen():
     for i in range(nstars):
         stars_list.append(Stars(mass[i],metals[i],positions[i],age[i]))
 
-  
+    
+
+    #ASSIGN DISK AND BULGE STARS - note, if these don't exist, it will
+    #just pull whatever bogus values it can from particle types 2 and
+    #3
+    #DISK STARS
+    disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
+    nstars_disk = len(disk_stars_dict['m'])
+    disk_positions = disk_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+    disk_masses = disk_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+    
+    #BULGE STARS
+    bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
+    nstars_bulge = len(bulge_stars_dict['m'])
+    bulge_positions = bulge_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+    bulge_masses = bulge_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+    
+    bulgestars_list = []
+    for i in range(nstars_bulge):
+        bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],par.bulge_stars_age))
+            
+      
+        
+    '''
+    else: 
+        #we just assign bogus values to the disk and bulge masses: equate them to the newstar values
+        disk_masses = mass
+        bulge_masses = mass
+    '''
+    
+        
+        
+    #create the bulge_list full of BulgeStars objects
+    bulgestars_list = []
+    for i in range(nstars_bulge):
+        bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],par.bulge_stars_age))
+            
+    diskstars_list = []
+    for i in range(nstars_disk):
+        diskstars_list.append(Stars(disk_masses[i],0.02,disk_positions[i],par.disk_stars_age))
+
+
+
+
+
+
+    return stars_list,diskstars_list,bulgestars_list
+
+def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
+
+
+    #NOTE this part is just for the gadget simulations - this will
+    #eventually become obviated as it gets passed into a function to
+    #populate the stars_list with objects as we start to feed in new
+    #types of simulation results.
+
+    nstars = len(stars_list)
+    nstars_disk = len(diskstars_list)
+    nstars_bulge = len(bulgestars_list)
+
 
     #get just the wavelength array
     sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0)
@@ -128,12 +154,13 @@ def allstars_sed_gen():
             stars_list_chunk = stars_list[chunk_start_indices[n]::]
 
         list_of_chunks.append(stars_list_chunk)
+    
+    
 
-
-
-    print 'Entering Pool.map multiprocessing'
+        print 'Entering Pool.map multiprocessing'
     t1=datetime.now()
     chunk_sol = p.map(newstars_gen, [arg for arg in list_of_chunks])
+    
     t2=datetime.now()
     print 'Execution time for SED generation in Pool.map multiprocessing = '+str(t2-t1)
 
@@ -156,47 +183,12 @@ def allstars_sed_gen():
 
     stellar_nu = nu
 
-   
-
-        
-    if par.COSMOFLAG == False: 
-
-        #DISK STARS
-        disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
-        nstars_disk = len(disk_stars_dict['m'])
-        disk_positions = disk_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-        disk_masses = disk_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
-    
-        #BULGE STARS
-        bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
-        nstars_bulge = len(bulge_stars_dict['m'])
-        bulge_positions = bulge_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-        bulge_masses = bulge_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
-        
-       
-
-        
-
-    else: 
-        #we just assign bogus values to the disk and bulge masses: equate them to the newstar values
-        disk_masses = mass
-        disk_fnu = stellar_fnu
-        bulge_masses = mass
-        bulge_fnu = fnu
-
-
-
-    #create the bulge_list full of BulgeStars objects
-    bulgestars_list = []
-    for i in range(nstars_bulge):
-        bulgestars_list.append(BulgeStars(bulge_masses[i],0.02,bulge_positions[i],par.bulge_stars_age))
-
-    diskstars_list = []
-    for i in range(nstars_disk):
-        diskstars_list.append(DiskStars(disk_masses[i],0.02,disk_positions[i],par.disk_stars_age))
-
-
-    #calculate the SED for disk stars
+    #calculate the SED for disk stars; note, this gets calculated
+    #whether or not disk stars actually exist.  if they don't exist,
+    #bogus values for the disk age and metallicity are assigned based
+    #on whatever par.disk_stars_age and metallicity are.  it's no big
+    #deal since these SEDs don't end up getting added to the model in
+    #source_creation as long as COSMOFLAG == True.  
 
     sp = fsps.StellarPopulation(tage = par.disk_stars_age,imf_type=1,sfh=0)
     spec = sp.get_spectrum(tage=par.disk_stars_age)
@@ -209,7 +201,26 @@ def allstars_sed_gen():
     
 
     #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
-    return stars_list,bulgestars_list,diskstars_list,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
+    return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def newstars_gen(stars_list):
@@ -222,7 +233,8 @@ def newstars_gen(stars_list):
     sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0)
     spec = sp.get_spectrum(tage=stars_list[0].age)
     nu = 1.e8*const.c/spec[0]
-    fnu = spec[1]
+    
+
 
     nlam = len(nu)
 
@@ -249,3 +261,7 @@ def newstars_gen(stars_list):
         stellar_fnu[i,:] = spec[1]
 
     return stellar_fnu
+
+
+
+

@@ -152,88 +152,13 @@ max_level = hos.hyperion_octree_stats(refined)
 
 pto.test_octree(refined,max_level)
 
-'''
-#DEBUG
-wz = np.where(dustdens == 0)[0]
-wnz = np.where(dustdens > 0)[0]
-dustdens[wz] = np.max(dustdens[wnz])*1.e4
-'''
-
 
 np.save('refined.npy',refined)
 np.save('density.npy',dustdens)
 
-#generate the SEDs 
-
-#stellar_nu,fnu are of shape (nstars,nlambda);
-#stellar_mass is the mass of the star particles, and therefore
-#(nstars) big.
-#stellar_pos is (nstars,3) big
 
 
 
-#generate the stellar masses, positions and spectra
-
-
-#stellar_pos,disk_pos,bulge_pos,stellar_masses,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu= sg.allstars_sed_gen()
-stars_list,bulgestars_list,diskstars_list,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu = sg.allstars_sed_gen()
-
-
-
-nstars = len(stars_list)
-nstars_disk = len(diskstars_list)
-nstars_bulge = len(bulgestars_list)
-
-'''
-#downsample the stellar SEDs
-lambda_cgs = const.c/stellar_nu
-lambda_micron = lambda_cgs*1.e4
-w_long = np.where(lambda_micron > 1)[0]
-w_short = np.where(lambda_micron <= 1)[0]
-stellar_nu_short = scipy.ndimage.interpolation.zoom(stellar_nu[w_short],0.5)
-stellar_nu_long = scipy.ndimage.interpolation.zoom(stellar_nu[w_long],0.1)
-disk_fnu_short = scipy.ndimage.interpolation.zoom(disk_fnu[w_short],0.5)
-disk_fnu_long = scipy.ndimage.interpolation.zoom(disk_fnu[w_long],0.1)
-bulge_fnu_short = scipy.ndimage.interpolation.zoom(bulge_fnu[w_short],0.5)
-bulge_fnu_long = scipy.ndimage.interpolation.zoom(bulge_fnu[w_long],0.1)
-pdb.set_trace()
-
-#the stellar fnu's need to be resampled
-nshort_lam = stellar_nu_short.shape[0]
-nlong_lam = stellar_nu_long.shape[0]
-stellar_fnu_short = np.zeros([stellar_fnu.shape[0],nshort_lam])
-stellar_fnu_long = np.zeros([stellar_fnu.shape[0],nlong_lam])
-
-for i in range(nstars):
-    stellar_fnu_short[i,:] = scipy.ndimage.interpolation.zoom(stellar_fnu[i,w_short],0.5)
-    stellar_fnu_long[i,:] = scipy.ndimage.interpolation.zoom(stellar_fnu[i,w_long],0.1)
-
-
-
-stellar_nu = np.append(stellar_nu_short,stellar_nu_long)
-
-print 'Done downsampling the stellar SEDs'
-'''
-
-#debug
-#stellar_nu = scipy.ndimage.interpolation.zoom(stellar_nu,0.25)
-#stellar_fnu = scipy.ndimage.interpolation.zoom(stellar_fnu,0.25)
-
-
-
-
-
-#potentially write the stellar SEDs to a npz file
-if par.STELLAR_SED_WRITE == True:
-    np.savez('stellar_seds.npz',par.COSMOFLAG,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
-
-
-
-if par.SOURCES_IN_CENTER == True:
-    for i in range(nstars):
-        stars_list[i].positions[:] = 0
-        bulgestars_list[i].positions[:] = 0
-        diskstars_list[i].positions[:] = 0 
 
 
 #========================================================================
@@ -294,8 +219,50 @@ df.close()
 
 if par.SUPER_SIMPLE_SED == False:
 
-    from source_creation import add_newstars
-    add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
+    stars_list,diskstars_list,bulgestars_list = sg.star_list_gen()
+    nstars = len(stars_list)
+
+    from source_creation import add_newstars,add_binned_seds
+
+
+
+    if nstars <= par.N_METAL_BINS*par.N_STELLAR_AGE_BINS*par.N_MASS_BINS:
+        stellar_nu,stellar_fnu,disk_fnu,bulge_fnu = sg.allstars_sed_gen(stars_list,diskstars_list,bulgestars_list)
+        add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
+
+        #potentially write the stellar SEDs to a npz file
+        if par.STELLAR_SED_WRITE == True:
+            np.savez('stellar_seds.npz',par.COSMOFLAG,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
+            
+    else:
+        #note - the generation of the SEDs is called within
+        #add_binned_seds itself, unlike add_newstars, which requires
+        #that sg.allstars_sed_gen() be called first.
+        
+        add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m)
+
+    
+
+
+    nstars = len(stars_list)
+    nstars_disk = len(diskstars_list)
+    nstars_bulge = len(bulgestars_list)
+
+
+   
+
+    
+
+    if par.SOURCES_IN_CENTER == True:
+        for i in range(nstars):
+            stars_list[i].positions[:] = 0
+            bulgestars_list[i].positions[:] = 0
+            diskstars_list[i].positions[:] = 0 
+
+
+
+
+
 
 else:
     
@@ -349,7 +316,7 @@ image.set_track_origin('basic')
 print 'Beginning RT Stage'
 #Run the Model
 m.write('example.rtin',overwrite=True)
-m.run('example.rtout',mpi=True,n_processes=par.n_processes)
+m.run('example.rtout',mpi=True,n_processes=par.n_processes,overwrite=True)
 
 
 
