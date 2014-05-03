@@ -167,6 +167,9 @@ def yt_octree_generate():
         dust_smoothed = np.zeros(len(refined))
         dust_smoothed[wFalse] = mass_smoothed * metallicity_smoothed * par.dusttometals_ratio
          
+
+
+
         dust_density_grid = dust_smoothed/volume #in gm/cm^-3       
         #since volume = 0 where there's a True, dust_density_grid is nan        
         #where there's trues, so we have to fix this                            
@@ -239,9 +242,6 @@ def gadget_logical_generate(sdir,snum):
     pos = gas_dict['p']
     hsml = gas_dict['h']
 
-    dustmass = m * metals * 1.e10 * 0.4
-
-    
     
     x = pos[:,0]
     y = pos[:,1]
