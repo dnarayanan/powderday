@@ -1,7 +1,8 @@
 import random
 import numpy as np
 import pfh_readsnap
-import parameters as par
+#import parameters as par
+import config as cfg
 from datetime import datetime
 from astropy.table import Table
 from astropy.io import ascii
@@ -24,9 +25,9 @@ def yt_octree_generate():
     from yt.geometry.selection_routines import AlwaysSelector
 
 
-    fname = par.hydro_dir+par.Gadget_snap_name
+    fname = cfg.par.hydro_dir+cfg.par.Gadget_snap_name
 
-    
+
     #first get the bounding box size
     ptype = 0 #for gas
     print 'in yt_octree_generate: reading in the snapshot with pfh_readsnap'
@@ -34,8 +35,8 @@ def yt_octree_generate():
 
     
 
-    sdir = par.hydro_dir
-    snum = par.Gadget_snap_num
+    sdir = cfg.par.hydro_dir
+    snum = cfg.par.Gadget_snap_num
     gas_dict = pfh_readsnap.readsnap(sdir,snum,ptype)
     
 
@@ -128,7 +129,7 @@ def yt_octree_generate():
     #    dust_mass_grid = smooth_operator.particle_smooth_linalg(x,y,z,hsml,fc1,pos,dustmass,refined)
 
     
-    import particle_smooth_cython as psnc
+#    import particle_smooth_cython as psnc
 
     #mass_grid is the smoothed mass_grid; this is just a dummy array
     #that has to get fed into psnc.particle_smooth_new
@@ -136,7 +137,7 @@ def yt_octree_generate():
     mass_grid = np.zeros(len(wFalse))
 
 
-    if par.CONSTANT_DUST_GRID == False: #this is the default; if True is set, then we'll 
+    if cfg.par.CONSTANT_DUST_GRID == False: #this is the default; if True is set, then we'll 
 
 
         '''PSNC.PARTICLE_SMOOTH_NEW STUFF
@@ -165,7 +166,7 @@ def yt_octree_generate():
         from particle_smooth_yt import yt_smooth
         metallicity_smoothed,mass_smoothed = yt_smooth(pf)
         dust_smoothed = np.zeros(len(refined))
-        dust_smoothed[wFalse] = mass_smoothed * metallicity_smoothed * par.dusttometals_ratio
+        dust_smoothed[wFalse] = mass_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio
          
 
 
@@ -177,7 +178,7 @@ def yt_octree_generate():
          
         
     else:
-        print 'par.CONSTANT_DUST_GRID=True'
+        print 'cfg.par.CONSTANT_DUST_GRID=True'
         print 'setting constant dust grid to 4.e-22'
         dust_density_grid = np.zeros(len(refined))+4.e-27
         #since volume = 0 where there's a True, dust_density_grid is nan
@@ -203,14 +204,14 @@ def yt_octree_generate():
                                fc1[:,1]+fw1[:,1],fc1[:,2]-fw1[:,2],fc1[:,2]+fw1[:,2]],
                               names = ['xmin','xmax','ymin','ymax','zmin','zmax'])
     
-    ascii.write(coordinates_Table,par.PD_output_dir+par.Auto_positions_file)
+    ascii.write(coordinates_Table,cfg.par.PD_output_dir+cfg.par.Auto_positions_file)
 
     logical_Table = Table([refined[:]],names=['logical'])
-    ascii.write(logical_Table,par.PD_output_dir+par.Auto_TF_file)
+    ascii.write(logical_Table,cfg.par.PD_output_dir+cfg.par.Auto_TF_file)
 
 
     dust_dens_Table = Table([dust_density_grid[:]],names=['dust density'])
-    ascii.write(dust_dens_Table,par.PD_output_dir+par.Auto_dustdens_file)
+    ascii.write(dust_dens_Table,cfg.par.PD_output_dir+cfg.par.Auto_dustdens_file)
         
 
     return refined,dust_density_grid,xmin,xmax,ymin,ymax,zmin,zmax
@@ -263,9 +264,9 @@ def gadget_logical_generate(sdir,snum):
     mastercell=[0] #the master cell we'll loop through in the recursive construct_octree
 
     refined = [True, False, False, False, False, False, False, False, False]
-    coordinates = position_calculate(-1.*par.dx,par.dx,
-                                     -1.*par.dy,par.dy,
-                                     -1.*par.dz,par.dz,
+    coordinates = position_calculate(-1.*cfg.par.dx,cfg.par.dx,
+                                     -1.*cfg.par.dy,cfg.par.dy,
+                                     -1.*cfg.par.dz,cfg.par.dz,
                                      refined)
 
     print 'constructing the octree: starting at ',str(datetime.now())
@@ -291,7 +292,7 @@ def gadget_logical_generate(sdir,snum):
     volume = ((coordinates[:,1]-coordinates[:,0])*const.pc*1.e3)*((coordinates[:,3]-coordinates[:,2])*const.pc*1.e3)*((coordinates[:,5]-coordinates[:,4])*const.pc*1.e3)
     
 
-    base_grid_volume = ((float(par.dx) * const.pc * 1.e3) * (float(par.dy) * const.pc * 1.e3) * (float(par.dz) * const.pc * 1.e3))
+    base_grid_volume = ((float(cfg.par.dx) * const.pc * 1.e3) * (float(cfg.par.dy) * const.pc * 1.e3) * (float(cfg.par.dz) * const.pc * 1.e3))
 
     volume = np.insert(volume,0,base_grid_volume) #put the base grid in 
     dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
@@ -308,14 +309,14 @@ def gadget_logical_generate(sdir,snum):
                               coordinates[:,3],coordinates[:,4],coordinates[:,5]],
                               names = ['xmin','xmax','ymin','ymax','zmin','zmax'])
     
-    ascii.write(coordinates_Table,par.PD_output_dir+par.Auto_positions_file)
+    ascii.write(coordinates_Table,cfg.par.PD_output_dir+cfg.par.Auto_positions_file)
 
     logical_Table = Table([refined[:]],names=['logical'])
-    ascii.write(logical_Table,par.PD_output_dir+par.Auto_TF_file)
+    ascii.write(logical_Table,cfg.par.PD_output_dir+cfg.par.Auto_TF_file)
 
 
     dust_dens_Table = Table([dust_density_grid[:]],names=['dust density'])
-    ascii.write(dust_dens_Table,par.PD_output_dir+par.Auto_dustdens_file)
+    ascii.write(dust_dens_Table,cfg.par.PD_output_dir+cfg.par.Auto_dustdens_file)
 
 
 
@@ -339,7 +340,7 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
 
     for subcell in range(8):
      
-        if par.VERBOSE:
+        if cfg.par.VERBOSE:
             if refined_levels > 10: print 'refined_levels = ',refined_levels
        
 
@@ -363,9 +364,9 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
         '''       
         if len(coordinates) != len(refined)-1:
         print 'recalculating coordinates'
-        coordinates = position_calculate(-1.*par.dx,par.dx,
-        -1.*par.dy,par.dy,
-        -1.*par.dz,par.dz,
+        coordinates = position_calculate(-1.*cfg.par.dx,cfg.par.dx,
+        -1.*cfg.par.dy,cfg.par.dy,
+        -1.*cfg.par.dz,cfg.par.dz,
         refined)
         '''            
         assert len(coordinates) == len(refined)-1
@@ -414,7 +415,7 @@ def construct_octree(x,y,z,hsml,coordinates_in,mastercell=[0],
 
             #if there are any particles that are too small (that fit wholly within the cell) then refine
             if len(particles_that_are_too_small) != 0:
-                if par.VERBOSE: 
+                if cfg.par.VERBOSE: 
                     print 'len (particles_that_are_too_small) = ',len(particles_that_are_too_small)
 
                     print mastercell

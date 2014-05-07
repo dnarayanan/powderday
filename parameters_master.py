@@ -3,9 +3,9 @@
 #snapshot parameters
 
 GADGET_octree_gen = False
-hydro_dir = '/Users/desika/gadgetruns/sbw_tests/mw_18_6_hr_hightimeres/'
-Gadget_snap_num = 006
-Gadget_snap_name = 'snapshot_006.hdf5'
+hydro_dir = '/Users/desika/gadgetruns/sbw_mergers/mw_e_hr_DIND/'
+Gadget_snap_num = 23
+Gadget_snap_name = 'snapshot_023.hdf5'
 
 YT_octree_gen = True
 
@@ -15,16 +15,24 @@ YT_octree_gen = True
 
 PD_output_dir = '/Users/desika/Dropbox/powderday/pd_runs/sbw_tests/mw_18_6_hr_hightimeres/'
 
-Auto_TF_file = 'snap6.logical'
-Auto_positions_file = 'snap6.positions'
-Auto_dustdens_file = 'snap6.dustdens'
+Auto_TF_file = 'snap23.logical'
+Auto_positions_file = 'snap23.positions'
+Auto_dustdens_file = 'snap23.dustdens'
+
+
+#===============================================
+#FILE I/O
+#===============================================
+inputfile = PD_output_dir+'/example.rtin'
+outputfile = PD_output_dir+'/example.rtout'
+
 
 
 #===============================================
 #PARALLELIZATION
 #===============================================
 
-n_processes = 4
+n_processes = 3
 
 #===============================================
 #PARTICLE SMOOTHING PARAMETERS
@@ -36,6 +44,16 @@ NPARTICLES_DEBUG = -1 #ONLY FOR DEBUGGING. if set, we set this to be
                        #production runs.  if this happens to be > the
                        #the number of actual particles, the number of
                        #actual particles is what will be used.
+
+
+
+#===============================================
+#RT INFORMATION
+#===============================================
+n_photons_initial = 1.e7
+n_photons_imaging = 1.e7
+n_photons_raytracing_sources = 1.e7
+n_photons_raytracing_dust = 1.e7
 
 
 #===============================================
@@ -82,6 +100,8 @@ N_MASS_BINS = 100  #these you want the most of for sure
 #===============================================
 
 NTHETA = 10
+
+
 
 #===============================================
 #DEBUGGING

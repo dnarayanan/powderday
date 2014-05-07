@@ -1,6 +1,7 @@
 import numpy as np
 import pfh_readsnap
-import parameters as par
+#import parameters as par
+import config as cfg
 from astropy.table import Table
 from astropy.io import ascii
 import constants as const
@@ -13,6 +14,7 @@ from datetime import timedelta
 
 
 from multiprocessing import Pool
+
 
 
 
@@ -36,14 +38,14 @@ class Stars:
 def star_list_gen():
     print 'reading in stars particles for SPS calculation'
 
-    sdir = par.hydro_dir
-    snum = par.Gadget_snap_num
+    sdir = cfg.par.hydro_dir
+    snum = cfg.par.Gadget_snap_num
 
     #NEW STARS
     new_stars_dict = pfh_readsnap.readsnap(sdir,snum,4)
-    mass = new_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+    mass = new_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
     metals = new_stars_dict['z']
-    positions = new_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+    positions = new_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
     age = new_stars_dict['age'] #Gyr (per phopkins)
 
 
@@ -66,18 +68,18 @@ def star_list_gen():
     #DISK STARS
     disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
     nstars_disk = len(disk_stars_dict['m'])
-    disk_positions = disk_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-    disk_masses = disk_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+    disk_positions = disk_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+    disk_masses = disk_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
     
     #BULGE STARS
     bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
     nstars_bulge = len(bulge_stars_dict['m'])
-    bulge_positions = bulge_stars_dict['p']*par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-    bulge_masses = bulge_stars_dict['m']*par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+    bulge_positions = bulge_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+    bulge_masses = bulge_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
     
     bulgestars_list = []
     for i in range(nstars_bulge):
-        bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],par.bulge_stars_age))
+        bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],cfg.par.bulge_stars_age))
             
       
         
@@ -93,11 +95,11 @@ def star_list_gen():
     #create the bulge_list full of BulgeStars objects
     bulgestars_list = []
     for i in range(nstars_bulge):
-        bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],par.bulge_stars_age))
+        bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],cfg.par.bulge_stars_age))
             
     diskstars_list = []
     for i in range(nstars_disk):
-        diskstars_list.append(Stars(disk_masses[i],0.02,disk_positions[i],par.disk_stars_age))
+        diskstars_list.append(Stars(disk_masses[i],0.02,disk_positions[i],cfg.par.disk_stars_age))
 
 
 
@@ -128,8 +130,8 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
 
 
     #initialize the process pool and build the chunks
-    p = Pool(processes = par.n_processes)
-    nchunks = par.n_processes
+    p = Pool(processes = cfg.par.n_processes)
+    nchunks = cfg.par.n_processes
 
 
     chunk_start_indices = []
@@ -190,13 +192,13 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
     #deal since these SEDs don't end up getting added to the model in
     #source_creation as long as COSMOFLAG == True.  
 
-    sp = fsps.StellarPopulation(tage = par.disk_stars_age,imf_type=1,sfh=0)
-    spec = sp.get_spectrum(tage=par.disk_stars_age)
+    sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=1,sfh=0)
+    spec = sp.get_spectrum(tage=cfg.par.disk_stars_age)
     disk_fnu = spec[1]
 
     #calculate the SED for bulge stars
-    sp = fsps.StellarPopulation(tage = par.bulge_stars_age,imf_type=1,sfh=0)
-    spec = sp.get_spectrum(tage=par.bulge_stars_age)
+    sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=1,sfh=0)
+    spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age)
     bulge_fnu = spec[1]
     
 

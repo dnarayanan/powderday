@@ -12,7 +12,7 @@
 #=========================================================
 
 import sys
-script,parfile = sys.argv
+script,pardir,parfile = sys.argv
 import numpy as np
 import scipy.interpolate
 import scipy.ndimage
@@ -26,8 +26,13 @@ import h5py
 
 import constants as const
 import pdb
+
+sys.path.insert(0,pardir)
 par = __import__(parfile) 
 import random
+import config as cfg
+cfg.par = par #re-write cfg.par for all modules that read this in now
+
 
 
 
@@ -304,24 +309,26 @@ print 'Done adding Sources'
 print 'Setting up Model'
 #set up the SEDs and images
 m.set_raytracing(True)
-m.set_n_photons(initial=1.e7,imaging=1.e7,
-                raytracing_sources=1.e7,raytracing_dust=1.e7)
+m.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging,
+                raytracing_sources=par.n_photons_raytracing_sources,raytracing_dust=par.n_photons_raytracing_dust)
 #m.set_n_initial_iterations(7)
 m.set_convergence(True,percentile=99.,absolute=1.1,relative=1.02)
 
 
-image = m.add_peeled_images(sed = True,image=True)
-#image.set_wavelength_range(250,0.01,5000.)
-image.set_wavelength_range(50,0.01,5000.)
+image = m.add_peeled_images(sed = True,image=False)
+image.set_wavelength_range(250,0.01,5000.)
+#image.set_wavelength_range(50,0.01,5000.)
 image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
 image.set_track_origin('basic')
+'''
 image.set_image_size(128,128)
 image.set_image_limits(-10.e3*const.pc,10.e3*const.pc,-10.e3*const.pc,10.e3*const.pc)
+'''
 
 print 'Beginning RT Stage'
 #Run the Model
-m.write('example.rtin',overwrite=True)
-m.run('example.rtout',mpi=True,n_processes=par.n_processes,overwrite=True)
+m.write(par.inputfile,overwrite=True)
+m.run(par.outputfile,mpi=True,n_processes=par.n_processes,overwrite=True)
 
 
 

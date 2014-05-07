@@ -1,7 +1,8 @@
 import random
 import numpy as np
 import pfh_readsnap
-import parameters as par
+#import parameters as par
+import config as cfg
 from datetime import datetime
 from astropy.table import Table
 from astropy.io import ascii
@@ -32,10 +33,10 @@ def particle_smooth_linalg(x,y,z,hsml,coordinates,pos,m,refined):
     
 
     #create chunks in sizes nparticles/nchunk
-    master_chunk_array = chunks(range(long(nparticles)),long(par.NCHUNK))
+    master_chunk_array = chunks(range(long(nparticles)),long(cfg.par.NCHUNK))
 
    
-    print 'in smooth_operator.particle_smooth_linalg: dividing the particles into '+str(nparticles/par.NCHUNK)+' chunks'
+    print 'in smooth_operator.particle_smooth_linalg: dividing the particles into '+str(nparticles/cfg.par.NCHUNK)+' chunks'
 
     chunk_counter=0
     t1 = datetime.now()

@@ -1,6 +1,7 @@
 #source_creation.py
 #purpose: to add new star sources, disks and bulge stars
-import parameters as par
+#import parameters as par
+import config as cfg
 import pdb
 import numpy as np
 import constants as const
@@ -53,7 +54,7 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
                                position = stars_list[i].positions)
         
         
-    if par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
+    if cfg.par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
             
     m.set_sample_sources_evenly(True)
 
@@ -158,7 +159,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
     #define the metallicity bins: we do this in log since there can be quite a spread in metallicities
 
-    delta_metallicity =  (np.log10(maximum_metallicity)-np.log10(minimum_metallicity))/par.N_METAL_BINS
+    delta_metallicity =  (np.log10(maximum_metallicity)-np.log10(minimum_metallicity))/cfg.par.N_METAL_BINS
     metal_bins = np.arange(np.log10(minimum_metallicity),
                            np.log10(maximum_metallicity),
                            delta_metallicity)
@@ -168,7 +169,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
 
     #define the age bins (linearly)
-    delta_age = (maximum_age-minimum_age)/par.N_STELLAR_AGE_BINS
+    delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
     age_bins = np.arange(minimum_age,maximum_age,delta_age)
     
     #tack on the maximum age bin
@@ -178,9 +179,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     #define the mass bins (log)
     #note - for some codes, all star particles have the same mass.  in this case, we have to have a trap:
     if minimum_mass == maximum_mass: 
-        mass_bins = np.zeros(par.N_MASS_BINS+1)+minimum_mass
+        mass_bins = np.zeros(cfg.par.N_MASS_BINS+1)+minimum_mass
     else:
-        delta_mass = (np.log10(maximum_mass)-np.log10(minimum_mass))/par.N_MASS_BINS
+        delta_mass = (np.log10(maximum_mass)-np.log10(minimum_mass))/cfg.par.N_MASS_BINS
         mass_bins = np.arange(np.log10(minimum_mass),
                               np.log10(maximum_mass),
                               delta_mass)
@@ -197,7 +198,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     #says whether or not that bin is being used downstream for
     #creating a point source collection (i.e. that it actually has at
     #least one star cluster that falls into it)
-    has_stellar_mass = np.zeros([par.N_METAL_BINS+1,par.N_STELLAR_AGE_BINS+1,par.N_MASS_BINS+1],dtype=bool)
+    has_stellar_mass = np.zeros([cfg.par.N_METAL_BINS+1,cfg.par.N_STELLAR_AGE_BINS+1,cfg.par.N_MASS_BINS+1],dtype=bool)
 
 
     stars_in_bin = {} #this will be a dictionary that holds the list
@@ -237,9 +238,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
    
 
-    for wz in range(par.N_METAL_BINS+1):
-        for wa in range(par.N_STELLAR_AGE_BINS+1):
-            for wm in range(par.N_MASS_BINS+1):
+    for wz in range(cfg.par.N_METAL_BINS+1):
+        for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
+            for wm in range(cfg.par.N_MASS_BINS+1):
                 sed_bins_list.append(Sed_Bins(mass_bins[wm],metal_bins[wz],age_bins[wa]))
                 if has_stellar_mass[wz,wa,wm] == True:
                     sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],metal_bins[wz],age_bins[wa]))
@@ -266,9 +267,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
     counter = 0
     counter_has_stellar_mass = 0
-    for wz in range(par.N_METAL_BINS+1):
-        for wa in range(par.N_STELLAR_AGE_BINS+1):
-            for wm in range(par.N_MASS_BINS+1):
+    for wz in range(cfg.par.N_METAL_BINS+1):
+        for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
+            for wm in range(cfg.par.N_MASS_BINS+1):
                 if has_stellar_mass[wz,wa,wm] == True:
                     binned_stellar_fnu[counter,:] = binned_stellar_fnu_has_stellar_mass[counter_has_stellar_mass,:]
                     counter_has_stellar_mass += 1 
@@ -293,9 +294,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     t1=datetime.now()
 
     counter=0
-    for wz in range(par.N_METAL_BINS+1):
-        for wa in range(par.N_STELLAR_AGE_BINS+1):
-            for wm in range(par.N_MASS_BINS+1):
+    for wz in range(cfg.par.N_METAL_BINS+1):
+        for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
+            for wm in range(cfg.par.N_MASS_BINS+1):
                 
                 if has_stellar_mass[wz,wa,wm] == True:
                 
@@ -319,7 +320,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                 counter+=1
 
                 
-    if par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
+    if cfg.par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
 
     m.set_sample_sources_evenly(True)
 
