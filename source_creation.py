@@ -9,7 +9,7 @@ import operator
 import SED_gen as sg
 from datetime import datetime
 from datetime import timedelta
-
+import random
 
 
 class Sed_Bins:
@@ -20,6 +20,30 @@ class Sed_Bins:
 
 
 
+def add_super_simple_sed(stars_list,diskstars_list,bulgestars_list,m,lum,temp):
+
+    print 'entering add_super_simple_sed function in source_creation'
+
+    nstars = len(stars_list)
+    nstars_disk = len(diskstars_list)
+    nstars_bulge = len(bulgestars_list)
+
+    for i in range(nstars):
+
+        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*const.rsun,
+                               position = stars_list[i].positions)
+    
+    
+    for i in range(nstars_disk):
+        
+        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*const.rsun,
+                               position = diskstars_list[i].positions)
+    
+    for i in range(nstars_bulge):
+        
+        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*const.rsun,
+                               position = bulgestars_list[i].positions)
+    
 
 
 def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m):
@@ -305,16 +329,26 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     fnu = binned_stellar_fnu[counter,:]
                     fnu = fnu[nu_inrange]
                     fnu = fnu[::-1]
-                    
-                    lum = np.absolute(np.trapz(fnu,x=nu))*mass_bins[wm]/const.msun*const.lsun
-                    source.luminosity = np.repeat(lum,len(stars_in_bin[(wz,wa,wm)]))
-            
-                    
-
                     pos = np.zeros([len(stars_in_bin[(wz,wa,wm)]),3])
-                    for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
-                    source.position=pos
-                    source.spectrum = (nu,fnu)
+
+
+                    if cfg.par.SUPER_SIMPLE_SED == False:
+                        
+                        lum = np.absolute(np.trapz(fnu,x=nu))*mass_bins[wm]/const.msun*const.lsun
+                        source.luminosity = np.repeat(lum,len(stars_in_bin[(wz,wa,wm)]))
+                        for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
+                        source.position=pos
+                        source.spectrum = (nu,fnu)
+
+                    else:
+
+                        lum = 1.e3*const.lsun
+                        source.luminosity = np.repeat(lum,len(stars_in_bin[(wz,wa,wm)]))
+                        for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
+                        source.position=pos
+                        source.temperature = 1.e4
+                        print 'adding super simple SED'
+
 
                 
                 counter+=1

@@ -172,18 +172,18 @@ np.save('density.npy',dustdens)
 #========================================================================
 #Initialize Hyperion Model
 #========================================================================
-if par.SUPER_SIMPLE_SED == False:
-    m = Model()
-    
 
+m = Model()
 
-    m.set_octree_grid(xcent,ycent,zcent,
-                      dx,dy,dz,refined)
+m.set_octree_grid(xcent,ycent,zcent,
+                  dx,dy,dz,refined)
     
     
-    m.add_density_grid(dustdens,par.dustfile)
+m.add_density_grid(dustdens,par.dustfile)
         
 
+
+'''
 else:
 
     m = Model()
@@ -205,7 +205,7 @@ else:
     
     m.add_density_grid(np.ones(m.grid.shape)*4.e-20,par.dustfile)
     
-    
+'''
 
   
 
@@ -225,85 +225,64 @@ df.close()
 #add sources to hyperion
 
 
-if par.SUPER_SIMPLE_SED == False:
 
-    stars_list,diskstars_list,bulgestars_list = sg.star_list_gen()
-    nstars = len(stars_list)
-
-    from source_creation import add_newstars,add_binned_seds
+stars_list,diskstars_list,bulgestars_list = sg.star_list_gen()
+nstars = len(stars_list)
 
 
 
-    if nstars <= par.N_METAL_BINS*par.N_STELLAR_AGE_BINS*par.N_MASS_BINS:
-        stellar_nu,stellar_fnu,disk_fnu,bulge_fnu = sg.allstars_sed_gen(stars_list,diskstars_list,bulgestars_list)
-        add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
 
-        #potentially write the stellar SEDs to a npz file
-        if par.STELLAR_SED_WRITE == True:
-            np.savez('stellar_seds.npz',par.COSMOFLAG,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
-            
-    else:
-        #note - the generation of the SEDs is called within
-        #add_binned_seds itself, unlike add_newstars, which requires
-        #that sg.allstars_sed_gen() be called first.
+from source_creation import add_newstars,add_binned_seds
+if nstars <= par.N_METAL_BINS*par.N_STELLAR_AGE_BINS*par.N_MASS_BINS:
+    stellar_nu,stellar_fnu,disk_fnu,bulge_fnu = sg.allstars_sed_gen(stars_list,diskstars_list,bulgestars_list)
+    add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
         
-        add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m)
-
+    #potentially write the stellar SEDs to a npz file
+    if par.STELLAR_SED_WRITE == True:
+        np.savez('stellar_seds.npz',par.COSMOFLAG,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
+            
+else:
+    #note - the generation of the SEDs is called within
+    #add_binned_seds itself, unlike add_newstars, which requires
+    #that sg.allstars_sed_gen() be called first.
     
+    add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m)
+            
 
 
-    nstars = len(stars_list)
-    nstars_disk = len(diskstars_list)
-    nstars_bulge = len(bulgestars_list)
+
+nstars = len(stars_list)
+nstars_disk = len(diskstars_list)
+nstars_bulge = len(bulgestars_list)
 
 
    
 
     
 
-    if par.SOURCES_IN_CENTER == True:
-        for i in range(nstars):
-            stars_list[i].positions[:] = 0
-            bulgestars_list[i].positions[:] = 0
-            diskstars_list[i].positions[:] = 0 
-
-
-
-
-
-
-else:
-    
-    print 'adding new stars to the grid'
+if par.SOURCES_IN_CENTER == True:
     for i in range(nstars):
-        nu = stellar_nu[:]
-        fnu = stellar_fnu[i,:]
-        
-        
-        nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
-        nu_inrange = np.where(nu_inrange == True)[0]
-        nu = nu[nu_inrange]
-        
-        #reverse the arrays for hyperion
-        nu = nu[::-1]
-        fnu = fnu[::-1]
-        
-        fnu = fnu[nu_inrange]
-        
-        lum = np.absolute(np.trapz(fnu,x=nu))*stars_list[i].mass/const.msun #since stellar masses are in cgs, and we need them to be in msun
+        stars_list[i].positions[:] = 0
+        bulgestars_list[i].positions[:] = 0
+        diskstars_list[i].positions[:] = 0 
+
+
+
+
+
+
 
         
-        
-        #add new stars
-        posx = ((-1.)**i)*random.random()*dx
-        posy = ((-1.)**(i+1))*random.random()*dy
-        posz = ((-1.)**i)*random.random()*dz
-           
-        m.add_spherical_source(luminosity = 1.e3, 
-                               spectrum = (nu,fnu),
-                               position = (posx,posy,posz),radius = 10.*const.rsun)
- 
-    
+
+
+
+
+
+
+
+
+
+   
 print 'Done adding Sources'
 
 print 'Setting up Model'

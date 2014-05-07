@@ -24,17 +24,25 @@ def yt_smooth(pf):
     mass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
                                                   "SmoothingLength", "Density","Masses", 
                                                   pf.field_info)
+
+
+
+    density_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
+                                                  "SmoothingLength", "Density","Density", 
+                                                  pf.field_info)
     
     pf.field_info.alias(("gas", "metallicity"), metal_fn[0])
     pf.field_info.alias(("gas", "masses"), mass_fn[0])
+    pf.field_info.alias(("gas","density"),density_fn[0])
     
 
     saved = pf.index.oct_handler.save_octree(always_descend=True)
 
     saved["metallicity"] = ad["gas", "metallicity"]
     saved["masses"] = ad["gas", "masses"]
+    saved["density"] = ad["density"]
 
-    return saved["metallicity"],saved["masses"]
+    return saved["metallicity"],saved["masses"],saved["density"]
 
     for i in sorted(saved):
         if not hasattr(saved[i], 'shape'): continue

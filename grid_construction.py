@@ -164,14 +164,17 @@ def yt_octree_generate():
         '''USING YT SMOOTHING'''
 
         from particle_smooth_yt import yt_smooth
-        metallicity_smoothed,mass_smoothed = yt_smooth(pf)
+        metallicity_smoothed,mass_smoothed,density_smoothed = yt_smooth(pf)
         dust_smoothed = np.zeros(len(refined))
+        
+
+        '''
         dust_smoothed[wFalse] = mass_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio
-         
-
-
-
         dust_density_grid = dust_smoothed/volume #in gm/cm^-3       
+        '''
+              
+        dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed
+        dust_density_grid = dust_smoothed #in gm/cm^-3       
         #since volume = 0 where there's a True, dust_density_grid is nan        
         #where there's trues, so we have to fix this                            
         dust_density_grid[wTrue] = 0
