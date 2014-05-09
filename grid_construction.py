@@ -81,8 +81,6 @@ def yt_octree_generate():
     #turk's code
     #==================================
 
-    #DEBUG
-
     pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=0)
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))

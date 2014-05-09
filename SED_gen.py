@@ -63,43 +63,37 @@ def star_list_gen():
     
 
     #ASSIGN DISK AND BULGE STARS - note, if these don't exist, it will
-    #just pull whatever bogus values it can from particle types 2 and
-    #3
+    #just make empty lists
+
     #DISK STARS
     disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
     nstars_disk = len(disk_stars_dict['m'])
     disk_positions = disk_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
     disk_masses = disk_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
-    
-    #BULGE STARS
-    bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
-    nstars_bulge = len(bulge_stars_dict['m'])
-    bulge_positions = bulge_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-    bulge_masses = bulge_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+
+
     
     bulgestars_list = []
-    for i in range(nstars_bulge):
-        bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],cfg.par.bulge_stars_age))
-            
-      
-        
-    '''
-    else: 
-        #we just assign bogus values to the disk and bulge masses: equate them to the newstar values
-        disk_masses = mass
-        bulge_masses = mass
-    '''
-    
-        
-        
-    #create the bulge_list full of BulgeStars objects
-    bulgestars_list = []
-    for i in range(nstars_bulge):
-        bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],cfg.par.bulge_stars_age))
-            
     diskstars_list = []
-    for i in range(nstars_disk):
-        diskstars_list.append(Stars(disk_masses[i],0.02,disk_positions[i],cfg.par.disk_stars_age))
+
+    if cfg.par.COSMOFLAG == False:
+
+
+        #BULGE STARS
+        bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
+        nstars_bulge = len(bulge_stars_dict['m'])
+        bulge_positions = bulge_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+        bulge_masses = bulge_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+  
+        
+        #create the bulge_list full of BulgeStars objects
+        
+        for i in range(nstars_bulge):
+            bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],cfg.par.bulge_stars_age))
+                        
+        for i in range(nstars_disk):
+            diskstars_list.append(Stars(disk_masses[i],0.02,disk_positions[i],cfg.par.disk_stars_age))
+
 
 
 
@@ -185,22 +179,34 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
 
     stellar_nu = nu
 
-    #calculate the SED for disk stars; note, this gets calculated
-    #whether or not disk stars actually exist.  if they don't exist,
-    #bogus values for the disk age and metallicity are assigned based
-    #on whatever par.disk_stars_age and metallicity are.  it's no big
-    #deal since these SEDs don't end up getting added to the model in
-    #source_creation as long as COSMOFLAG == True.  
 
-    sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=1,sfh=0)
-    spec = sp.get_spectrum(tage=cfg.par.disk_stars_age)
-    disk_fnu = spec[1]
 
-    #calculate the SED for bulge stars
-    sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=1,sfh=0)
-    spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age)
-    bulge_fnu = spec[1]
+    if cfg.par.COSMOFLAG == False:
+
+        #calculate the SED for disk stars; note, this gets calculated
+        #whether or not disk stars actually exist.  if they don't exist,
+        #bogus values for the disk age and metallicity are assigned based
+        #on whatever par.disk_stars_age and metallicity are.  it's no big
+        #deal since these SEDs don't end up getting added to the model in
+        #source_creation as long as COSMOFLAG == True.  
+        
+        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=1,sfh=0)
+        spec = sp.get_spectrum(tage=cfg.par.disk_stars_age)
+        disk_fnu = spec[1]
+        
+        #calculate the SED for bulge stars
+        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=1,sfh=0)
+        spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age)
+        bulge_fnu = spec[1]
     
+
+    else: #we have a cosmological simulation
+
+        disk_fnu = []
+        bulge_fnu = []
+        
+
+
 
     #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
     return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu

@@ -10,7 +10,7 @@ import SED_gen as sg
 from datetime import datetime
 from datetime import timedelta
 import random
-
+import sys
 
 class Sed_Bins:
     def __init__(self,mass,metals,age):
@@ -253,7 +253,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     
 
 
-
+   
     
     print 'assigning stars to SED bins'
     sed_bins_list=[]
@@ -281,6 +281,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     print 'calculating the SEDs for ',len(sed_bins_list_has_stellar_mass),' bins'
     binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,diskstars_list,bulgestars_list)
 
+
+
     #since the binned_stellar_fnu_has_stellar_mass is now
     #[len(sed_bins_list_has_stellar_mass),nlam)] big, we need to
     #transform it back to the a larger array.  this is an ugly loop
@@ -300,6 +302,15 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                 counter+=1
 
 
+    
+    '''
+    #DEBUG trap for nans and infs
+    if np.isinf(np.sum(binned_stellar_nu)):  pdb.set_trace()
+    if np.isinf(np.sum(binned_stellar_fnu)): pdb.set_trace()
+    if np.isnan(np.sum(binned_stellar_nu)): pdb.set_trace()
+    if np.isnan(np.sum(binned_stellar_fnu)): pdb.set_trace()
+    '''
+
     #now binned_stellar_nu and binned_stellar_fnu are the SEDs for the bins in order of wz, wa, wm 
     
     #create the point source collections: we loop through the bins and
@@ -317,6 +328,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     print 'adding point source collections'
     t1=datetime.now()
 
+
     counter=0
     for wz in range(cfg.par.N_METAL_BINS+1):
         for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
@@ -332,31 +344,28 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     pos = np.zeros([len(stars_in_bin[(wz,wa,wm)]),3])
 
 
-                    if cfg.par.SUPER_SIMPLE_SED == False:
+                    
                         
-                        lum = np.absolute(np.trapz(fnu,x=nu))*mass_bins[wm]/const.msun*const.lsun
-                        source.luminosity = np.repeat(lum,len(stars_in_bin[(wz,wa,wm)]))
-                        for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
-                        source.position=pos
-                        source.spectrum = (nu,fnu)
-
-                    else:
-
-                        lum = 1.e3*const.lsun
-                        source.luminosity = np.repeat(lum,len(stars_in_bin[(wz,wa,wm)]))
-                        for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
-                        source.position=pos
-                        source.temperature = 1.e4
-                        print 'adding super simple SED'
+                    lum = np.absolute(np.trapz(fnu,x=nu))*mass_bins[wm]/const.msun*const.lsun
+                    source.luminosity = np.repeat(lum,len(stars_in_bin[(wz,wa,wm)]))
+                    for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
+                    source.position=pos
+                    source.spectrum = (nu,fnu)
 
 
+                    if np.isnan(lum): 
+                        print 'lum is a nan in point source collection addition. exiting now.'
+                        sys.exit()
+                    if np.isinf(lum): 
+                        print 'lum is an inf in point source collection addition. exiting now.'
+                        sys.exit()
                 
                 counter+=1
 
                 
     if cfg.par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
 
-    m.set_sample_sources_evenly(True)
+    #m.set_sample_sources_evenly(True)
 
     t2=datetime.now()
     print 'Execution time for point source collection adding = '+str(t2-t1)
