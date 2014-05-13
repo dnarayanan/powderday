@@ -175,6 +175,11 @@ np.save('density.npy',dustdens)
 
 m = Model()
 
+print 'Setting Octree Grid with Parameters: '
+print '[xcent,ycent,zcent] (cgs) = ',xcent,ycent,zcent
+print '[dx,dy,dz] (cgs) = ',dx,dy,dz
+
+
 m.set_octree_grid(xcent,ycent,zcent,
                   dx,dy,dz,refined)
     

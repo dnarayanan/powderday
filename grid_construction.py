@@ -7,6 +7,7 @@ from datetime import datetime
 from astropy.table import Table
 from astropy.io import ascii
 import hyperion_octree_stats as hos
+from gridstats import gridstats
 
 import constants as const
 
@@ -81,17 +82,34 @@ def yt_octree_generate():
     #turk's code
     #==================================
 
-    pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=0)
+    pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+
+    pf.index
+
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))
     
     saved = pf.index.oct_handler.save_octree(always_descend=True)
-    
+ 
     always = AlwaysSelector(None)
     ir1 = pf.index.oct_handler.ires(always)  #refinement levels
     fc1 = pf.index.oct_handler.fcoords(always)  #coordinates in kpc
     fw1 = pf.index.oct_handler.fwidth(always)  #width of cell in kpc
+    
 
+
+
+    print '----------------------------'
+    print 'yt Octree Construction Stats'
+    print '----------------------------'
+    print ' n_ref = ',pf.index.oct_handler.n_ref
+    print ' max_level = ',pf.index.oct_handler.max_level
+    print ' nocts = ',pf.index.oct_handler.nocts
+    print '----------------------------'
+        
+    gridstats(ir1,fc1,fw1)
+    
+    
 
 
 
@@ -118,9 +136,7 @@ def yt_octree_generate():
     volume[wFalse] = (fw1 * const.pc * 1.e3)**3.
     
 
-    max_level = pf.index.oct_handler.max_level
-    
-    
+   
 
 
     #get the dust mass via smooth_operator linalg 
