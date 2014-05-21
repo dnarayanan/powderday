@@ -50,7 +50,7 @@ def yt_octree_generate():
 
     dustmass = m * metals * 1.e10 * 0.4
 
-    
+
     x = pos[:,0]
     y = pos[:,1]
     z = pos[:,2]
@@ -260,7 +260,6 @@ def gadget_logical_generate(sdir,snum):
     pos = gas_dict['p']
     hsml = gas_dict['h']
 
-    
     x = pos[:,0]
     y = pos[:,1]
     z = pos[:,2]
