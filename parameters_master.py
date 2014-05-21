@@ -33,6 +33,8 @@ outputfile = PD_output_dir+'/example.rtout'
 #===============================================
 oref = 1
 n_ref = 64
+zoom = True
+zoom_box_len = 30 #kpc
 
 #===============================================
 #PARALLELIZATION
