@@ -33,7 +33,7 @@ import random
 import config as cfg
 cfg.par = par #re-write cfg.par for all modules that read this in now
 
-
+import error_handling as eh
 
 
 from astropy.table import Table
@@ -48,6 +48,16 @@ from find_order import *
 import powderday_test_octree as pto
 
 import os.path
+
+
+#=========================================================
+#CHECK FOR THE EXISTENCE OF A FEW CRUCIAL FILES FIRST
+#=========================================================
+
+eh.file_exist(par.hydro_dir+par.Gadget_snap_name)
+eh.file_exist(par.dustfile)
+
+
 #=========================================================
 #GRIDDING
 #=========================================================
