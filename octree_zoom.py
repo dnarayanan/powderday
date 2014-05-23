@@ -7,15 +7,29 @@ import sys
 import config as cfg
 
 
-def octree_zoom(pf,box_len):
+
+def octree_zoom(pf):
 
 
     pf.index
+    ad = pf.all_data()
+
+    print '----------------------------'
+    print 'Entering Octree Zoom with parameters: '
+    print "(...Calculating Center of Mass in octree_zoom)"
+    com = ad.quantities.center_of_mass()
+    print "Center of Mass is at coordinates (kpc): ",com
+   
 
 
-    
-    region = pf.region([0,0,0],[-box_len,-box_len,-box_len],[box_len,box_len,box_len])
-    
+
+    minbox = np.array(com)-cfg.par.zoom_box_len
+    maxbox = np.array(com)+cfg.par.zoom_box_len
+    region = pf.region(com,minbox,maxbox)
+
+    print 'minimum edges of the zoomed box are: (kpc)',minbox
+    print 'maximum edges of the zoomed box are: (kpc)',maxbox
+
     data = {}
     skip = []
     vector_fields = [(r"particle_position_%s", "code_length"),
@@ -52,11 +66,20 @@ def octree_zoom(pf,box_len):
 
     import pprint
     pprint.pprint(sorted(data.keys()))
-    bbox = [[-box_len*1.01, box_len*1.01],
-            [-box_len*1.01, box_len*1.01],
-            [-box_len*1.01, box_len*1.01]]
 
+    #because minbox can be negative or positive (as can maxbox), and
+    #we want to make sure we go *just* beyond those values for bbox to
+    #encapsulate all of the particles in region, we have to have some
+    #np.min and max arguments in the bbox definition.
 
+    bbox = [[np.min([minbox[0]*1.01,minbox[0]*0.99]), 
+             np.max([maxbox[0]*1.01,maxbox[0]*0.99])],
+            [np.min([minbox[1]*1.01,minbox[1]*0.99]),
+             np.max([maxbox[1]*1.01,maxbox[1]*0.99])],
+            [np.min([minbox[2]*1.01,minbox[2]*0.99]),
+             np.max([maxbox[2]*1.01,maxbox[2]*0.99])]]
+
+ 
 
 
     new_ds = load_particles(data,
@@ -69,7 +92,29 @@ def octree_zoom(pf,box_len):
     new_ds.particle_types_raw = tuple(pt for pt in pf.particle_types_raw 
                                       if pt not in skip)
     new_ds.index
-                 
+                
+
+
+    '''
+    DEBUG
+    '''
+
+    new_ds.field_info.alias(("gas", "density"),
+    ('deposit', 'PartType0_smoothed_density'))
+    saved = new_ds.index.oct_handler.save_octree(always_descend=True)
+    saved["density"] = ad["gas","density"]
+ 
+    new_ad = new_ds.all_data()
+
+
+    print '[min,max] x particle position: ',np.min(new_ad["PartType0","particle_position_x"]),np.max(new_ad["PartType0","particle_position_x"])
+    print '[min,max] y particle position: ',np.min(new_ad["PartType0","particle_position_y"]),np.max(new_ad["PartType0","particle_position_y"])
+    print '[min,max] z particle position: ',np.min(new_ad["PartType0","particle_position_z"]),np.max(new_ad["PartType0","particle_position_z"])
+
+  
+    #p = ProjectionPlot(new_ds, "z", "density")
+    #p.save()
+
 
 
     
