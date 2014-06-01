@@ -11,7 +11,7 @@ import sys
 import fsps 
 from datetime import datetime
 from datetime import timedelta
-
+from grid_construction import stars_coordinate_boost 
 
 from multiprocessing import Pool
 
@@ -35,7 +35,7 @@ class Stars:
 
 
 
-def star_list_gen():
+def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     print 'reading in stars particles for SPS calculation'
 
     sdir = cfg.par.hydro_dir
@@ -54,29 +54,70 @@ def star_list_gen():
     nstars = len(age)
     print 'number of new stars =',nstars
     
-
+   
     #create the stars_list full of Stars objects
     stars_list = []
     for i in range(nstars):
         stars_list.append(Stars(mass[i],metals[i],positions[i],age[i]))
 
-    
 
+
+    #boost stellar positions to grid center
+
+    #DEBUG 053014   stars_list = stars_coordinate_boost(stars_list,boost)
+
+      
+
+   
+    #DEBUG 053014
+    '''
+    #if zoom is set, then pop off the stars that are not in the actual hyperion grid
+    if cfg.par.zoom == True:
+        orig_stars_list_len = len(stars_list)
+        #we have to go through the loop in reverse so that we don't throw off the subsquent indices
+        print 'Popping Stars out of Grid (potentially)...'
+
+
+
+
+        for i in reversed(range(nstars)):
+            
+            if np.logical_or(stars_list[i].positions[0] <= xcent-dx,stars_list[i].positions[0] >= xcent+dx) == True: 
+                stars_list.pop(i)
+                continue
+
+            if np.logical_or(stars_list[i].positions[1] <= ycent-dy,stars_list[i].positions[1] >= ycent+dy) == True: 
+                stars_list.pop(i)
+                continue
+
+            if np.logical_or(stars_list[i].positions[2] <= zcent-dz,stars_list[i].positions[2] >= zcent+dz) == True: 
+                stars_list.pop(i)
+                continue
+
+        len_difference = orig_stars_list_len-len(stars_list)
+        print '\n [SED_gen]: Warning: threw out %d stars for being outside the zoomed grid \n'%len_difference
+
+       '''
+ 
     #ASSIGN DISK AND BULGE STARS - note, if these don't exist, it will
     #just make empty lists
 
-    #DISK STARS
-    disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
-    nstars_disk = len(disk_stars_dict['m'])
-    disk_positions = disk_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-    disk_masses = disk_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
-
+   
 
     
     bulgestars_list = []
     diskstars_list = []
 
+
     if cfg.par.COSMOFLAG == False:
+
+
+         #DISK STARS
+        disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
+        nstars_disk = len(disk_stars_dict['m'])
+        disk_positions = disk_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+        disk_masses = disk_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
+
 
 
         #BULGE STARS
@@ -96,15 +137,58 @@ def star_list_gen():
 
 
 
+            #DEBUG 053014 diskstars_list = stars_coordinate_boost(diskstars_list,boost)
+            #DEBUG 053014 bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
+
+        #DEBUG 053014
+
+        '''
+        #if zoom is set, then pop off the stars that are not in the actual hyperion grid
+        if cfg.par.zoom == True:
+            orig_bulge_stars_list_len = nstars_bulge
+            orig_disk_stars_list_len = nstars_disk
+            #we have to go through the loop in reverse so that we don't throw off the subsquent indices
+
+            
+
+            for i in reversed(range(nstars_bulge)):
+                if np.logical_or(bulgestars_list[i].positions[0] <= xcent-dx,bulgestars_list[i].positions[0] >= xcent+dx) == True: 
+                    bulgestars_list.pop(i)
+                    continue
+                if np.logical_or(bulgestars_list[i].positions[1] <= ycent-dy,bulgestars_list[i].positions[1] >= ycent+dy) == True: 
+                    bulgestars_list.pop(i)
+                    continue
+                if np.logical_or(bulgestars_list[i].positions[2] <= zcent-dz,bulgestars_list[i].positions[2] >= zcent+dz) == True: 
+                    bulgestars_list.pop(i)
+                    continue
+
+            for i in reversed(range(nstars_disk)):
+                if np.logical_or(diskstars_list[i].positions[0] <= xcent-dx,diskstars_list[i].positions[0] >= xcent+dx) == True: 
+                    diskstars_list.pop(i)
+                    continue
+                if np.logical_or(diskstars_list[i].positions[1] <= ycent-dy,diskstars_list[i].positions[1] >= ycent+dy) == True: 
+                    diskstars_list.pop(i)
+                    continue
+                if np.logical_or(diskstars_list[i].positions[2] <= zcent-dz,diskstars_list[i].positions[2] >= zcent+dz) == True: 
+                    diskstars_list.pop(i)
+                    continue
+
+            
+
+            bulge_len_difference = orig_bulge_stars_list_len-len(bulgestars_list)
+            disk_len_difference = orig_disk_stars_list_len-len(diskstars_list)
+            print '\n [SED_gen]: Warning: threw out %d bulge stars for being outside the zoomed grid \n'%bulge_len_difference
+            print '\n [SED_gen]: Warning: threw out %d disk stars for being outside the zoomed grid \n'%disk_len_difference
 
 
+        '''
 
 
     return stars_list,diskstars_list,bulgestars_list
 
 def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
 
-
+    
     #NOTE this part is just for the gadget simulations - this will
     #eventually become obviated as it gets passed into a function to
     #populate the stars_list with objects as we start to feed in new
@@ -113,7 +197,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
     nstars = len(stars_list)
     nstars_disk = len(diskstars_list)
     nstars_bulge = len(bulgestars_list)
-
+    
 
     #get just the wavelength array
     sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0)
@@ -250,13 +334,13 @@ def newstars_gen(stars_list):
     stellar_fnu = np.zeros([len(stars_list),nlam])
     
   
-    
+    '''
     #DEBUG DEBUG DEBUG 
     #for now we don't have a metallicity in the sps calculations
     print '========================='
     print 'WARNING: METALLICITIES NOT ACCOUNTED FOR IN STELLAR SEDS'
     print '========================'
-    
+    '''
     
 
     #calculate the SEDs for new stars

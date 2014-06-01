@@ -8,6 +8,7 @@ from astropy.table import Table
 from astropy.io import ascii
 import hyperion_octree_stats as hos
 from gridstats import gridstats
+from octree_zoom import octree_zoom
 
 import constants as const
 
@@ -78,11 +79,15 @@ def yt_octree_generate():
     print 'NOTE: this assumes the following Gaget parameters which are hard-coded into yt_octree_generate:'
     print unit_base
 
-    #==================================
-    #turk's code
-    #==================================
+    
+    if cfg.par.zoom == False:
+    
+        pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
 
-    pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+    else:
+    
+        pf = octree_zoom(fname,unit_base,bbox)
+
 
     pf.index
 
@@ -138,15 +143,7 @@ def yt_octree_generate():
 
    
 
-
-    #get the dust mass via smooth_operator linalg 
-    #    dust_mass_grid = smooth_operator.particle_smooth_linalg(x,y,z,hsml,fc1,pos,dustmass,refined)
-
-    
-#    import particle_smooth_cython as psnc
-
-    #mass_grid is the smoothed mass_grid; this is just a dummy array
-    #that has to get fed into psnc.particle_smooth_new
+ 
 
     mass_grid = np.zeros(len(wFalse))
 
@@ -154,40 +151,32 @@ def yt_octree_generate():
     if cfg.par.CONSTANT_DUST_GRID == False: #this is the default; if True is set, then we'll 
 
 
-        '''PSNC.PARTICLE_SMOOTH_NEW STUFF
-        print 'Entering psnc.particle_smooth_new'
-        temp_dust_mass_grid = psnc.particle_smooth_new(x,y,z,hsml,fc1,dustmass,refined,mass_grid)
-        #normalizing for mass conservation
-        
-        temp_dust_mass_grid /= sum(temp_dust_mass_grid)/sum(m)
-    
-        #copy over the temp_mass_grid to a grid that is as big as refined
-        #(and not just as big as wFalse) for the hyperion calculation
-        #(which requires the octree grid include the True's)
-        
-        dust_mass_grid = np.zeros(len(refined))
-        dust_mass_grid[wFalse] = temp_dust_mass_grid
-        
-        dust_density_grid = dust_mass_grid*const.msun/volume #in gm/cm^-3
-        #since volume = 0 where there's a True, dust_density_grid is nan
-        #where there's trues, so we have to fix this
-        dust_density_grid[wTrue] = 0
-        '''
-
-
+ 
         '''USING YT SMOOTHING'''
 
-        from particle_smooth_yt import yt_smooth
-        metallicity_smoothed,mass_smoothed,density_smoothed = yt_smooth(pf)
-        dust_smoothed = np.zeros(len(refined))
-        
 
+
+
+
+        from particle_smooth_yt import yt_smooth
+        metallicity_smoothed,density_smoothed = yt_smooth(pf)
+        dust_smoothed = np.zeros(len(refined))
+
+        '''
+        ad = pf.all_data()
+        saved["density"] = ad["gas","density"]
+        density_smoothed = saved["density"]
+        metallicity_smoothed = np.zeros(len(density_smoothed))+0.02
+        dust_smoothed = np.zeros(len(refined))
+        '''
+
+        
         '''
         dust_smoothed[wFalse] = mass_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio
         dust_density_grid = dust_smoothed/volume #in gm/cm^-3       
         '''
               
-        dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed
+        dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
         dust_density_grid = dust_smoothed #in gm/cm^-3       
         #since volume = 0 where there's a True, dust_density_grid is nan        
         #where there's trues, so we have to fix this                            
@@ -217,6 +206,15 @@ def yt_octree_generate():
     zmin = fc1[:,2]-fw1[:,2]
     zmax = fc1[:,2]+fw1[:,2]
 
+
+
+    xcent_orig,ycent_orig,zcent_orig,dx,dy,dz = grid_center(xmin,xmax,ymin,ymax,zmin,zmax)
+    boost = np.array([xcent_orig,ycent_orig,zcent_orig])*1.e3*const.pc
+
+
+
+    xmin,xmax,ymin,ymax,zmin,zmax = grid_coordinate_boost(xmin,xmax,ymin,ymax,zmin,zmax)
+
     coordinates_Table = Table([fc1[:,0]-fw1[:,0],fc1[:,0]+fw1[:,0],fc1[:,1]-fw1[:,1],
                                fc1[:,1]+fw1[:,1],fc1[:,2]-fw1[:,2],fc1[:,2]+fw1[:,2]],
                               names = ['xmin','xmax','ymin','ymax','zmin','zmax'])
@@ -231,11 +229,57 @@ def yt_octree_generate():
     ascii.write(dust_dens_Table,cfg.par.PD_output_dir+cfg.par.Auto_dustdens_file)
         
 
-    return refined,dust_density_grid,xmin,xmax,ymin,ymax,zmin,zmax
+    return refined,dust_density_grid,xmin,xmax,ymin,ymax,zmin,zmax,boost
 
 
 
+def grid_coordinate_boost(xmin,xmax,ymin,ymax,zmin,zmax):
+    
+    print '\n boosting coordinates to [0,0,0] centering \n'
+    xcent,ycent,zcent,dx,dy,dz = grid_center(xmin,xmax,ymin,ymax,zmin,zmax)
+    xmin -= xcent
+    xmax -= xcent
+    ymin -= ycent
+    ymax -= ycent
+    zmin -= zcent
+    zmax -= zcent
+                
+    return xmin,xmax,ymin,ymax,zmin,zmax
 
+
+def stars_coordinate_boost(star_list,boost):
+    
+#center the stars
+    nstars = len(star_list)
+    for i in range(nstars):
+        star_list[i].positions[0] -= boost[0]
+        star_list[i].positions[1] -= boost[1]
+        star_list[i].positions[2] -= boost[2]
+        
+    return star_list
+
+
+
+def grid_center(xmin,xmax,ymin,ymax,zmin,zmax):
+    
+    xcent = np.mean([min(xmin),max(xmax)])
+    ycent = np.mean([min(ymin),max(ymax)])
+    zcent = np.mean([min(zmin),max(zmax)])
+    
+    
+    #dx,dy,dz are the edges of the parent grid
+    dx = (max(xmax)-min(xmin))/2
+    dy = (max(ymax)-min(ymin))/2.
+    dz = (max(zmax)-min(zmin))/2.
+
+    '''
+    
+    dx = np.absolute(xcent - min(xmin))
+    dy = np.absolute(ycent - min(ymin))
+    dz = np.absolute(zcent - min(zmin))
+    '''
+
+    return xcent,ycent,zcent,dx,dy,dz
 
 
 
