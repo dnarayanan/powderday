@@ -63,14 +63,13 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
 
 
     #boost stellar positions to grid center
-
-    #DEBUG 053014   stars_list = stars_coordinate_boost(stars_list,boost)
+    print 'boosting new stars to coordinate center'
+    stars_list = stars_coordinate_boost(stars_list,boost)
 
       
 
    
-    #DEBUG 053014
-    '''
+
     #if zoom is set, then pop off the stars that are not in the actual hyperion grid
     if cfg.par.zoom == True:
         orig_stars_list_len = len(stars_list)
@@ -95,9 +94,10 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
                 continue
 
         len_difference = orig_stars_list_len-len(stars_list)
-        print '\n [SED_gen]: Warning: threw out %d stars for being outside the zoomed grid \n'%len_difference
+        print '\n [SED_gen]: Warning: Out of %d new stars\n'%nstars
+        print '\n [SED_gen]: Warning: threw out %d stars or being outside the zoomed grid \n'%len_difference
+        
 
-       '''
  
     #ASSIGN DISK AND BULGE STARS - note, if these don't exist, it will
     #just make empty lists
@@ -136,13 +136,11 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
             diskstars_list.append(Stars(disk_masses[i],0.02,disk_positions[i],cfg.par.disk_stars_age))
 
 
+        print 'boosting disk and bulge stars to coordinate center'    
+        diskstars_list = stars_coordinate_boost(diskstars_list,boost)
+        bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
 
-            #DEBUG 053014 diskstars_list = stars_coordinate_boost(diskstars_list,boost)
-            #DEBUG 053014 bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
-
-        #DEBUG 053014
-
-        '''
+      
         #if zoom is set, then pop off the stars that are not in the actual hyperion grid
         if cfg.par.zoom == True:
             orig_bulge_stars_list_len = nstars_bulge
@@ -177,11 +175,14 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
 
             bulge_len_difference = orig_bulge_stars_list_len-len(bulgestars_list)
             disk_len_difference = orig_disk_stars_list_len-len(diskstars_list)
+ 
+            print '\n [SED_gen]: Warning: Out of %d bulge stars\n'%nstars_bulge
             print '\n [SED_gen]: Warning: threw out %d bulge stars for being outside the zoomed grid \n'%bulge_len_difference
+            print '\n [SED_gen]: Warning: Out of %d disk stars\n'%nstars_disk
             print '\n [SED_gen]: Warning: threw out %d disk stars for being outside the zoomed grid \n'%disk_len_difference
 
 
-        '''
+       
 
 
     return stars_list,diskstars_list,bulgestars_list

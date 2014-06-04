@@ -72,6 +72,7 @@ def yt_octree_generate():
              
     
 
+
     unit_base = {'UnitLength_in_cm'         : 3.08568e+21,
                  'UnitMass_in_g'            :   1.989e+43,
                  'UnitVelocity_in_cm_per_s' :      100000}
@@ -90,6 +91,26 @@ def yt_octree_generate():
 
 
     pf.index
+
+
+
+    
+    #---------------------------------------------------------------
+    #PLOTTING DIAGNOSTIC PROJECTION PLOTS
+    #---------------------------------------------------------------
+    print '\n[grid_construction] Saving Diagnostic Projection Plots \n'
+    p = ProjectionPlot(pf,"z",("deposit","PartType0_smoothed_density"))
+    p.save()
+    p = ProjectionPlot(pf,"x",("deposit","PartType0_smoothed_density"))
+    p.save()
+    p = ProjectionPlot(pf,"y",("deposit","PartType0_smoothed_density"))
+    p.save()
+ 
+
+
+
+
+
 
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))
@@ -155,20 +176,12 @@ def yt_octree_generate():
         '''USING YT SMOOTHING'''
 
 
-
-
-
         from particle_smooth_yt import yt_smooth
         metallicity_smoothed,density_smoothed = yt_smooth(pf)
         dust_smoothed = np.zeros(len(refined))
+        
 
-        '''
-        ad = pf.all_data()
-        saved["density"] = ad["gas","density"]
-        density_smoothed = saved["density"]
-        metallicity_smoothed = np.zeros(len(density_smoothed))+0.02
-        dust_smoothed = np.zeros(len(refined))
-        '''
+
 
         
         '''
@@ -228,6 +241,7 @@ def yt_octree_generate():
     dust_dens_Table = Table([dust_density_grid[:]],names=['dust density'])
     ascii.write(dust_dens_Table,cfg.par.PD_output_dir+cfg.par.Auto_dustdens_file)
         
+
 
     return refined,dust_density_grid,xmin,xmax,ymin,ymax,zmin,zmax,boost
 
