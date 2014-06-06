@@ -36,6 +36,10 @@ so, simply go to that directory and do:
 
 > ln -s f2py2.7 f2py
 
+1.d also you need to go to yt-x86_64/lib/python2.7/site-packages  and do
+
+>ln -s numpy/f2py/ f2py
+
 
 
 2. Compiling Hyperion:
