@@ -98,6 +98,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
         print '\n [SED_gen]: Warning: threw out %d stars or being outside the zoomed grid \n'%len_difference
         
 
+
  
     #ASSIGN DISK AND BULGE STARS - note, if these don't exist, it will
     #just make empty lists

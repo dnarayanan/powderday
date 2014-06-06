@@ -22,7 +22,12 @@ def octree_zoom(fname,unit_base,bbox):
     print '----------------------------'
     print '[octree zoom] Entering Octree Zoom with parameters: '
     print "[octree zoom] (...Calculating Center of Mass in octree_zoom)"
-    com = ad.quantities.center_of_mass()
+#    com = ad.quantities.center_of_mass()
+
+    gas_com_x = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_x"])/np.sum(ad["PartType0","density"])
+    gas_com_y = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_y"])/np.sum(ad["PartType0","density"])
+    gas_com_z = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_z"])/np.sum(ad["PartType0","density"])
+    com = [gas_com_x,gas_com_y,gas_com_z]
 
     print "[octree zoom] Center of Mass is at coordinates (kpc): ",com
 

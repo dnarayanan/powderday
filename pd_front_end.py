@@ -169,9 +169,14 @@ np.save('density.npy',dustdens)
 
 m = Model()
 
+dx = np.max([(dx,dy,dz)])
+dy = dx
+dz = dx
+
 print 'Setting Octree Grid with Parameters: '
 print '[xcent,ycent,zcent] (kpc) = ',xcent/(const.pc*1.e3),ycent/(const.pc*1.e3),zcent/(const.pc*1.e3)
 print '[dx,dy,dz] (kpc) = ',dx/(const.pc*1.e3),dy/(const.pc*1.e3),dz/(const.pc*1.e3)
+print 'NOTE the dx,dy,dz are fixed \n'
 
 
 
