@@ -7,6 +7,7 @@ from astropy.io import ascii
 import constants as const
 import pdb
 import sys
+from plot_generate import mass_weighted_distribution as mwd
 
 import fsps 
 from datetime import datetime
@@ -19,16 +20,17 @@ from multiprocessing import Pool
 
 
 class Stars:
-    def __init__(self,mass,metals,positions,age,sed_bin=[-1,-1,-1],lum=-1):
+    def __init__(self,mass,metals,positions,age,sed_bin=[-1,-1,-1],lum=-1,fsps_zmet=20):
         self.mass = mass
         self.metals = metals
         self.positions = positions
         self.age = age
         self.sed_bin = sed_bin
         self.lum = lum
+        self.fsps_zmet = fsps_zmet
 
     def info(self):
-        return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum)
+        return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
 
 
 
@@ -54,12 +56,23 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     nstars = len(age)
     print 'number of new stars =',nstars
     
-   
+
+    #calculate the fsps interpolated metallicity
+
+    #if the metallicity has many fields, and not just global
+    #metallicity then just extract the global metallicity
+
+    if metals.ndim > 1:
+        metals = metals[:,0]
+
+    zmet = fsps_metallicity_interpolate(metals)
+    mwd(zmet,mass,'zmet_distribution.png')
+
     #create the stars_list full of Stars objects
     stars_list = []
-    for i in range(nstars):
-        stars_list.append(Stars(mass[i],metals[i],positions[i],age[i]))
 
+    for i in range(nstars):
+        stars_list.append(Stars(mass[i],metals[i],positions[i],age[i],fsps_zmet=zmet[i]))
 
 
     #boost stellar positions to grid center
@@ -202,10 +215,11 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
     
 
     #get just the wavelength array
-    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0)
-    spec = sp.get_spectrum(tage=stars_list[0].age)
+    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0,zmet=stars_list[0].fsps_zmet)
+    spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
     nu = 1.e8*const.c/spec[0]
     nlam = len(nu)
+
 
 
 
@@ -276,13 +290,13 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
         #deal since these SEDs don't end up getting added to the model in
         #source_creation as long as COSMOFLAG == True.  
         
-        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=1,sfh=0)
-        spec = sp.get_spectrum(tage=cfg.par.disk_stars_age)
+        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=1,sfh=0,zmet=20)
+        spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=20)
         disk_fnu = spec[1]
         
         #calculate the SED for bulge stars
-        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=1,sfh=0)
-        spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age)
+        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=1,sfh=0,zmet=20)
+        spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=20)
         bulge_fnu = spec[1]
     
 
@@ -324,8 +338,8 @@ def newstars_gen(stars_list):
     
 
     #first figure out how many wavelengths there are
-    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0)
-    spec = sp.get_spectrum(tage=stars_list[0].age)
+    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0,zmet=stars_list[0].fsps_zmet)
+    spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
     nu = 1.e8*const.c/spec[0]
     
 
@@ -348,8 +362,8 @@ def newstars_gen(stars_list):
     #calculate the SEDs for new stars
     for i in range(len(stars_list)):
         
-        sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=1,sfh=0)
-        spec = sp.get_spectrum(tage=stars_list[i].age)
+        sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=1,sfh=0,zmet=stars_list[i].fsps_zmet)
+        spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
 
         stellar_nu[:] = 1.e8*const.c/spec[0]
         stellar_fnu[i,:] = spec[1]
@@ -357,5 +371,32 @@ def newstars_gen(stars_list):
     return stellar_fnu
 
 
+
+
+
+
+def fsps_metallicity_interpolate(metals):
+
+    #takes a list of metallicities for star particles, and returns a
+    #list of interpolated metallicities
+    
+    fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+    nstars = len(metals)
+    
+    zmet = []
+
+    for i in range(nstars):
+        zmet.append(find_nearest_zmet(fsps_metals,metals[i]))
+    
+    return zmet
+    
+def find_nearest_zmet(array,value):
+    #this is modified from the normal find_nearest in that it forces
+    #the output to be 1 index higher than the true value since the
+    #minimum zmet value fsps will take is 1 (not 0)
+
+    idx = (np.abs(array-value)).argmin()
+    
+    return idx+1
 
 

@@ -17,28 +17,21 @@ def yt_smooth(pf):
     
     pf.field_info["PartType0","metallicity"].particle_type=True
     ad = pf.all_data()
-    saved = pf.index.oct_handler.save_octree(always_descend=True)
+    saved = pf.index.oct_handler.save_octree()
+
+
     saved["density"] = ad["deposit","PartType0_smoothed_density"]
     saved["metallicity"] = ad["deposit","PartType0_smoothed_metallicity"]
+    saved["masses"] = ad["deposit", "PartType0_smoothed_particle_mass"]
 
-
-
-    
-    
-    print '\n\n\n'
-    print "[particle_smooth_yt] ---------------------------------------------"
-    print "[particle_smooth_yt] WARNING: These are being smoothed onto the non-descended octree"
-    print "[particle_smooth_yt] THIS IS NOT LONG TERM CORRECT"
-    print "[particle_smooth_yt] ---------------------------------------------"
-    print '\n\n\n'
+   
 
 
     #convert density to cgs
     saved["density"] = saved["density"].in_cgs()
 
-    return saved["metallicity"],saved["density"]
+    return saved["metallicity"],saved["density"],saved["masses"]
 
-   
    
     for i in sorted(saved):
         if not hasattr(saved[i], 'shape'): continue

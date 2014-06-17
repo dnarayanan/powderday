@@ -20,6 +20,7 @@ Auto_positions_file = 'snap23.positions'
 Auto_dustdens_file = 'snap23.dustdens'
 
 
+
 #===============================================
 #FILE I/O
 #===============================================
@@ -96,10 +97,10 @@ bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True
 #>N_METALLICITY_BINS*N_STELLAR_AGE_BINS) stars; this is necessary for
 #reduction of memory load; see manual for details.
 
-N_METAL_BINS = 2
 N_STELLAR_AGE_BINS = 100
 N_MASS_BINS = 100  #these you want the most of for sure
 
+metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
 
 
 

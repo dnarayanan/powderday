@@ -13,10 +13,11 @@ import random
 import sys
 
 class Sed_Bins:
-    def __init__(self,mass,metals,age):
+    def __init__(self,mass,metals,age,fsps_zmet):
         self.mass = mass
         self.metals = metals
         self.age = age
+        self.fsps_zmet=fsps_zmet
 
 
 
@@ -52,6 +53,8 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
     nstars = len(stars_list)
     print 'adding new stars to the grid'
     
+    totallum_newstars = 0.
+
     for i in range(nstars):
         
         nu = stellar_nu[:]
@@ -68,20 +71,24 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
         fnu = fnu[::-1]
 
       
-
+        
         lum = np.absolute(np.trapz(fnu,x=nu))*stars_list[i].mass/const.msun 
         lum *= const.lsun #to get in cgs
 
         #add new stars
-
+        totallum_newstars += lum
         m.add_spherical_source(luminosity = lum,radius = 10.*const.rsun,spectrum = (nu,fnu),
                                position = stars_list[i].positions)
         
+
+                           
+
+
+    print '[source_creation/add_newstars:] totallum_newstars = ',totallum_newstars
         
     if cfg.par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
             
     m.set_sample_sources_evenly(True)
-
     
 def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m):
     print 'Non-Cosmological Simulation: Adding Disk and Bulge Stars:'
@@ -126,7 +133,10 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
     disksource.position=disk_pos
     
     disksource.spectrum = (nu,fnu)
-            
+    
+
+    print '[source_creation/add_bulge_disk_stars:] totallum_disktars = ',disksource.luminosity[0]
+    
     print 'adding bulge stars to the grid: adding as a point source collection'
     
     
@@ -149,11 +159,15 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
     fnu = fnu[nu_inrange]
     bulgesource.spectrum = (nu,fnu)
 
+    print '[source_creation/add_bulge_disk_stars:] totallum_bulgetars = ',bulgesource.luminosity[0]
 
     
 
 def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     
+
+  
+
     #calculate max and min ages
     minimum_age = 15 #Gyr - obviously too high of a number
     maximum_age = 0 #Gyr
@@ -169,8 +183,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
     nstars = len(stars_list)
     for i in range(nstars):
-        if stars_list[i].metals[0] < minimum_metallicity: minimum_metallicity = stars_list[i].metals[0]
-        if stars_list[i].metals[0] > maximum_metallicity: maximum_metallicity = stars_list[i].metals[0]
+        #if stars_list[i].metals[0] < minimum_metallicity: minimum_metallicity = stars_list[i].metals[0]
+        #if stars_list[i].metals[0] > maximum_metallicity: maximum_metallicity = stars_list[i].metals[0]
         
         if stars_list[i].mass < minimum_mass: minimum_mass = stars_list[i].mass
         if stars_list[i].mass > maximum_mass: maximum_mass = stars_list[i].mass
@@ -181,15 +195,14 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
       
 
 
-    #define the metallicity bins: we do this in log since there can be quite a spread in metallicities
+    #define the metallicity bins: we do this by saying that they are the number of metallicity bins in FSPS
 
-    delta_metallicity =  (np.log10(maximum_metallicity)-np.log10(minimum_metallicity))/cfg.par.N_METAL_BINS
-    metal_bins = np.arange(np.log10(minimum_metallicity),
-                           np.log10(maximum_metallicity),
-                           delta_metallicity)
-    #add on the maximum metallicity bin
-    metal_bins = np.append(metal_bins,metal_bins[-1]+delta_metallicity)
-    metal_bins = 10.**metal_bins
+    fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+    N_METAL_BINS = len(fsps_metals)
+
+    #note the bins are NOT metallicity, but rather the zmet keys in
+    #fsps (i.e. the zmet column in Table 1 of the fsps manual)
+    metal_bins = np.arange(N_METAL_BINS)+1
 
 
     #define the age bins (linearly)
@@ -222,7 +235,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     #says whether or not that bin is being used downstream for
     #creating a point source collection (i.e. that it actually has at
     #least one star cluster that falls into it)
-    has_stellar_mass = np.zeros([cfg.par.N_METAL_BINS+1,cfg.par.N_STELLAR_AGE_BINS+1,cfg.par.N_MASS_BINS+1],dtype=bool)
+    has_stellar_mass = np.zeros([N_METAL_BINS,cfg.par.N_STELLAR_AGE_BINS+1,cfg.par.N_MASS_BINS+1],dtype=bool)
 
 
     stars_in_bin = {} #this will be a dictionary that holds the list
@@ -233,7 +246,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     
     for i in range(nstars):
         
-        wz = find_nearest(metal_bins,stars_list[i].metals[0])
+        wz = find_nearest(metal_bins,stars_list[i].fsps_zmet)
         wa = find_nearest(age_bins,stars_list[i].age)
         wm = find_nearest(mass_bins,stars_list[i].mass)
         
@@ -261,13 +274,15 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
 
    
-
-    for wz in range(cfg.par.N_METAL_BINS+1):
+    #we loop through age bins +1 because the max values were tacked
+    #onto those bin lists. but for metal bins, this isn't the case, so
+    #we don't loop the extra +1
+    for wz in range(N_METAL_BINS):
         for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
             for wm in range(cfg.par.N_MASS_BINS+1):
-                sed_bins_list.append(Sed_Bins(mass_bins[wm],metal_bins[wz],age_bins[wa]))
+                sed_bins_list.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz]))
                 if has_stellar_mass[wz,wa,wm] == True:
-                    sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],metal_bins[wz],age_bins[wa]))
+                    sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz]))
 
    
 
@@ -283,6 +298,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
 
 
+   
+
+
     #since the binned_stellar_fnu_has_stellar_mass is now
     #[len(sed_bins_list_has_stellar_mass),nlam)] big, we need to
     #transform it back to the a larger array.  this is an ugly loop
@@ -293,13 +311,16 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
     counter = 0
     counter_has_stellar_mass = 0
-    for wz in range(cfg.par.N_METAL_BINS+1):
+    for wz in range(N_METAL_BINS):
         for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
             for wm in range(cfg.par.N_MASS_BINS+1):
                 if has_stellar_mass[wz,wa,wm] == True:
                     binned_stellar_fnu[counter,:] = binned_stellar_fnu_has_stellar_mass[counter_has_stellar_mass,:]
                     counter_has_stellar_mass += 1 
                 counter+=1
+
+
+
 
 
     
@@ -329,8 +350,11 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     t1=datetime.now()
 
 
+    totallum = 0
+    totalmass = 0
+
     counter=0
-    for wz in range(cfg.par.N_METAL_BINS+1):
+    for wz in range(N_METAL_BINS):
         for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
             for wm in range(cfg.par.N_MASS_BINS+1):
                 
@@ -342,16 +366,23 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     fnu = fnu[nu_inrange]
                     fnu = fnu[::-1]
                     pos = np.zeros([len(stars_in_bin[(wz,wa,wm)]),3])
-
-
+                    
+                    #quickly calculate the total stellar mass in the wz,wa,wm bin:
+                    mass = np.zeros(len(stars_in_bin[(wz,wa,wm)]))
+                    for i in range(len(stars_in_bin[(wz,wa,wm)])): mass[i] = stars_list[i].mass
+                    totalmass += np.sum(mass)
                     
                         
-                    lum = np.absolute(np.trapz(fnu,x=nu))*mass_bins[wm]/const.msun*const.lsun
+                    #lum = np.absolute(np.trapz(fnu,x=nu))*mass_bins[wm]/const.msun*const.lsun
+                    lum = (np.absolute(np.trapz(fnu,x=nu))*np.sum(mass))/const.msun*const.lsun
                     source.luminosity = np.repeat(lum,len(stars_in_bin[(wz,wa,wm)]))
                     for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
                     source.position=pos
-                    source.spectrum = (nu,fnu)
 
+
+                    source.spectrum = (nu,fnu)
+                                    
+                    totallum += source.luminosity[0]
 
                     if np.isnan(lum): 
                         print 'lum is a nan in point source collection addition. exiting now.'
@@ -368,8 +399,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     #m.set_sample_sources_evenly(True)
 
     t2=datetime.now()
-    print 'Execution time for point source collection adding = '+str(t2-t1)
-
+    print '[source_creation/add_binned_seds:] Execution time for point source collection adding = '+str(t2-t1)
+    print '[source_creation/add_binned_seds:] Total Luminosity of point source collection is: ',totallum
 
     
 def find_nearest(array,value):

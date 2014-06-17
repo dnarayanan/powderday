@@ -8,6 +8,9 @@ import config as cfg
 import constants as const
 
 from cutout_data import yt_field_map
+from yt.frontends.sph.data_structures import ParticleDataset
+ParticleDataset.filter_bbox = True
+ParticleDataset._skip_cache = True
 
 
 
@@ -95,3 +98,46 @@ def octree_zoom(fname,unit_base,bbox):
     return new_ds
 
 
+def octree_zoom_bbox_filter(fname,unit_base,bbox0):
+
+    ds0 = load(fname,unit_base=unit_base,bounding_box=bbox0)
+    
+    ds0.index
+    ad = ds0.all_data()
+
+    print '\n\n'
+    print '----------------------------'
+    print '[octree zoom_bbox_filter:] Entering Octree Zoom with parameters: '
+    print "[octree zoom_bbox_filter:] (...Calculating Center of Mass in octree_zoom)"
+#    com = ad.quantities.center_of_mass()
+
+    gas_com_x = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_x"])/np.sum(ad["PartType0","density"])
+    gas_com_y = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_y"])/np.sum(ad["PartType0","density"])
+    gas_com_z = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_z"])/np.sum(ad["PartType0","density"])
+    com = [gas_com_x,gas_com_y,gas_com_z]
+
+    print "[octree zoom_bbox_filter:] Center of Mass is at coordinates (kpc): ",com
+
+
+    minbox = np.array(com)-cfg.par.zoom_box_len
+    maxbox = np.array(com)+cfg.par.zoom_box_len
+
+
+
+    print '[octree zoom] minimum edges of the zoomed box are: (kpc)',minbox
+    print '[octree zoom] maximum edges of the zoomed box are: (kpc)',maxbox
+    print '----------------------------'
+    print '\n'
+
+    #because minbox can be negative or positive (as can maxbox), and
+    #we want to make sure we go *just* beyond those values for bbox to
+    #encapsulate all of the particles in region, we have to have some
+    #np.min and max arguments in the bbox definition.
+    
+    bbox1 = [[minbox[0],maxbox[0]],[minbox[1],maxbox[1]],[minbox[2],maxbox[2]]]
+
+    ds1 = load(fname,unit_base=unit_base,bounding_box=bbox1)
+    ds1.periodicity = (False,False,False)
+
+
+    return ds1

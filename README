@@ -1,11 +1,12 @@
 INSTALLATION NOTES:
 
+0. Install yt
 1. have powderday in your PYTHONPATH
-2. Install Hyperion
-3. Install astropy
-4. Install yt
-5. Install FSPS
-6. Install f2py
+2. Install scipy
+3. Install Hyperion
+4. Install astropy
+5. Install ATpy
+6. Install FSPS
 7. Install python-fsps
 
 THINGS TO INCLUDE IN INSTALLATION
