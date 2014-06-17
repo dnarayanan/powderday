@@ -350,8 +350,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     t1=datetime.now()
 
 
-    totallum = 0
-    totalmass = 0
+    totallum = 0 
+
 
     counter=0
     for wz in range(N_METAL_BINS):
@@ -365,16 +365,17 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     fnu = binned_stellar_fnu[counter,:]
                     fnu = fnu[nu_inrange]
                     fnu = fnu[::-1]
+
                     pos = np.zeros([len(stars_in_bin[(wz,wa,wm)]),3])
                     
                     #quickly calculate the total stellar mass in the wz,wa,wm bin:
-                    mass = np.zeros(len(stars_in_bin[(wz,wa,wm)]))
-                    for i in range(len(stars_in_bin[(wz,wa,wm)])): mass[i] = stars_list[i].mass
-                    totalmass += np.sum(mass)
+                    mass = 0.
+                    for i in stars_in_bin[(wz,wa,wm)]:  mass += stars_list[i].mass
+                    print 'mass = ',mass/const.msun
                     
                         
                     #lum = np.absolute(np.trapz(fnu,x=nu))*mass_bins[wm]/const.msun*const.lsun
-                    lum = (np.absolute(np.trapz(fnu,x=nu))*np.sum(mass))/const.msun*const.lsun
+                    lum = (np.absolute(np.trapz(fnu,x=nu))*mass)/const.msun*const.lsun
                     source.luminosity = np.repeat(lum,len(stars_in_bin[(wz,wa,wm)]))
                     for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
                     source.position=pos

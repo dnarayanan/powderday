@@ -306,26 +306,14 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
         bulge_fnu = []
         
 
+    total_lum_in_sed_gen = 0.
+    for i in range(stellar_fnu.shape[0]):
+        total_lum_in_sed_gen += np.absolute(np.trapz(stellar_fnu[i,:],x=nu))
 
+    print '[SED_gen: ] total_lum_in_sed_gen = ',total_lum_in_sed_gen
 
     #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
     return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
