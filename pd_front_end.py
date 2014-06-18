@@ -122,6 +122,7 @@ for i in range(len(order)):
     refined_reordered.append(refined[order[i]])
     dustdens_reordered[i] = dustdens[order[i]]
 
+
 refined = refined_reordered
 dustdens=dustdens_reordered
 
@@ -207,7 +208,7 @@ N_METAL_BINS = len(fsps_metals)
 
 if nstars <= N_METAL_BINS*par.N_STELLAR_AGE_BINS*par.N_MASS_BINS:
     stellar_nu,stellar_fnu,disk_fnu,bulge_fnu = sg.allstars_sed_gen(stars_list,diskstars_list,bulgestars_list)
-    add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
+    m=add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
     
 
 #potentially write the stellar SEDs to a npz file
@@ -219,7 +220,7 @@ else:
 #add_binned_seds itself, unlike add_newstars, which requires
 #that sg.allstars_sed_gen() be called first.
 
-    add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m)
+    m=add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m)
 
 
 

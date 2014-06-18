@@ -90,6 +90,8 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
             
     m.set_sample_sources_evenly(True)
     
+    return m
+
 def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m):
     print 'Non-Cosmological Simulation: Adding Disk and Bulge Stars:'
     
@@ -351,7 +353,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
 
     totallum = 0 
-
+    totalmass = 0 
 
     counter=0
     for wz in range(N_METAL_BINS):
@@ -366,42 +368,48 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     fnu = fnu[nu_inrange]
                     fnu = fnu[::-1]
 
+                    
+                    #source luminosities
+                    lum = np.array([stars_list[i].mass/const.msun*const.lsun for i in stars_in_bin[(wz,wa,wm)]])
+                    lum *= np.absolute(np.trapz(fnu,x=nu))
+                    source.luminosity = lum
+                    
+
+
+                    for i in stars_in_bin[(wz,wa,wm)]:  totalmass += stars_list[i].mass
+                    
+                    #source positions
                     pos = np.zeros([len(stars_in_bin[(wz,wa,wm)]),3])
-                    
-                    #quickly calculate the total stellar mass in the wz,wa,wm bin:
-                    mass = 0.
-                    for i in stars_in_bin[(wz,wa,wm)]:  mass += stars_list[i].mass
-                    print 'mass = ',mass/const.msun
-                    
-                        
-                    #lum = np.absolute(np.trapz(fnu,x=nu))*mass_bins[wm]/const.msun*const.lsun
-                    lum = (np.absolute(np.trapz(fnu,x=nu))*mass)/const.msun*const.lsun
-                    source.luminosity = np.repeat(lum,len(stars_in_bin[(wz,wa,wm)]))
                     for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
                     source.position=pos
 
-
+                    #source spectrum
                     source.spectrum = (nu,fnu)
                                     
-                    totallum += source.luminosity[0]
+                    totallum += np.sum(source.luminosity)
 
+                    
+                    '''
                     if np.isnan(lum): 
                         print 'lum is a nan in point source collection addition. exiting now.'
                         sys.exit()
                     if np.isinf(lum): 
                         print 'lum is an inf in point source collection addition. exiting now.'
                         sys.exit()
-                
+                    '''
                 counter+=1
 
                 
     if cfg.par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
 
-    #m.set_sample_sources_evenly(True)
+    m.set_sample_sources_evenly(True)
 
     t2=datetime.now()
     print '[source_creation/add_binned_seds:] Execution time for point source collection adding = '+str(t2-t1)
     print '[source_creation/add_binned_seds:] Total Luminosity of point source collection is: ',totallum
+
+
+    return m
 
     
 def find_nearest(array,value):
