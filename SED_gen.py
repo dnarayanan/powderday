@@ -66,7 +66,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
         metals = metals[:,0]
 
     zmet = fsps_metallicity_interpolate(metals)
-    mwd(zmet,mass,'zmet_distribution.png')
+    #mwd(zmet,mass,'zmet_distribution.png')
 
     #create the stars_list full of Stars objects
     stars_list = []
@@ -215,7 +215,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
     
 
     #get just the wavelength array
-    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0,zmet=stars_list[0].fsps_zmet)
+    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=2,sfh=0,zmet=stars_list[0].fsps_zmet)
     spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
     nu = 1.e8*const.c/spec[0]
     nlam = len(nu)
@@ -290,12 +290,12 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
         #deal since these SEDs don't end up getting added to the model in
         #source_creation as long as COSMOFLAG == True.  
         
-        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=1,sfh=0,zmet=20)
+        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=2,sfh=0,zmet=20)
         spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=20)
         disk_fnu = spec[1]
         
         #calculate the SED for bulge stars
-        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=1,sfh=0,zmet=20)
+        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=2,sfh=0,zmet=20)
         spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=20)
         bulge_fnu = spec[1]
     
@@ -326,7 +326,7 @@ def newstars_gen(stars_list):
     
 
     #first figure out how many wavelengths there are
-    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=1,sfh=0,zmet=stars_list[0].fsps_zmet)
+    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=2,sfh=0,zmet=stars_list[0].fsps_zmet)
     spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
     nu = 1.e8*const.c/spec[0]
     
@@ -350,7 +350,7 @@ def newstars_gen(stars_list):
     #calculate the SEDs for new stars
     for i in range(len(stars_list)):
         
-        sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=1,sfh=0,zmet=stars_list[i].fsps_zmet)
+        sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=2,sfh=0,zmet=stars_list[i].fsps_zmet)
         spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
 
         stellar_nu[:] = 1.e8*const.c/spec[0]

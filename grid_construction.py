@@ -204,11 +204,8 @@ def yt_octree_generate():
 
        
         
-        '''
-        dust_smoothed[wFalse] = masses_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio
-        dust_density_grid = dust_smoothed/volume #in gm/cm^-3       
-        dust_density_grid[wTrue] = 0
-        '''
+        #dust_smoothed[wFalse] = masses_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio / volume[wFalse]
+        #dust_smoothed[wTrue] = 0
               
         dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
 
