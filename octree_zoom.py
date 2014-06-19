@@ -118,23 +118,16 @@ def octree_zoom_bbox_filter(fname,unit_base,bbox0):
 
     print "[octree zoom_bbox_filter:] Center of Mass is at coordinates (kpc): ",com
 
-
-    minbox = np.array(com)-cfg.par.zoom_box_len
-    maxbox = np.array(com)+cfg.par.zoom_box_len
-
-
-
-    print '[octree zoom] minimum edges of the zoomed box are: (kpc)',minbox
-    print '[octree zoom] maximum edges of the zoomed box are: (kpc)',maxbox
-    print '----------------------------'
-    print '\n'
-
-    #because minbox can be negative or positive (as can maxbox), and
-    #we want to make sure we go *just* beyond those values for bbox to
-    #encapsulate all of the particles in region, we have to have some
-    #np.min and max arguments in the bbox definition.
     
-    bbox1 = [[minbox[0],maxbox[0]],[minbox[1],maxbox[1]],[minbox[2],maxbox[2]]]
+
+
+    bbox_lim = ds0.quan(cfg.par.zoom_box_len,'code_length')
+    
+    bbox1 = [[com[0]-bbox_lim,com[0]+bbox_lim],
+            [com[1]-bbox_lim,com[1]+bbox_lim],
+            [com[2]-bbox_lim,com[2]+bbox_lim]]
+    print '[octree zoom] new zoomed bbox = ',bbox1
+    
 
     ds1 = load(fname,unit_base=unit_base,bounding_box=bbox1)
     ds1.periodicity = (False,False,False)

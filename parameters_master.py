@@ -32,9 +32,9 @@ outputfile = PD_output_dir+'/example.rtout'
 #===============================================
 #RESOLUTION KEYWORDS
 #===============================================
-oref = 1
+oref = 0
 n_ref = 64
-zoom = True
+zoom = False
 zoom_box_len = 200 #kpc; so the box will be +/- zoom_box_len from the center
 
 #===============================================
