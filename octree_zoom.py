@@ -100,16 +100,14 @@ def octree_zoom(fname,unit_base,bbox):
 
 def octree_zoom_bbox_filter(fname,unit_base,bbox0):
 
-    ds0 = load(fname,unit_base=unit_base,bounding_box=bbox0)
+    ds0 = load(fname,unit_base=unit_base,bounding_box=bbox0,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
     
     ds0.index
     ad = ds0.all_data()
 
     print '\n\n'
     print '----------------------------'
-    print '[octree zoom_bbox_filter:] Entering Octree Zoom with parameters: '
-    print "[octree zoom_bbox_filter:] (...Calculating Center of Mass in octree_zoom)"
-#    com = ad.quantities.center_of_mass()
+    print "[octree zoom_bbox_filter:] Calculating Center of Mass"
 
     gas_com_x = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_x"])/np.sum(ad["PartType0","density"])
     gas_com_y = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_y"])/np.sum(ad["PartType0","density"])
@@ -117,20 +115,33 @@ def octree_zoom_bbox_filter(fname,unit_base,bbox0):
     com = [gas_com_x,gas_com_y,gas_com_z]
 
     print "[octree zoom_bbox_filter:] Center of Mass is at coordinates (kpc): ",com
-
     
+
+    print "[octree zoom_bbox_filter:] Calculating Central Density Peak"
+    
+
+    density = ad[("PartType0","density")]
+    wdens = np.where(density == np.max(density))[0]
+    coordinates = ad[("PartType0","Coordinates")]
+    maxdens_coordinates = coordinates[wdens]
+    
+    center = maxdens_coordinates[0]
+
+    print '[octree zoom_bbox_filter:] using center: ',center
+
 
 
     bbox_lim = ds0.quan(cfg.par.zoom_box_len,'code_length')
     
-    bbox1 = [[com[0]-bbox_lim,com[0]+bbox_lim],
-            [com[1]-bbox_lim,com[1]+bbox_lim],
-            [com[2]-bbox_lim,com[2]+bbox_lim]]
+    bbox1 = [[center[0]-bbox_lim,center[0]+bbox_lim],
+            [center[1]-bbox_lim,center[1]+bbox_lim],
+            [center[2]-bbox_lim,center[2]+bbox_lim]]
     print '[octree zoom] new zoomed bbox = ',bbox1
     
 
-    ds1 = load(fname,unit_base=unit_base,bounding_box=bbox1)
+    ds1 = load(fname,unit_base=unit_base,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
     ds1.periodicity = (False,False,False)
+
 
 
     return ds1

@@ -102,7 +102,7 @@ def yt_octree_generate():
     #PLOTTING DIAGNOSTIC PROJECTION PLOTS
     #---------------------------------------------------------------
     
-    proj_plots(pf)
+    #proj_plots(pf)
 
 
 
@@ -203,6 +203,11 @@ def yt_octree_generate():
         print '[grid_construction: ] len(metallicity_smoothed) = ',len(metallicity_smoothed)
 
        
+        #some of the outer grids in the octree can have zeros for
+        #metallicity_smoothed and density_smoothed; since this causes
+        #nans and infs down the road, we just set these to the minimum
+        #nonzero value
+        
         
         #dust_smoothed[wFalse] = masses_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio / volume[wFalse]
         #dust_smoothed[wTrue] = 0
@@ -215,6 +220,11 @@ def yt_octree_generate():
         print 'setting constant dust grid to 4.e-22'
         dust_smoothed = np.zeros(len(refined))+4.e-23
 
+
+
+
+    
+    
 
 
 

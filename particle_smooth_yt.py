@@ -14,7 +14,6 @@ def yt_smooth(pf):
     pf.index
     
 
-    
     pf.field_info["PartType0","metallicity"].particle_type=True
     ad = pf.all_data()
     saved = pf.index.oct_handler.save_octree()
