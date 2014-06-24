@@ -14,7 +14,7 @@ THINGS TO INCLUDE IN INSTALLATION
 1. dust files
 
 =========================================
-TROUBLE SHOOTING
+TROUBLE SHOOTING: Installation
 =========================================
 
 
@@ -53,3 +53,16 @@ mavericks, do:
 >sudo xcode-select --install
 
 and wait 30 minutes while it downloads and installs command line tools!
+
+
+
+
+=========================================
+TROUBLE SHOOTING: Running
+=========================================
+
+Order of operations:
+
+(1) Make sure your SED and results are resolution converged (by either
+zooming in on the region of interest in a cosmological simulation, or
+decreasing the cell size via n_ref)
