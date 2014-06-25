@@ -29,7 +29,7 @@ def yt_octree_generate():
    
     
 
-    fname = cfg.par.hydro_dir+cfg.par.Gadget_snap_name
+    fname = cfg.model.hydro_dir+cfg.model.Gadget_snap_name
 
 
     #first get the bounding box size
@@ -39,8 +39,8 @@ def yt_octree_generate():
 
     
 
-    sdir = cfg.par.hydro_dir
-    snum = cfg.par.Gadget_snap_num
+    sdir = cfg.model.hydro_dir
+    snum = cfg.model.Gadget_snap_num
     gas_dict = pfh_readsnap.readsnap(sdir,snum,ptype)
     
 
@@ -259,11 +259,11 @@ def yt_octree_generate():
     '''
 
     logical_Table = Table([refined[:]],names=['logical'])
-    ascii.write(logical_Table,cfg.par.PD_output_dir+cfg.par.Auto_TF_file)
+    ascii.write(logical_Table,cfg.model.PD_output_dir+cfg.model.Auto_TF_file)
 
 
     dust_dens_Table = Table([dust_smoothed[:]],names=['dust density'])
-    ascii.write(dust_dens_Table,cfg.par.PD_output_dir+cfg.par.Auto_dustdens_file)
+    ascii.write(dust_dens_Table,cfg.model.PD_output_dir+cfg.model.Auto_dustdens_file)
         
 
 
@@ -407,14 +407,14 @@ def gadget_logical_generate(sdir,snum):
                               coordinates[:,3],coordinates[:,4],coordinates[:,5]],
                               names = ['xmin','xmax','ymin','ymax','zmin','zmax'])
     
-    ascii.write(coordinates_Table,cfg.par.PD_output_dir+cfg.par.Auto_positions_file)
+    ascii.write(coordinates_Table,cfg.model.PD_output_dir+cfg.model.Auto_positions_file)
 
     logical_Table = Table([refined[:]],names=['logical'])
-    ascii.write(logical_Table,cfg.par.PD_output_dir+cfg.par.Auto_TF_file)
+    ascii.write(logical_Table,cfg.model.PD_output_dir+cfg.model.Auto_TF_file)
 
 
     dust_dens_Table = Table([dust_density_grid[:]],names=['dust density'])
-    ascii.write(dust_dens_Table,cfg.par.PD_output_dir+cfg.par.Auto_dustdens_file)
+    ascii.write(dust_dens_Table,cfg.model.PD_output_dir+cfg.model.Auto_dustdens_file)
 
 
 

@@ -40,8 +40,8 @@ class Stars:
 def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     print 'reading in stars particles for SPS calculation'
 
-    sdir = cfg.par.hydro_dir
-    snum = cfg.par.Gadget_snap_num
+    sdir = cfg.model.hydro_dir
+    snum = cfg.model.Gadget_snap_num
 
     #NEW STARS
     new_stars_dict = pfh_readsnap.readsnap(sdir,snum,4)

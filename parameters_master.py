@@ -1,34 +1,3 @@
-#GRIDDING PARAMETERS
-
-#snapshot parameters
-
-GADGET_octree_gen = False
-hydro_dir = '/Users/desika/gadgetruns/sbw_mergers/mw_e_hr_DIND/'
-Gadget_snap_num = 23
-Gadget_snap_name = 'snapshot_023.hdf5'
-
-YT_octree_gen = True
-
-
-
-#where the files should go
-
-PD_output_dir = '/Users/desika/Dropbox/powderday/pd_runs/sbw_tests/mw_18_6_hr_hightimeres/'
-
-Auto_TF_file = 'snap23.logical'
-Auto_positions_file = 'snap23.positions'
-Auto_dustdens_file = 'snap23.dustdens'
-
-
-
-#===============================================
-#FILE I/O
-#===============================================
-inputfile = PD_output_dir+'/example.rtin'
-outputfile = PD_output_dir+'/example.rtout'
-
-
-
 #===============================================
 #RESOLUTION KEYWORDS
 #===============================================
@@ -46,14 +15,7 @@ n_processes = 3
 #===============================================
 #PARTICLE SMOOTHING PARAMETERS
 #===============================================
-NCHUNK = 10. #number of particles per chunk 
-NPARTICLES_DEBUG = -1 #ONLY FOR DEBUGGING. if set, we set this to be
-                       #the number of particles that we smooth onto
-                       #the grid. this needs to be set to -1 for all
-                       #production runs.  if this happens to be > the
-                       #the number of actual particles, the number of
-                       #actual particles is what will be used.
-
+NCHUNK = 10. #number of particles per chunk   #DEPRECATED; DON'T USE
 
 
 #===============================================
@@ -68,7 +30,6 @@ n_photons_raytracing_dust = 1.e7
 #===============================================
 #DUST INFORMATION
 #===============================================
-#dustfile = 'dustfiles/kmh_lite.hdf5'
 dustfile = '/Users/desika/hyperion-dust-0.1.0/dust_files/d03_4.0_4.0_A.hdf5'
 dusttometals_ratio = 0.4
 
@@ -77,8 +38,6 @@ dusttometals_ratio = 0.4
 #===============================================
 #HYDRO CODE UNITS
 #===============================================
-
-stellar_softening_length = 0.005 #kpc - typically the softening length in your SPH calculation
 unit_mass = 1.e10 #msun
 unit_length = 1. #kpc
 

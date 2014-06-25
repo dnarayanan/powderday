@@ -5,7 +5,7 @@
 #=========================================================
 
 import sys
-script,pardir,parfile = sys.argv
+script,pardir,parfile,modelfile = sys.argv
 import numpy as np
 import scipy.interpolate
 import scipy.ndimage
@@ -21,10 +21,13 @@ import constants as const
 import pdb
 
 sys.path.insert(0,pardir)
-par = __import__(parfile) 
+par = __import__(parfile)
+model = __import__(modelfile)
+ 
 import random
 import config as cfg
 cfg.par = par #re-write cfg.par for all modules that read this in now
+cfg.model = model
 
 import error_handling as eh
 
@@ -48,7 +51,7 @@ import os.path
 #CHECK FOR THE EXISTENCE OF A FEW CRUCIAL FILES FIRST
 #=========================================================
 
-eh.file_exist(par.hydro_dir+par.Gadget_snap_name)
+eh.file_exist(model.hydro_dir+model.Gadget_snap_name)
 eh.file_exist(par.dustfile)
 
 
@@ -268,8 +271,8 @@ image.set_track_origin('detailed')
 
 print 'Beginning RT Stage'
 #Run the Model
-m.write(par.inputfile,overwrite=True)
-m.run(par.outputfile,mpi=True,n_processes=par.n_processes,overwrite=True)
+m.write(model.inputfile,overwrite=True)
+m.run(model.outputfile,mpi=True,n_processes=par.n_processes,overwrite=True)
 
 
 
