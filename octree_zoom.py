@@ -129,9 +129,14 @@ def octree_zoom_bbox_filter(fname,unit_base,bbox0):
 
     print '[octree zoom_bbox_filter:] using center: ',center
 
+    
+    if cfg.par.COSMOFLAG==True:
+        box_len = cfg.par.zoom_box_len/(1.+ds0.current_redshift)
+    else:
+        box_len = cfg.par.zoom_box_len
+    
 
-
-    bbox_lim = ds0.quan(cfg.par.zoom_box_len,'code_length')
+    bbox_lim = ds0.quan(box_len,'code_length')
     
     bbox1 = [[center[0]-bbox_lim,center[0]+bbox_lim],
             [center[1]-bbox_lim,center[1]+bbox_lim],
