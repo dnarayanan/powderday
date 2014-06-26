@@ -23,7 +23,7 @@ startsnap=21
 endsnap=22 #set the same as startsnap if you just want to do one snapshot
 model_dir='/home/desika/Dropbox/powderday/pd_runs/m13_mr_Dec16_2013' 
 hydro_dir='/data/desika/gadgetruns/m13_mr_Dec16_2013' 
-
+model_run_name='m13_mr'
 
  
 for (( i=$startsnap; i<=$endsnap; i++ ))
@@ -31,7 +31,7 @@ for (( i=$startsnap; i<=$endsnap; i++ ))
 
 do
 
-    echo "processing snapshot:  $i"
+    echo "processing model file for snapshot:  $i"
 
 
     #clear the pyc files
@@ -74,10 +74,30 @@ do
     echo "inputfile = PD_output_dir+'/example.'+snapnum_str+'.rtin'" >>$filem
     echo "outputfile = PD_output_dir+'/example.'+snapnum_str+'.rtout'" >>$filem
 
-    
-    
+done
 
 
-   
+
+echo "writing qsub file"
+qsubfile="$model_dir/qsub_master.qsub"
+rm -f $qsubfile
+echo $qsubfile
+
+echo "#! /bin/bash" >>$qsubfile
+echo "#PBS -N $model_run_name" >>$qsubfile
+echo "#PBS -l nodes=$n_nodes" >>$qsubfile
+echo "#PBS -m bea" >>$qsubfile
+echo "#PBS -M dnarayanan@as.arizona.edu" >>$qsubfile
+
+echo -e "\n" >>$qsubfile
+echo "cd /home/desika/Dropbox/powderday" >>$qsubfile
+
+
+
+ 
+for (( i=$startsnap; i<=$endsnap; i++ ))
+do
+    echo $i
+    echo "python pd_front_end.py $model_dir parameters_master model_$i > $model_dir/snap$i.txt">>$qsubfile
 
 done
