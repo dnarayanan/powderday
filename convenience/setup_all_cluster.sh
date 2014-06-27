@@ -19,12 +19,12 @@
 
 
 n_nodes=6
-startsnap=50
-endsnap=350 #set the same as startsnap if you just want to do one snapshot
-model_dir='/data/desika/pd_runs/m13_mr_Dec16_2013'
-hydro_dir='/data/desika/gadgetruns/m13_mr_Dec16_2013' 
-model_run_name='m13_mr'
-
+startsnap=1
+endsnap=23 #set the same as startsnap if you just want to do one snapshot
+model_dir='/home/desika/Dropbox/powderday/pd_runs/sbw_mergers/mw_e_hr_DIND'
+hydro_dir='/data/desika/gadgetruns/sbw_mergers/mw_e_hr_DIND'
+model_run_name='mw_e_hr'
+COSMOFLAG=0 #flag
  
 for (( i=$startsnap; i<=$endsnap; i++ ))
 
@@ -56,9 +56,15 @@ do
  
     echo -e "\n" >>$filem
     
-    echo "hydro_dir = '$hydro_dir/snapdir_'+snapnum_str+'/'">>$filem
+    if [ $COSMOFLAG -eq 1]
+    then
+	echo "hydro_dir = '$hydro_dir/snapdir_'+snapnum_str+'/'">>$filem
+	echo "Gadget_snap_name = 'snapshot_'+snapnum_str+'.0.hdf5'" >>$filem
+    else
+	echo "hydro_dir = '$hydro_dir/'">>$filem
+	echo "Gadget_snap_name = 'snapshot_'+snapnum_str+'.hdf5'" >>$filem
+    fi
 
-    echo "Gadget_snap_name = 'snapshot_'+snapnum_str+'.0.hdf5'" >>$filem
 
     echo -e "\n" >>$filem
 

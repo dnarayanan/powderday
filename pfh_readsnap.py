@@ -43,6 +43,8 @@ def readsnap(sdir,snum,ptype,
         file = open(fname) # Open binary snapshot file
         header_toparse = load_gadget_binary_header(file)
 
+
+
     npart = header_toparse["NumPart_ThisFile"]
     massarr = header_toparse["MassTable"]
     time = header_toparse["Time"]
@@ -170,7 +172,7 @@ def readsnap(sdir,snum,ptype,
     file.close();
     
     if (ptype==0):
-        return {'k':1,'p':pos,'v':vel,'m':mass,'id':ids,'u':ugas,'rho':rho,'h':hsml,'ne':nume,'nh':numh,'sfr':sfr,'z':metal};
+        return {'k':1,'p':pos,'v':vel,'m':mass,'id':ids,'u':ugas,'rho':rho,'h':hsml,'ne':nume,'nh':numh,'sfr':sfr,'z':metal,'redshift':redshift};
     if (ptype==4):
         return {'k':1,'p':pos,'v':vel,'m':mass,'id':ids,'z':metal,'age':stellage}
     if (ptype==5) and (skip_bh==0):
