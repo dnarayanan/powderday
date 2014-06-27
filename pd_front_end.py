@@ -209,11 +209,10 @@ from source_creation import add_newstars,add_binned_seds
 fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
 N_METAL_BINS = len(fsps_metals)
 
-if nstars <= N_METAL_BINS*par.N_STELLAR_AGE_BINS*par.N_MASS_BINS:
+if par.FORCE_BINNING == False:
     stellar_nu,stellar_fnu,disk_fnu,bulge_fnu = sg.allstars_sed_gen(stars_list,diskstars_list,bulgestars_list)
     m=add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
     
-
 #potentially write the stellar SEDs to a npz file
     if par.STELLAR_SED_WRITE == True:
         np.savez('stellar_seds.npz',par.COSMOFLAG,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)

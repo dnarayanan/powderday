@@ -19,9 +19,9 @@
 
 
 n_nodes=6
-startsnap=21
-endsnap=22 #set the same as startsnap if you just want to do one snapshot
-model_dir='/home/desika/Dropbox/powderday/pd_runs/m13_mr_Dec16_2013' 
+startsnap=50
+endsnap=350 #set the same as startsnap if you just want to do one snapshot
+model_dir='/data/desika/pd_runs/m13_mr_Dec16_2013'
 hydro_dir='/data/desika/gadgetruns/m13_mr_Dec16_2013' 
 model_run_name='m13_mr'
 

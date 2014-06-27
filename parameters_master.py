@@ -45,7 +45,7 @@ unit_length = 1. #kpc
 #===============================================
 #STELLAR SEDS INFO
 #===============================================
-
+FORCE_BINNING = True
 COSMOFLAG = False
 
 disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True
