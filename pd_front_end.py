@@ -264,9 +264,9 @@ image.set_wavelength_range(250,0.01,5000.)
 image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
 image.set_track_origin('detailed')
 
-#image.set_image_size(128,128)
+image.set_image_size(128,128)
 #image.set_image_limits(-10.e3*const.pc,10.e3*const.pc,-10.e3*const.pc,10.e3*const.pc)
-
+image.set_image_limits(-dx,dx,-dy,dy)
 
 print 'Beginning RT Stage'
 #Run the Model

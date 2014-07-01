@@ -66,3 +66,10 @@ Order of operations:
 (1) Make sure your SED and results are resolution converged (by either
 zooming in on the region of interest in a cosmological simulation, or
 decreasing the cell size via n_ref)
+
+
+
+Memory Errors:
+
+(1) If you get it at the beginning of the peeled images set up, try
+changing the track_origin from detailed-->basic in pd_front_end
