@@ -102,8 +102,8 @@ def yt_octree_generate():
     #PLOTTING DIAGNOSTIC PROJECTION PLOTS
     #---------------------------------------------------------------
     
-    proj_plots(pf)
-
+    #proj_plots(pf)
+    
 
 
 

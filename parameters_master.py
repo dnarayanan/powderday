@@ -48,8 +48,10 @@ unit_length = 1. #kpc
 FORCE_BINNING = True
 COSMOFLAG = False
 
-disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True
-bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True
+disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
+bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
+
+birth_cloud_clearing_age = 0.01 #Gyr 
 
 #bins for binning the stellar ages and metallicities for SED
 #assignments in cases of many (where many ==
