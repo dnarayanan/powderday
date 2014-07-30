@@ -120,6 +120,8 @@ def octree_zoom_bbox_filter(fname,unit_base,bbox0):
     print "[octree zoom_bbox_filter:] Calculating Central Density Peak"
     
 
+
+
     density = ad[("PartType0","density")]
     wdens = np.where(density == np.max(density))[0]
     coordinates = ad[("PartType0","Coordinates")]
@@ -128,6 +130,7 @@ def octree_zoom_bbox_filter(fname,unit_base,bbox0):
     center = maxdens_coordinates[0]
 
     print '[octree zoom_bbox_filter:] using center: ',center
+    
 
     
     if cfg.par.COSMOFLAG==True:
