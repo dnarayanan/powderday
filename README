@@ -1,17 +1,64 @@
-INSTALLATION NOTES:
+Quick and Dirty INSTALLATION NOTES:
 
-0. Install yt
-1. have powderday in your PYTHONPATH
-2. Install scipy
-3. Install Hyperion
-4. Install astropy
+0. Install yt - note, you need at least the 3.0 version which, thanks
+to the recent release of 3.0, makes this the 'stable' version.  That
+said, since at least some future updates to powderday will happen
+through yt, it's safest to install the 'development' version.
+
+1. Switch your python to the yt version.  You can do this via either
+'activating' yt: 
+
+> source YT_DEST/bin/activate
+
+or in your bashrc: 
+
+>export PATH=$HOME/yt-x86_64/bin:$PATH
+
+At the terminal, this should work:
+
+>thundersnow:~ desika$ which python
+>/Users/desika/yt-x86_64/bin/python
+
+
+2. Install scipy  - this is easily done via pip (which comes with yt):
+
+>pip install scipy
+
+3. Install Astropy: 
+
+>pip install Astropy
+
+4. Install Hyperion: 
+
+http://docs.hyperion-rt.org/en/stable/installation/installation.html
+
+in order you should: 
+(a) Install the Fortran dependencies:  http://docs.hyperion-rt.org/en/stable/installation/fortran_dependencies.html
+
+(b) make sure you have all the python dependencies installed (I think most come with yt; if not, there are handy links to each of these at: http://docs.hyperion-rt.org/en/stable/installation/python_dependencies.html  )
+
+(c) Install hyperion: http://docs.hyperion-rt.org/en/stable/installation/installation.html
+
 5. Install ATpy
+> pip install ATpy
+
 6. Install FSPS
+
+http://people.ucsc.edu/~conroy/FSPS.html
+
 7. Install python-fsps
 
-THINGS TO INCLUDE IN INSTALLATION
+http://dan.iel.fm/python-fsps/current/installation/
 
-1. dust files
+NOTE - in here, be sure to revert your FSPS install to the correct
+revision number required by python-fsps.  
+
+8: Download and unpack the Hyperion dust files:
+
+http://docs.hyperion-rt.org/en/stable/dust/dust.html
+
+put these wherever you want, but you'll need the location of this for your parameters_master.py file
+
 
 =========================================
 TROUBLE SHOOTING: Installation
