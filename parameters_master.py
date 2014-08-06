@@ -21,10 +21,10 @@ NCHUNK = 10. #number of particles per chunk   #DEPRECATED; DON'T USE
 #===============================================
 #RT INFORMATION
 #===============================================
-n_photons_initial = 1.e7
-n_photons_imaging = 1.e7
-n_photons_raytracing_sources = 1.e7
-n_photons_raytracing_dust = 1.e7
+n_photons_initial = 1.e8
+n_photons_imaging = 1.e8
+n_photons_raytracing_sources = 1.e8
+n_photons_raytracing_dust = 1.e8
 
 
 #===============================================
@@ -38,20 +38,20 @@ dusttometals_ratio = 0.4
 #===============================================
 #HYDRO CODE UNITS
 #===============================================
-unit_mass = 1.e10 #msun
-unit_length = 1. #kpc
+unit_mass = 1.e10 #msun; gadget parameters that are still alive but need to be phased out
+unit_length = 1. #kpc; gadget parameters that are still alive but need to be phased out
 
 
 #===============================================
 #STELLAR SEDS INFO
 #===============================================
-FORCE_BINNING = True
-COSMOFLAG = False
+FORCE_BINNING = True #force SED binning
+COSMOFLAG = False  #is this a cosmological simulation?
 
 disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
 bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
 
-birth_cloud_clearing_age = 0.01 #Gyr 
+birth_cloud_clearing_age = 0.01 #Gyr #tolerance above 1e7 years that you allow for birthclouds to exist.
 
 #bins for binning the stellar ages and metallicities for SED
 #assignments in cases of many (where many ==
@@ -60,6 +60,7 @@ birth_cloud_clearing_age = 0.01 #Gyr
 
 N_STELLAR_AGE_BINS = 100
 N_MASS_BINS = 100  #these you want the most of for sure
+
 
 metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
 
@@ -70,7 +71,6 @@ metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_bas
 #===============================================
 
 NTHETA = 10
-
 
 
 #===============================================
@@ -90,7 +90,7 @@ CONSTANT_DUST_GRID = False #if set, then we don't create a dust grid by
                           #4e-20
 
 #===============================================
-#GRID INFORMATION
+#GRID INFORMATION  #DEPRECATED - no need to edit.
 #===============================================
 
 #size in kpc: note - the parent grid corners are [-dx,dx; -dy,dy; -dz,dz]
