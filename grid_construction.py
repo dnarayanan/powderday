@@ -35,45 +35,10 @@ def yt_octree_generate():
     #first get the bounding box size
     ptype = 0 #for gas
     print 'in yt_octree_generate: reading in the snapshot with pfh_readsnap'
-
-
-    
-
-    sdir = cfg.model.hydro_dir
-    snum = cfg.model.Gadget_snap_num
-    gas_dict = pfh_readsnap.readsnap(sdir,snum,ptype)
-    
-
-
-    metals = gas_dict['z']
-    metals = metals[:,0]
-    m = gas_dict['m']
-    pos = gas_dict['p']
-    hsml = gas_dict['h']
-
-    dustmass = m * metals * 1.e10 * 0.4
-
-
-    x = pos[:,0]
-    y = pos[:,1]
-    z = pos[:,2]
-
-
-    '''
-    bbox_lim = max([np.absolute(min(x)),np.absolute(max(x)),
-                    np.absolute(min(y)),np.absolute(max(y)),
-                    np.absolute(min(z)),np.absolute(max(z))])
-    '''
     
     print '[grid_construction]: bbox_lim = ',cfg.par.bbox_lim
 
-    '''
-    bbox = [[-2.*bbox_lim,2.*bbox_lim],
-            [-2.*bbox_lim,2.*bbox_lim],
-            [-2.*bbox_lim,2.*bbox_lim]]
-             
-    '''
-
+    
     bbox = [[-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim]]
@@ -85,8 +50,7 @@ def yt_octree_generate():
                  'UnitMass_in_g'            : cfg.par.unit_mass*const.msun,
                  'UnitVelocity_in_cm_per_s' : cfg.par.unit_velocity}
 
-    print 'NOTE: this assumes the following Gaget parameters which are hard-coded into yt_octree_generate:'
-    print unit_base
+    print '[grid_construction]: unit_base = ',unit_base
 
     
     if cfg.par.zoom == False:
