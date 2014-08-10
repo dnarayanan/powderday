@@ -1,21 +1,16 @@
 #===============================================
 #RESOLUTION KEYWORDS
 #===============================================
-oref = 0
-n_ref = 64
-zoom = False
+oref = 0 #over refine factor - should typically be set to 0
+n_ref = 64 #when n_particles > n_ref, octree refines further
+zoom = False #False = use the entire grid; True = zoom in on the highest density peak
 zoom_box_len = 200 #kpc; so the box will be +/- zoom_box_len from the center
 
 #===============================================
 #PARALLELIZATION
 #===============================================
 
-n_processes = 3
-
-#===============================================
-#PARTICLE SMOOTHING PARAMETERS
-#===============================================
-NCHUNK = 10. #number of particles per chunk   #DEPRECATED; DON'T USE
+n_processes = 3 #number of MPI processes to run
 
 
 #===============================================
@@ -38,8 +33,8 @@ dusttometals_ratio = 0.4
 #===============================================
 #HYDRO CODE UNITS
 #===============================================
-unit_mass = 1.e10 #msun; gadget parameters that are still alive but need to be phased out
-unit_length = 1. #kpc; gadget parameters that are still alive but need to be phased out
+unit_mass = 1.e10 #msun/h
+unit_length = 1. #kpc/h
 
 
 #===============================================
@@ -93,32 +88,8 @@ CONSTANT_DUST_GRID = False #if set, then we don't create a dust grid by
 #GRID INFORMATION  #DEPRECATED - no need to edit.
 #===============================================
 
-#size in kpc: note - the parent grid corners are [-dx,dx; -dy,dy; -dz,dz]
-dx = 100
-dy = 100
-dz = 100
-
-#center cell position
+#center cell position #currently deprecated, though will be used for zooming later
 x_cent = 0
 y_cent = 0
 z_cent = 0 
-
-
-
-
-
-
-
-
-
-#SED INFORMATION
-
-N_viewing_angles = 10
-n_wav = 250    # number of wavelengths in SED
-wav_min = 0.01 # min wavelength for SED in micron
-wav_max = 5000.# max wavelength for SED in micron
-
-
-
-VERBOSE = False
 

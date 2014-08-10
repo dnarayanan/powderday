@@ -9,9 +9,9 @@ import pdb
 #shell scripting
 nnodes=6
 startsnap=1
-endsnap=141 #set the same as startsnap if you just want to do one snapshot
-model_dir='/data/desika/pd_runs/SIGS/c6e/'
-hydro_dir='/data/desika/gadgetruns/SIGS/c6e/'
+endsnap=140 #set the same as startsnap if you just want to do one snapshot
+model_dir=' /data/desika/pd_runs/SIGS/c6e/'
+hydro_dir='/data/desika/gadgetruns/SIGS/c6e_hdf5/'
 model_run_name='c6e'
 COSMOFLAG=0 #flag
 

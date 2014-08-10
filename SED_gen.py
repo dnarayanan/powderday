@@ -50,6 +50,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     positions = new_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
     age = new_stars_dict['age'] #Gyr (per phopkins)
 
+    
 
     median_metallicity = np.median(metals)
   
