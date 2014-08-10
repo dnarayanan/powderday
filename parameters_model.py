@@ -9,12 +9,12 @@ elif Gadget_snap_num >= 10 and Gadget_snap_num <100:
 else:
     snapnum_str = str(Gadget_snap_num)
 
-hydro_dir = '/data/desika/gadgetruns/m13_mr_Dec16_2013/snapdir_'+snapnum_str+'/'
+hydro_dir = '/Volumes/pegasus/gadgetruns/SIGS/G2/'
 
-Gadget_snap_name = 'snapshot_'+snapnum_str+'.0.hdf5'
+Gadget_snap_name = 'snapshot_'+snapnum_str+'.hdf5'
 
 #where the files should go
-PD_output_dir = '/home/desika/Dropbox/powderday/pd_runs/m13_mr_Dec16_2013/'
+PD_output_dir = '/Volumes/pegasus/pd_runs/test/'
 Auto_TF_file = 'snap'+snapnum_str+'.logical'
 Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 

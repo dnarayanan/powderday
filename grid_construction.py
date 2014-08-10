@@ -58,17 +58,25 @@ def yt_octree_generate():
     y = pos[:,1]
     z = pos[:,2]
 
+
+    '''
     bbox_lim = max([np.absolute(min(x)),np.absolute(max(x)),
                     np.absolute(min(y)),np.absolute(max(y)),
                     np.absolute(min(z)),np.absolute(max(z))])
+    '''
     
-    
-    print '[grid_construction]: bbox_lim = ',bbox_lim
+    print '[grid_construction]: bbox_lim = ',cfg.par.bbox_lim
+
+    '''
     bbox = [[-2.*bbox_lim,2.*bbox_lim],
             [-2.*bbox_lim,2.*bbox_lim],
             [-2.*bbox_lim,2.*bbox_lim]]
              
-    
+    '''
+
+    bbox = [[-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim]]
  
              
     
