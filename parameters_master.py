@@ -40,6 +40,7 @@ dusttometals_ratio = 0.4
 unit_mass = 1.e10 #msun/h
 unit_length = 1. #kpc/h
 unit_age = 1. #Gyr
+unit_velocity = 1.e5 #cm/s
 
 #===============================================
 #STELLAR SEDS INFO

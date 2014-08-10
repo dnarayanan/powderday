@@ -81,9 +81,9 @@ def yt_octree_generate():
              
     
 
-    unit_base = {'UnitLength_in_cm'         : 3.08568e+21,
-                 'UnitMass_in_g'            :   1.989e+43,
-                 'UnitVelocity_in_cm_per_s' :      100000}
+    unit_base = {'UnitLength_in_cm'         : cfg.par.unit_length*1.e3*const.pc,
+                 'UnitMass_in_g'            : cfg.par.unit_mass*const.msun,
+                 'UnitVelocity_in_cm_per_s' : cfg.par.unit_velocity}
 
     print 'NOTE: this assumes the following Gaget parameters which are hard-coded into yt_octree_generate:'
     print unit_base
