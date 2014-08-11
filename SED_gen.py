@@ -1,5 +1,5 @@
 import numpy as np
-import pfh_readsnap
+#import pfh_readsnap
 #import parameters as par
 import config as cfg
 from astropy.table import Table
@@ -8,6 +8,7 @@ import constants as const
 import pdb
 import sys
 from plot_generate import mass_weighted_distribution as mwd
+from octree_zoom import octree_zoom_bbox_filter
 
 import fsps 
 from datetime import datetime
@@ -38,19 +39,37 @@ class Stars:
 
 
 def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
-    print 'reading in stars particles for SPS calculation'
+    print '[SED_gen/star_list_gen]: reading in stars particles for SPS calculation'
 
-    sdir = cfg.model.hydro_dir
-    snum = cfg.model.Gadget_snap_num
-
-    #NEW STARS
-    new_stars_dict = pfh_readsnap.readsnap(sdir,snum,4)
-    mass = new_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
-    metals = new_stars_dict['z']
-    positions = new_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-    age = new_stars_dict['age'] #Gyr (per phopkins)
+    fname = cfg.model.hydro_dir+cfg.model.Gadget_snap_name
+    
+    bbox = [[-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim]]
+ 
+    unit_base = {'UnitLength_in_cm'         : cfg.par.unit_length*1.e3*const.pc,
+                 'UnitMass_in_g'            : cfg.par.unit_mass*const.msun,
+                 'UnitVelocity_in_cm_per_s' : cfg.par.unit_velocity}
 
     
+    if cfg.par.zoom == False:
+        pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+    else:
+        pf = octree_zoom_bbox_filter(fname,unit_base,bbox)
+    pf.index
+
+    ad = pf.all_data()
+    
+   
+
+    metals = ad[("PartType4","Metallicity")].value
+    mass = ad[("PartType4","Masses")].value*cfg.par.unit_mass*const.msun
+    positions = ad[("PartType4","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+    age = ad[("PartType4","StellarFormationTime")].value * cfg.par.unit_age #gyr
+    
+
+
+
 
     median_metallicity = np.median(metals)
   
@@ -128,20 +147,23 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
 
 
          #DISK STARS
-        disk_stars_dict = pfh_readsnap.readsnap(sdir,snum,2)
-        nstars_disk = len(disk_stars_dict['m'])
-        disk_positions = disk_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-        disk_masses = disk_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
-
+        
+       
+        
+        disk_positions = ad[("PartType2","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+        disk_masses =  ad[("PartType2","Masses")].value*cfg.par.unit_mass*const.msun
+        nstars_disk = len(disk_masses)
+     
 
 
         #BULGE STARS
-        bulge_stars_dict = pfh_readsnap.readsnap(sdir,snum,3)
-        nstars_bulge = len(bulge_stars_dict['m'])
-        bulge_positions = bulge_stars_dict['p']*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-        bulge_masses = bulge_stars_dict['m']*cfg.par.unit_mass*const.msun #g (as par.unit_mass is in msun)
-  
+       
         
+        bulge_positions = ad[("PartType3","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+        bulge_masses =  ad[("PartType3","Masses")].value*cfg.par.unit_mass*const.msun
+        nstars_bulge = len(bulge_masses)
+
+
         #create the bulge_list full of BulgeStars objects
         
         for i in range(nstars_bulge):

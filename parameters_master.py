@@ -29,7 +29,7 @@ n_photons_raytracing_dust = 1.e8
 #===============================================
 #DUST INFORMATION
 #===============================================
-dustfile = '/Users/desika/hyperion-dust-0.1.0/dust_files/d03_4.0_4.0_A.hdf5'
+dustfile = '/home/desika/hyperion-dust-0.1.0/dust_files/d03_4.0_4.0_A.hdf5'
 dusttometals_ratio = 0.4
 
 
@@ -62,7 +62,7 @@ N_STELLAR_AGE_BINS = 100
 N_MASS_BINS = 100  #these you want the most of for sure
 
 
-metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
+metallicity_legend= "/home/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
 
 
 

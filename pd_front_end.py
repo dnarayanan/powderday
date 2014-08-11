@@ -37,7 +37,6 @@ from astropy.io import ascii
 
 
 
-import pfh_readsnap
 from grid_construction import yt_octree_generate,grid_coordinate_boost,grid_center
 import SED_gen as sg
 from find_order import *

@@ -1,6 +1,5 @@
 import random
 import numpy as np
-import pfh_readsnap
 #import parameters as par
 import config as cfg
 from datetime import datetime
@@ -31,11 +30,6 @@ def yt_octree_generate():
 
     fname = cfg.model.hydro_dir+cfg.model.Gadget_snap_name
 
-
-    #first get the bounding box size
-    ptype = 0 #for gas
-    print 'in yt_octree_generate: reading in the snapshot with pfh_readsnap'
-    
     print '[grid_construction]: bbox_lim = ',cfg.par.bbox_lim
 
     
@@ -64,6 +58,8 @@ def yt_octree_generate():
 
 
     pf.index
+
+
 
   
 
