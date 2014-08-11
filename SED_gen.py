@@ -143,86 +143,88 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     diskstars_list = []
 
 
+    
+    #in principle, we should just be able to do the following blocks
+    #if the particle types exist. the issue is that different groups
+    #use PartType2 and 3 as 'filler' particle types, so they may exist
+    #even if they don't correspond to disk/bulge stars.
+
     if cfg.par.COSMOFLAG == False:
 
-
-         #DISK STARS
-        
-       
-        
-        disk_positions = ad[("PartType2","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-        disk_masses =  ad[("PartType2","Masses")].value*cfg.par.unit_mass*const.msun
-        nstars_disk = len(disk_masses)
+        #Disk Stars
+        if ("PartType2","Coordinates") in pf.derived_field_list:
+            disk_positions = ad[("PartType2","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+            disk_masses =  ad[("PartType2","Masses")].value*cfg.par.unit_mass*const.msun
+            nstars_disk = len(disk_masses)
      
+            #create the disk_list full of DiskStars objects
+            for i in range(nstars_disk):
+                diskstars_list.append(Stars(disk_masses[i],0.02,disk_positions[i],cfg.par.disk_stars_age))
 
+            print 'boosting disk stars to coordinate center'    
+            diskstars_list = stars_coordinate_boost(diskstars_list,boost)
 
-        #BULGE STARS
-       
-        
-        bulge_positions = ad[("PartType3","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-        bulge_masses =  ad[("PartType3","Masses")].value*cfg.par.unit_mass*const.msun
-        nstars_bulge = len(bulge_masses)
-
-
-        #create the bulge_list full of BulgeStars objects
-        
-        for i in range(nstars_bulge):
-            bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],cfg.par.bulge_stars_age))
-                        
-        for i in range(nstars_disk):
-            diskstars_list.append(Stars(disk_masses[i],0.02,disk_positions[i],cfg.par.disk_stars_age))
-
-
-        print 'boosting disk and bulge stars to coordinate center'    
-        diskstars_list = stars_coordinate_boost(diskstars_list,boost)
-        bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
-
-      
-        #if zoom is set, then pop off the stars that are not in the actual hyperion grid
-        if cfg.par.zoom == True:
-            orig_bulge_stars_list_len = nstars_bulge
-            orig_disk_stars_list_len = nstars_disk
-            #we have to go through the loop in reverse so that we don't throw off the subsquent indices
-
+            #if zoom is set, then pop off the stars that are not in the actual hyperion grid
+            if cfg.par.zoom == True:
+                orig_disk_stars_list_len = nstars_disk
             
 
-            for i in reversed(range(nstars_bulge)):
-                if np.logical_or(bulgestars_list[i].positions[0] <= xcent-dx,bulgestars_list[i].positions[0] >= xcent+dx) == True: 
-                    bulgestars_list.pop(i)
-                    continue
-                if np.logical_or(bulgestars_list[i].positions[1] <= ycent-dy,bulgestars_list[i].positions[1] >= ycent+dy) == True: 
-                    bulgestars_list.pop(i)
-                    continue
-                if np.logical_or(bulgestars_list[i].positions[2] <= zcent-dz,bulgestars_list[i].positions[2] >= zcent+dz) == True: 
-                    bulgestars_list.pop(i)
-                    continue
+                #we have to go through the loop in reverse so that we don't throw off the subsquent indices
+                for i in reversed(range(nstars_disk)):
+                    if np.logical_or(diskstars_list[i].positions[0] <= xcent-dx,diskstars_list[i].positions[0] >= xcent+dx) == True: 
+                        diskstars_list.pop(i)
+                        continue
+                    if np.logical_or(diskstars_list[i].positions[1] <= ycent-dy,diskstars_list[i].positions[1] >= ycent+dy) == True: 
+                        diskstars_list.pop(i)
+                        continue
+                    if np.logical_or(diskstars_list[i].positions[2] <= zcent-dz,diskstars_list[i].positions[2] >= zcent+dz) == True: 
+                        diskstars_list.pop(i)
+                        continue
 
-            for i in reversed(range(nstars_disk)):
-                if np.logical_or(diskstars_list[i].positions[0] <= xcent-dx,diskstars_list[i].positions[0] >= xcent+dx) == True: 
-                    diskstars_list.pop(i)
-                    continue
-                if np.logical_or(diskstars_list[i].positions[1] <= ycent-dy,diskstars_list[i].positions[1] >= ycent+dy) == True: 
-                    diskstars_list.pop(i)
-                    continue
-                if np.logical_or(diskstars_list[i].positions[2] <= zcent-dz,diskstars_list[i].positions[2] >= zcent+dz) == True: 
-                    diskstars_list.pop(i)
-                    continue
+                disk_len_difference = orig_disk_stars_list_len-len(diskstars_list)
+                print '\n [SED_gen]: Warning: Out of %d disk stars\n'%nstars_disk
+                print '\n [SED_gen]: Warning: threw out %d disk stars for being outside the zoomed grid \n'%disk_len_difference
 
+
+        #Bulge Stars
+        if ("PartType3,""Coordinates") in pf.derived_field_list:
+            bulge_positions = ad[("PartType3","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+            bulge_masses =  ad[("PartType3","Masses")].value*cfg.par.unit_mass*const.msun
+            nstars_bulge = len(bulge_masses)
+
+            #create the bulge_list full of BulgeStars objects
             
+            for i in range(nstars_bulge):
+                bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],cfg.par.bulge_stars_age))
+                
 
-            bulge_len_difference = orig_bulge_stars_list_len-len(bulgestars_list)
-            disk_len_difference = orig_disk_stars_list_len-len(diskstars_list)
- 
-            print '\n [SED_gen]: Warning: Out of %d bulge stars\n'%nstars_bulge
-            print '\n [SED_gen]: Warning: threw out %d bulge stars for being outside the zoomed grid \n'%bulge_len_difference
-            print '\n [SED_gen]: Warning: Out of %d disk stars\n'%nstars_disk
-            print '\n [SED_gen]: Warning: threw out %d disk stars for being outside the zoomed grid \n'%disk_len_difference
+            print 'boosting bulge stars to coordinate center'    
+            bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
 
+            #if zoom is set, then pop off the stars that are not in the actual hyperion grid
+            if cfg.par.zoom == True:
+                orig_bulge_stars_list_len = nstars_bulge
+
+                for i in reversed(range(nstars_bulge)):
+                    if np.logical_or(bulgestars_list[i].positions[0] <= xcent-dx,bulgestars_list[i].positions[0] >= xcent+dx) == True: 
+                        bulgestars_list.pop(i)
+                        continue
+                    if np.logical_or(bulgestars_list[i].positions[1] <= ycent-dy,bulgestars_list[i].positions[1] >= ycent+dy) == True: 
+                        bulgestars_list.pop(i)
+                        continue
+                    if np.logical_or(bulgestars_list[i].positions[2] <= zcent-dz,bulgestars_list[i].positions[2] >= zcent+dz) == True: 
+                        bulgestars_list.pop(i)
+                        continue
+
+
+                bulge_len_difference = orig_bulge_stars_list_len-len(bulgestars_list)
+                print '\n [SED_gen]: Warning: Out of %d bulge stars\n'%nstars_bulge
+                print '\n [SED_gen]: Warning: threw out %d bulge stars for being outside the zoomed grid \n'%bulge_len_difference
 
        
-
-
     return stars_list,diskstars_list,bulgestars_list
+
+
 
 def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
 
@@ -311,6 +313,11 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
         #deal since these SEDs don't end up getting added to the model in
         #source_creation as long as COSMOFLAG == True.  
         
+        #note, even if there are no disk/bulge stars, these are still
+        #created since they're completely based on input parameters in
+        #parameters_master.  they just won't get used at a later point
+        #as there will be no disk/bulge star positions to add them to.
+
         #dust_tesc is an absolute value (not relative to min star age) as the ages of these stars are input by the user
         sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=2,sfh=0,zmet=20,dust_type=0,dust1=1,dust2=0,dust_tesc=7)
         spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=20)
