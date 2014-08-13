@@ -61,8 +61,10 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     ad = pf.all_data()
     
    
-
-    metals = ad[("PartType4","Metallicity")].value
+    if  ('PartType4', 'Metallicity_00') in pf.derived_field_list == True:
+        metals = ad[('PartType4', 'Metallicity_00')]
+    else:
+        metals = ad[("PartType4","Metallicity")].value
     mass = ad[("PartType4","Masses")].value*cfg.par.unit_mass*const.msun
     positions = ad[("PartType4","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
     age = ad[("PartType4","StellarFormationTime")].value * cfg.par.unit_age #gyr
