@@ -51,7 +51,12 @@ COSMOFLAG = False  #is this a cosmological simulation?
 disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
 bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
 
-birth_cloud_clearing_age = 0.01 #Gyr #tolerance above 1e7 years that you allow for birthclouds to exist.
+CF_on = True #if set to true, then we enable the Charlot & Fall birthcloud models 
+birth_cloud_clearing_age = 0.01 #Gyr - stars with age <
+                                #birth_cloud_clearing_age have
+                                #charlot&fall birthclouds meaningless
+                                #of CF_on  == False
+
 
 #bins for binning the stellar ages and metallicities for SED
 #assignments in cases of many (where many ==
