@@ -59,9 +59,9 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     pf.index
 
     ad = pf.all_data()
-    
-   
-    if  ('PartType4', 'Metallicity_00') in pf.derived_field_list == True:
+
+
+    if  ('PartType4', 'Metallicity_00') in pf.derived_field_list:
         metals = ad[('PartType4', 'Metallicity_00')]
     else:
         metals = ad[("PartType4","Metallicity")].value
