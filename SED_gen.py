@@ -321,12 +321,12 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
         #as there will be no disk/bulge star positions to add them to.
 
         #dust_tesc is an absolute value (not relative to min star age) as the ages of these stars are input by the user
-        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=2,sfh=0,zmet=20,dust_type=0,dust1=1,dust2=0,dust_tesc=7)
+        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=2,sfh=0,zmet=cfg.par.disk_stars_metals,dust_type=0,dust1=1,dust2=0,dust_tesc=7)
         spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=20)
         disk_fnu = spec[1]
         
         #calculate the SED for bulge stars
-        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=2,sfh=0,zmet=20,dust_type=0,dust1=1,dust2=0,dust_tesc=7)
+        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=2,sfh=0,zmet=cfg.par.bulge_staras_metals,dust_type=0,dust1=1,dust2=0,dust_tesc=7)
         spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=20)
         bulge_fnu = spec[1]
     

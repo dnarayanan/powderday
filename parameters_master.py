@@ -50,6 +50,9 @@ COSMOFLAG = False  #is this a cosmological simulation?
 
 disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
 bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
+disk_stars_metals = 19 #in fsps metallicity units
+bulge_stars_metals = 19 #in fsps metallicity units
+
 
 CF_on = True #if set to true, then we enable the Charlot & Fall birthcloud models 
 birth_cloud_clearing_age = 0.01 #Gyr - stars with age <
