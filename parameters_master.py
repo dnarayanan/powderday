@@ -48,6 +48,8 @@ unit_velocity = 1.e5 #cm/s
 FORCE_BINNING = True #force SED binning
 COSMOFLAG = False  #is this a cosmological simulation?
 
+imf_type = 1
+
 disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
 bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
 disk_stars_metals = 19 #in fsps metallicity units
