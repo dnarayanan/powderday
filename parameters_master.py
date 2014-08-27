@@ -29,7 +29,9 @@ n_photons_raytracing_dust = 1.e8
 #===============================================
 #DUST INFORMATION
 #===============================================
-dustfile = '/Users/desika/hyperion-dust-0.1.0/dust_files/d03_4.0_4.0_A.hdf5'
+dustdir = '/home/desika/hyperion-dust-0.1.0/dust_files/'
+dustfile = 'd03_3.1_6.0_A.hdf5'
+PAH = True
 dusttometals_ratio = 0.4
 
 

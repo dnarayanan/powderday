@@ -51,7 +51,7 @@ import os.path
 #=========================================================
 
 eh.file_exist(model.hydro_dir+model.Gadget_snap_name)
-eh.file_exist(par.dustfile)
+eh.file_exist(par.dustdir+par.dustfile)
 
 
 #=========================================================
@@ -171,7 +171,15 @@ m.set_octree_grid(xcent,ycent,zcent,
                   dx,dy,dz,refined)
     
 
-m.add_density_grid(dustdens,par.dustfile)
+
+if par.PAH == True:
+    frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063}
+    for size in ['usg', 'vsg', 'big']:
+        m.add_density_grid(dustdens * frac[size], par.dustdir+'%s.hdf5' % size)
+        
+    m.set_enforce_energy_range(False)
+else:
+    m.add_density_grid(dustdens,par.dustdir+par.dustfile)
         
 
 
@@ -182,7 +190,7 @@ m.add_density_grid(dustdens,par.dustfile)
 #generate dust model. This needs to preceed the generation of sources
 #for hyperion since the wavelengths of the SEDs need to fit in the dust opacities.
 
-df = h5py.File(par.dustfile,'r')
+df = h5py.File(par.dustdir+par.dustfile,'r')
 o = df['optical_properties']
 df_nu = o['nu']
 df_chi = o['chi']
