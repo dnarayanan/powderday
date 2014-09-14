@@ -92,6 +92,8 @@ dx = (max(xmax)-min(xmin))*1.e3*const.pc
 dy = (max(ymax)-min(ymin))*1.e3*const.pc
 dz = (max(zmax)-min(zmin))*1.e3*const.pc
 
+
+
 xcent = np.mean([min(xmin),max(xmax)])
 ycent = np.mean([min(ymin),max(ymax)])
 zcent = np.mean([min(zmin),max(zmax)])
@@ -265,15 +267,12 @@ m.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging,
 m.set_convergence(True,percentile=99.,absolute=1.1,relative=1.02)
 
 
-image = m.add_peeled_images(sed = True,image=False)
+image = m.add_peeled_images(sed = True,image=True)
 image.set_wavelength_range(250,0.01,5000.)
-#image.set_wavelength_range(50,0.01,5000.)
 image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
-image.set_track_origin('detailed')
-
-#image.set_image_size(128,128)
-#image.set_image_limits(-10.e3*const.pc,10.e3*const.pc,-10.e3*const.pc,10.e3*const.pc)
-#image.set_image_limits(-dx,dx,-dy,dy)
+image.set_track_origin('basic')
+image.set_image_size(128,128)
+image.set_image_limits(-dx, dx, -dy, dy)
 
 print 'Beginning RT Stage'
 #Run the Model
