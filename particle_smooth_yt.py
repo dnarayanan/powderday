@@ -7,6 +7,7 @@ from gridstats import gridstats
 from yt.geometry.selection_routines import AlwaysSelector
 from yt.geometry.oct_container import OctreeContainer
 import yt.units as units
+import ipdb
 
 def yt_smooth(pf):
 
@@ -24,7 +25,7 @@ def yt_smooth(pf):
     saved["masses"] = ad["deposit", "PartType0_smoothed_particle_mass"]
 
    
-
+  
 
     #convert density to cgs
     saved["density"] = saved["density"].in_cgs()

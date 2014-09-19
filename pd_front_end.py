@@ -182,7 +182,7 @@ if par.PAH == True:
     m.set_enforce_energy_range(False)
 else:
     m.add_density_grid(dustdens,par.dustdir+par.dustfile)
-        
+#    m.set_enforce_energy_range(False)
 
 
 
@@ -263,12 +263,13 @@ print 'Setting up Model'
 m.set_raytracing(True)
 m.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging,
                 raytracing_sources=par.n_photons_raytracing_sources,raytracing_dust=par.n_photons_raytracing_dust)
-#m.set_n_initial_iterations(7)
-m.set_convergence(True,percentile=99.,absolute=1.1,relative=1.02)
+#m.set_n_initial_iterations(10)
+m.set_n_initial_iterations(5)
+m.set_convergence(True,percentile=99.,absolute=1.005,relative=1.01)
 
 
 image = m.add_peeled_images(sed = True,image=True)
-image.set_wavelength_range(250,0.01,5000.)
+image.set_wavelength_range(250,0.001,1000.)
 image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
 image.set_track_origin('basic')
 image.set_image_size(128,128)

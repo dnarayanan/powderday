@@ -17,7 +17,7 @@ import constants as const
 
 random.seed('octree-demo')
  
-import pdb
+import pdb,ipdb
 import os.path
 import sys
 

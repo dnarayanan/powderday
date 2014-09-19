@@ -9,10 +9,10 @@ import pdb
 #shell scripting
 nnodes=6
 startsnap=50
-endsnap=400 #set the same as startsnap if you just want to do one snapshot
-model_dir='/data/desika/pd_runs/SIGS/G0/CF_off/8_gyr/dtm_1e-3/'
+endsnap=300 #set the same as startsnap if you just want to do one snapshot
+model_dir='/data/desika/pd_runs/SIGS/G0/CF_off/8_gyr/mass_smooth/'
 hydro_dir='/data/desika/gadgetruns/SIGS/G0/'
-model_run_name='SIGS_dtm1e-3'
+model_run_name='G0_mass_smooth'
 COSMOFLAG=0 #flag
 
 
