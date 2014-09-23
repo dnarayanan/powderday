@@ -63,24 +63,8 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
         nu = stellar_nu[:]
         fnu = stellar_fnu[i,:]
     
-
-       
-        nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
-        nu_inrange = np.where(nu_inrange == True)[0]
-        nu = nu[nu_inrange]
-        fnu = fnu[nu_inrange]
-
-        '''
-        #get rid of all wavelengths below lyman limit
-        dum_nu = nu*units.Hz
-        dum_lam = constants.c.cgs/dum_nu
-        dum_lam = dum_lam.to(units.angstrom)
-        wll = np.where(dum_lam.value >= 912) #where are lambda is above the lyman limit
-        nu = nu[wll]
-        fnu = fnu[wll]
-        '''
-
-
+        
+        nu,fnu = wavelength_compress(nu,fnu,df_nu)
         #reverse the arrays for hyperion
         nu = nu[::-1]
         fnu = fnu[::-1]
@@ -113,11 +97,8 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
     
 
     nu = stellar_nu[:]
-    nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
-    nu_inrange = np.where(nu_inrange == True)[0]
-    nu = nu[nu_inrange]
-    bulge_fnu = bulge_fnu[nu_inrange]
-    disk_fnu = disk_fnu[nu_inrange]
+    nu,bulge_fnu = wavelength_compress(nu,bulge_fnu,df_nu)
+    nu,disk_fnu = wavelength_compress(nu,disk_fnu,df_nu)
 
 
     #reverse the arrays for hyperion
@@ -357,17 +338,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     #add them to a list, and create a point source collection out of
     #these
 
-    nu = binned_stellar_nu
-    nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
-    nu_inrange = np.where(nu_inrange == True)[0]
-    
-    nu = binned_stellar_nu[nu_inrange]
-
-
-  
-
-    #reverse for hyperion
-    nu = nu[::-1]
 
     print 'adding point source collections'
     t1=datetime.now()
@@ -385,10 +355,13 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                 
                     source = m.add_point_source_collection()
                     
+                    
+                    nu = binned_stellar_nu
                     fnu = binned_stellar_fnu[counter,:]
-                    fnu = fnu[nu_inrange]
+                    nu,fnu = wavelength_compress(nu,fnu,df_nu)
 
-
+                    #reverse for hyperion
+                    nu = nu[::-1]
                     fnu = fnu[::-1]
 
                     
@@ -441,3 +414,22 @@ def find_nearest(array,value):
     return idx
 
 
+
+def wavelength_compress(nu,fnu,df_nu):
+    
+    nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
+    nu_inrange = np.where(nu_inrange == True)[0]
+    compressed_nu = nu[nu_inrange]
+    compressed_fnu = fnu[nu_inrange]
+    
+   
+    #get rid of all wavelengths below lyman limit
+    dum_nu = nu*units.Hz
+    dum_lam = constants.c.cgs/dum_nu
+    dum_lam = dum_lam.to(units.angstrom)
+    wll = np.where(dum_lam.value >= 912) #where are lambda is above the lyman limit
+    nu = nu[wll]
+    fnu = fnu[wll]
+   
+  
+    return compressed_nu,compressed_fnu
