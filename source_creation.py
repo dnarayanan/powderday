@@ -12,6 +12,9 @@ from datetime import timedelta
 import random
 import sys
 
+import astropy.units as units
+import astropy.constants as constants
+
 class Sed_Bins:
     def __init__(self,mass,metals,age,fsps_zmet):
         self.mass = mass
@@ -61,24 +64,37 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
         fnu = stellar_fnu[i,:]
     
 
+       
         nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
         nu_inrange = np.where(nu_inrange == True)[0]
         nu = nu[nu_inrange]
         fnu = fnu[nu_inrange]
 
+        '''
+        #get rid of all wavelengths below lyman limit
+        dum_nu = nu*units.Hz
+        dum_lam = constants.c.cgs/dum_nu
+        dum_lam = dum_lam.to(units.angstrom)
+        wll = np.where(dum_lam.value >= 912) #where are lambda is above the lyman limit
+        nu = nu[wll]
+        fnu = fnu[wll]
+        '''
+
+
         #reverse the arrays for hyperion
         nu = nu[::-1]
         fnu = fnu[::-1]
 
-      
+        
         
         lum = np.absolute(np.trapz(fnu,x=nu))*stars_list[i].mass/const.msun 
         lum *= const.lsun #to get in cgs
 
         #add new stars
         totallum_newstars += lum
-        m.add_spherical_source(luminosity = lum,radius = 10.*const.rsun,spectrum = (nu,fnu),
-                               position = stars_list[i].positions)
+        #m.add_spherical_source(luminosity = lum,radius = 10.*const.rsun,spectrum = (nu,fnu),
+        #position = stars_list[i].positions)
+        m.add_point_source(luminosity = lum,spectrum=(nu,fnu),position = stars_list[i].positions)
         
 
                            
@@ -100,6 +116,10 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
     nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
     nu_inrange = np.where(nu_inrange == True)[0]
     nu = nu[nu_inrange]
+    bulge_fnu = bulge_fnu[nu_inrange]
+    disk_fnu = disk_fnu[nu_inrange]
+
+
     #reverse the arrays for hyperion
     nu = nu[::-1]
     
@@ -112,7 +132,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
     if nstars_disk >0: 
 
         fnu = disk_fnu[:]
-        fnu = fnu[nu_inrange]
+
         #reverse the arrays for hyperion
         fnu = fnu[::-1]
 
@@ -141,7 +161,6 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
     if nstars_bulge > 0:
 
         fnu = bulge_fnu[:]
-        fnu = fnu[nu_inrange]
         #reverse the arrays for hyperion
         fnu = fnu[::-1]
 
@@ -149,11 +168,6 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
 
         print 'adding bulge stars to the grid: adding as a point source collection'
         bulgesource = m.add_point_source_collection()
-        
-        fnu = bulge_fnu[:]
-        fnu = fnu[nu_inrange]
-        fnu = fnu[::-1]
-        
         bulge_lum = np.absolute(np.trapz(fnu,x=nu))*bulgestars_list[0].mass/const.msun
         bulge_lum *= const.lsun
         bulgesource.luminosity = np.repeat(bulge_lum,nstars_bulge)
@@ -161,10 +175,6 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
         bulge_pos = np.zeros([len(bulgestars_list),3])
         for i in range(len(bulgestars_list)): bulge_pos[i,:] = bulgestars_list[i].positions
         bulgesource.position=bulge_pos
-    
-        fnu = disk_fnu[:]
-        fnu = fnu[::-1]
-        fnu = fnu[nu_inrange]
         bulgesource.spectrum = (nu,fnu)
         
         print '[source_creation/add_bulge_disk_stars:] totallum_bulgetars = ',bulgesource.luminosity[0]
@@ -352,6 +362,11 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     nu_inrange = np.where(nu_inrange == True)[0]
     
     nu = binned_stellar_nu[nu_inrange]
+
+
+  
+
+    #reverse for hyperion
     nu = nu[::-1]
 
     print 'adding point source collections'
@@ -372,6 +387,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     
                     fnu = binned_stellar_fnu[counter,:]
                     fnu = fnu[nu_inrange]
+
+
                     fnu = fnu[::-1]
 
                     

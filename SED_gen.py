@@ -1,9 +1,12 @@
 import numpy as np
-#import pfh_readsnap
-#import parameters as par
 import config as cfg
+
 from astropy.table import Table
 from astropy.io import ascii
+import astropy.units as u
+import astropy.constants as constants
+from astropy import cosmology as cosmo
+
 import constants as const
 import pdb
 import sys
@@ -67,11 +70,26 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
         metals = ad[("PartType4","Metallicity")].value
     mass = ad[("PartType4","Masses")].value*cfg.par.unit_mass*const.msun
     positions = ad[("PartType4","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-    age = ad[("PartType4","StellarFormationTime")].value * cfg.par.unit_age #gyr
-    
 
 
+    if cfg.par.COSMOFLAG == False:
+        simtime = pf.current_time.value
+        simtime *= u.s
+        simtime = simtime.to(u.Gyr)
+        simtime = simtime.value
+        age = simtime-ad[("PartType4","StellarFormationTime")].value * cfg.par.unit_age #gyr
+        print '\n--------------'
+        print '[SED_gen/star_list_gen: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ',simtime
+        print '--------------\n'
+    else:
+        simtime = cosmo.Planck13.age(pf.current_redshift).value #what is the age of the Universe right now?
+        age = simtime-ad[("PartType4","StellarFormationTime")].value * cfg.par.unit_age #gyr
+        print '\n--------------'
+        print '[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime
+        print '--------------\n'
+                
 
+       
 
     median_metallicity = np.median(metals)
   
@@ -83,12 +101,18 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
 
     #if the metallicity has many fields, and not just global
     #metallicity then just extract the global metallicity
-
     if metals.ndim > 1:
         metals = metals[:,0]
 
+
+    print '[SED_gen/star_list_gen:] Manually increasing the newstar metallicities by: ',cfg.par.Z_init
+    metals += cfg.par.Z_init
+
+
     zmet = fsps_metallicity_interpolate(metals)
     #mwd(zmet,mass,'zmet_distribution.png')
+
+    print '[SED_gen/star_list_gen: ] fsps zmet codes:',zmet
 
     #create the stars_list full of Stars objects
     stars_list = []
@@ -189,7 +213,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
 
 
         #Bulge Stars
-        if ("PartType3,""Coordinates") in pf.derived_field_list:
+        if ("PartType3","Coordinates") in pf.derived_field_list:
             bulge_positions = ad[("PartType3","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
             bulge_masses =  ad[("PartType3","Masses")].value*cfg.par.unit_mass*const.msun
             nstars_bulge = len(bulge_masses)
@@ -242,10 +266,12 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
     
 
     #get just the wavelength array
-    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,sfh=0,zmet=stars_list[0].fsps_zmet,dust_type=0,dust1=1,dust2=0)
+    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[0].fsps_zmet)
+    
     spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
     nu = 1.e8*const.c/spec[0]
     nlam = len(nu)
+
 
 
     #initialize the process pool and build the chunks
@@ -321,12 +347,12 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
         #as there will be no disk/bulge star positions to add them to.
 
         #dust_tesc is an absolute value (not relative to min star age) as the ages of these stars are input by the user
-        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=cfg.par.imf_type,sfh=0,zmet=cfg.par.disk_stars_metals,dust_type=0,dust1=1,dust2=0,dust_tesc=7)
+        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=cfg.par.disk_stars_metals)
         spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=20)
         disk_fnu = spec[1]
         
         #calculate the SED for bulge stars
-        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=cfg.par.imf_type,sfh=0,zmet=cfg.par.bulge_stars_metals,dust_type=0,dust1=1,dust2=0,dust_tesc=7)
+        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=cfg.par.bulge_stars_metals)
         spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=20)
         bulge_fnu = spec[1]
     
@@ -357,11 +383,10 @@ def newstars_gen(stars_list):
     
 
     #first figure out how many wavelengths there are
-    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,sfh=0,zmet=stars_list[0].fsps_zmet,dust_type=0,dust1=1,dust2=0,dust_tesc=8)
+    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[0].fsps_zmet)
     spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
     nu = 1.e8*const.c/spec[0]
     
-
 
     nlam = len(nu)
 
@@ -369,15 +394,6 @@ def newstars_gen(stars_list):
     stellar_fnu = np.zeros([len(stars_list),nlam])
     
   
-    '''
-    #DEBUG DEBUG DEBUG 
-    #for now we don't have a metallicity in the sps calculations
-    print '========================='
-    print 'WARNING: METALLICITIES NOT ACCOUNTED FOR IN STELLAR SEDS'
-    print '========================'
-    '''
-    
- 
     minage = 13 #Gyr
     for i in range(len(stars_list)): 
         if stars_list[i].age < minage:
@@ -390,9 +406,9 @@ def newstars_gen(stars_list):
     for i in range(len(stars_list)):
         
         if cfg.par.CF_on == True:
-            sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=cfg.par.imf_type,sfh=0,zmet=stars_list[i].fsps_zmet,dust_type=0,dust1=1,dust2=0,dust_tesc=tesc_age)
+            sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[i].fsps_zmet,dust_type=0,dust1=1,dust2=0,dust_tesc=tesc_age)
         else:
-            sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=cfg.par.imf_type,sfh=0,zmet=stars_list[i].fsps_zmet)
+            sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[i].fsps_zmet)
          
 
         #sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=2,sfh=0,zmet=stars_list[i].fsps_zmet)

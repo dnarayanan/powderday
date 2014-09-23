@@ -50,12 +50,9 @@ unit_velocity = 1.e5 #cm/s
 FORCE_BINNING = True #force SED binning
 COSMOFLAG = False  #is this a cosmological simulation?
 
-imf_type = 1 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
+imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
+pagb = 1 #weight given to post agb stars# 1 is the default
 
-disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
-bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
-disk_stars_metals = 19 #in fsps metallicity units
-bulge_stars_metals = 19 #in fsps metallicity units
 
 
 CF_on = True #if set to true, then we enable the Charlot & Fall birthcloud models 
@@ -63,6 +60,21 @@ birth_cloud_clearing_age = 0.01 #Gyr - stars with age <
                                 #birth_cloud_clearing_age have
                                 #charlot&fall birthclouds meaningless
                                 #of CF_on  == False
+
+Z_init = 0 #force a metallicity increase in the newstar particles.
+           #This is useful for idealized galaxies.  The units for this
+           #are absolute (so enter 0.02 for solar).  Setting to 0
+           #means you use the stellar metallicities as they come in
+           #the simulation (more likely appropriate for cosmological
+           #runs)
+
+#Idealized Galaxy SED Parameters
+
+disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
+bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
+disk_stars_metals = 19 #in fsps metallicity units
+bulge_stars_metals = 19 #in fsps metallicity units
+
 
 
 #bins for binning the stellar ages and metallicities for SED

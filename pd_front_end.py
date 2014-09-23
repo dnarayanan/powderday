@@ -222,6 +222,7 @@ if par.FORCE_BINNING == False:
     stellar_nu,stellar_fnu,disk_fnu,bulge_fnu = sg.allstars_sed_gen(stars_list,diskstars_list,bulgestars_list)
     m=add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
     
+
 #potentially write the stellar SEDs to a npz file
     if par.STELLAR_SED_WRITE == True:
         np.savez('stellar_seds.npz',par.COSMOFLAG,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
@@ -230,7 +231,7 @@ else:
 #note - the generation of the SEDs is called within
 #add_binned_seds itself, unlike add_newstars, which requires
 #that sg.allstars_sed_gen() be called first.
-
+    
     m=add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m)
 
 
@@ -263,9 +264,8 @@ print 'Setting up Model'
 m.set_raytracing(True)
 m.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging,
                 raytracing_sources=par.n_photons_raytracing_sources,raytracing_dust=par.n_photons_raytracing_dust)
-#m.set_n_initial_iterations(10)
-m.set_n_initial_iterations(5)
-m.set_convergence(True,percentile=99.,absolute=1.005,relative=1.01)
+m.set_n_initial_iterations(7)
+m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
 
 
 image = m.add_peeled_images(sed = True,image=True)
