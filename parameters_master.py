@@ -83,7 +83,7 @@ bulge_stars_metals = 19 #in fsps metallicity units
 #reduction of memory load; see manual for details.
 
 N_STELLAR_AGE_BINS = 100
-N_MASS_BINS = 100  #these you want the most of for sure
+N_MASS_BINS = 100  
 
 
 metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
@@ -95,6 +95,17 @@ metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_bas
 #===============================================
 
 NTHETA = 10
+
+
+#===============================================
+#GRID INFORMATION  
+#===============================================
+
+#center cell position #currently deprecated, though will be used for zooming later
+MANUAL_CENTERING = True
+x_cent = 0
+y_cent = 0
+z_cent = 0
 
 
 #===============================================
@@ -112,13 +123,3 @@ CONSTANT_DUST_GRID = False #if set, then we don't create a dust grid by
                           #smoothing, but rather just make it the same
                           #size as the octree with a constant value of
                           #4e-20
-
-#===============================================
-#GRID INFORMATION  #DEPRECATED - no need to edit.
-#===============================================
-
-#center cell position #currently deprecated, though will be used for zooming later
-x_cent = 0
-y_cent = 0
-z_cent = 0 
-

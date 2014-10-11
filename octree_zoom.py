@@ -1,6 +1,6 @@
 
 import numpy as np
-import pdb
+import pdb,ipdb
 from yt.mods import *
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import sys
@@ -119,16 +119,18 @@ def octree_zoom_bbox_filter(fname,unit_base,bbox0):
 
     print "[octree zoom_bbox_filter:] Calculating Central Density Peak"
     
-
-
-
     density = ad[("PartType0","density")]
     wdens = np.where(density == np.max(density))[0]
     coordinates = ad[("PartType0","Coordinates")]
     maxdens_coordinates = coordinates[wdens]
     
-    center = maxdens_coordinates[0]
 
+    if cfg.par.MANUAL_CENTERING == True:
+        center = [cfg.par.x_cent,cfg.par.y_cent,cfg.par.z_cent]
+    else:
+        center = maxdens_coordinates[0]
+        center = center.value
+    
     print '[octree zoom_bbox_filter:] using center: ',center
     
     #DEBUG
@@ -139,8 +141,9 @@ def octree_zoom_bbox_filter(fname,unit_base,bbox0):
         box_len = cfg.par.zoom_box_len
     '''
     box_len = cfg.par.zoom_box_len
-
-    bbox_lim = ds0.quan(box_len,'code_length')
+    
+    bbox_lim = box_len
+    #bbox_lim = ds0.quan(box_len,'code_length')
     
     bbox1 = [[center[0]-bbox_lim,center[0]+bbox_lim],
             [center[1]-bbox_lim,center[1]+bbox_lim],
