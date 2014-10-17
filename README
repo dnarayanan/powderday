@@ -16,3 +16,14 @@ however.
 
 For further instructions, please see the installation guide, and
 ever-evolving user manual in the src/docs: https://bitbucket.org/desika/powderday/src/2a87385712bb18c5d291e397e5440e836a4615b6/docs/?at=default
+
+Finally, this code benefits from the contributions, either directly to
+this software, or indirectly by contributions to dependency software,
+by many astrophysicists.
+
+Matthew Turk (NCSA)
+Tom Robitaille (MPIA)
+Robert Thompson (University of Western Cape)
+Philip Hopkins (Caltech)
+Charlie Conroy (Harvard)
+Daniel Foreman-Mackey (NYU)
