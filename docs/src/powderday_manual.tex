@@ -1,0 +1,150 @@
+\documentclass[11pt,letterpaper,notitlepage]{classnotes}
+\pagestyle{plain}
+\usepackage{classnotes}
+\usepackage{latexsym,exscale,amsfonts,amsmath,amssymb,array}
+\usepackage{gensymb}
+\usepackage{mathtools}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{mdframed}
+
+%\setlength{\topmargin}{-2.3cm}
+%\setlength{\textheight}{24.8cm}
+%\setlength{\oddsidemargin}{-0.5cm}
+%\setlength{\textwidth}{17cm}
+%\setlength{\parindent}{0cm}
+% set up 1 inch margins
+\usepackage[margin=1in]{geometry}
+
+\setlength{\parskip}{.15cm}
+\newcommand{\totaldiffx}{\frac{d}{dx}}
+\newcommand{\pardiffx}{\frac{\partial}{\partial x}}
+\newcommand{\luft}{\:\!}
+\newcommand{\pd}{{\sc powderday}}
+\newcommand{\yt}{{\sc yt}}
+\newcommand{\hyperion}{{\sc hyperion}}
+\newcommand{\fsps}{{\sc fsps}}
+\newcommand{\pfsps}{{\sc python-fsps}}
+\newcommand{\scipy}{{\sc scipy}}
+\newcommand{\astropy}{{\sc astropy}}
+
+\usepackage{pgf}
+\usepackage{tikz}
+\usepackage{framed}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[latin1]{inputenc}
+\usepackage{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{chapterbib}
+\usepackage[comma,numbers,sort&compress,sectionbib]{natbib}
+\usepackage[colorlinks,linkcolor=blue,citecolor=blue]{hyperref}
+
+
+%%% Settings for code listings
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.9,0.9,0.9}
+%\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{ %
+  backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+%%%  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  basicstyle=\ttfamily\small,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{black},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=none,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{black},       % keyword style
+  language=python,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=none,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{black}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{black},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  %%title=\lstname,                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+  xleftmargin=\parindent
+}
+
+\newcounter{exercise}
+\newenvironment{exercise}[1]%
+{%
+\vspace{10pt}
+\begin{framed}
+\refstepcounter{exercise}\par\noindent
+\textbf{Exercise \theexercise\ (#1)}%
+\par\noindent}%
+{%
+\end{framed}\vspace{10pt}\par%
+}%
+
+\newenvironment{exampleo}%
+{%
+\begin{framed}
+  \textbf{\textsf{EXAMPLE}}\vspace*{2em}%
+}
+{%
+\end{framed}%
+}%
+
+
+\numberwithin{equation}{section}
+\numberwithin{exercise}{section}
+\numberwithin{figure}{section}
+
+\newcommand{\todo}[1]{{\color{red}$\blacksquare$~\textsf{[TODO: #1]}}}  
+
+\author{Desika Narayanan}
+\shortauthor{Narayanan}
+\title{{\sc powderday} Manual}
+\email{dnarayan@haverford.edu}
+
+\bibliographystyle{plainnat}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{center}
+%\noindent {\bf Manual for \pd}
+
+\vskip1cm
+
+\end{center}
+
+
+\newpage
+
+\tableofcontents
+
+\newpage
+\chapter{Installation}
+\input{installation.tex}
+
+
+\chapter{Quick Start}
+
+\chapter{Description of Parameters}
+
+\chapter{Algorithm Description}
+
+\chapter{Known Issues}
+\input{known_issues.tex}
+
+
+
+
+\end{document}
+ 

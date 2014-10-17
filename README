@@ -1,3 +1,23 @@
+Welcome to Powderday!  
+
+Powderday is a dust radiative transfer package designed to interface
+with galaxy formation simulations in order to produce spectral energy
+distributions, as well as realistic images.  The code utilizes FSPS
+(and its python hooks) for stellar SEDs, and Hyperion for dust
+radiative transfer.  Threaded throughout is yt.
+
+The code has two principle aims - to be flexible (and extremely
+modular), and to be easy to use.  The package is written in python,
+though makes use of fortran, C and cython.  
+
+As of now, the code works principally for Gadget, Gizmo and other
+variants.  Support for Gasoline, RAMSES, ART and Enzo are planned
+however.
+
+For further instructions, please see the installation guide, and
+ever-evolving user manual in the src/docs.
+
+
 Quick and Dirty INSTALLATION NOTES:
 
 0. Install yt - note, you need at least the 3.0 version which, thanks

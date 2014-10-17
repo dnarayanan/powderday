@@ -1,0 +1,166 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{hssnotes}[2004/10/07 HSS Notes format]
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%	Declaration of Options
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{ifthen}
+\newboolean{timestamp}
+
+\DeclareOption{timestamp}{\setboolean{timestamp}{true}}
+
+\ProcessOptions
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 		***** Time stamping *****
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% check for conflicting definitions
+\providecommand{\@forwhom}{}
+\providecommand{\forwhom}[1]{\renewcommand{\@forwhom}{#1}}
+
+\ifthenelse{\boolean{timestamp}}
+{
+\RequirePackage{timestamp}
+}
+{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 		***** New commands *****
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%	Command to make sure no info is omitted
+\newcommand{\@checkargs}{\ifx\@author\@empty\@warning{Missing prof command}\fi
+\ifx\@title\@empty\@warning{Missing title command}\fi
+}
+
+%	Commands for formatting:
+\def\@author{}
+\def\@shortauthor{}
+\def\@title{}
+\def\@email{}
+\def\@headertitle{\@title}
+\def\@runninghead{\@headertitle}
+\newcommand{\runninghead}[1]{\renewcommand{\@runninghead}{#1}}
+\newcommand{\shortauthor}[1]{\renewcommand{\@shortauthor}{#1}}
+\let\currentdate\today
+%%% \renewcommand{\today}{\ifcase\month\or
+%%%  Winter\or Winter\or Winter\or Spring\or Spring\or Spring\or
+%%% Summer\or Summer\or Fall\or Fall\or Fall\or Fall\fi
+%%%  \space\number\year}
+ 
+\let\@ldtitle\title
+\renewcommand{\title}{\@ifnextchar[\@titlehead\@ldtitle}
+\def\@titlehead[#1]{\def\@headertitle{#1}\@ldtitle}
+
+%	For compatibility with coursewk.sty
+\newcommand{\course}[1]{}
+\newcommand{\coursetitle}[1]{}
+\let\prof\author
+
+\newcommand{\email}[1]{\renewcommand{\@email}{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 		***** Headings *****
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% center @title between prof and page number 
+% assuming that prof is longer than page number
+
+\pagestyle{headings} 
+\setlength{\headheight}{\baselineskip}
+\addtolength{\headheight}{2pt}
+
+\renewcommand{\@oddhead}{\reset@font\small\@shortauthor\hfill\@runninghead\hfill%
+%\phantom{\@author}\smash{\thepage}%
+\thepage%
+\vadjust{\simplerule}}
+
+\let\@evenhead\@oddhead
+
+\newcommand{\simplerule}{\kern 2\p@
+\hrule width \columnwidth}
+
+\ifthenelse{\boolean{timestamp}}
+{\renewcommand{\@oddfoot}{\reset@font\small
+\hfill v.~\@timestamp\hfill}
+\let\@evenfoot\@oddfoot
+}
+{}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 		***** Title *****
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% if the titlepage option is used
+\if@titlepage
+\def\maketitle{\begin{titlepage}
+\setcounter{footnote}{0}
+\setcounter{page}{0}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\begin{center}
+\Large \sffamily Haverford College\\[6pt]
+\large
+Department of Physics and Astronomy\\
+\rmfamily\normalsize\vspace{180pt}
+%
+\Large\@title\\
+\vspace{36pt}
+%
+\large
+\@author\\
+\vspace{28pt}
+\normalsize
+\@email\\
+\@date
+\end{center}
+\end{titlepage}
+\def\thanks##1{}
+\@checkargs}
+\else
+\def\maketitle{%
+	\begingroup
+	\def\thefootnote{\fnsymbol{footnote}}%
+	\def\@makefnmark{\hbox
+       to3pt{$\m@th^{\@thefnmark}$\hss}}%
+	\if@twocolumn
+		\twocolumn[\@maketitle]%
+	\else \newpage
+		\global\@topnum\z@
+		\@maketitle 
+	\fi
+	\thispagestyle{plain}\@thanks
+	\endgroup
+	\setcounter{footnote}{0}%
+	\let\maketitle\relax
+	\let\@maketitle\relax
+	\gdef\@thanks{}\def\thanks##1{}
+	\@checkargs
+}
+\fi
+
+\def\@maketitle{\vspace*{-\headheight}
+%\vspace*{-\headsep}
+\vspace*{\baselineskip}
+\centerline{\reset@font\sffamily \Large Haverford College}
+\smallskip
+\centerline{\reset@font\small\rmfamily Department of Physics and Astronomy}
+\bigskip
+\begin{center}
+\reset@font\Large\bfseries\boldmath\@title
+\end{center}
+\begin{center}
+\reset@font\large\@author\ifx\@author\@empty\else\\\fi
+\reset@font\small
+\@email \\ Last Compiled: \@date
+\ifthenelse{\boolean{timestamp}}
+  {\ifx\@date\@empty\else\\\fi v.~\@timestamp}{}
+\end{center}
+\bigskip
+}
+
+
