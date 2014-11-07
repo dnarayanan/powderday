@@ -8,7 +8,7 @@ import astropy.constants as constants
 from astropy import cosmology as cosmo
 
 import constants as const
-import pdb
+import pdb,ipdb
 import sys
 from plot_generate import mass_weighted_distribution as mwd
 from octree_zoom import octree_zoom_bbox_filter
@@ -19,7 +19,7 @@ from datetime import timedelta
 from grid_construction import stars_coordinate_boost 
 
 from multiprocessing import Pool
-
+import yt
 
 
 
@@ -56,7 +56,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
 
     
     if cfg.par.zoom == False:
-        pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+        pf = yt.load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
     else:
         pf = octree_zoom_bbox_filter(fname,unit_base,bbox)
     pf.index
@@ -78,6 +78,11 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
         simtime = simtime.to(u.Gyr)
         simtime = simtime.value
         age = simtime-ad[("PartType4","StellarFormationTime")].value * cfg.par.unit_age #gyr
+
+        #make the minimum age 1 million years 
+        age[np.where(age < 1.e-3)[0]] = 1.e-3
+
+
         print '\n--------------'
         print '[SED_gen/star_list_gen: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ',simtime
         print '--------------\n'

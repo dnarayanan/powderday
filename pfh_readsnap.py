@@ -62,7 +62,6 @@ def readsnap(sdir,snum,ptype,
     flag_metals = header_toparse["Flag_Metals"]
 
 
-
     hinv=1.
     if (h0==1):
         hinv=1./hubble
