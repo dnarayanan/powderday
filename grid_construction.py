@@ -47,6 +47,12 @@ def yt_octree_generate():
     print '[grid_construction]: unit_base = ',unit_base
 
     
+    def _metaldens(field,data):
+        return (data["PartType0","Density"]*data["PartType0","Metallicity"])
+        
+    add_field("metaldens",function=_metaldens,units="g/cm**3")
+
+    
     if cfg.par.zoom == False:
     
         pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
@@ -177,10 +183,10 @@ def yt_octree_generate():
         #nonzero value
         
         
-        #dust_smoothed[wFalse] = masses_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio / volume[wFalse]
+        #dust_smoothed[wFalse] = 1.e10*const.msun*masses_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio / volume[wFalse]
         #dust_smoothed[wTrue] = 0
               
-        dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
+        dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio 
 
         
     else:
