@@ -179,11 +179,13 @@ if par.PAH == True:
     for size in ['usg', 'vsg', 'big']:
         m.add_density_grid(dustdens * frac[size], par.dustdir+'%s.hdf5' % size)
         
-    m.set_enforce_energy_range(False)
+    m.set_enforce_energy_range(cfg.par.enforce_energy_range)
 else:
     m.add_density_grid(dustdens,par.dustdir+par.dustfile)
 #    m.set_enforce_energy_range(False)
 
+
+#m.set_pda(True)
 
 
   
