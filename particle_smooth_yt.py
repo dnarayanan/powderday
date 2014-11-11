@@ -24,13 +24,23 @@ def yt_smooth(pf):
     saved["metallicity"] = ad["deposit","PartType0_smoothed_metallicity"]
     saved["masses"] = ad["deposit", "PartType0_smoothed_particle_mass"]
 
-   
+    
   
 
     #convert density to cgs
     saved["density"] = saved["density"].in_cgs()
 
-    return saved["metallicity"],saved["density"],saved["masses"]
+    
+    #direct calculation of the smoothed metal density (via the added
+    #MetalDens field in grid_construction)
+    metal_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
+                                                  "SmoothingLength", "Density","MetalDens",
+                                                  pf.field_info)
+    metal_fn = metal_fn[0]
+    
+
+
+    return saved["metallicity"],saved["density"],saved["masses"],ad[metal_fn]
 
    
     for i in sorted(saved):

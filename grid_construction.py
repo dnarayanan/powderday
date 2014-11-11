@@ -12,6 +12,8 @@ from plot_generate import proj_plots
 from yt.mods import *
 from yt.geometry.oct_container import OctreeContainer
 from yt.geometry.selection_routines import AlwaysSelector
+from yt.fields.particle_fields import add_volume_weighted_smoothed_field
+
 
 import constants as const
 
@@ -46,28 +48,21 @@ def yt_octree_generate():
 
     print '[grid_construction]: unit_base = ',unit_base
 
-    
-    def _metaldens(field,data):
-        return (data["PartType0","Density"]*data["PartType0","Metallicity"])
+    #define a metal dens field for smooothing; right now we don't use
+    #it because it makes little difference, but the functionality is
+    #in place.
+    def _metaldens(field,data): return (data["PartType0","Density"]*data["PartType0","Metallicity"])
+    add_field(("PartType0","MetalDens"),function=_metaldens,units="g/cm**3", particle_type=True)
         
-    add_field("metaldens",function=_metaldens,units="g/cm**3")
 
-    
     if cfg.par.zoom == False:
-    
         pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
-
-    
     else:
-    
         pf = octree_zoom_bbox_filter(fname,unit_base,bbox)
 
 
     pf.index
-
-
-    
-  
+    ad = pf.all_data()
 
 
 
@@ -143,7 +138,7 @@ def yt_octree_generate():
 
         
         from particle_smooth_yt import yt_smooth
-        metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
+        metallicity_smoothed,density_smoothed,masses_smoothed,metaldens_smoothed = yt_smooth(pf)
 
         
         '''
@@ -177,17 +172,14 @@ def yt_octree_generate():
         print '[grid_construction: ] len(metallicity_smoothed) = ',len(metallicity_smoothed)
 
        
-        #some of the outer grids in the octree can have zeros for
-        #metallicity_smoothed and density_smoothed; since this causes
-        #nans and infs down the road, we just set these to the minimum
-        #nonzero value
-        
+
         
         #dust_smoothed[wFalse] = 1.e10*const.msun*masses_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio / volume[wFalse]
         #dust_smoothed[wTrue] = 0
               
+        #dust_smoothed[wFalse] = metaldens_smoothed * cfg.par.dusttometals_ratio
         dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio 
-
+        
         
     else:
         print 'cfg.par.CONSTANT_DUST_GRID=True'
