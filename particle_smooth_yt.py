@@ -14,8 +14,13 @@ def yt_smooth(pf):
     print 'starting yt_smooth'
     pf.index
     
+    if  ('PartType4', 'Metallicity_00') in pf.derived_field_list:
+        pf.field_info["PartType0","Metallicity_00"].particle_type=True
+    else: 
+        pf.field_info["PartType0","Metallicity"].particle_type=True
 
-    pf.field_info["PartType0","metallicity"].particle_type=True
+    
+
     ad = pf.all_data()
     saved = pf.index.oct_handler.save_octree()
 
@@ -37,11 +42,12 @@ def yt_smooth(pf):
                                                   "SmoothingLength", "Density","MetalDens",
                                                   pf.field_info)
     metal_fn = metal_fn[0]
-    
+
 
 
     return saved["metallicity"],saved["density"],saved["masses"],ad[metal_fn]
-
+   
+    #return saved["metallicity"],saved["density"],saved["masses"]
    
     for i in sorted(saved):
         if not hasattr(saved[i], 'shape'): continue
