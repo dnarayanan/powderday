@@ -376,7 +376,10 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     
                     #source positions
                     pos = np.zeros([len(stars_in_bin[(wz,wa,wm)]),3])
-                    for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
+                    #for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
+                    for i in range(len(stars_in_bin[(wz,wa,wm)])):
+                        pos[i,:] = stars_list[stars_in_bin[(wz,wa,wm)][i]].positions
+                        
                     source.position=pos
 
                     #source spectrum
