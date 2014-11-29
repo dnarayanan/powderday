@@ -2,7 +2,7 @@
 #purpose: to add new star sources, disks and bulge stars
 #import parameters as par
 import config as cfg
-import pdb
+import pdb,ipdb
 import numpy as np
 import constants as const
 import operator
