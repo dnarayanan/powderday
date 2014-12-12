@@ -291,6 +291,7 @@ def grid_center(xmin,xmax,ymin,ymax,zmin,zmax):
     dy = (max(ymax)-min(ymin))/2.
     dz = (max(zmax)-min(zmin))/2.
 
+
     '''
     
     dx = np.absolute(xcent - min(xmin))

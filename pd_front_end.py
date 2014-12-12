@@ -169,9 +169,9 @@ print '[dx,dy,dz] (kpc) = ',dx/(const.pc*1.e3),dy/(const.pc*1.e3),dz/(const.pc*1
 
 
 
-m.set_octree_grid(xcent,ycent,zcent,
-                  dx,dy,dz,refined)
-    
+#m.set_octree_grid(xcent,ycent,zcent,
+#                  dx,dy,dz,refined)
+m.set_octree_grid(0,0,0,dx,dy,dz,refined)    
 
 
 if par.PAH == True:

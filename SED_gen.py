@@ -139,8 +139,8 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     #boost stellar positions to grid center
     print 'boosting new stars to coordinate center'
     stars_list = stars_coordinate_boost(stars_list,boost)
+    
 
-      
 
    
 

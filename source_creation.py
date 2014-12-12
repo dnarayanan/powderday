@@ -130,6 +130,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
         disksource.luminosity = np.repeat(disk_lum,nstars_disk)
         
         disk_pos = np.zeros([len(diskstars_list),3])
+ 
         for i in range(len(diskstars_list)): disk_pos[i,:] = diskstars_list[i].positions
         disksource.position=disk_pos
         
