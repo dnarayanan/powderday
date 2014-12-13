@@ -12,10 +12,12 @@ though makes use of fortran, C and cython.
 
 As of now, the code works principally for Gadget, Gizmo and other
 variants.  Support for Gasoline, RAMSES, ART and Enzo are planned
-however.
+however.  The current timeline is for TIPSY front ends to be built
+over winter 2014-2015, with AMR support to follow
 
 For further instructions, please see the installation guide, and
 ever-evolving user manual in the src/docs: https://bitbucket.org/desika/powderday/src/2a87385712bb18c5d291e397e5440e836a4615b6/docs/?at=default
+
 
 Finally, this code benefits from the contributions, either directly to
 this software, or indirectly by contributions to dependency software,
