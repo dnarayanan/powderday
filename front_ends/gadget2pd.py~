@@ -1,0 +1,53 @@
+import numpy as np
+import astropy.units as u
+import yt
+from yt import derived_field
+import pdb,ipdb
+
+#STUFF THAT HAS TO GET GENERALIZED INTO PD:
+tempfname = '/Volumes/pegasus/gadgetruns/m13m14_lr_Dec9_2013/snapshot_200.hdf5'
+unit_base = {'UnitLength_in_cm'         : 3.08568e+21,
+             'UnitMass_in_g'            :   1.989e+43,
+             'UnitVelocity_in_cm_per_s' :      100000}
+
+boxsize = 1.e5
+
+bbox = [[-boxsize,boxsize],
+        [-boxsize,boxsize],
+        [-boxsize,boxsize]]
+
+
+#need - 
+#1. PartType4_Metallicity (newstar metals)
+#2. PartType4_coordinates
+#3. Parttype4_StelarFormationTiome
+#4. PartType0_Density
+#5. PartType0_Metallicity
+#6. Parttype0_Coordinates
+#7. Parttype0_Smoothed_Density
+
+
+
+
+def _starmetals_00(field,data):
+    return  data[('PartType4', 'Metallicity_00')]
+
+def _starmetals(field,data):
+    return  data[('PartType4', 'Metallicity')]
+
+#pre-load to see what the metallicity fields look like
+ds = yt.load(tempfname)
+ds.index
+
+'''
+if  ('PartType4', 'Metallicity_00') in ds.derived_field_list:
+    yt.ds.add_field(('starmetals'),function=_starmetals_00,units="code_metallicity",particle_type=True)
+else:
+    yt.ds.add_field(('starmetals'),function=_starmetals,units="code_metallicity",particle_type=True)
+'''
+
+ds = yt.load(tempfname)
+ds.index
+ds.add_field(('starmetals'),function=_starmetals_00,units="code_metallicity",particle_type=True)
+ad = ds.all_data()
+#print ad[("starmetals")]
