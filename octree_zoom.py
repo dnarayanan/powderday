@@ -98,9 +98,9 @@ def octree_zoom(fname,unit_base,bbox):
     return new_ds
 
 
-def octree_zoom_bbox_filter(fname,unit_base,bbox0):
+def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
 
-    ds0 = load(fname,unit_base=unit_base,bounding_box=bbox0,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+    ds0 = pf
     
     ds0.index
     ad = ds0.all_data()

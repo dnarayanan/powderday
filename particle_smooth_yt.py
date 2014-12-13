@@ -38,16 +38,16 @@ def yt_smooth(pf):
     
     #direct calculation of the smoothed metal density (via the added
     #MetalDens field in grid_construction)
-    metal_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
-                                                  "SmoothingLength", "Density","MetalDens",
-                                                  pf.field_info)
-    metal_fn = metal_fn[0]
+    #metal_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
+    #                                              "SmoothingLength", "Density","MetalDens",
+    #                                              pf.field_info)
+    #metal_fn = metal_fn[0]
 
 
 
-    return saved["metallicity"],saved["density"],saved["masses"],ad[metal_fn]
+    #return saved["metallicity"],saved["density"],saved["masses"],ad[metal_fn]
    
-    #return saved["metallicity"],saved["density"],saved["masses"]
+    return saved["metallicity"],saved["density"],saved["masses"]
    
     for i in sorted(saved):
         if not hasattr(saved[i], 'shape'): continue

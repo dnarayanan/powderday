@@ -2,18 +2,9 @@ import numpy as np
 import yt
 from yt import derived_field
 import pdb,ipdb
+import config as cfg
 
-#STUFF THAT HAS TO GET GENERALIZED INTO PD:
-tempfname = '/Volumes/pegasus/gadgetruns/m13m14_lr_Dec9_2013/snapshot_200.hdf5'
-unit_base = {'UnitLength_in_cm'         : 3.08568e+21,
-             'UnitMass_in_g'            :   1.989e+43,
-             'UnitVelocity_in_cm_per_s' :      100000}
 
-boxsize = 1.e5
-
-bbox = [[-boxsize,boxsize],
-        [-boxsize,boxsize],
-        [-boxsize,boxsize]]
 
 
 #need - 
@@ -26,8 +17,8 @@ bbox = [[-boxsize,boxsize],
 #7. Parttype0_Smoothed_Density
 
 
-def gadget_field_add(fname):
-
+def gadget_field_add(fname,unit_base,bbox):
+    
     
     def _starmetals_00(field,data):
         return data[('PartType4', 'Metallicity_00')]
@@ -56,8 +47,19 @@ def gadget_field_add(fname):
     def _gassmootheddensity(field,data):
         return data[("deposit","PartType0_smoothed_density")]
 
+    def _metaldens_00(field,data):
+        return (data["PartType0","Density"]*data["PartType0","Metallicity_00"])
+
+    def _metaldens(field,data):
+        return (data["PartType0","Density"]*data["PartType0","Metallicity"])
+
+    
+    
+        
+
+
     #load the ds
-    ds = yt.load(tempfname)
+    ds = yt.load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
     ds.index
 
 
@@ -72,7 +74,15 @@ def gadget_field_add(fname):
     else:
         ds.add_field(('gasmetals'),function=_gasmetals,units="code_metallicity",particle_type=True)
 
-    
+    if  ('PartType0', 'Metallicity_00') in ds.derived_field_list:
+        ds.add_field(('metaldens'),function=_metaldens_00,units="g/cm**3", particle_type=True)
+    else:
+        ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
+
+
+        
+        
+        
     ds.add_field(('starcoordinates'),function=_starcoordinates,units='code_length',particle_type=True)
     ds.add_field(('starformationtime'),function=_starformationtime,units='dimensionless',particle_type=True)
     ds.add_field(('gasdensity'),function=_gasdensity,units='code_mass/code_length**3',particle_type=True)

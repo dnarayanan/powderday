@@ -20,6 +20,8 @@ from grid_construction import stars_coordinate_boost
 
 from multiprocessing import Pool
 import yt
+from front_ends.gadget2pd import *
+
 
 
 
@@ -54,11 +56,15 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
                  'UnitMass_in_g'            : cfg.par.unit_mass*const.msun,
                  'UnitVelocity_in_cm_per_s' : cfg.par.unit_velocity}
 
+
+    #load the DS
+    pf = gadget_field_add(fname,unit_base,bbox)
     
-    if cfg.par.zoom == False:
-        pf = yt.load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
-    else:
-        pf = octree_zoom_bbox_filter(fname,unit_base,bbox)
+    #zoom if necessary
+    if cfg.par.zoom == True:
+        pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox)
+        
+        
     pf.index
 
     ad = pf.all_data()
