@@ -17,7 +17,7 @@ import config as cfg
 #7. Parttype0_Smoothed_Density
 
 
-def gadget_field_add(fname,unit_base,bbox):
+def gadget_field_add(fname,unit_base,bbox,ds=None):
     
     
     def _starmetals_00(field,data):
@@ -47,6 +47,12 @@ def gadget_field_add(fname,unit_base,bbox):
     def _gassmootheddensity(field,data):
         return data[("deposit","PartType0_smoothed_density")]
 
+    def _gassmoothedmetals(field,data):
+        return data[("deposit","PartType0_smoothed_metallicity")]
+
+    def _gassmoothedmasses(field,data):
+        return data[("deposit","PartType0_smoothed_particle_mass")]
+    
     def _metaldens_00(field,data):
         return (data["PartType0","Density"]*data["PartType0","Metallicity_00"])
 
@@ -56,11 +62,10 @@ def gadget_field_add(fname,unit_base,bbox):
     
     
         
-
-
     #load the ds
-    ds = yt.load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
-    ds.index
+    if fname != None:
+        ds = yt.load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+        ds.index
 
 
     #for the metal fields have a few options since gadget can have different nomenclatures
@@ -69,25 +74,23 @@ def gadget_field_add(fname,unit_base,bbox):
     else:
         ds.add_field(('starmetals'),function=_starmetals,units="code_metallicity",particle_type=True)
 
+        
     if  ('PartType0', 'Metallicity_00') in ds.derived_field_list:
         ds.add_field(('gasmetals'),function=_gasmetals_00,units="code_metallicity",particle_type=True)
-    else:
-        ds.add_field(('gasmetals'),function=_gasmetals,units="code_metallicity",particle_type=True)
-
-    if  ('PartType0', 'Metallicity_00') in ds.derived_field_list:
         ds.add_field(('metaldens'),function=_metaldens_00,units="g/cm**3", particle_type=True)
     else:
+        ds.add_field(('gasmetals'),function=_gasmetals,units="code_metallicity",particle_type=True)
         ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
 
-
-        
-        
         
     ds.add_field(('starcoordinates'),function=_starcoordinates,units='code_length',particle_type=True)
     ds.add_field(('starformationtime'),function=_starformationtime,units='dimensionless',particle_type=True)
     ds.add_field(('gasdensity'),function=_gasdensity,units='code_mass/code_length**3',particle_type=True)
     ds.add_field(('gascoordinates'),function=_gascoordinates,units='code_length',particle_type=True)
     ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='code_mass/code_length**3',particle_type=True)
+    ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
+    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='code_mass',particle_type=True)
 
+    
 
     return ds

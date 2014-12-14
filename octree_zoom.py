@@ -9,12 +9,14 @@ import constants as const
 
 from cutout_data import yt_field_map
 from yt.frontends.sph.data_structures import ParticleDataset
+from front_ends.gadget2pd import *
+
 ParticleDataset.filter_bbox = True
 ParticleDataset._skip_cache = True
 
 
 
-def octree_zoom(fname,unit_base,bbox):
+def octree_zoom(fname,pf,unit_base,bbox):
 
     pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
 
@@ -25,11 +27,13 @@ def octree_zoom(fname,unit_base,bbox):
     print '----------------------------'
     print '[octree zoom] Entering Octree Zoom with parameters: '
     print "[octree zoom] (...Calculating Center of Mass in octree_zoom)"
-#    com = ad.quantities.center_of_mass()
+    #    com = ad.quantities.center_of_mass()
 
-    gas_com_x = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_x"])/np.sum(ad["PartType0","density"])
-    gas_com_y = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_y"])/np.sum(ad["PartType0","density"])
-    gas_com_z = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_z"])/np.sum(ad["PartType0","density"])
+    
+    gas_com_x = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,0])/np.sum(ad["gasdensity"])
+    gas_com_y = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,1])/np.sum(ad["gasdensity"])
+    gas_com_z = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,2])/np.sum(ad["gasdensity"])
+    
     com = [gas_com_x,gas_com_y,gas_com_z]
 
     print "[octree zoom] Center of Mass is at coordinates (kpc): ",com
@@ -81,18 +85,12 @@ def octree_zoom(fname,unit_base,bbox):
     new_ds.particle_types_raw = tuple(pt for pt in pf.particle_types_raw 
                                       if pt not in skip)
     new_ds.index
-    
+
     #make sure that the metallicity particles make the translation
     new_ds.field_info["PartType0","metallicity"].particle_type=True
 
     new_ad = new_ds.all_data()
     
-    '''
-    saved = new_ds.index.oct_handler.save_octree(always_descend=True)
-    saved["density"] = new_ad["deposit","PartType0_smoothed_density"]
-    saved["metallicity"] = new_ad["deposit","PartType0_smoothed_metallicity"]
-    '''
-
 
         
     return new_ds
@@ -109,9 +107,12 @@ def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
     print '----------------------------'
     print "[octree zoom_bbox_filter:] Calculating Center of Mass"
 
-    gas_com_x = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_x"])/np.sum(ad["PartType0","density"])
-    gas_com_y = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_y"])/np.sum(ad["PartType0","density"])
-    gas_com_z = np.sum(ad["PartType0","density"]*ad["PartType0","particle_position_z"])/np.sum(ad["PartType0","density"])
+
+    gas_com_x = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,0])/np.sum(ad["gasdensity"])
+    gas_com_y = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,1])/np.sum(ad["gasdensity"])
+    gas_com_z = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,2])/np.sum(ad["gasdensity"])
+
+
     com = [gas_com_x,gas_com_y,gas_com_z]
 
     print "[octree zoom_bbox_filter:] Center of Mass is at coordinates (kpc): ",com
@@ -119,9 +120,10 @@ def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
 
     print "[octree zoom_bbox_filter:] Calculating Central Density Peak"
     
-    density = ad[("PartType0","density")]
+    density = ad["gasdensity"]
     wdens = np.where(density == np.max(density))[0]
-    coordinates = ad[("PartType0","Coordinates")]
+
+    coordinates = ad["gascoordinates"]
     maxdens_coordinates = coordinates[wdens]
     
 
@@ -154,6 +156,8 @@ def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
     ds1 = load(fname,unit_base=unit_base,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
     ds1.periodicity = (False,False,False)
 
+    #re-add the new powderday convention fields
+    ds1 = gadget_field_add(None,unit_base,bbox1,ds=ds1)
 
-
+    
     return ds1

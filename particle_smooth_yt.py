@@ -19,16 +19,26 @@ def yt_smooth(pf):
     else: 
         pf.field_info["PartType0","Metallicity"].particle_type=True
 
+    if  ('gasmetals_00') in pf.derived_field_list:
+        pf.field_info["gasmetals_00"].particle_type=True
+    else: 
+        pf.field_info["gasmetals"].particle_type=True
+
     
 
     ad = pf.all_data()
     saved = pf.index.oct_handler.save_octree()
+    
+    saved["density"] = ad["gassmootheddensity"]
+    saved["metallicity"] = ad["gassmoothedmetals"]
+    saved["masses"] = ad["gassmoothedmasses"]
 
-
+    
+    '''
     saved["density"] = ad["deposit","PartType0_smoothed_density"]
     saved["metallicity"] = ad["deposit","PartType0_smoothed_metallicity"]
     saved["masses"] = ad["deposit", "PartType0_smoothed_particle_mass"]
-
+    '''
     
   
 
