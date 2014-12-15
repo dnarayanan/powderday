@@ -91,6 +91,14 @@ do
     echo "inputfile = PD_output_dir+'/example.'+snapnum_str+'.rtin'" >>$filem
     echo "outputfile = PD_output_dir+'/example.'+snapnum_str+'.rtout'" >>$filem
 
+    echo -e "\n\n" >>$filem
+    echo "#===============================================" >>$filem
+    echo "#GRID POSITIONS" >>$filem
+    echo "#===============================================" >>$filem
+    echo "x_cent = 0" >>$filem
+    echo "y_cent = 0" >>$filem
+    echo "z_cent = 0" >>$filem
+
 done
 
 
