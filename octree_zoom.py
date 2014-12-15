@@ -128,7 +128,7 @@ def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
     
 
     if cfg.par.MANUAL_CENTERING == True:
-        center = [cfg.pos.x_cent,cfg.pos.y_cent,cfg.pos.z_cent]
+        center = [cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent]
     else:
         center = maxdens_coordinates[0]
         center = center.value

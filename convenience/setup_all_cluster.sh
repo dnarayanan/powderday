@@ -115,6 +115,6 @@ echo "cd /home/desika/Dropbox/powderday" >>$qsubfile
 for (( i=$startsnap; i<=$endsnap; i++ ))
 do
     echo $i
-    echo "python pd_front_end.py $model_dir parameters_master model_$i > $model_dir/snap$i.txt">>$qsubfile
+    echo "python pd_front_end.py $model_dir parameters_master model_$i pos_$i > $model_dir/snap$i.txt">>$qsubfile
 
 done

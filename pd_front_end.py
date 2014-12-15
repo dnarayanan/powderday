@@ -5,7 +5,7 @@
 #=========================================================
 
 import sys
-script,pardir,parfile,modelfile,posfile = sys.argv
+script,pardir,parfile,modelfile = sys.argv
 import numpy as np
 import scipy.interpolate
 import scipy.ndimage
@@ -23,13 +23,13 @@ import pdb
 sys.path.insert(0,pardir)
 par = __import__(parfile)
 model = __import__(modelfile)
-pos = __import__(posfile)
+
 
 import random
 import config as cfg
 cfg.par = par #re-write cfg.par for all modules that read this in now
 cfg.model = model
-cfg.pos = pos
+
 
 import error_handling as eh
 
