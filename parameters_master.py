@@ -3,7 +3,8 @@
 #===============================================
 oref = 0 #over refine factor - should typically be set to 0
 n_ref = 64 #when n_particles > n_ref, octree refines further
-zoom = True #False = use the entire grid; True = zoom in on the highest density peak
+zoom = True #False = use the entire grid; True = zoom in on the
+            #highest density peak (unless Manual_Centering==True)
 zoom_box_len = 200 #kpc; so the box will be +/- zoom_box_len from the center
 bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_lim)
                #This *must* encompass all of the particles in the
@@ -27,9 +28,9 @@ n_photons_raytracing_dust = 1.e8
 
 
 #===============================================
-#DUST INFORMATION
+#DUST INFORMATION 
 #===============================================
-dustdir = '/home/desika/hyperion-dust-0.1.0/dust_files/'
+dustdir = '/home/desika/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 dusttometals_ratio = 0.4
@@ -55,7 +56,7 @@ pagb = 1 #weight given to post agb stars# 1 is the default
 
 
 
-CF_on = True #if set to true, then we enable the Charlot & Fall birthcloud models 
+CF_on = False #if set to true, then we enable the Charlot & Fall birthcloud models 
 birth_cloud_clearing_age = 0.01 #Gyr - stars with age <
                                 #birth_cloud_clearing_age have
                                 #charlot&fall birthclouds meaningless
@@ -69,7 +70,6 @@ Z_init = 0 #force a metallicity increase in the newstar particles.
            #runs)
 
 #Idealized Galaxy SED Parameters
-
 disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
 bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
 disk_stars_metals = 19 #in fsps metallicity units
