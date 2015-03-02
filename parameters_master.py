@@ -103,10 +103,6 @@ NTHETA = 10
 
 #center cell position #currently deprecated, though will be used for zooming later
 MANUAL_CENTERING = True
-x_cent = 0
-y_cent = 0
-z_cent = 0
-
 
 #===============================================
 #DEBUGGING
