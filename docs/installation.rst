@@ -49,6 +49,7 @@ fsps
 --------------
 
 `fsps <https://code.google.com/p/fsps/source/checkout>`_ can be checked out with::
+  
   >svn checkout http://fsps.googlecode.com/svn/trunk/ fsps
 
 and directions to the installation are in the `Manual <https://www.cfa.harvard.edu/~cconroy/ FSPS_files/MANUAL.pdf>`_
@@ -58,11 +59,16 @@ Currently, `python-fsps
 work with revision 145 of `fsps
 <https://code.google.com/p/fsps/source/checkout>`_ , so it is safest
 to revert to this version via::
+  
   >svn update -r 145
-in the src directory of fsps.  It is almost certainly going to be necessary downstream when installing  `python-fsps
+
+  in the src directory of fsps.  It is almost certainly going to be necessary downstream when installing  `python-fsps
 <http://dan.iel.fm/python-fsps/current/installation/>`_ to have the -fPIC flags set in `fsps <https://code.google.com/p/fsps/source/checkout>`_ when making.  So, in the Makefile of `fsps <https://code.google.com/p/fsps/source/checkout>`_ , set::
+  
   >F90FLAGS = -O -cpp -fPIC
-Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
+
+ Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
+   
   >export SPS\_HOME=/Users/desika/fsps/
 
 
@@ -79,9 +85,13 @@ Foreman-Mackey and others called `python-fsps
 <http://dan.iel.fm/python-fsps/current/installation/>`_.  There are a
 few ways to install it.  Perhaps the easiest is via a pip installer::
   >pip install fsps
+  
 Though you could also install the development version::
+  
   >git clone https://github.com/dfm/python-fsps.git
   >cd python-fsps
   >python setup.py install
+
 You can test the installation by opening python and typing::
-  >import fsps
+
+>import fsps
