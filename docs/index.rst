@@ -30,6 +30,18 @@ Finally, this code benefits from the contributions, either directly to
 this software, or indirectly by contributions to dependency software,
 by many astrophysicists.
 
+.. important:: **Please Read the Following Disclaimers**:
+
+               *While the developers have made every effort to ensure
+                that the code is bug-free, bugs invariably find their
+                way in.  The developers are not responsible for
+                incorrect results, arising either from inherent bugs
+                in the code, or mistakes in usage.  Any questions
+                regarding the code or usage should be sent to the
+                mailing list.
+
+
+
 Contents:
 
 .. toctree::

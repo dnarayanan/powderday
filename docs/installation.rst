@@ -182,3 +182,28 @@ which should return something like::
 
   >Usage: hyperion_sph [-f] input_file output_file
 
+
+  .. _Hyperion_dust:
+
+Hyperion Dust Files
+--------------
+
+Unless you've written your own dust files, you will likely want to use
+the pre-compiled dust files developed by Tom Robitaille (though don't
+ship with `Hyperion <http://www.hyperion-rt.org>`_ due to their size).
+To install these download them here:
+http://docs.hyperion-rt.org/en/stable/dust/dust.html.  Then to
+install::
+
+  >tar xvzf hyperion-dust-xxx.tar.gz
+  >cd hyperion-dust-0.1.0
+  >python setup.py build_dust
+
+If you want to use the PAH model in `powderday
+<https://bitbucket.org/desika/powderday>`_, you'll additionally need
+these files in the same dust directory.  To download, click on the link,
+then click 'raw' on the right side of each page.
+
+1. https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/big.hdf5
+2. https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/vsg.hdf5
+3. https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/usg.hdf5
