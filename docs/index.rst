@@ -16,6 +16,21 @@ The code has two principle aims - to be flexible (and extremely
 modular), and to be easy to use.  The package is written in python,
 though makes use of fortran, C and cython.  
 
+As of now, the code works principally for Gadget, Gizmo and other
+variants.  Support for Gasoline, RAMSES, ART and Enzo are planned
+however.  The current timeline is for TIPSY front ends to be built
+over Spring 2015, with AMR support to follow
+
+Finally, this code benefits from the contributions, either directly to
+this software, or indirectly by contributions to dependency software,
+by many astrophysicists:
+
+Matthew Turk (NCSA)
+Tom Robitaille (MPIA)
+Robert Thompson (University of Western Cape)
+Philip Hopkins (Caltech)
+Charlie Conroy (Harvard)
+Daniel Foreman-Mackey (NYU)
 
 Contents:
 
