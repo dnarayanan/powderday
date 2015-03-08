@@ -10,6 +10,7 @@ Overview of Requirements
 	  * scipy
 	  * astropy
 	  * Atpy
+	  * h5py
 	  
 	* **yt** <http:yt-project.org>
 	* **FSPS** <https://code.google.com/p/fsps/source/checkout>
@@ -62,12 +63,12 @@ to revert to this version via::
   
   >svn update -r 145
 
-  in the src directory of fsps.  It is almost certainly going to be necessary downstream when installing  `python-fsps
+in the src directory of fsps.  It is almost certainly going to be necessary downstream when installing  `python-fsps
 <http://dan.iel.fm/python-fsps/current/installation/>`_ to have the -fPIC flags set in `fsps <https://code.google.com/p/fsps/source/checkout>`_ when making.  So, in the Makefile of `fsps <https://code.google.com/p/fsps/source/checkout>`_ , set::
   
   >F90FLAGS = -O -cpp -fPIC
 
- Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
+Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
    
   >export SPS\_HOME=/Users/desika/fsps/
 
@@ -95,3 +96,82 @@ Though you could also install the development version::
 You can test the installation by opening python and typing::
 
 >import fsps
+
+.. _Hyperion:
+
+Hyperion
+--------------
+
+`Hyperion <http://www.hyperion-rt.org>`_ is the main work horse of
+`powderday <https://bitbucket.org/desika/powderday>`_.  The directions
+for installation are somewhat detialed (if easy), so we direct you to
+the host website for details.  Here, we summarize the installation
+which should get most users through without any real difficulty.
+
+
+1. First download the tarball and unpack it.::
+
+     >tar -xzvf hyperion.xxx
+     >cd hyperion.xxx
+     
+2. Install the fortran dependencies::
+
+   >cd deps/fortran
+   >python install.py <prefix>
+
+where <prefix> is where you want the libraries to be installed.  To
+avoid conflicts with other packages, I usually install somewhere
+like:: >python install.py /usr/local/hyperion as suggested by the
+`Hyperion <http://www.hyperion-rt.org>`_ docs.  Ensure that the
+following commands return something sensible::
+
+  >which mpif90
+  >which h5fc
+
+if not, your path probably needs to include wherever the <prefix> directory pointed to.
+  
+
+ 
+3. Install any remaining python dependencies. These are listed `here <http://docs.hyperion-rt.org/en/stable/installation/python_dependencies.html>`_  
+   
+4. Install `Hyperion <http://www.hyperion-rt.org>`_  itself.  To do this::
+     >cd hyperion.xxx
+     >python setup.py install
+
+or::
+
+  >python setup.py install --user
+
+if you don't have root access.  At this point::
+
+  >import hyperion
+
+from within python should work, and typing::
+
+  >hyperion
+
+at the command line should return something along the lines of::
+
+  >usage: hyperion [-h] [-f] [-m n_cores] input output
+  >hyperion: error: too few arguments
+
+if not, check the the path that is near one of the last lines of the
+setup.py installation (that is something associated with the
+number 755) and make sure it's in your path.  Ir's most likely to be a
+python binaries directory.
+
+You then have to install the Fortran Binaries::
+
+  >./configure  --prefix=prefix
+  >make
+  >make install
+
+where the prefix is wherever you installed the Fortran libraries
+before.  Make sure this works by typing at the command line::
+
+  >hyperion_sph
+
+which should return something like::
+
+  >Usage: hyperion_sph [-f] input_file output_file
+
