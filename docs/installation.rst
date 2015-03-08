@@ -121,8 +121,11 @@ which should get most users through without any real difficulty.
 
 where <prefix> is where you want the libraries to be installed.  To
 avoid conflicts with other packages, I usually install somewhere
-like:: >python install.py /usr/local/hyperion as suggested by the
-`Hyperion <http://www.hyperion-rt.org>`_ docs.  Ensure that the
+like::
+
+  >python install.py /usr/local/hyperion
+
+as suggested by the `Hyperion <http://www.hyperion-rt.org>`_ docs.  Ensure that the
 following commands return something sensible::
 
   >which mpif90
@@ -135,6 +138,7 @@ if not, your path probably needs to include wherever the <prefix> directory poin
 3. Install any remaining python dependencies. These are listed `here <http://docs.hyperion-rt.org/en/stable/installation/python_dependencies.html>`_  
    
 4. Install `Hyperion <http://www.hyperion-rt.org>`_  itself.  To do this::
+     
      >cd hyperion.xxx
      >python setup.py install
 
