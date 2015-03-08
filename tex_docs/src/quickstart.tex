@@ -1,0 +1,27 @@
+In the examples subdirectory, you will find example snapshots for the
+different hydro codes supported with Powderday. This will likely
+change significantly over time as the code gets cleaned up, the
+parameter files change, and the example snapshots migrate toward the
+Agora snaps.  But, in the mean time, this should hopefully get you started.
+
+For each example file there should be two parameter files that will be
+reasonable for the associated snapshot.
+
+To run, type (in your source directory):\\
+\begin{verbatim}
+ > python pd_front_end.py <example directory> <parameters_master_file> <parameters_model_file>
+\end{verbatim}
+Note - the .py extensions on the parameter files need to be left off.  So, as an example for the {\sc gadget} \ snapshot detailed below:
+\begin{verbatim}
+ > python pd_front_end.py examples/gadget parameters_master parameters_model
+\end{verbatim}
+
+\section{Gadget}
+
+The {\sc gadget} file here is an idealized disk galaxy (actually
+created with {\sc gizmo} but the outputs are the same).  The snapshot
+can be downloaded here:
+\url{https://www.dropbox.com/s/055bewn1iv7mk7r/snapshot_020.hdf5?dl=0}.\\
+\newline
+The SED as of hash 191d121 (in Jy, redshift 0) is [to come..]:
+
