@@ -16,6 +16,7 @@ Overview of Requirements
 	* **FSPS** <https://code.google.com/p/fsps/source/checkout>
 	* **python-fsps** <http://dan.iel.fm/python-fsps/current/>
 	* **Hyperion** <http://www.hyperion-rt.org/>
+	* **Hyperion Dust Files** <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
 
 	  
 Installation
