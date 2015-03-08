@@ -25,8 +25,11 @@ We're working on an all-in-one installer for `powderday
 <https://bitbucket.org/desika/powderday>`_.  For the time being, for
 better or worse, the installation of individual packagesa that
 `powderday <https://bitbucket.org/desika/powderday>`_ depends on is
-manual. Here, we'll detail the order of operations, though it's always
-wise to check the parent site for installation.
+manual.  What follows is a self-contained installation manual, though
+for problematic installs of any of the sub packages, it's definitely
+best to visit the main docs on the main software site (which are
+always linked below in each subsection).
+
 
 .. _yt:
 
@@ -70,7 +73,7 @@ in the src directory of fsps.  It is almost certainly going to be necessary down
 
 Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
    
-  >export SPS\_HOME=/Users/desika/fsps/
+  >export SPS_HOME=/Users/desika/fsps/
 
 
 
