@@ -11,7 +11,7 @@ Overview of Requirements
 	  * astropy
 	  * Atpy
 	  
-	* **yt**
+	* '**yt** <https://yt-project.org>'
 	* **FSPS**
 	* **python-fsps**
 	* **Hyperion**
