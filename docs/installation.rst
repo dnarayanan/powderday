@@ -4,7 +4,7 @@ Getting Started
 Overview of Requirements
 ============
 
-	* **python**
+	* **python2.x**
 
 	  * numpy
 	  * scipy
@@ -12,7 +12,7 @@ Overview of Requirements
 	  * Atpy
 	  * h5py
 	  
-	* **yt** <http:yt-project.org>
+	* **yt** <http://yt-project.org>
 	* **FSPS** <https://code.google.com/p/fsps/source/checkout>
 	* **python-fsps** <http://dan.iel.fm/python-fsps/current/>
 	* **Hyperion** <http://www.hyperion-rt.org/>
@@ -31,6 +31,14 @@ for problematic installs of any of the sub packages, it's definitely
 best to visit the main docs on the main software site (which are
 always linked below in each subsection).
 
+.. _python:
+
+python
+--------------
+
+`powderday <https://bitbucket.org/desika/powderday>`_ currently only
+works with python 2.x.  The code was developed on, and principally
+tested with python 2.7. 
 
 .. _yt:
 
@@ -40,10 +48,9 @@ yt
 First and foremost, you need to have `yt <http://yt-project.org>`_
 installed.  There are many ways to do this (as directed on the `yt
 <http://yt-project.org>`_ project website.  Utilizing `anaconda
-<https://store.continuum.io/>`_) is certainly a good option
-because (a) it comes with all of the required python subpackages,
-and (b) the `yt <http://yt-project.org>`_ installation is
-exceptionally easy then.
+<https://store.continuum.io/>`_ is certainly a good option because (a)
+it comes with all of the required python subpackages, and (b) the `yt
+<http://yt-project.org>`_ installation is exceptionally easy then.
 
 Note, that you will need yt 3.x, meaning at least the stable or
 development versions.
