@@ -129,50 +129,15 @@ def yt_octree_generate():
 
     if cfg.par.CONSTANT_DUST_GRID == False: 
 
- 
-        '''USING YT SMOOTHING'''
-
         
         from particle_smooth_yt import yt_smooth
         metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
-
-        
-        '''
-        #DEBUG 061314
-        wm = np.where(metallicity_smoothed > 0)[0]
-        print np.median(metallicity_smoothed[wm])
-        wm2 = np.where(metallicity_smoothed > (np.min(metallicity_smoothed[wm]*2.)))
-        print np.median(metallicity_smoothed[wm2])
-        wmless = np.where(metallicity_smoothed < np.min(metallicity_smoothed[wm2]))[0]
-        metallicity_smoothed[wmless] = np.median(metallicity_smoothed[wm2])
-        print np.median(metallicity_smoothed)
-
-
-        wd = np.where(density_smoothed > 0)[0]
-        print np.median(density_smoothed[wd])
-        wd2 = np.where(density_smoothed > (np.min(density_smoothed[wd]*200.)))
-        print np.median(density_smoothed[wd2])
-        wdless = np.where(density_smoothed < np.min(density_smoothed[wd2]))[0]
-        density_smoothed[wdless] = np.median(density_smoothed[wd2])
-        print np.median(density_smoothed)
-
-        '''
-
-
-
 
 
         dust_smoothed = np.zeros(len(refined))
         
         print '[grid_construction: ] len(wFalse) = ',len(wFalse)
         print '[grid_construction: ] len(metallicity_smoothed) = ',len(metallicity_smoothed)
-
-       
-
-        
-        #dust_smoothed[wFalse] = 1.e10*const.msun*masses_smoothed * metallicity_smoothed * cfg.par.dusttometals_ratio / volume[wFalse]
-        #dust_smoothed[wTrue] = 0
-              
 
         dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio 
         
@@ -181,13 +146,6 @@ def yt_octree_generate():
         print 'cfg.par.CONSTANT_DUST_GRID=True'
         print 'setting constant dust grid to 4.e-22'
         dust_smoothed = np.zeros(len(refined))+4.e-23
-
-
-
-
-    
-    
-
 
 
 
@@ -208,17 +166,7 @@ def yt_octree_generate():
     xcent_orig,ycent_orig,zcent_orig,dx,dy,dz = grid_center(xmin,xmax,ymin,ymax,zmin,zmax)
     boost = np.array([xcent_orig,ycent_orig,zcent_orig])*1.e3*const.pc
 
-    '''
-    xmin,xmax,ymin,ymax,zmin,zmax = grid_coordinate_boost(xmin,xmax,ymin,ymax,zmin,zmax)
-   
-
-    coordinates_Table = Table([fc1[:,0]-fw1[:,0]/2.,fc1[:,0]+fw1[:,0]/2.,fc1[:,1]-fw1[:,1]/2.,
-                               fc1[:,1]+fw1[:,1]/2.,fc1[:,2]-fw1[:,2]/2.,fc1[:,2]+fw1[:,2]/2.],
-                              names = ['xmin','xmax','ymin','ymax','zmin','zmax'])
-    
-    ascii.write(coordinates_Table,cfg.par.PD_output_dir+cfg.par.Auto_positions_file)
-
-    '''
+  
 
     logical_Table = Table([refined[:]],names=['logical'])
     ascii.write(logical_Table,cfg.model.PD_output_dir+cfg.model.Auto_TF_file)
@@ -271,14 +219,6 @@ def grid_center(xmin,xmax,ymin,ymax,zmin,zmax):
     dx = (max(xmax)-min(xmin))/2
     dy = (max(ymax)-min(ymin))/2.
     dz = (max(zmax)-min(zmin))/2.
-
-
-    '''
-    
-    dx = np.absolute(xcent - min(xmin))
-    dy = np.absolute(ycent - min(ymin))
-    dz = np.absolute(zcent - min(zmin))
-    '''
 
     return xcent,ycent,zcent,dx,dy,dz
 
