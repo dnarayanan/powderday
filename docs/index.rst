@@ -12,10 +12,12 @@ Welcome to Powderday's documentation!
 
 Powderday is a dust radiative transfer package designed to interface
 with galaxy formation simulations in order to produce realistic
-spectral energy distributions and images. The code utilizes ''FSPS''
-(and its python hooks, ''python-fsps'') for stellar SEDs, and
-''Hyperion'' for dust radiative transfer.  Threaded throughout is
-''yt''.
+spectral energy distributions and images. The code utilizes fsps
+<https://code.google.com/p/fsps/source/checkout>`_ (and its python
+hooks, `python-fsps
+<http://dan.iel.fm/python-fsps/current/installation/>`_) for stellar
+SEDs, and `Hyperion <http://www.hyperion-rt.org>`_ for dust radiative
+transfer.  Threaded throughout is `yt <http://yt-project.org>`_.
 
 The code has two principle aims - to be flexible (and extremely
 modular), and to be easy to use.  The package is written in python,
@@ -31,7 +33,7 @@ this software, or indirectly by contributions to dependency software,
 by many astrophysicists, including Matt Turk, Tom Robitaille, Robert
 Thompson, Charlie Conroy, Dan Forman-Mackey and Phil Hopkins.
 
-.. important:: **Please Read the Following Disclaimers**:
+.. important:: **Please Read the Following Disclaimer**:
 
    While the developers have made every effort to ensure
    that the code is bug-free, bugs invariably find their
