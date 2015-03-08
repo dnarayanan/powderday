@@ -28,25 +28,14 @@ over Spring 2015, with AMR support to follow
 
 Finally, this code benefits from the contributions, either directly to
 this software, or indirectly by contributions to dependency software,
-by many astrophysicists:
-
-Matthew Turk (NCSA)
-
-Tom Robitaille (MPIA)
-
-Robert Thompson (University of Western Cape)
-
-Philip Hopkins (Caltech)
-
-Charlie Conroy (Harvard)
-
-Daniel Foreman-Mackey (NYU)
+by many astrophysicists.
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
+   installation.rst
 
 
 Indices and tables
