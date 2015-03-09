@@ -24,7 +24,7 @@ Installation
 
 We're working on an all-in-one installer for `powderday
 <https://bitbucket.org/desika/powderday>`_.  For the time being, for
-better or worse, the installation of individual packagesa that
+better or worse, the installation of individual packages that
 `powderday <https://bitbucket.org/desika/powderday>`_ depends on is
 manual.  What follows is a self-contained installation manual, though
 for problematic installs of any of the sub packages, it's definitely
@@ -114,10 +114,11 @@ Hyperion
 --------------
 
 `Hyperion <http://www.hyperion-rt.org>`_ is the main work horse of
-`powderday <https://bitbucket.org/desika/powderday>`_.  The directions
-for installation are somewhat detialed (if easy), so we direct you to
-the host website for details.  Here, we summarize the installation
-which should get most users through without any real difficulty.
+`powderday <https://bitbucket.org/desika/powderday>`_.  The full
+directions for installation are well-described on the main `Hyperion
+<http://www.hyperion-rt.org>`_ website.  Here, we summarize the
+installation which should get most users through without any real
+difficulty.
 
 
 1. First download the tarball and unpack it.::
