@@ -51,6 +51,7 @@ Contents:
    :maxdepth: 2
 
    installation.rst
+   quickstart.rst
 
 
 Indices and tables

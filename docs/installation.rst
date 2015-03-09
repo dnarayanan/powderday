@@ -11,7 +11,9 @@ Overview of Requirements
 	  * astropy
 	  * Atpy
 	  * h5py
-	  
+
+	* **mercurial** <http://mercurial.selenic.com/>
+	* **powderday** <http://bitbucket.org/desika/powderday>
 	* **yt** <http://yt-project.org>
 	* **FSPS** <https://code.google.com/p/fsps/source/checkout>
 	* **python-fsps** <http://dan.iel.fm/python-fsps/current/>
@@ -40,14 +42,47 @@ python
 works with python 2.x.  The code was developed on, and principally
 tested with python 2.7. 
 
+.. _mercurial:
+
+
+mercurial
+--------------
+
+You'll need this to clone `powderday
+<https://bitbucket.org/desika/powderday>`_ using mercurial (hg).  If
+you don't want to install mercurial, then first install `yt
+<http://yt-project.org>`_ (before `powderday
+<https://bitbucket.org/desika/powderday>`_ ) - `yt
+<http://yt-project.org>`_ ships with its own hg which you can
+optionally use.
+
+
+.. _powderday:
+
+
+powderday
+--------------
+
+Simply clone the latest and greatest from the repo::
+
+  >hg clone https://desika@bitbucket.org/desika/powderday
+
+And that's it!  Once it's cloned, there's no subsidiary installation commands.
+
 .. _yt:
 
 yt
 --------------
 
-First and foremost, you need to have `yt <http://yt-project.org>`_
-installed.  There are many ways to do this (as directed on the `yt
-<http://yt-project.org>`_ project website.  Utilizing `anaconda
+`powderday <https://bitbucket.org/desika/powderday>`_ has `yt
+<http://yt-project.org>`_ threaded throughout, and thus needs the
+software to be installed to function.  If you already have `yt
+<http://yt-project.org>`_ installed, be sure that it's `yt
+<http://yt-project.org>`_ 3.x (i.e at least the 'stable' branch).
+
+If you don't have `yt <http://yt-project.org>`_ already installed,
+it's super easy!  There are many ways to do this (as directed on the
+`yt <http://yt-project.org>`_ project website.  Utilizing `anaconda
 <https://store.continuum.io/>`_ is certainly a good option because (a)
 it comes with all of the required python subpackages, and (b) the `yt
 <http://yt-project.org>`_ installation is exceptionally easy then.
