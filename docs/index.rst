@@ -52,6 +52,9 @@ Contents:
 
    installation.rst
    quickstart.rst
+   parameters_description.rst
+   algorithm_description.rst
+   troubleshooting.rst
 
 
 Indices and tables
