@@ -8,7 +8,6 @@ from astropy import constants
 #========================================================
 #MODIFIABLE HEADER (make this a function later with argv)
 z = 4.
-distance = 2.e9*constants.pc.value
 #========================================================
 
 
@@ -29,9 +28,7 @@ wav *= u.micron #wav is in micron
 wav *= (1.+z)
 
 flux*= u.erg/u.s
-da = Planck13.angular_diameter_distance(z)
 dl = Planck13.luminosity_distance(z)
-da = da.to(u.cm)
 dl = dl.to(u.cm)
     
 flux /= (4.*3.14*dl**2.)
