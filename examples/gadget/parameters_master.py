@@ -14,7 +14,7 @@ bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_li
 #PARALLELIZATION
 #===============================================
 
-n_processes = 3 #number of MPI processes to run
+n_processes = 12 #number of MPI processes to run
 
 
 #===============================================
@@ -29,7 +29,7 @@ n_photons_raytracing_dust = 1.e7
 #===============================================
 #DUST INFORMATION
 #===============================================
-dustdir = '/Users/desika/hyperion-dust-0.1.0/dust_files/' #location of your dust files
+dustdir = '/home/desika/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 dusttometals_ratio = 0.4
@@ -85,7 +85,7 @@ N_STELLAR_AGE_BINS = 100
 N_MASS_BINS = 100  
 
 
-metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
+metallicity_legend= "/home/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
 
 
 
