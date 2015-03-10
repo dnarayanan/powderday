@@ -1,2 +1,0 @@
-1. On some runs, if we we exceed > 90 processors, there seem to be MPI
-collision problems.
