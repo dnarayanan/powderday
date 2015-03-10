@@ -30,7 +30,7 @@ Gadget/Gizmo
 
 The snapshot is an idealized disk galaxy that can be downloaded here (13 MB download):
 
-<https://www.dropbox.com/s/vy6qu43056q5ii5/snapshot_200.hdf5?dl=0>
+.. <https://www.dropbox.com/s/vy6qu43056q5ii5/snapshot_200.hdf5?dl=0>
 
 The SED (placed at z=4 with a Planck13 cosmology) looks like:
 
