@@ -11,6 +11,8 @@ Overview of Requirements
 	  * astropy
 	  * Atpy
 	  * h5py
+	  * ipdb
+
 
 	* **mercurial** <http://mercurial.selenic.com/>
 	* **powderday** <http://bitbucket.org/desika/powderday>
