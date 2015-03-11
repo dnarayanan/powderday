@@ -104,6 +104,98 @@ Dust Information
    <http://docs.hyperion-rt.org/en/latest/api/hyperion.model.Model.html?highlight=enforce#hyperion.model.Model.set_enforce_energy_range>
 
    
+Hydro Code Units
+------------
+:unit_mass:
 
+   Mass code units for galaxy simulation.  Units: Msun/h
+
+:unit_length:
+
+   Length code unit for galaxy simulation.  Units: kpc/h
+
+:unit_age:
+
+   Stellar age units.  Units: Gyr/h
+
+:unit_velocity:
+
+   Velocity code unit for galaxy simulation.  Units: cm/s
+
+
+Stellar SEDs Info
+------------
+
+:Force_Binning:
+
+   Boolean.  True means force binning of the stellar SEDs (in bins of
+   age and metallicity).  False means don't.  False results in an
+   exact solution since the stellar SEDs are individually represented
+   (as opposed to broken up into bins).  This said, this can be very
+   slow to run, and extremely hard on the memory.
+
+:COSMOFLAG:
+
+   Boolean.  True means this is a cosmological simulation, False means
+   idealized galaxy simulation.
+
+:imf_type:
+
+   IMF parameter for stellar pops calculations.
+
+   0. Salpeter
+   1. Chabrier
+   2. Kroupa
+   3. Van Dokkum
+   4. Dave
+
+   Though note options 3 and 4 are currently not supported.
+
+
+:pagb:
+
+   Weight given to post AGB stars.  1 is the default.
+
+:CF_on:
+
+   Boolean.  If set to True, then enables the Charlot & Fall
+   birthcloud models for all stars with age younger than
+   birth_cloud_clearing_age.
+
+:birth_cloud_clearing_age:
+
+   Stars with age < birth_cloud_clearing_age have Charlot & Fall
+   birthclouds (if CF_on == True).  Meaningless if CF_on == False.
+   Units: Gyr.
+
+:Z_init:
+
+   Forced metallicity increase in the newstar particles.  Useful for
+   idealized galaxy simulations where the stars can form out of
+   pristine gas.  Units are absolute (so 0.02 = Solar). Setting to 0
+   (default) means that you use the stellar metallicities as they come
+   in the simulation (i.e. for Cosmological simulations).
+
+:disk_stars_age:
+
+   Age in Gyr of disk stars for idealized simulations. Meaningless for
+   cosmological simulations.  Note, if this is <=7, then these will
+   live in Charlot & Fall birthclouds (if CF_on = True)
+
+:bulge_stars_age:
+
+   As disk_stars_age but for bulge stars.
+
+:disk_stars_metals:
+
+   Metallicity of disk stars in FSPS metallicity units.  See last page
+   of FSPS manual for numbers.  (e.g. 20 = Solar for Padova + BaSeL
+   tracks).  Meaningless for cosmological simulations.
+
+:bulge_stars_metals:
+
+   As disk_stars_metals but for bulge stars.
+   
+   
 parameters_model
 ============
