@@ -30,7 +30,49 @@ Resolution Keywords
    Units are kpc.  So, a grid centered on [0,0,0] with zoom_box_len =
    200 would extend from [-200,200].
 
-   
+:bbox_lim:
 
+   Initial bounding box of grid for SPH simulations (+/- bbox_lim).
+   Units are kpc.  This must encompass all of the particles in a
+   simulation currently.
+
+
+
+Parallelization
+------------
+
+:n_processes:
+
+   Number of MPI processes to run the radiative transfer on.  Note,
+   the stellar population synthesis will only run on as many
+   processors as are on a core since its parallelization is pool.map
+   (not MPI)
+
+
+RT Information
+------------
+
+For all photon counts, a decent rule of thumb is 10-100x the number of
+grid cells that you have, though of course you should check the
+convergence properties of your simulation.
+
+:n_photons_initial:
+
+   Number of photons to use in main iterations (for the whole grid)
+   for specific energy and temperature calculations.
+
+:n_photons_imaging:
+
+   Number of photons to use for the SED/image calculation
+
+:n_photons_raytracing_sources:
+
+   If raytracing is set (which is the default hard-coded into the
+   code), number of raytracing photons to use for source emission.
+
+:n_photons_raytracing_dust:
+
+   Similar to n_photons_raytracing_sources but for dust emission.
+   
 parameters_model
 ============
