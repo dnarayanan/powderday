@@ -20,9 +20,9 @@ Resolution Keywords
 
 :zoom:
    
-   True means use a specified region of the grid; False means use the
-   whole grid.  If set to True, then the grid will have side length
-   +/- zoom_box_len
+   Boolean. True means use a specified region of the grid; False means
+   use the whole grid.  If set to True, then the grid will have side
+   length +/- zoom_box_len
 
 :zoom_box_len:
 
@@ -73,6 +73,37 @@ convergence properties of your simulation.
 :n_photons_raytracing_dust:
 
    Similar to n_photons_raytracing_sources but for dust emission.
+
+Dust Information
+------------
+
+:dustdir:
+
+   path to where your dust files are.  String format -
+   (e.g. '/home/desika/hyperion-dust-0.1.0/dust_files/')
+
+:dustfile:
    
+   Name of your main dust file.  String format - (e.g. 'd03_3.1_6.0_A.hdf5')
+
+:PAH:
+
+   Boolean - True means use model for PAHs, False means don't.
+
+:dusttometals_ratio:
+
+   Dust mass to metals mass ratio
+
+:enforce_energy_range:
+
+   Boolean. False ensures energy conservation.  But the emisivities
+   may not be strictly correct if the energy in a cell is out of range
+   of the emissivities.  True modifies the energy in the simulation,
+   but ensures that the emissivities are consistent with the energy.
+   See:
+   <http://docs.hyperion-rt.org/en/latest/api/hyperion.model.Model.html?highlight=enforce#hyperion.model.Model.set_enforce_energy_range>
+
+   
+
 parameters_model
 ============
