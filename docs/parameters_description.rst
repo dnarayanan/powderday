@@ -79,12 +79,13 @@ Dust Information
 
 :dustdir:
 
-   path to where your dust files are.  String format -
+   String. Path to where your dust files are.  String format -
    (e.g. '/home/desika/hyperion-dust-0.1.0/dust_files/')
 
 :dustfile:
    
-   Name of your main dust file.  String format - (e.g. 'd03_3.1_6.0_A.hdf5')
+   String. Name of your main dust file.  String format -
+   (e.g. 'd03_3.1_6.0_A.hdf5')
 
 :PAH:
 
@@ -195,7 +196,48 @@ Stellar SEDs Info
 :bulge_stars_metals:
 
    As disk_stars_metals but for bulge stars.
+
+:N_STELLAR_AGE_BINS:
+   
+   Number of bins to bin the stellar ages in (boundaries are the
+   oldest and youngest star particles; linear bins in log(age)).
+
+:N_MASS_BINS:
+
+   Meaningless parameter; place holder for future code additions.
+
+:metallicity_legend:
+
+   String.  Location of the metallicity maps in FSPS for the stellar
+   libraries you use.  Currently Padova2007 is the default (hard coded
+   into `powderday <https://bitbucket.org/desika/powderday>`_), so
+   this should point to something like:
+   "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
    
    
+
+Images and SED Parameters
+------------
+
+:NTHETA:
+
+   Number of polar angles to view galaxy at
+
+GRID INFORMATION
+------------
+
+:MANUAL_CENTERING:
+
+   Boolean.  False means the simulation automatically centers on the
+   cell with the highest gas density peak.  True means you center on
+   x_cent,y_cent,z_cent as given in parameters_model.
+
+
+DEBUGGING
+------------
+
+You should probably never touch any of these.
+
+
 parameters_model
 ============
