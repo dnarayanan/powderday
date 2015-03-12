@@ -54,6 +54,7 @@ Contents:
    quickstart.rst
    parameters_description.rst
    algorithm_description.rst
+   convenience.rst
    troubleshooting.rst
 
 
