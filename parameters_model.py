@@ -25,3 +25,12 @@ Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 inputfile = PD_output_dir+'/example.'+snapnum_str+'.rtin'
 outputfile = PD_output_dir+'/example.'+snapnum_str+'.rtout'
 
+
+#===============================================
+#GRID POSITIONS
+#===============================================
+x_cent = 0
+y_cent = 0
+z_cent = 0
+
+

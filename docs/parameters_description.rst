@@ -1,6 +1,14 @@
 Detailed Description of Parameters
 **********
 
+There are two parameters files - parameters_master and
+parameters_model.  The distinction between where a parameter goes is
+somewhat arbitrary, but is based on the following.  Parameters_master
+tends to contain parmaeters that will likely be shared amongst all
+snapshots in a given galaxy run, while parameters_model are parameters
+that might change from run to run (like the snapshot name or the
+galaxy center).
+
 parameters_master
 ============
 
@@ -241,3 +249,4 @@ You should probably never touch any of these.
 
 parameters_model
 ============
+There are a few important parameters to be set in this parameters file
