@@ -8,12 +8,12 @@ from astropy import constants
 #========================================================
 #MODIFIABLE HEADER (make this a function later with argv)
 z = 4.
+run = '/Users/desika/Dropbox/powderday/examples/gadget/example.200.rtout'
 #========================================================
 
 
 
 
-run = '/Users/desika/Dropbox/powderday/examples/gadget/example.200.rtout'
 
 
 
@@ -40,8 +40,9 @@ flux /= nu
 flux = flux.to(u.mJy)
 
 
+for i in range(flux.shape[0]):
+    ax.loglog(wav,flux[i,:])
 
-ax.loglog(wav,flux[0,:])
 ax.set_xlabel(r'$\lambda$ [$\mu$m]')
 ax.set_ylabel('Flux (mJy)')
 ax.set_ylim([1e-6,1.])
