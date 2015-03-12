@@ -9,6 +9,24 @@ snapshots in a given galaxy run, while parameters_model are parameters
 that might change from run to run (like the snapshot name or the
 galaxy center).
 
+The parameters files are (somewhat non-traditionally) written as
+python code files because this enables you to embed little snippets in
+them that may be particular to your galaxy run.  For example, for
+gadget snapshot naming conventions, it can be useful to have a snippet along the lines of::
+
+  Gadget_snap_num = 20
+  if Gadget_snap_num < 10:
+     snapnum_str = '00'+str(Gadget_snap_num)
+  elif Gadget_snap_num >= 10 and Gadget_snap_num <100:
+     snapnum_str = '0'+str(Gadget_snap_num)
+  else:
+     snapnum_str = str(Gadget_snap_num)
+
+  Gadget_snap_name = 'snapshot_'+snapnum_str+'.hdf5'
+
+
+That puts the correct number of 0's in front of the snapshot name.
+
 parameters_master
 ============
 
@@ -249,4 +267,51 @@ You should probably never touch any of these.
 
 parameters_model
 ============
-There are a few important parameters to be set in this parameters file
+
+:Gadget_snap_name:
+
+   String - currently the snapshot name of your galaxy run. (Naming
+   will change as other front ends built).
+
+:hydro_dir:
+
+   Location of snapshots
+
+:PD_output_dir:
+
+   String - location of where `powderday
+   <https://bitbucket.org/desika/powderday>`_ output files should go.
+
+:Auto_TF_file:
+
+   String - name of the TF logical file to be written (doesn't need a
+   path - will go into PD_output_dir)
+
+:Auto_dustdens_file:
+
+   String - name of the dust density ascii file to be written (doesn't
+   need a path - will go into PD_output_dir)
+
+:inputfile:
+
+   String - name of the input HDF5 (rtin) file for `powderday
+   <https://bitbucket.org/desika/powderday>`_ to write before
+   radiative transfer begins.
+
+:outputfile:
+
+   String - name of the output HDF5 (rtout) file after radiative transfer
+
+:x_cent:
+
+   Location in grid coordinates of the x-coordinate of the center of
+   your galaxy.  Only pertinenet if MANUAL_CENTERING==True.  Otherwise
+   ignored by `powderday <https://bitbucket.org/desika/powderday>`_.
+
+:y_cent:
+
+   As x_cent but for the y-coordinate
+
+:z_cent:
+
+   As x_cent but for the z-coordinate.
