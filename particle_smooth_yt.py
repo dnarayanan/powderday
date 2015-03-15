@@ -13,17 +13,11 @@ def yt_smooth(pf):
 
     print 'starting yt_smooth'
     pf.index
+
+    #make sure the relevant fields make the transition
+    pf.field_info["starmetals"].particle_type=True
+    pf.field_info["gasmetals"].particle_type=True
     
-    if  ('PartType4', 'Metallicity_00') in pf.derived_field_list:
-        pf.field_info["PartType0","Metallicity_00"].particle_type=True
-    else: 
-        pf.field_info["PartType0","Metallicity"].particle_type=True
-
-    if  ('gasmetals_00') in pf.derived_field_list:
-        pf.field_info["gasmetals_00"].particle_type=True
-    else: 
-        pf.field_info["gasmetals"].particle_type=True
-
     
 
     ad = pf.all_data()
@@ -34,11 +28,7 @@ def yt_smooth(pf):
     saved["masses"] = ad["gassmoothedmasses"]
 
     
-    '''
-    saved["density"] = ad["deposit","PartType0_smoothed_density"]
-    saved["metallicity"] = ad["deposit","PartType0_smoothed_metallicity"]
-    saved["masses"] = ad["deposit", "PartType0_smoothed_particle_mass"]
-    '''
+   
     
   
 
@@ -46,14 +36,7 @@ def yt_smooth(pf):
     saved["density"] = saved["density"].in_cgs()
 
     
-    #direct calculation of the smoothed metal density (via the added
-    #MetalDens field in grid_construction)
-    #metal_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
-    #                                              "SmoothingLength", "Density","MetalDens",
-    #                                              pf.field_info)
-    #metal_fn = metal_fn[0]
-
-
+ 
 
     #return saved["metallicity"],saved["density"],saved["masses"],ad[metal_fn]
    

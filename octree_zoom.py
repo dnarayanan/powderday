@@ -87,8 +87,7 @@ def octree_zoom(fname,pf,unit_base,bbox):
     new_ds.index
 
     #make sure that the metallicity particles make the translation
-    new_ds.field_info["PartType0","metallicity"].particle_type=True
-
+    new_ds.field_info["gasmetals"].particle_type=True
     new_ad = new_ds.all_data()
     
 
