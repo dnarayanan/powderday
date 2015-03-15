@@ -32,6 +32,21 @@ def gadget_field_add(fname,unit_base,bbox,ds=None):
     def _starformationtime(field,data):
         return data[('PartType4', 'StellarFormationTime')]
 
+    def _starmasses(field,data):
+        return data[("PartType4","Masses")]
+
+    def _diskstarcoordinates(field,data):
+        return data[('PartType2','Coordinates')]
+    
+    def _diskstarmasses(field,data):
+        return data[("PartType2","Masses")]
+    
+    def _bulgestarcoordinates(field,data):
+        return data[('PartType3','Coordinates')]
+
+    def _bulgestarmasses(field,data):
+        return data[("PartType3","Masses")]
+
     def _gasdensity(fied,data):
         return data[('PartType0', 'Density')]
 
@@ -60,7 +75,6 @@ def gadget_field_add(fname,unit_base,bbox,ds=None):
         return (data["PartType0","Density"]*data["PartType0","Metallicity"])
 
     
-    
         
     #load the ds
     if fname != None:
@@ -82,9 +96,16 @@ def gadget_field_add(fname,unit_base,bbox,ds=None):
         ds.add_field(('gasmetals'),function=_gasmetals,units="code_metallicity",particle_type=True)
         ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
 
-        
+    ds.add_field(('starmasses'),function=_starmasses,units='code_mass',particle_type=True)
     ds.add_field(('starcoordinates'),function=_starcoordinates,units='code_length',particle_type=True)
     ds.add_field(('starformationtime'),function=_starformationtime,units='dimensionless',particle_type=True)
+
+    ds.add_field(('diskstarmasses'),function=_diskstarmasses,units='code_mass',particle_type=True)
+    ds.add_field(('diskstarcoordinates'),function=_diskstarcoordinates,units='code_length',particle_type=True)
+
+    ds.add_field(('bulgestarmasses'),function=_bulgestarmasses,units='code_mass',particle_type=True)
+    ds.add_field(('bulgestarcoordinates'),function=_bulgestarcoordinates,units='code_length',particle_type=True)
+    
     ds.add_field(('gasdensity'),function=_gasdensity,units='code_mass/code_length**3',particle_type=True)
     ds.add_field(('gascoordinates'),function=_gascoordinates,units='code_length',particle_type=True)
     ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='code_mass/code_length**3',particle_type=True)

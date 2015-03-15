@@ -69,21 +69,27 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
 
     ad = pf.all_data()
 
+    metals = ad["starmetals"].value
+    mass = ad["starmasses"].value*cfg.par.unit_mass*const.msun
+    positions = ad["starcoordinates"].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
 
+    '''
     if  ('PartType4', 'Metallicity_00') in pf.derived_field_list:
         metals = ad[('PartType4', 'Metallicity_00')]
     else:
         metals = ad[("PartType4","Metallicity")].value
+
     mass = ad[("PartType4","Masses")].value*cfg.par.unit_mass*const.msun
     positions = ad[("PartType4","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-
+    '''
 
     if cfg.par.COSMOFLAG == False:
         simtime = pf.current_time.value
         simtime *= u.s
         simtime = simtime.to(u.Gyr)
         simtime = simtime.value
-        age = simtime-ad[("PartType4","StellarFormationTime")].value * cfg.par.unit_age #gyr
+        #age = simtime-ad[("PartType4","StellarFormationTime")].value * cfg.par.unit_age #gyr
+        age = simtime-ad[("starformationtime")].value * cfg.par.unit_age #gyr
 
         #make the minimum age 1 million years 
         age[np.where(age < 1.e-3)[0]] = 1.e-3
@@ -94,7 +100,8 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
         print '--------------\n'
     else:
         simtime = cosmo.Planck13.age(pf.current_redshift).value #what is the age of the Universe right now?
-        scalefactor = ad[("PartType4","StellarFormationTime")].value
+        #scalefactor = ad[("PartType4","StellarFormationTime")].value
+        scalefactor = ad[("starformationtime")].value
         formation_z = (1./scalefactor)-1.
 
         formation_time = redshift_multithread(formation_z)
@@ -199,9 +206,17 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     if cfg.par.COSMOFLAG == False:
 
         #Disk Stars
+        '''
         if ("PartType2","Coordinates") in pf.derived_field_list:
             disk_positions = ad[("PartType2","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
             disk_masses =  ad[("PartType2","Masses")].value*cfg.par.unit_mass*const.msun
+           
+        '''
+
+        if ("diskstarcoordinates") in pf.derived_field_list:
+            
+            disk_positions = ad[("diskstarcoordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+            disk_masses =  ad[("diskstarmasses")].value*cfg.par.unit_mass*const.msun
             nstars_disk = len(disk_masses)
      
             #create the disk_list full of DiskStars objects
@@ -234,11 +249,21 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
 
 
         #Bulge Stars
+
+
+        '''
         if ("PartType3","Coordinates") in pf.derived_field_list:
             bulge_positions = ad[("PartType3","Coordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
             bulge_masses =  ad[("PartType3","Masses")].value*cfg.par.unit_mass*const.msun
-            nstars_bulge = len(bulge_masses)
 
+
+        '''
+
+        if ("bulgestarcoordinates") in pf.derived_field_list:
+            bulge_positions = ad[("bulgestarcoordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+            bulge_masses =  ad[("bulgestarmasses")].value*cfg.par.unit_mass*const.msun
+            nstars_bulge = len(bulge_masses)
+            
             #create the bulge_list full of BulgeStars objects
             
             for i in range(nstars_bulge):
