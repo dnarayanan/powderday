@@ -39,8 +39,8 @@ enforce_energy_range = False #False is the default;  ensures energy conservation
 #===============================================
 #HYDRO CODE UNITS
 #===============================================
-unit_mass = 1.e10 #msun/h
-unit_length = 1. #kpc/h
+unit_mass = 1.e10 #msun
+unit_length = 1. #kpc
 unit_age = 1. #Gyr
 unit_velocity = 1.e5 #cm/s
 
