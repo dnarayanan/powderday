@@ -110,7 +110,7 @@ def gadget_field_add(fname,unit_base,bbox,ds=None):
     ds.add_field(('gascoordinates'),function=_gascoordinates,units='code_length',particle_type=True)
     ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='code_mass/code_length**3',particle_type=True)
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
-    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='code_mass',particle_type=True)
+#    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='code_mass',particle_type=True)
 
     
 

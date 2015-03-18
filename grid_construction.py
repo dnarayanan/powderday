@@ -131,7 +131,7 @@ def yt_octree_generate():
 
         
         from particle_smooth_yt import yt_smooth
-        metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
+        metallicity_smoothed,density_smoothed = yt_smooth(pf)
 
 
         dust_smoothed = np.zeros(len(refined))

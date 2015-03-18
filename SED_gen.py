@@ -76,13 +76,18 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
 
 
     if cfg.par.COSMOFLAG == False:
+
+        #this commented code needs to be switched with the next two line block if the yt fix isn't in place yet
+        '''
         simtime = pf.current_time.value
         simtime *= u.s
-        simtime = simtime.to(u.Gyr)
+        simtime = simtime.to(u.Gyr).value
+        '''
+
+        simtime = pf.current_time.in_units('Gyr')
         simtime = simtime.value
 
         age = simtime-ad[("starformationtime")].value * cfg.par.unit_age #gyr
-
         #make the minimum age 1 million years 
         age[np.where(age < 1.e-3)[0]] = 1.e-3
 
@@ -102,7 +107,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
         #make the minimum age 1 million years 
         age[np.where(age < 1.e-3)[0]] = 1.e-3
 
-      
+        
         print '\n--------------'
         print '[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime
         print '--------------\n'
