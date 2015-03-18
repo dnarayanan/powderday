@@ -43,7 +43,7 @@ class Stars:
 
 
 
-def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
+def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
     print '[SED_gen/star_list_gen]: reading in stars particles for SPS calculation'
 
     fname = cfg.model.hydro_dir+cfg.model.Gadget_snap_name
@@ -57,33 +57,20 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
                  'UnitVelocity_in_cm_per_s' : cfg.par.unit_velocity}
 
 
-    #load the DS
-    pf = gadget_field_add(fname,unit_base,bbox)
+   
+        
     
-    #zoom if necessary
-    if cfg.par.zoom == True:
-        pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox)
-        
-        
-    pf.index
 
-    ad = pf.all_data()
 
     metals = ad["starmetals"].value
     mass = ad["starmasses"].value*cfg.par.unit_mass*const.msun
     positions = ad["starcoordinates"].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
 
 
-
+    '''
     if cfg.par.COSMOFLAG == False:
 
-        #this commented code needs to be switched with the next two line block if the yt fix isn't in place yet
-        '''
-        simtime = pf.current_time.value
-        simtime *= u.s
-        simtime = simtime.to(u.Gyr).value
-        '''
-
+ 
         simtime = pf.current_time.in_units('Gyr')
         simtime = simtime.value
 
@@ -111,12 +98,13 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
         print '\n--------------'
         print '[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime
         print '--------------\n'
-                
+        '''
 
        
 
     median_metallicity = np.median(metals)
   
+    age = ad["stellarages"]
     nstars = len(age)
     print 'number of new stars =',nstars
     
@@ -141,8 +129,9 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     #create the stars_list full of Stars objects
     stars_list = []
 
+   
     for i in range(nstars):
-        stars_list.append(Stars(mass[i],metals[i],positions[i],age[i],fsps_zmet=zmet[i]))
+        stars_list.append(Stars(mass[i],metals[i],positions[i],age[i].value,fsps_zmet=zmet[i]))
 
 
     #boost stellar positions to grid center

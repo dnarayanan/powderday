@@ -4,6 +4,9 @@ from yt import derived_field
 import pdb,ipdb
 import config as cfg
 
+from astropy.cosmology import Planck13
+import astropy.units as u
+from redshift_multithread import *
 
 
 
@@ -17,7 +20,7 @@ import config as cfg
 #7. Parttype0_Smoothed_Density
 
 
-def gadget_field_add(fname,unit_base,bbox,ds=None):
+def gadget_field_add(fname,unit_base,bbox,ds=None,starages=False):
     
     
     def _starmetals_00(field,data):
@@ -74,7 +77,38 @@ def gadget_field_add(fname,unit_base,bbox,ds=None):
     def _metaldens(field,data):
         return (data["PartType0","Density"]*data["PartType0","Metallicity"])
 
-    
+    def _stellarages(field,data):
+        ad = data.ds.all_data()
+        if cfg.par.COSMOFLAG == False:
+            
+            
+            simtime = data.ds.current_time.in_units("Gyr").value
+            age = simtime-ad[("starformationtime")].value #assumes that the ages are already in Gyr
+          
+            #make the minimum age 1 million years to not screw up SPS calculations downstream
+            age[np.where(age < 1.e-3)[0]] = 1.e-3
+            
+            
+            print '\n--------------'
+            print '[gadget2pd/_stellarages: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ',simtime
+            print '--------------\n'
+        else:
+            simtime = Planck13.age(data.ds.current_redshift).to(u.Gyr).value #what is the age of the Universe right now?
+            scalefactor = ad["starformationtime"].value
+            formation_z = (1./scalefactor)-1.
+            formation_time = redshift_multithread(formation_z)
+            
+            age = simtime - formation_time
+            #make the minimum age 1 million years 
+            age[np.where(age < 1.e-3)[0]] = 1.e-3
+            
+            print '\n--------------'
+            print '[gadget2pd/_stellarages: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime
+            print '--------------\n'
+        
+       
+        return age
+
         
     #load the ds
     if fname != None:
@@ -100,18 +134,24 @@ def gadget_field_add(fname,unit_base,bbox,ds=None):
     ds.add_field(('starcoordinates'),function=_starcoordinates,units='code_length',particle_type=True)
     ds.add_field(('starformationtime'),function=_starformationtime,units='dimensionless',particle_type=True)
 
-    ds.add_field(('diskstarmasses'),function=_diskstarmasses,units='code_mass',particle_type=True)
-    ds.add_field(('diskstarcoordinates'),function=_diskstarcoordinates,units='code_length',particle_type=True)
-
-    ds.add_field(('bulgestarmasses'),function=_bulgestarmasses,units='code_mass',particle_type=True)
-    ds.add_field(('bulgestarcoordinates'),function=_bulgestarcoordinates,units='code_length',particle_type=True)
+    if ('PartType2' 'Masses') in ds.derived_field_list:
+        ds.add_field(('diskstarmasses'),function=_diskstarmasses,units='code_mass',particle_type=True)
+        ds.add_field(('diskstarcoordinates'),function=_diskstarcoordinates,units='code_length',particle_type=True)
+        
+    if ('PartType3' 'Masses') in ds.derived_field_list:
+        ds.add_field(('bulgestarmasses'),function=_bulgestarmasses,units='code_mass',particle_type=True)
+        ds.add_field(('bulgestarcoordinates'),function=_bulgestarcoordinates,units='code_length',particle_type=True)
     
     ds.add_field(('gasdensity'),function=_gasdensity,units='code_mass/code_length**3',particle_type=True)
     ds.add_field(('gascoordinates'),function=_gascoordinates,units='code_length',particle_type=True)
     ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='code_mass/code_length**3',particle_type=True)
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
-#    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='code_mass',particle_type=True)
+    #    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='code_mass',particle_type=True)
 
-    
+    if starages==True:
+        ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
+        
+    ds.index
+    ad = ds.all_data()
 
-    return ds
+    return ds,ad
