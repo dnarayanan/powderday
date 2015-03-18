@@ -149,7 +149,8 @@ def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
     ds1 = load(fname,unit_base=unit_base,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
     ds1.periodicity = (False,False,False)
 
+    #re-add the new powderday convention fields
+    ds1 = gadget_field_add(None,unit_base,bbox1,ds=ds1)
 
-   
     
-    return ds1,bbox1
+    return ds1

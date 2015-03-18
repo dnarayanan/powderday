@@ -49,19 +49,18 @@ def yt_octree_generate():
     print '[grid_construction]: unit_base = ',unit_base
 
     #load the DS
-    pf,ad = gadget_field_add(fname,unit_base,bbox)
+    pf = gadget_field_add(fname,unit_base,bbox)
 
     #zoom if necessary
     if cfg.par.zoom == True:
-        pf,bbox_zoom = octree_zoom_bbox_filter(fname,pf,unit_base,bbox)
+        pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox)
         
-    #now we add the stellar ages; this also serves the purpose of
-    #adding the other pd-specific fields in case we octree_zoom
-    #because they won't be added in that module.
-    pf,ad = gadget_field_add(fname,unit_base,bbox_zoom,starages=True)
+    
  
 
-  
+    pf.index
+    ad = pf.all_data()
+
     
    
     #---------------------------------------------------------------
@@ -179,7 +178,7 @@ def yt_octree_generate():
 
 
     #return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost
-    return refined,dust_smoothed,fc1,fw1,boost,pf,ad
+    return refined,dust_smoothed,fc1,fw1,boost
 
 
 def grid_coordinate_boost(xmin,xmax,ymin,ymax,zmin,zmax):
