@@ -74,17 +74,11 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
     mass = ad["starmasses"].value*cfg.par.unit_mass*const.msun
     positions = ad["starcoordinates"].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
 
-
-
+    
+    '''
     if cfg.par.COSMOFLAG == False:
-
+    
         #this commented code needs to be switched with the next two line block if the yt fix isn't in place yet
-        '''
-        simtime = pf.current_time.value
-        simtime *= u.s
-        simtime = simtime.to(u.Gyr).value
-        '''
-
         simtime = pf.current_time.in_units('Gyr')
         simtime = simtime.value
 
@@ -112,12 +106,13 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
         print '\n--------------'
         print '[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime
         print '--------------\n'
-                
-
+  
+    '''
        
 
     median_metallicity = np.median(metals)
   
+    age = ad["stellarages"].value
     nstars = len(age)
     print 'number of new stars =',nstars
     

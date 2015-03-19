@@ -4,6 +4,9 @@ from yt import derived_field
 import pdb,ipdb
 import config as cfg
 
+from astropy.cosmology import Planck13
+import astropy.units as u
+from redshift_multithread import *
 
 
 
@@ -74,7 +77,40 @@ def gadget_field_add(fname,unit_base,bbox,ds=None):
     def _metaldens(field,data):
         return (data["PartType0","Density"]*data["PartType0","Metallicity"])
 
-    
+
+    def _stellarages(field,data):
+        ad = data.ds.all_data()
+        if cfg.par.COSMOFLAG == False:
+
+            simtime = data.ds.current_time.in_units('Gyr')
+            simtime = simtime.value
+            
+            age = simtime-ad[("starformationtime")].value #Gyr (assumes that ad["starformationtime"] is in Gyr for Gadget)
+            #make the minimum age 1 million years 
+            age[np.where(age < 1.e-3)[0]] = 1.e-3
+            
+            
+            print '\n--------------'
+            print '[SED_gen/star_list_gen: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ',simtime
+            print '--------------\n'
+        else:
+            simtime = Planck13.age(data.ds.current_redshift).to(u.Gyr).value #what is the age of the Universe right now?
+            
+            scalefactor = ad[("starformationtime")].value
+            formation_z = (1./scalefactor)-1.
+            
+            formation_time = redshift_multithread(formation_z)
+            
+            age = simtime - formation_time
+            #make the minimum age 1 million years 
+            age[np.where(age < 1.e-3)[0]] = 1.e-3
+
+        
+            print '\n--------------'
+            print '[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime
+            print '--------------\n'
+                
+        return age
         
     #load the ds
     if fname != None:
@@ -112,6 +148,7 @@ def gadget_field_add(fname,unit_base,bbox,ds=None):
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
 #    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='code_mass',particle_type=True)
 
-    
+    ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
 
+    
     return ds
