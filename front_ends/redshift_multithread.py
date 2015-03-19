@@ -45,5 +45,5 @@ def redshift_multithread(formation_z):
         
 
 def redshift_gen(formation_z):
-    age = cosmo.Planck13.age(formation_z)
+    age = Planck13.age(formation_z)
     return age
