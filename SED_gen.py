@@ -43,7 +43,7 @@ class Stars:
 
 
 
-def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
+def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
     print '[SED_gen/star_list_gen]: reading in stars particles for SPS calculation'
 
     fname = cfg.model.hydro_dir+cfg.model.Gadget_snap_name
@@ -56,7 +56,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
                  'UnitMass_in_g'            : cfg.par.unit_mass*const.msun,
                  'UnitVelocity_in_cm_per_s' : cfg.par.unit_velocity}
 
-
+    '''
     #load the DS
     pf = gadget_field_add(fname,unit_base,bbox)
     
@@ -68,7 +68,8 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz):
     pf.index
 
     ad = pf.all_data()
-
+    '''
+    
     metals = ad["starmetals"].value
     mass = ad["starmasses"].value*cfg.par.unit_mass*const.msun
     positions = ad["starcoordinates"].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)

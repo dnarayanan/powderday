@@ -54,7 +54,8 @@ def yt_octree_generate():
     #zoom if necessary
     if cfg.par.zoom == True:
         pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox)
-        
+
+    
     
  
 
@@ -178,7 +179,7 @@ def yt_octree_generate():
 
 
     #return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost
-    return refined,dust_smoothed,fc1,fw1,boost
+    return refined,dust_smoothed,fc1,fw1,boost,pf,ad
 
 
 def grid_coordinate_boost(xmin,xmax,ymin,ymax,zmin,zmax):
