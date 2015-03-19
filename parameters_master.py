@@ -3,8 +3,6 @@
 #===============================================
 oref = 0 #over refine factor - should typically be set to 0
 n_ref = 64 #when n_particles > n_ref, octree refines further
-zoom = True #False = use the entire grid; True = zoom in on the
-            #highest density peak (unless Manual_Centering==True)
 zoom_box_len = 200 #kpc; so the box will be +/- zoom_box_len from the center
 bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_lim)
                #This *must* encompass all of the particles in the

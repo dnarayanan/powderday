@@ -52,8 +52,8 @@ def yt_octree_generate():
     pf = gadget_field_add(fname,unit_base,bbox)
 
     #zoom if necessary
-    if cfg.par.zoom == True:
-        pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox)
+    # if cfg.par.zoom == True:
+    pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox)
 
     
     

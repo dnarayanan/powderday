@@ -155,31 +155,31 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
    
 
     #if zoom is set, then pop off the stars that are not in the actual hyperion grid
-    if cfg.par.zoom == True:
-        orig_stars_list_len = len(stars_list)
-        #we have to go through the loop in reverse so that we don't throw off the subsquent indices
-        print 'Popping Stars out of Grid (potentially)...'
+    #    if cfg.par.zoom == True:
+    orig_stars_list_len = len(stars_list)
+    #we have to go through the loop in reverse so that we don't throw off the subsquent indices
+    print 'Popping Stars out of Grid (potentially)...'
 
 
 
 
-        for i in reversed(range(nstars)):
+    for i in reversed(range(nstars)):
+        
+        if np.logical_or(stars_list[i].positions[0] <= xcent-dx,stars_list[i].positions[0] >= xcent+dx) == True: 
+            stars_list.pop(i)
+            continue
             
-            if np.logical_or(stars_list[i].positions[0] <= xcent-dx,stars_list[i].positions[0] >= xcent+dx) == True: 
-                stars_list.pop(i)
-                continue
+        if np.logical_or(stars_list[i].positions[1] <= ycent-dy,stars_list[i].positions[1] >= ycent+dy) == True: 
+            stars_list.pop(i)
+            continue
 
-            if np.logical_or(stars_list[i].positions[1] <= ycent-dy,stars_list[i].positions[1] >= ycent+dy) == True: 
-                stars_list.pop(i)
-                continue
+        if np.logical_or(stars_list[i].positions[2] <= zcent-dz,stars_list[i].positions[2] >= zcent+dz) == True: 
+            stars_list.pop(i)
+            continue
 
-            if np.logical_or(stars_list[i].positions[2] <= zcent-dz,stars_list[i].positions[2] >= zcent+dz) == True: 
-                stars_list.pop(i)
-                continue
-
-        len_difference = orig_stars_list_len-len(stars_list)
-        print '\n [SED_gen]: Warning: Out of %d new stars\n'%nstars
-        print '\n [SED_gen]: Warning: threw out %d stars or being outside the zoomed grid \n'%len_difference
+    len_difference = orig_stars_list_len-len(stars_list)
+    print '\n [SED_gen]: Warning: Out of %d new stars\n'%nstars
+    print '\n [SED_gen]: Warning: threw out %d stars or being outside the zoomed grid \n'%len_difference
         
 
 
@@ -217,26 +217,26 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
             print 'boosting disk stars to coordinate center'    
             diskstars_list = stars_coordinate_boost(diskstars_list,boost)
 
-            #if zoom is set, then pop off the stars that are not in the actual hyperion grid
-            if cfg.par.zoom == True:
-                orig_disk_stars_list_len = nstars_disk
+        #if zoom is set, then pop off the stars that are not in the actual hyperion grid
+        #if cfg.par.zoom == True:
+        orig_disk_stars_list_len = nstars_disk
             
 
-                #we have to go through the loop in reverse so that we don't throw off the subsquent indices
-                for i in reversed(range(nstars_disk)):
-                    if np.logical_or(diskstars_list[i].positions[0] <= xcent-dx,diskstars_list[i].positions[0] >= xcent+dx) == True: 
-                        diskstars_list.pop(i)
-                        continue
-                    if np.logical_or(diskstars_list[i].positions[1] <= ycent-dy,diskstars_list[i].positions[1] >= ycent+dy) == True: 
-                        diskstars_list.pop(i)
-                        continue
-                    if np.logical_or(diskstars_list[i].positions[2] <= zcent-dz,diskstars_list[i].positions[2] >= zcent+dz) == True: 
-                        diskstars_list.pop(i)
-                        continue
-
-                disk_len_difference = orig_disk_stars_list_len-len(diskstars_list)
-                print '\n [SED_gen]: Warning: Out of %d disk stars\n'%nstars_disk
-                print '\n [SED_gen]: Warning: threw out %d disk stars for being outside the zoomed grid \n'%disk_len_difference
+        #we have to go through the loop in reverse so that we don't throw off the subsquent indices
+        for i in reversed(range(nstars_disk)):
+            if np.logical_or(diskstars_list[i].positions[0] <= xcent-dx,diskstars_list[i].positions[0] >= xcent+dx) == True: 
+                diskstars_list.pop(i)
+                continue
+            if np.logical_or(diskstars_list[i].positions[1] <= ycent-dy,diskstars_list[i].positions[1] >= ycent+dy) == True: 
+                diskstars_list.pop(i)
+                continue
+            if np.logical_or(diskstars_list[i].positions[2] <= zcent-dz,diskstars_list[i].positions[2] >= zcent+dz) == True: 
+                diskstars_list.pop(i)
+                continue
+                        
+        disk_len_difference = orig_disk_stars_list_len-len(diskstars_list)
+        print '\n [SED_gen]: Warning: Out of %d disk stars\n'%nstars_disk
+        print '\n [SED_gen]: Warning: threw out %d disk stars for being outside the zoomed grid \n'%disk_len_difference
 
 
         #Bulge Stars
@@ -257,24 +257,24 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
             bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
 
             #if zoom is set, then pop off the stars that are not in the actual hyperion grid
-            if cfg.par.zoom == True:
-                orig_bulge_stars_list_len = nstars_bulge
+            #if cfg.par.zoom == True:
+            orig_bulge_stars_list_len = nstars_bulge
+            
+            for i in reversed(range(nstars_bulge)):
+                if np.logical_or(bulgestars_list[i].positions[0] <= xcent-dx,bulgestars_list[i].positions[0] >= xcent+dx) == True: 
+                    bulgestars_list.pop(i)
+                    continue
+                if np.logical_or(bulgestars_list[i].positions[1] <= ycent-dy,bulgestars_list[i].positions[1] >= ycent+dy) == True: 
+                    bulgestars_list.pop(i)
+                    continue
+                if np.logical_or(bulgestars_list[i].positions[2] <= zcent-dz,bulgestars_list[i].positions[2] >= zcent+dz) == True: 
+                    bulgestars_list.pop(i)
+                    continue
 
-                for i in reversed(range(nstars_bulge)):
-                    if np.logical_or(bulgestars_list[i].positions[0] <= xcent-dx,bulgestars_list[i].positions[0] >= xcent+dx) == True: 
-                        bulgestars_list.pop(i)
-                        continue
-                    if np.logical_or(bulgestars_list[i].positions[1] <= ycent-dy,bulgestars_list[i].positions[1] >= ycent+dy) == True: 
-                        bulgestars_list.pop(i)
-                        continue
-                    if np.logical_or(bulgestars_list[i].positions[2] <= zcent-dz,bulgestars_list[i].positions[2] >= zcent+dz) == True: 
-                        bulgestars_list.pop(i)
-                        continue
 
-
-                bulge_len_difference = orig_bulge_stars_list_len-len(bulgestars_list)
-                print '\n [SED_gen]: Warning: Out of %d bulge stars\n'%nstars_bulge
-                print '\n [SED_gen]: Warning: threw out %d bulge stars for being outside the zoomed grid \n'%bulge_len_difference
+            bulge_len_difference = orig_bulge_stars_list_len-len(bulgestars_list)
+            print '\n [SED_gen]: Warning: Out of %d bulge stars\n'%nstars_bulge
+            print '\n [SED_gen]: Warning: threw out %d bulge stars for being outside the zoomed grid \n'%bulge_len_difference
 
        
     return stars_list,diskstars_list,bulgestars_list
