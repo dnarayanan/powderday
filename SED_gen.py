@@ -71,8 +71,8 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
     '''
     
     metals = ad["starmetals"].value
-    mass = ad["starmasses"].value*cfg.par.unit_mass*const.msun
-    positions = ad["starcoordinates"].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
+    mass = ad["starmasses"].value
+    positions = ad["starcoordinates"].value
 
     
     '''
@@ -201,8 +201,8 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
         if ("diskstarcoordinates") in pf.derived_field_list:
             
-            disk_positions = ad[("diskstarcoordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-            disk_masses =  ad[("diskstarmasses")].value*cfg.par.unit_mass*const.msun
+            disk_positions = ad[("diskstarcoordinates")].value
+            disk_masses =  ad[("diskstarmasses")].value
             nstars_disk = len(disk_masses)
      
             #create the disk_list full of DiskStars objects
@@ -238,8 +238,8 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
 
         if ("bulgestarcoordinates") in pf.derived_field_list:
-            bulge_positions = ad[("bulgestarcoordinates")].value*cfg.par.unit_length*const.pc*1.e3 #cm (as par.unit_length is kpc)
-            bulge_masses =  ad[("bulgestarmasses")].value*cfg.par.unit_mass*const.msun
+            bulge_positions = ad[("bulgestarcoordinates")].value
+            bulge_masses =  ad[("bulgestarmasses")].value
             nstars_bulge = len(bulge_masses)
             
             #create the bulge_list full of BulgeStars objects
