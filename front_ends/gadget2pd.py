@@ -146,7 +146,7 @@ def gadget_field_add(fname,unit_base,bbox,ds=None,starages=False):
     
     ds.add_field(('gasdensity'),function=_gasdensity,units='g/cm**3',particle_type=True)
     #Gas Coordinates need to be in Comoving/h as they'll get converted later.
-    ds.add_field(('gascoordinates'),function=_gascoordinates,units='cmcm/h',particle_type=True)
+    ds.add_field(('gascoordinates'),function=_gascoordinates,units='cm',particle_type=True)
     ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='g/cm**3',particle_type=True)
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
 
