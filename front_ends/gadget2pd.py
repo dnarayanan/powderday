@@ -20,7 +20,7 @@ from redshift_multithread import *
 #7. Parttype0_Smoothed_Density
 
 
-def gadget_field_add(fname,unit_base,bbox,ds=None):
+def gadget_field_add(fname,unit_base,bbox,ds=None,starages=False):
     
     
     def _starmetals_00(field,data):
@@ -148,9 +148,10 @@ def gadget_field_add(fname,unit_base,bbox,ds=None):
     ds.add_field(('gascoordinates'),function=_gascoordinates,units='cmcm/h',particle_type=True)
     ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='g/cm**3',particle_type=True)
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
-#    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='code_mass',particle_type=True)
+    #    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='code_mass',particle_type=True)
 
-    ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
+    if starages == True:
+        ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
 
     
     return ds

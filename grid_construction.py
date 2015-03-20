@@ -48,7 +48,8 @@ def yt_octree_generate():
 
     print '[grid_construction]: unit_base = ',unit_base
 
-    #load the DS
+    #load the DS and add pd fields; no need to put in stellar ages yet
+    #as this will happen downstream in zoom
     pf = gadget_field_add(fname,unit_base,bbox)
 
     #zoom if necessary
