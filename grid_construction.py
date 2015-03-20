@@ -83,10 +83,12 @@ def yt_octree_generate():
  
     always = AlwaysSelector(None)
     ir1 = pf.index.oct_handler.ires(always)  #refinement levels
-    fc1 = pf.index.oct_handler.fcoords(always)  #coordinates in kpc
-    fw1 = pf.index.oct_handler.fwidth(always)  #width of cell in kpc
+    fc1 = pf.index.oct_handler.fcoords(always)  #coordinates in code_length
+    fw1 = pf.index.oct_handler.fwidth(always)  #width of cell in code_length
     
-
+    #convert fc1 and fw1 to YTArrays
+    fc1 = pf.arr(fc1,'code_length')
+    fw1 = pf.arr(fw1,'code_length')
     
 
     print '----------------------------'
@@ -164,23 +166,23 @@ def yt_octree_generate():
     zmax = fc1[:,2]+fw1[:,2]/2.
 
 
-   
+    '''
     xcent_orig,ycent_orig,zcent_orig,dx,dy,dz = grid_center(xmin,xmax,ymin,ymax,zmin,zmax)
     boost = np.array([xcent_orig,ycent_orig,zcent_orig])*1.e3*const.pc
-
+    '''
   
-
+    '''
     logical_Table = Table([refined[:]],names=['logical'])
     ascii.write(logical_Table,cfg.model.PD_output_dir+cfg.model.Auto_TF_file)
 
 
     dust_dens_Table = Table([dust_smoothed[:]],names=['dust density'])
     ascii.write(dust_dens_Table,cfg.model.PD_output_dir+cfg.model.Auto_dustdens_file)
-        
+    '''
 
 
     #return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost
-    return refined,dust_smoothed,fc1,fw1,boost,pf,ad
+    return refined,dust_smoothed,fc1,fw1,pf,ad
 
 
 def grid_coordinate_boost(xmin,xmax,ymin,ymax,zmin,zmax):
