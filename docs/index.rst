@@ -10,9 +10,10 @@
 Welcome to Powderday's documentation!
 =====================================
 
-Powderday is a dust radiative transfer package designed to interface
-with galaxy formation simulations in order to produce realistic
-spectral energy distributions and images. The code utilizes`fsps
+`powderday <https://bitbucket.org/desika/powderday>`_) is a dust
+radiative transfer package designed to interface with galaxy formation
+simulations in order to produce realistic spectral energy
+distributions and images. The code utilizes`fsps
 <https://code.google.com/p/fsps/source/checkout>`_ (and its python
 hooks, `python-fsps
 <http://dan.iel.fm/python-fsps/current/installation/>`_) for stellar
@@ -56,7 +57,7 @@ Contents:
    algorithm_description.rst
    convenience.rst
    troubleshooting.rst
-
+   referencing.rst
 
 Indices and tables
 ==================

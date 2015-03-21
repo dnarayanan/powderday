@@ -3,7 +3,6 @@
 #===============================================
 oref = 0 #over refine factor - should typically be set to 0
 n_ref = 64 #when n_particles > n_ref, octree refines further
-zoom = True #False = use the entire grid; True = zoom in on the highest density peak
 zoom_box_len = 200 #kpc; so the box will be +/- zoom_box_len from the center
 bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_lim)
                #This *must* encompass all of the particles in the
@@ -29,7 +28,7 @@ n_photons_raytracing_dust = 1.e7
 #===============================================
 #DUST INFORMATION
 #===============================================
-dustdir = '/home/desika/hyperion-dust-0.1.0/dust_files/' #location of your dust files
+dustdir = '/Users/desika/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 dusttometals_ratio = 0.4
@@ -85,7 +84,7 @@ N_STELLAR_AGE_BINS = 100
 N_MASS_BINS = 100  
 
 
-metallicity_legend= "/home/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
+metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
 
 
 
