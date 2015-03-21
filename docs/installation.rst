@@ -84,13 +84,10 @@ software to be installed to function.  If you already have `yt
 
 If you don't have `yt <http://yt-project.org>`_ already installed,
 it's super easy!  There are many ways to do this (as directed on the
-`yt <http://yt-project.org>`_ project website.  Utilizing `anaconda
-<https://store.continuum.io/>`_ is certainly a good option because (a)
-it comes with all of the required python subpackages, and (b) the `yt
-<http://yt-project.org>`_ installation is exceptionally easy then.
-
-Note, that you will need yt 3.x, meaning at least the stable or
-development versions.
+`yt <http://yt-project.org>`_ project website.  We require the
+standalone installer script for the Development version.  This will
+ensure that bugs caught in or bleeding-edge features of `yt
+<http://yt-project.org>`_ are included.  
 
 .. _fsps:
 
