@@ -47,14 +47,17 @@ Resolution Keywords
 :zoom_box_len:
 
    Side length to zoom in on.  Is +/- zoom_box_len from the center.
-   Units are kpc.  So, a grid centered on [0,0,0] with
-   zoom_box_len = 200 would extend from [-200,200].
+   Units are proper kpc.  So, a grid centered on [0,0,0] with
+   zoom_box_len = 200 would extend from [-200,200] kpc in physical
+   units at the redshift of the simulation.
 
 :bbox_lim:
 
    Initial bounding box of grid for SPH simulations (+/- bbox_lim).
    Units are kpc.  This must encompass all of the particles in a
-   simulation currently.
+   simulation currently.  This just has to be a big number, but you
+   want to be careful of making *too* large as precision limitations
+   only allow for up to 20 levels of refinement.
 
 
 
@@ -127,6 +130,12 @@ Dust Information
    
 Hydro Code Units
 ------------
+
+Currently these are actually not used in `powderday
+<https://bitbucket.org/desika/powderday>`_).  They remain in the
+parameters file as a placeholder though as we may need them as an
+over-ride if we find some HDF5 files don't contain this information.
+
 :unit_mass:
 
    Mass code units for galaxy simulation.  Units: Msun/h
