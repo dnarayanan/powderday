@@ -56,7 +56,7 @@ Contents:
    parameters_description.rst
    algorithm_description.rst
    convenience.rst
-   troubleshooting.rst
+   referencing.rst
    referencing.rst
 
 Indices and tables
