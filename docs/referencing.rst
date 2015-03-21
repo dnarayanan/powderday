@@ -1,7 +1,7 @@
 Referencing
 **********
 
-If you use `powderday <https://bitbucket.org/desika/powderday>`_), we
+If you use `powderday <https://bitbucket.org/desika/powderday>`_, we
 would definitely appreciate a hat tip toward the following papers that
 describe software that we depend on.  Thanks!
 
