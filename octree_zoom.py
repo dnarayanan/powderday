@@ -133,17 +133,27 @@ def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
         center = center.value
     
     print '[octree zoom_bbox_filter:] using center: ',center
-    
+
     
     box_len = cfg.par.zoom_box_len
+    #now begin the process of converting box_len to physical units in
+    #case we're in a cosmological simulation.  We'll first give it
+    #units of proper kpc, then convert to code length (which for
+    #gadget is kpcm/h) for the bbox calculation (dropping the units of
+    #course).  then when we re-convert to proper units, the box_len as
+    #input in parameters_master will be in proper units.  if a
+    #simulation isn't cosmological, then the only difference here will
+    #be a 1/h
     
+    box_len = ds0.quan(box_len,'kpc')
+    box_len = box_len.convert_to_units('code_length').value
     bbox_lim = box_len
-    #bbox_lim = ds0.quan(box_len,'code_length')
+
     
     bbox1 = [[center[0]-bbox_lim,center[0]+bbox_lim],
             [center[1]-bbox_lim,center[1]+bbox_lim],
             [center[2]-bbox_lim,center[2]+bbox_lim]]
-    print '[octree zoom] new zoomed bbox = ',bbox1
+    print '[octree zoom] new zoomed bbox (comoving/h) = ',bbox1
     
 
     ds1 = load(fname,unit_base=unit_base,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
