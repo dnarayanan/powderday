@@ -58,7 +58,7 @@ Contents:
    convenience.rst
    referencing.rst 
    troubleshooting.rst
-   referencing.rst
+  
 
 Indices and tables
 ==================
