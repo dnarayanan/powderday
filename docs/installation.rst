@@ -20,6 +20,7 @@ Overview of Requirements
 
 
 	* **Additional Packages (with Instructions Below)**
+
 	  * mercurial  <http://mercurial.selenic.com/>
 	  * powderday <http://bitbucket.org/desika/powderday>
 	  * yt <http://yt-project.org>
@@ -265,7 +266,7 @@ Troubleshooting your Installation
    <http://dan.iel.fm/python-fsps/current/installation/>`_ installation
    
    f2py comes with the `yt
-   <http://yt-project.org>`_ installation, but is named f2py2.7.  So, you need to:
+   <http://yt-project.org>`_ installation, but is named f2py2.7.  So, you need to link the following files::
 
    >cd /Users/desika/yt-x86_64/bin
    >ln -s f2py2.7 f2py
