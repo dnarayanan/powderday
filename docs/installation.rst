@@ -265,8 +265,12 @@ Troubleshooting your Installation
 1. Issues with 'f2py' in the  `python-fsps
    <http://dan.iel.fm/python-fsps/current/installation/>`_ installation
    
-   f2py comes with the `yt
-   <http://yt-project.org>`_ installation, but is named f2py2.7.  So, you need to link the following files::
+   f2py is a numpy packages that ships with the `yt
+   <http://yt-project.org>`_ installation, but is named f2py2.7 by
+   numpy.  At the same time, `python-fsps
+   <http://dan.iel.fm/python-fsps/current/installation/>`_ expects it
+   to be called f2py (as it sometimes is; for example in Anaconda).
+   So, you need to link the following files::
 
    >cd /Users/desika/yt-x86_64/bin
    >ln -s f2py2.7 f2py
