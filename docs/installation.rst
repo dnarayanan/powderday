@@ -20,15 +20,15 @@ Overview of Requirements
 
 
 	* **Additional Packages (with Instructions Below)**
-	  * **mercurial** <http://mercurial.selenic.com/>
-	  * **powderday** <http://bitbucket.org/desika/powderday>
-	  * **yt** <http://yt-project.org>
-	  * **FSPS** <https://code.google.com/p/fsps/source/checkout>
-	  * **python-fsps** <http://dan.iel.fm/python-fsps/current/>
-	  * **Hyperion** <http://www.hyperion-rt.org/>
-	  * **Hyperion Dust Files** <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
+	  * mercurial  <http://mercurial.selenic.com/>
+	  * powderday <http://bitbucket.org/desika/powderday>
+	  * yt <http://yt-project.org>
+	  * FSPS <https://code.google.com/p/fsps/source/checkout>
+	  * python-fsps <http://dan.iel.fm/python-fsps/current/>
+	  * Hyperion <http://www.hyperion-rt.org/>
+	  * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
 
-	  
+
 Installation
 ============
 
