@@ -256,3 +256,23 @@ then click 'raw' on the right side of each page.
 1. https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/big.hdf5
 2. https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/vsg.hdf5
 3. https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/usg.hdf5
+
+
+Troubleshooting your Installation
+============
+
+1. Issues with 'f2py' in the  `python-fsps
+   <http://dan.iel.fm/python-fsps/current/installation/>`_ installation
+   
+   f2py comes with the `yt
+   <http://yt-project.org>`_ installation, but is named f2py2.7.  So, you need to:
+
+   >cd /Users/desika/yt-x86_64/bin
+   >ln -s f2py2.7 f2py
+
+   and
+
+   >cd /Users/desika/yt-x86_64/lib/python2.7/site-packages
+   >ln -s numpy/f2py/ f2py
+
+   This should hopefully fix it.
