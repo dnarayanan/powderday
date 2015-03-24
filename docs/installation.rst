@@ -271,7 +271,7 @@ Troubleshooting your Installation
    >cd /Users/desika/yt-x86_64/bin
    >ln -s f2py2.7 f2py
 
-   and
+   and::
 
    >cd /Users/desika/yt-x86_64/lib/python2.7/site-packages
    >ln -s numpy/f2py/ f2py
