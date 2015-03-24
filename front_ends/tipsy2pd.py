@@ -60,7 +60,7 @@ def tipsy_field_add(fname,bbox,ds=None,starages=False):
 
 
     if fname != None:
-        ds = yt.load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+        ds = yt.load(fname,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
         ds.index
     
     ds.add_field(('starmetals'),function=_starmetals,units="code_metallicity",particle_type=True)
