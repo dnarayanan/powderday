@@ -15,7 +15,7 @@ import ipdb
 #6. Parttype0_Coordinates
 #7. Parttype0_Smoothed_Density
 
-def tipsy_field_add(fname,unit_base,bbox,ds=None,starages=False):
+def tipsy_field_add(fname,ds=None,starages=False):
 
     def _starmetals(field,data):
         return data[('Stars', 'Metals')]
@@ -59,7 +59,7 @@ def tipsy_field_add(fname,unit_base,bbox,ds=None,starages=False):
         return (data["Gas","Density"]*data["Gas","Metals"])
 
 
-    ds = yt.load('../tipsy/christensen/Disk_Collapse_1e6.00100.scalez1')
+    ds = yt.load(fname)
     ds.index
     
     ds.add_field(('starmetals'),function=_starmetals,units="code_metallicity",particle_type=True)
