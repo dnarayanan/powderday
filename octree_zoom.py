@@ -162,7 +162,7 @@ def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
     #re-add the new powderday convention fields; this time we need to
     #make sure to do the ages calculation since it hasn't been done
     #before.
-    ds1 = gadget_field_add(None,unit_base,bbox1,ds=ds1,starages=True)
+    ds1 = gadget_field_add(None,bounding_box = bbox1,ds=ds1,starages=True)
 
     
     return ds1

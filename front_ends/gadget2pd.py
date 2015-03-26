@@ -20,7 +20,7 @@ from redshift_multithread import *
 #7. Parttype0_Smoothed_Density
 
 
-def gadget_field_add(fname,unit_base,bbox,ds=None,starages=False):
+def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     
     
     def _starmetals_00(field,data):
@@ -114,7 +114,7 @@ def gadget_field_add(fname,unit_base,bbox,ds=None,starages=False):
         
     #load the ds
     if fname != None:
-        ds = yt.load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+        ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
         ds.index
 
 
