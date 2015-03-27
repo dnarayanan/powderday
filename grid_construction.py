@@ -13,7 +13,7 @@ from yt.mods import *
 from yt.geometry.oct_container import OctreeContainer
 from yt.geometry.selection_routines import AlwaysSelector
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
-from front_ends.gadget2pd import *
+
 
 import constants as const
 
@@ -25,12 +25,12 @@ import sys
 
 
 
-def yt_octree_generate():
+def yt_octree_generate(fname,field_add):
     
    
     
 
-    fname = cfg.model.hydro_dir+cfg.model.Gadget_snap_name
+    
 
     print '[grid_construction]: bbox_lim = ',cfg.par.bbox_lim
 
@@ -50,11 +50,11 @@ def yt_octree_generate():
 
     #load the DS and add pd fields; no need to put in stellar ages yet
     #as this will happen downstream in zoom
-    pf = gadget_field_add(fname,bounding_box = bbox)
+    pf = field_add(fname,bounding_box = bbox)
 
     #zoom if necessary
     # if cfg.par.zoom == True:
-    pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox)
+    pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox,field_add)
 
     
     

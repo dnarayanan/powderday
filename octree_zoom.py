@@ -9,7 +9,7 @@ import constants as const
 
 from cutout_data import yt_field_map
 from yt.frontends.sph.data_structures import ParticleDataset
-from front_ends.gadget2pd import *
+
 
 ParticleDataset.filter_bbox = True
 ParticleDataset._skip_cache = True
@@ -95,7 +95,7 @@ def octree_zoom(fname,pf,unit_base,bbox):
     return new_ds
 
 
-def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
+def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0,field_add):
 
     ds0 = pf
     
@@ -162,7 +162,7 @@ def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0):
     #re-add the new powderday convention fields; this time we need to
     #make sure to do the ages calculation since it hasn't been done
     #before.
-    ds1 = gadget_field_add(None,bounding_box = bbox1,ds=ds1,starages=True)
+    ds1 = field_add(None,bounding_box = bbox1,ds=ds1,starages=True)
 
     
     return ds1
