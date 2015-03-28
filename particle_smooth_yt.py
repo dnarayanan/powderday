@@ -25,8 +25,8 @@ def yt_smooth(pf):
     
     saved["density"] = ad["gassmootheddensity"]
     saved["metallicity"] = ad["gassmoothedmetals"]
+    saved["masses"] = ad["gassmoothedmasses"]
     
-
     
    
     
@@ -40,7 +40,7 @@ def yt_smooth(pf):
 
     #return saved["metallicity"],saved["density"],saved["masses"],ad[metal_fn]
    
-    return saved["metallicity"],saved["density"]
+    return saved["metallicity"],saved["density"],saved["masses"]
    
     for i in sorted(saved):
         if not hasattr(saved[i], 'shape'): continue

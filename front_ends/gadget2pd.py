@@ -69,7 +69,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         return data[("deposit","PartType0_smoothed_metallicity")]
 
     def _gassmoothedmasses(field,data):
-        return data[("deposit","PartType0_smoothed_particle_mass")]
+        return data[('deposit', 'PartType0_mass')]
     
     def _metaldens_00(field,data):
         return (data["PartType0","Density"]*data["PartType0","Metallicity_00"])
@@ -149,7 +149,8 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     ds.add_field(('gascoordinates'),function=_gascoordinates,units='cm',particle_type=True)
     ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='g/cm**3',particle_type=True)
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
-
+    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
+    
     if starages == True:
         ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
 

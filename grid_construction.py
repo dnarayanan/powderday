@@ -126,7 +126,7 @@ def yt_octree_generate(fname,field_add):
     volume = np.zeros(len(refined))
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
-    volume[wFalse] = (fw1 * const.pc * 1.e3)**3.
+    volume[wFalse] = (fw1.in_units('cm'))**3.
     
 
    
@@ -135,15 +135,19 @@ def yt_octree_generate(fname,field_add):
 
         
         from particle_smooth_yt import yt_smooth
-        metallicity_smoothed,density_smoothed = yt_smooth(pf)
-
-
+        metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
+       
+        
+        
         dust_smoothed = np.zeros(len(refined))
         
         print '[grid_construction: ] len(wFalse) = ',len(wFalse)
         print '[grid_construction: ] len(metallicity_smoothed) = ',len(metallicity_smoothed)
 
-        dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio 
+        #dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
+
+        
+        dust_smoothed[wFalse] = metallicity_smoothed * masses_smoothed/volume[wFalse] * cfg.par.dusttometals_ratio
         
         
     else:
