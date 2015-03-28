@@ -1,6 +1,7 @@
 import numpy as np
 import yt
 from yt import derived_field
+from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import pdb,ipdb
 import config as cfg
 
@@ -77,6 +78,14 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     def _metaldens(field,data):
         return (data["PartType0","Density"]*data["PartType0","Metallicity"])
 
+    def _metalmass_00(field,data):
+        return (data["PartType0","Masses"]*(data["PartType0","Metallicity_00"].value))
+    
+    def _metalmass(field,data):
+        return (data["PartType0","Masses"]*(data["PartType0","Metallicity"].value))
+
+    def _metalsmoothedmasses(field,data):
+        return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
 
     def _stellarages(field,data):
         ad = data.ds.all_data()
@@ -128,9 +137,23 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     if  ('PartType0', 'Metallicity_00') in ds.derived_field_list:
         ds.add_field(('gasmetals'),function=_gasmetals_00,units="code_metallicity",particle_type=True)
         ds.add_field(('metaldens'),function=_metaldens_00,units="g/cm**3", particle_type=True)
+
+        #we add this as part type 0 (a non-general name) as it gets
+        #smoothed immediately and that's all we end up using downstream
+        ds.add_field(('PartType0','metalmass'),function=_metalmass_00,units="g", particle_type=True)
+
     else:
         ds.add_field(('gasmetals'),function=_gasmetals,units="code_metallicity",particle_type=True)
         ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
+        ds.add_field(('PartType0','metalmass'),function=_metalmass,units="g", particle_type=True)
+
+
+    metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
+                                                  "SmoothingLength", "Density","metalmass",
+                                                  ds.field_info)
+    ds.add_field(('metalsmoothedmasses'),function=_metalsmoothedmasses,units='code_metallicity',particle_type=True)
+
+
 
     ds.add_field(('starmasses'),function=_starmasses,units='g',particle_type=True)
     ds.add_field(('starcoordinates'),function=_starcoordinates,units='cm',particle_type=True)

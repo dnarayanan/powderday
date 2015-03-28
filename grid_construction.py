@@ -52,6 +52,8 @@ def yt_octree_generate(fname,field_add):
     #as this will happen downstream in zoom
     pf = field_add(fname,bounding_box = bbox)
 
+    ipdb.set_trace()
+    
     #zoom if necessary
     # if cfg.par.zoom == True:
     pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox,field_add)
