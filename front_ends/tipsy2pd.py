@@ -6,7 +6,9 @@ import ipdb
 import config as cfg
 from astropy.cosmology import Planck13
 import astropy.units as u
+from yt.config import ytcfg
 
+ytcfg["yt","skip_dataset_cache"] = "True"
 
 #need - 
 #1. PartType4_Metallicity (newstar metals)
@@ -17,7 +19,7 @@ import astropy.units as u
 #6. Parttype0_Coordinates
 #7. Parttype0_Smoothed_Density
 
-def tipsy_field_add(fname,bbox,ds=None,starages=False):
+def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
 
     def _starmetals(field,data):
         return data[('Stars', 'Metals')]
@@ -62,7 +64,7 @@ def tipsy_field_add(fname,bbox,ds=None,starages=False):
 
 
     if fname != None:
-        ds = yt.load(fname,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+        ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
         ds.index
     
     ds.add_field(('starmetals'),function=_starmetals,units="code_metallicity",particle_type=True)
@@ -76,7 +78,7 @@ def tipsy_field_add(fname,bbox,ds=None,starages=False):
     ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='g/cm**3',particle_type=True)
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
     ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
-    
+    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
 
 
     ad = ds.all_data()
