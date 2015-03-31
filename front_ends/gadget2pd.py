@@ -119,6 +119,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
             print '[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime
             print '--------------\n'
                 
+        age = data.ds.arr(age,'Gyr')
         return age
         
     #load the ds
