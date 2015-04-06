@@ -7,6 +7,7 @@ import config as cfg
 from astropy.cosmology import Planck13
 import astropy.units as u
 from yt.config import ytcfg
+from yt.data_objects.particle_filters import add_particle_filter
 
 ytcfg["yt","skip_dataset_cache"] = "True"
 
@@ -22,13 +23,13 @@ ytcfg["yt","skip_dataset_cache"] = "True"
 def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
 
     def _starmetals(field,data):
-        return data[('Stars', 'Metals')]
+        return data[('newstars', 'Metals')]
     
     def _starcoordinates(field,data):
-        return data[('Stars', 'Coordinates')]
+        return data[('newstars', 'Coordinates')]
 
     def _starformationtime(field,data):
-        return data[('Stars', 'FormationTime')]
+        return data[('newstars', 'FormationTime')]
 
     def _stellarages(field,data):
         ad = data.ds.all_data()
@@ -37,11 +38,18 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
         age = simtime - ad["starformationtime"].in_units('Gyr').value
         age[np.where(age < 1.e-3)[0]] = 1.e-3
         age = data.ds.arr(age,'Gyr')
-        
         return age
 
     def _starmasses(field,data):
-        return data[('Stars', 'Mass')]
+        return data[('newstars', 'Mass')]
+
+
+    def _diskstarcoordinates(field,data):
+        return data[('diskstars','Coordinates')]
+        
+    def _diskstarmasses(field,data):
+        return data[("diskstars","Mass")]
+    
     
     def _gasdensity(fied,data):
         return data[('Gas', 'Density')]
@@ -69,6 +77,34 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
         ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
         ds.index
     
+
+    #set up particle filters to figure out which stars might have been
+    #initalized with the simulation.  we'll call stars that are formed
+    #in the simulation 'new_stars' (no matter how old they are), and
+    #stars that are initalized with the simulation as 'diskstars'.
+    #Assume that no cosmology someone uses will give us a Hubbe time >
+    #15 Gyr.
+
+    def newstars(pfilter, data):
+        age = data.ds.current_time - data[pfilter.filtered_type, "creation_time"]
+        filter = np.logical_and(age.in_units('Gyr') <= 15, age.in_units('Gyr') >= 0)
+        return filter
+
+    def diskstars(pfilter, data):
+        age = data.ds.current_time - data[pfilter.filtered_type, "creation_time"]
+        filter = np.logical_or(age.in_units('Gyr') >= 15, age.in_units('Gyr') <= 0)
+        return filter
+
+
+    add_particle_filter("newstars", function=newstars, filtered_type='Stars', requires=["creation_time"])
+    add_particle_filter("diskstars", function=diskstars, filtered_type='Stars', requires=["creation_time"])
+
+    ds.add_particle_filter("newstars")
+    ds.add_particle_filter("diskstars")
+
+    ad = ds.all_data()
+
+    #add the regular powderday fields
     ds.add_field(('starmetals'),function=_starmetals,units="code_metallicity",particle_type=True)
     ds.add_field(('starcoordinates'),function=_starcoordinates,units='cm',particle_type=True)
     ds.add_field(('starformationtime'),function=_starformationtime,units='Gyr',particle_type=True)
@@ -81,6 +117,12 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
     ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
     ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
+
+    #only add the disk star fields if there are any disk stars
+    if len(ad["diskstars","Mass"]) > 0 :
+        ds.add_field(('diskstarmasses'),function=_diskstarmasses,units='g',particle_type=True)
+        ds.add_field(('diskstarcoordinates'),function=_diskstarcoordinates,units='cm',particle_type=True)
+
 
 
     ad = ds.all_data()
