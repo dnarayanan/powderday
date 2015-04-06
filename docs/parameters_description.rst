@@ -210,7 +210,14 @@ Stellar SEDs Info
 
    Age in Gyr of disk stars for idealized simulations. Meaningless for
    cosmological simulations.  Note, if this is <=7, then these will
-   live in Charlot & Fall birthclouds (if CF_on = True)
+   live in Charlot & Fall birthclouds (if CF_on = True).
+
+   Note, for Gadget simulations, stars are divided into newstars, disk
+   stars and bulge stars.  For Tipsy outputs, the stars initalized
+   with the simulation are auto-detected by their nonsensical ages,
+   and assigned as disk stars.  So, if there are stars initalized with
+   your Tipsy simulation, assign their ages (and metallicities below)
+   as disk stars.
 
 :bulge_stars_age:
 
