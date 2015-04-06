@@ -34,8 +34,10 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
         ad = data.ds.all_data()
         simtime = data.ds.current_time.in_units('Gyr')
         simtime = simtime.value
-        age = simtime - ad["starformationtime"].value
+        age = simtime - ad["starformationtime"].in_units('Gyr').value
         age[np.where(age < 1.e-3)[0]] = 1.e-3
+        age = data.ds.arr(age,'Gyr')
+        
         return age
 
     def _starmasses(field,data):

@@ -93,7 +93,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
 
             simtime = data.ds.current_time.in_units('Gyr')
             simtime = simtime.value
-            
+
             age = simtime-ad[("starformationtime")].value #Gyr (assumes that ad["starformationtime"] is in Gyr for Gadget)
             #make the minimum age 1 million years 
             age[np.where(age < 1.e-3)[0]] = 1.e-3
