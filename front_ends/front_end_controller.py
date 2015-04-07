@@ -16,6 +16,10 @@ def stream(fname):
         print '[front_end_controller:] tipsy data set detected'
         return field_add
 
+    def ramses():
+        from ramses2pd import ramses_field_add as field_add
+        print '[front_end_controller:] ramses data set detected'
+        return field_add
 
   
     ds = yt.load(fname)
@@ -24,7 +28,8 @@ def stream(fname):
   
     #define the options dictionary
     options = {'gadget_hdf5':gadget,
-               'tipsy':tipsy}
+               'tipsy':tipsy,
+               'ramses':ramses}
 
 
     #grab the field from the right front end
