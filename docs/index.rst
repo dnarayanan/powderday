@@ -10,7 +10,7 @@
 Welcome to Powderday's documentation!
 =====================================
 
-`powderday <https://bitbucket.org/desika/powderday>`_) is a dust
+`powderday <https://bitbucket.org/desika/powderday>`_ is a dust
 radiative transfer package designed to interface with galaxy formation
 simulations in order to produce realistic spectral energy
 distributions and images. The code utilizes`fsps
@@ -58,7 +58,7 @@ Contents:
    convenience.rst
    referencing.rst 
    troubleshooting.rst
-  
+   getting_help.rst
 
 Indices and tables
 ==================
