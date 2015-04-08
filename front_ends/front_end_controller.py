@@ -6,8 +6,8 @@ def stream(fname):
 
    
     
-    def gadget():
-        from gadget2pd import gadget_field_add as field_add
+    def gadgethdf5():
+        from gadgethdf52pd import gadget_field_add as field_add
         print '[front_end_controller:] gadget data set detected'
         return field_add
 
@@ -27,7 +27,7 @@ def stream(fname):
     
   
     #define the options dictionary
-    options = {'gadget_hdf5':gadget,
+    options = {'gadget_hdf5':gadgethdf5,
                'tipsy':tipsy,
                'ramses':ramses}
 
