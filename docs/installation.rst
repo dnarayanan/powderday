@@ -22,6 +22,7 @@ Overview of Requirements
 	* **Additional Packages (with Instructions Below)**
 
 	  * mercurial  <http://mercurial.selenic.com/>
+	  * git  <http://git-scm.com/>
 	  * powderday <http://bitbucket.org/desika/powderday>
 	  * yt <http://yt-project.org>
 	  * FSPS <https://code.google.com/p/fsps/source/checkout>
