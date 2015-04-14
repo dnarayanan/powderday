@@ -6,8 +6,6 @@ from astropy.io import ascii
 import astropy.units as u
 import astropy.constants as constants
 from astropy import cosmology as cosmo
-
-import constants as const
 import pdb,ipdb
 import sys
 from plot_generate import mass_weighted_distribution as mwd
@@ -217,7 +215,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
     sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[0].fsps_zmet)
     
     spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
-    nu = 1.e8*const.c/spec[0]
+    nu = 1.e8*constants.c.cgs.value/spec[0]
     nlam = len(nu)
 
 
@@ -372,7 +370,7 @@ def newstars_gen(stars_list):
     #first figure out how many wavelengths there are
     sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[0].fsps_zmet)
     spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
-    nu = 1.e8*const.c/spec[0]
+    nu = 1.e8*constants.c.cgs.value/spec[0]
     
 
     nlam = len(nu)
@@ -401,7 +399,7 @@ def newstars_gen(stars_list):
         #sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=2,sfh=0,zmet=stars_list[i].fsps_zmet)
         spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
 
-        stellar_nu[:] = 1.e8*const.c/spec[0]
+        stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = spec[1]
 
     return stellar_fnu

@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 from hyperion.model import ModelOutput
 import h5py
 
-import constants as const
 import pdb,ipdb
 
 import yt

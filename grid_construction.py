@@ -14,8 +14,8 @@ from yt.geometry.oct_container import OctreeContainer
 from yt.geometry.selection_routines import AlwaysSelector
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 
+import astropy.constants as constants
 
-import constants as const
 
 random.seed('octree-demo')
  
@@ -168,19 +168,7 @@ def yt_octree_generate(fname,field_add):
     zmax = fc1[:,2]+fw1[:,2]/2.
 
 
-    '''
-    xcent_orig,ycent_orig,zcent_orig,dx,dy,dz = grid_center(xmin,xmax,ymin,ymax,zmin,zmax)
-    boost = np.array([xcent_orig,ycent_orig,zcent_orig])*1.e3*const.pc
-    '''
-  
-    '''
-    logical_Table = Table([refined[:]],names=['logical'])
-    ascii.write(logical_Table,cfg.model.PD_output_dir+cfg.model.Auto_TF_file)
-
-
-    dust_dens_Table = Table([dust_smoothed[:]],names=['dust density'])
-    ascii.write(dust_dens_Table,cfg.model.PD_output_dir+cfg.model.Auto_dustdens_file)
-    '''
+   
 
 
     #return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost

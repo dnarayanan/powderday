@@ -1,6 +1,6 @@
 import numpy as np
 import pdb
-import constants as const
+import astropy.constants as constants
 import matplotlib.pyplot as plt
 
 data = np.load('stellar_seds.metalshi.npz')
@@ -12,7 +12,7 @@ bulge_fnu = data['arr_4']
 nstars = stellar_fnu.shape[0]
 
 #get lambda from nu
-lambda_cgs = const.c/stellar_nu
+lambda_cgs = constants.c.cgs.value/stellar_nu
 lambda_micron = lambda_cgs*1.e4
 
 

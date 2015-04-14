@@ -1,7 +1,7 @@
 import numpy as np
 import config as cfg
 import pdb
-import constants as const
+
 
 def gridstats(ir1,fc1,fw1):
 

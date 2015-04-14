@@ -4,7 +4,6 @@
 import config as cfg
 import pdb,ipdb
 import numpy as np
-import constants as const
 import operator
 import SED_gen as sg
 from datetime import datetime
@@ -34,18 +33,18 @@ def add_super_simple_sed(stars_list,diskstars_list,bulgestars_list,m,lum,temp):
 
     for i in range(nstars):
 
-        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*const.rsun,
+        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*constants.R_sun.cgs.value,
                                position = stars_list[i].positions)
     
     
     for i in range(nstars_disk):
         
-        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*const.rsun,
+        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*constants.R_sun.cgs.value,
                                position = diskstars_list[i].positions)
     
     for i in range(nstars_bulge):
         
-        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*const.rsun,
+        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*constants.R_sun.cgs.value,
                                position = bulgestars_list[i].positions)
     
 
@@ -71,8 +70,8 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
 
         
         
-        lum = np.absolute(np.trapz(fnu,x=nu))*stars_list[i].mass/const.msun 
-        lum *= const.lsun #to get in cgs
+        lum = np.absolute(np.trapz(fnu,x=nu))*stars_list[i].mass/constants.M_sun.cgs.value 
+        lum *= constants.L_sun.cgs.value
 
         #add new stars
         totallum_newstars += lum
@@ -122,11 +121,11 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
         disksource = m.add_point_source_collection()
             
         
-        disk_lum = np.absolute(np.trapz(fnu,x=nu))*diskstars_list[0].mass/const.msun
+        disk_lum = np.absolute(np.trapz(fnu,x=nu))*diskstars_list[0].mass/constants.M_sun.cgs.value
         #since stellar masses are in cgs, and we need them to be in msun - we
         #multiply by mass to get the *total* luminosity of the stellar
         #cluster since int(nu,fnu) is just the luminosity of a 1 Msun single star
-        disk_lum *= const.lsun
+        disk_lum *= constants.L_sun.cgs.value
         disksource.luminosity = np.repeat(disk_lum,nstars_disk)
         
         disk_pos = np.zeros([len(diskstars_list),3])
@@ -150,8 +149,8 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
 
         print 'adding bulge stars to the grid: adding as a point source collection'
         bulgesource = m.add_point_source_collection()
-        bulge_lum = np.absolute(np.trapz(fnu,x=nu))*bulgestars_list[0].mass/const.msun
-        bulge_lum *= const.lsun
+        bulge_lum = np.absolute(np.trapz(fnu,x=nu))*bulgestars_list[0].mass/constants.M_sun.cgs.value
+        bulge_lum *= constants.L_sun.cgs.value
         bulgesource.luminosity = np.repeat(bulge_lum,nstars_bulge)
         
         bulge_pos = np.zeros([len(bulgestars_list),3])
@@ -174,7 +173,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
 
     #calculate the minimum and maximum luminosity
-    minimum_mass = 1e15*const.msun #msun - some absurdly large value for a single stellar cluster
+    minimum_mass = 1e15*constants.M_sun.cgs.value #msun - some absurdly large value for a single stellar cluster
     maximum_mass = 0 #msun
 
     #calculate the minimum and maximum stellar metallicity
@@ -367,7 +366,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
                     
                     #source luminosities
-                    lum = np.array([stars_list[i].mass/const.msun*const.lsun for i in stars_in_bin[(wz,wa,wm)]])
+                    lum = np.array([stars_list[i].mass/constants.M_sun.cgs.value*constants.L_sun.cgs.value for i in stars_in_bin[(wz,wa,wm)]])
                     lum *= np.absolute(np.trapz(fnu,x=nu))
                     source.luminosity = lum
                     
