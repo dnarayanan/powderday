@@ -41,12 +41,11 @@ def yt_octree_generate(fname,field_add):
  
              
     
-
+    '''
     unit_base = {'UnitLength_in_cm'         : cfg.par.unit_length*1.e3*const.pc,
                  'UnitMass_in_g'            : cfg.par.unit_mass*const.msun,
                  'UnitVelocity_in_cm_per_s' : cfg.par.unit_velocity}
-
-    print '[grid_construction]: unit_base = ',unit_base
+    '''
 
     #load the DS and add pd fields; no need to put in stellar ages yet
     #as this will happen downstream in zoom
@@ -56,7 +55,7 @@ def yt_octree_generate(fname,field_add):
     
     #zoom if necessary
     # if cfg.par.zoom == True:
-    pf = octree_zoom_bbox_filter(fname,pf,unit_base,bbox,field_add)
+    pf = octree_zoom_bbox_filter(fname,pf,bbox,field_add)
 
     
     

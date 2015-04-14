@@ -52,10 +52,6 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
             [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim]]
  
-    unit_base = {'UnitLength_in_cm'         : cfg.par.unit_length*1.e3*const.pc,
-                 'UnitMass_in_g'            : cfg.par.unit_mass*const.msun,
-                 'UnitVelocity_in_cm_per_s' : cfg.par.unit_velocity}
-
    
     
     metals = ad["starmetals"].value

@@ -16,7 +16,7 @@ ParticleDataset._skip_cache = True
 
 
 
-def octree_zoom(fname,pf,unit_base,bbox):
+def octree_zoom(fname,pf,bbox):
 
     pf = load(fname,unit_base=unit_base,bounding_box=bbox,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
 
@@ -95,7 +95,7 @@ def octree_zoom(fname,pf,unit_base,bbox):
     return new_ds
 
 
-def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0,field_add):
+def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
 
     ds0 = pf
     
@@ -156,7 +156,8 @@ def octree_zoom_bbox_filter(fname,pf,unit_base,bbox0,field_add):
     print '[octree zoom] new zoomed bbox (comoving/h) = ',bbox1
     
 
-    ds1 = load(fname,unit_base=unit_base,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+
+    ds1 = load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
     ds1.periodicity = (False,False,False)
 
     #re-add the new powderday convention fields; this time we need to
