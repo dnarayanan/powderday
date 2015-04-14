@@ -11,16 +11,6 @@ from redshift_multithread import *
 
 
 
-#need - 
-#1. PartType4_Metallicity (newstar metals)
-#2. PartType4_coordinates
-#3. Parttype4_StelarFormationTiome
-#4. PartType0_Density
-#5. PartType0_Metallicity
-#6. Parttype0_Coordinates
-#7. Parttype0_Smoothed_Density
-
-
 def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     
     

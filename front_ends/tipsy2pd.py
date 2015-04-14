@@ -11,14 +11,6 @@ from yt.data_objects.particle_filters import add_particle_filter
 
 ytcfg["yt","skip_dataset_cache"] = "True"
 
-#need - 
-#1. PartType4_Metallicity (newstar metals)
-#2. PartType4_coordinates
-#3. Parttype4_StelarFormationTiome
-#4. PartType0_Density
-#5. PartType0_Metallicity
-#6. Parttype0_Coordinates
-#7. Parttype0_Smoothed_Density
 
 def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
 
