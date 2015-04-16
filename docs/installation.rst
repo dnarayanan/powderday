@@ -259,6 +259,12 @@ then click 'raw' on the right side of each page.
 2. https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/vsg.hdf5
 3. https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/usg.hdf5
 
+Please note the caveat that the PAH files are generated using some
+approxmations described in `Robitaille et
+al. <http://www.aanda.org/articles/aa/abs/2012/09/aa19073-12/aa19073-12.html>`_,
+and we encourage the user of these PAH files to read this paper,
+especially section 3.4.2.
+
 
 Troubleshooting your Installation
 ============

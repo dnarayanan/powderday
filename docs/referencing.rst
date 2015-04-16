@@ -3,7 +3,14 @@ Referencing
 
 If you use `powderday <https://bitbucket.org/desika/powderday>`_, we
 would definitely appreciate a hat tip toward the following papers that
-describe software that we depend on.  Thanks!
+describe software that we depend on.  We suggest either the following
+paragraph, or some variant.
+
+This paper makes use of the powderday radiative transfer software,
+which is built on yt (Turk et al. 2011), Hyperion (Robitaille 2011),
+and FSPS (Conroy & Gunn, 2010).
+
+References:
 
 1. `yt
 <http://yt-project.org>`_:   `Turk et al. 2011
