@@ -7,7 +7,11 @@ def stream(fname):
    
     
     def gadget():
-        from gadget2pd import gadget_field_add as field_add
+        if ('PartType0', 'CS Temperature') in ds.derived_field_list:
+            from CSgadget2pd import gadget_field_add as field_add
+        else:
+            from gadget2pd import gadget_field_add as field_add
+        
         print '[front_end_controller:] gadget data set detected'
         return field_add
 
