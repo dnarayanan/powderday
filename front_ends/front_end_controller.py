@@ -1,6 +1,7 @@
 import numpy as np
 import yt
 import ipdb
+import config as cfg
 
 def stream(fname):
 
@@ -25,11 +26,21 @@ def stream(fname):
         print '[front_end_controller:] ramses data set detected'
         return field_add
 
-  
-    ds = yt.load(fname)
+
+    bbox = [[-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim]]
+    
+    try: 
+        ds = yt.load(fname,bounding_box = bbox)
+        print '[front_end_controller:] bounding_box being used'
+    except:
+        ds = yt.load(fname)
+        print '[front_end_controller:] NO bounding_box being used'
+
     ds_type = ds.dataset_type 
     
-  
+ 
     #define the options dictionary
     options = {'gadget_hdf5':gadget,
                'tipsy':tipsy,

@@ -156,8 +156,12 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
     print '[octree zoom] new zoomed bbox (comoving/h) = ',bbox1
     
 
+    try: #particle
+        ds1 = load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+    except: #amr
+        ds1 = load(fname,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+        bbox1 = None
 
-    ds1 = load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
     ds1.periodicity = (False,False,False)
 
     #re-add the new powderday convention fields; this time we need to
