@@ -13,6 +13,7 @@ import sys
 from yt.mods import *
 import astropy.units as units
 import astropy.constants as constants
+from helpers import *
 
 class Sed_Bins:
     def __init__(self,mass,metals,age,fsps_zmet):
@@ -410,11 +411,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
     return m
 
-    
-def find_nearest(array,value):
-    idx = (np.abs(array-value)).argmin()
-    
-    return idx
 
 
 

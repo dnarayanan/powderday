@@ -98,7 +98,9 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
             scalefactor = ad[("starformationtime")].value
             formation_z = (1./scalefactor)-1.
             
-            formation_time = redshift_multithread(formation_z)
+            formation_time = redshift_vectorized(formation_z)
+            #drop the Gyr unit
+            formation_time = np.asarray([formation_time[i].value for i in range(len(formation_time))])
             
             age = simtime - formation_time
             #make the minimum age 1 million years 

@@ -6,6 +6,7 @@ import yt
 from datetime import datetime
 from datetime import timedelta
 from astropy.cosmology import Planck13
+from helpers import * 
 
 def redshift_multithread(formation_z):
 
@@ -46,4 +47,29 @@ def redshift_multithread(formation_z):
 
 def redshift_gen(formation_z):
     age = Planck13.age(formation_z)
+    
     return age
+
+
+def redshift_vectorized(formation_z):
+        t1=datetime.now()
+        
+        print 'Beginning redshift referencing'
+        reference_z = np.arange(0,100,0.01)
+        reference_t = Planck13.age(reference_z)
+        t2=datetime.now()
+        print 'Redshift referencing time: = '+str(t2-t1)
+        
+        formation_time = []
+
+        t1=datetime.now()
+        for i in range(len(formation_z)):
+                
+                idx = find_nearest(reference_z,formation_z[i])
+                formation_time.append(reference_t[idx])
+            
+
+        t2=datetime.now()
+        print 'redshift_vectorizing time: = '+str(t2-t1)
+
+        return formation_time
