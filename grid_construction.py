@@ -156,8 +156,6 @@ def yt_octree_generate(fname,field_add):
 
 
 
-     #file I/O
-    print 'Writing Out the Coordinates and Logical Tables'
    
 
     xmin = fc1[:,0]-fw1[:,0]/2.
