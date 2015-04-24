@@ -76,7 +76,7 @@ ymax = (fc1[:,1]+fw1[:,1]/2.).convert_to_units('cm')
 zmin = (fc1[:,2]-fw1[:,2]/2.).convert_to_units('cm')
 zmax = (fc1[:,2]+fw1[:,2]/2.).convert_to_units('cm')
 
-ipdb.set_trace()
+
 #dx,dy,dz are the edges of the parent grid
 dx = (np.max(xmax)-np.min(xmin)).value
 dy = (np.max(ymax)-np.min(ymin)).value
