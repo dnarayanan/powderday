@@ -145,6 +145,7 @@ def yt_octree_generate(fname,field_add):
         print '[grid_construction: ] len(wFalse) = ',len(wFalse)
         print '[grid_construction: ] len(metallicity_smoothed) = ',len(metallicity_smoothed)
 
+        
         dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
         
         

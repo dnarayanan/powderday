@@ -76,15 +76,16 @@ ymax = (fc1[:,1]+fw1[:,1]/2.).convert_to_units('cm')
 zmin = (fc1[:,2]-fw1[:,2]/2.).convert_to_units('cm')
 zmax = (fc1[:,2]+fw1[:,2]/2.).convert_to_units('cm')
 
+ipdb.set_trace()
 #dx,dy,dz are the edges of the parent grid
-dx = (max(xmax)-min(xmin)).value
-dy = (max(ymax)-min(ymin)).value
-dz = (max(zmax)-min(zmin)).value
+dx = (np.max(xmax)-np.min(xmin)).value
+dy = (np.max(ymax)-np.min(ymin)).value
+dz = (np.max(zmax)-np.min(zmin)).value
 
 
-xcent = np.mean([min(xmin),max(xmax)]) #kpc
-ycent = np.mean([min(ymin),max(ymax)])
-zcent = np.mean([min(zmin),max(zmax)])
+xcent = np.mean([np.min(xmin),np.max(xmax)]) #kpc
+ycent = np.mean([np.min(ymin),np.max(ymax)])
+zcent = np.mean([np.min(zmin),np.max(zmax)])
 
 boost = np.array([xcent,ycent,zcent])
 print '[pd_front end] boost = ',boost
