@@ -158,13 +158,7 @@ def yt_octree_generate(fname,field_add):
 
    
 
-    xmin = fc1[:,0]-fw1[:,0]/2.
-    xmax = fc1[:,0]+fw1[:,0]/2.
-    ymin = fc1[:,1]-fw1[:,1]/2.
-    ymax = fc1[:,1]+fw1[:,1]/2.
-    zmin = fc1[:,2]-fw1[:,2]/2.
-    zmax = fc1[:,2]+fw1[:,2]/2.
-
+  
 
    
 
