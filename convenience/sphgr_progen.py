@@ -2,8 +2,12 @@ from common_analysis import *
 import pylab as plt
 import pdb,ipdb
 import numpy as np
+import cPickle
+from progenner import *
+from dn_galinfo_return import *
+from progenner import *
 
-def progen(SNAPNUM,GAL):
+def progen(SNAPNUM,GAL,p):
 
     ## specify snapshot number
     #SNAPNUM = 300
@@ -13,22 +17,39 @@ def progen(SNAPNUM,GAL):
 
     ## create a list of SPHGR objects using the
     ## loadSata function defined in common_analysis.py
-    sims = loadSnap(SNAPNUM)
+
+
+    #get the galaxy ID from the last snap
+    sims = cPickle.load(open(p,'rb'))
+    galid,mstar,mgas,sfr,mhalo,haloid = galinfo_top(sims,10)
+    GAL = galid[0]
+
+
+    sims_loadsnap = iS.loadData(p)
     
-    ## depending on your DIRPRES config, this list
-    ## may have multiple objects, but for now lets
-    ## focus on the 0th index
-    obj = sims[0]
+    obj = sims_loadsnap
 
-    ## import progen routine
-    from progenner import *
-    ## initialize progen data
-    ## this basically fills the galaxy object with
-    ## all of the .progen_xxxx data
-    progenInit(sims, SNAPNUM, 0, [[GAL]], 'galaxy')
+    #now get the progenitors for the galaxies and it's physical properties
+    progenInit([sims_loadsnap], SNAPNUM, 0, [[GAL]], 'galaxy')
+    
+    #print whats available
+    obj.galaxies[GAL].progen_galaxies[0].__dict__.keys()
 
-    snap = []
-    gal = obj.galaxies[GAL]
+    #assign the physical quantities
+
+    z = np.asarray([s.redshift for s in obj.galaxies[GAL].progen_galaxies])
+    
+    
+
+    cm = np.asarray([s.cm for s in obj.galaxies[GAL].progen_galaxies])
+    cmx = cm[:,0]
+    cmy = cm[:,1]
+    cmz = cm[:,2]
+    
+    snap = np.arange(len(z))
+    snap += (SNAPNUM+1)-len(z)
+    ipdb.set_trace()
+    '''
     for i in range(0,len(gal.progen_z)):
         snap.append(SNAPNUM-i)
         print '%d %0.3f  %e %e  %f  %f  %f' % (snap[i], gal.progen_z[i],
@@ -38,5 +59,7 @@ def progen(SNAPNUM,GAL):
                                                gal.progen_cmy[i],
                                                gal.progen_cmz[i])
         
+    '''
+            
+    return snap,cmx,cmy,cmz
 
-    return snap,gal.progen_cmx,gal.progen_cmy,gal.progen_cmz
