@@ -7,7 +7,7 @@ from progenner import *
 from dn_galinfo_return import *
 from progenner import *
 
-def progen(SNAPNUM,GAL,p):
+def progen(SNAPNUM,p):
 
     ## specify snapshot number
     #SNAPNUM = 300
