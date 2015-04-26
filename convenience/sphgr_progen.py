@@ -23,7 +23,7 @@ def progen(SNAPNUM,p):
     sims = cPickle.load(open(p,'rb'))
     galid,mstar,mgas,sfr,mhalo,haloid = galinfo_top(sims,10)
     GAL = galid[0]
-
+    
 
     sims_loadsnap = iS.loadData(p)
     
@@ -42,9 +42,9 @@ def progen(SNAPNUM,p):
     
 
     cm = np.asarray([s.cm for s in obj.galaxies[GAL].progen_galaxies])
-    cmx = cm[:,0]
-    cmy = cm[:,1]
-    cmz = cm[:,2]
+    cmx = cm[:,0]*0.7 #new progen has h divided out - need to put it back to put in code units
+    cmy = cm[:,1]*0.7
+    cmz = cm[:,2]*0.7
     
     snap = np.arange(len(z))
     snap += (SNAPNUM+1)-len(z)
