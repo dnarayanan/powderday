@@ -1,0 +1,23 @@
+#pdfilters.dat
+
+#wavelength (micron) #filter name (prepended by a "#")
+
+0.435	    #ACS_F435
+0.606	    #ACS_F606
+0.775	    #ACS_F775
+0.814	    #ACS_F814
+0.850	    #ACS_F850
+0.98	    #WFC3
+1.25	    #WFC3
+1.40	    #WFC3
+1.60	    #WFC3
+3.55	    #IRAC1
+4.49	    #IRAC2
+5.73	    #IRAC3
+7.87	    #IRAC4
+24	    #MIPS1
+70	    #MIPS2
+160	    #MIPS3
+350	    #SCUBA
+850	    #SCUBA
+1300	    #LABOCA

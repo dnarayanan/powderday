@@ -9,7 +9,9 @@ script,pardir,parfile,modelfile = sys.argv
 import numpy as np
 import scipy.interpolate
 import scipy.ndimage
-
+import os.path
+import copy
+import pdb,ipdb
 
 from hyperion.model import Model
 import matplotlib as mpl
@@ -17,7 +19,6 @@ import matplotlib.pyplot as plt
 from hyperion.model import ModelOutput
 import h5py
 
-import pdb,ipdb
 
 import yt
 from yt.units.yt_array import YTQuantity
@@ -31,23 +32,18 @@ import config as cfg
 cfg.par = par #re-write cfg.par for all modules that read this in now
 cfg.model = model
 
-
-import error_handling as eh
-
-
 from astropy.table import Table
 from astropy.io import ascii
 
 
-#powderday adds
 from front_ends.front_end_controller import stream
 from grid_construction import yt_octree_generate,grid_coordinate_boost,grid_center
 import SED_gen as sg
 from find_order import *
 import powderday_test_octree as pto
 import hyperion_octree_stats as hos
+import error_handling as eh
 
-import os.path
 
 
 #=========================================================
@@ -135,12 +131,6 @@ np.save('density.npy',dustdens)
 
 m = Model()
 
-
-''' DEBUG 061214
-dx = np.max([(dx,dy,dz)])
-dy = dx
-dz = dx
-'''
 
 print 'Setting Octree Grid with Parameters: '
 
@@ -230,10 +220,13 @@ if par.SOURCES_IN_CENTER == True:
 
 
 
-   
+
 print 'Done adding Sources'
 
 print 'Setting up Model'
+m_imaging = copy.deepcopy(m)
+
+
 #set up the SEDs and images
 m.set_raytracing(True)
 m.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging,
@@ -242,19 +235,51 @@ m.set_n_initial_iterations(7)
 m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
 
 
-image = m.add_peeled_images(sed = True,image=True)
-image.set_wavelength_range(250,0.001,1000.)
-image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
-image.set_track_origin('basic')
-image.set_image_size(128,128)
-image.set_image_limits(-dx, dx, -dy, dy)
+sed = m.add_peeled_images(sed = True,image=False)
+sed.set_wavelength_range(250,0.001,1000.)
+sed.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
+sed.set_track_origin('basic')
 
 print 'Beginning RT Stage'
 #Run the Model
-m.write(model.inputfile,overwrite=True)
-m.run(model.outputfile,mpi=True,n_processes=par.n_processes,overwrite=True)
+m.write(model.inputfile+'.sed',overwrite=True)
+m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
 
 
+
+#see if the variable exists to make code backwards compatible
+try:
+    cfg.par.IMAGING
+except:
+    cfg.par.IMAGING  = None
+
+
+if cfg.par.IMAGING == True:
+    #read in the filters file
+    filters = np.loadtxt(par.filter_file)
+    print "Beginning Monochromatic Imaging RT"
+
+
+    m_imaging.set_raytracing(True)
+    m_imaging.set_monochromatic(True,wavelengths=filters)
+    
+    m_imaging.set_n_photons(initial = par.n_photons_initial,
+                            imaging_sources = par.n_photons_imaging,
+                            imaging_dust =  par.n_photons_imaging,
+                            raytracing_sources=par.n_photons_raytracing_sources,
+                            raytracing_dust = par.n_photons_raytracing_dust)
+    m_imaging.set_n_initial_iterations(7)
+    m_imaging.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
+    image = m_imaging.add_peeled_images(sed = True, image = True)
+    
+    image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
+    image.set_track_origin('basic')
+    image.set_image_size(128,128)
+    image.set_image_limits(-dx,dx,-dy,dy)
+    
+    m_imaging.write(model.inputfile+'.image',overwrite=True)
+    m_imaging.run(model.outputfile+'.image',mpi=True,n_processes=par.n_processes,overwrite=True)
+   
 
 
 
