@@ -8,10 +8,10 @@ import astropy.units as u
 # modifiable header
 # ------------------------
 
-m = ModelOutput('/Users/desika/Dropbox/powderday/verification/quick/example.200.rtout.image')
-wav = 850 #micron
+m = ModelOutput('/Users/desika/Dropbox/powderday/verification/gadget/example.200.rtout.image')
+wav = 200 #micron
 redshift =2
-image_width = 100 #kpc
+image_width = 200 #kpc
 
 # ------------------------
 
@@ -40,8 +40,9 @@ w = w.to(u.kpc)
 
 #plot the beast
 
-cax = ax.imshow(np.arcsinh(image.val[0,:, :, iwav]),
+cax = ax.imshow(np.log(image.val[0,:, :, iwav]),
                 cmap = plt.cm.spectral, origin='lower', extent=[-w.value, w.value, -w.value, w.value])
+
 
 plt.xlim([-image_width,image_width])
 plt.ylim([-image_width,image_width])
