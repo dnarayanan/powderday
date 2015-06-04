@@ -360,7 +360,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     nu = binned_stellar_nu
                     fnu = binned_stellar_fnu[counter,:]
                     nu,fnu = wavelength_compress(nu,fnu,df_nu)
-
+                    
                     #reverse for hyperion
                     nu = nu[::-1]
                     fnu = fnu[::-1]
@@ -418,17 +418,48 @@ def wavelength_compress(nu,fnu,df_nu):
     
     nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
     nu_inrange = np.where(nu_inrange == True)[0]
+  
     compressed_nu = nu[nu_inrange]
-    compressed_fnu = fnu[nu_inrange]
+    compressed_fnu = np.asarray(fnu)[nu_inrange]
     
-   
+  
     #get rid of all wavelengths below lyman limit
-    dum_nu = nu*units.Hz
+    dum_nu = compressed_nu*units.Hz
     dum_lam = constants.c.cgs/dum_nu
     dum_lam = dum_lam.to(units.angstrom)
-    wll = np.where(dum_lam.value >= 912) #where are lambda is above the lyman limit
-    nu = nu[wll]
-    fnu = fnu[wll]
+    wll = np.where(dum_lam.value >= 912)[0] #where are lambda is above the lyman limit
+    compressed_nu = compressed_nu[wll]
+    compressed_fnu = compressed_fnu[wll]
    
-  
+   
     return compressed_nu,compressed_fnu
+
+
+
+def BH_source_add(m,pf,df_nu):
+    
+    ad = pf.all_data()
+    nholes = ad["bhsed"].shape[0]
+
+    if ad["bhluminosity"][0].value != None:
+
+        for i in range(nholes):
+            
+            nu = ad["bhnu"].value
+            fnu = ad["bhsed"][i,:].value.tolist()
+            
+            nu,fnu = wavelength_compress(nu,fnu,df_nu)
+
+            if i == 0:
+                fnu_compressed = np.zeros([nholes,len(nu)])
+            fnu_compressed[i,:] = fnu
+
+
+            #the tolist gets rid of the array brackets
+            bh = m.add_point_source(luminosity = ad["bhluminosity"][i].value.tolist(), 
+                                    spectrum = (nu,fnu),
+                                    position = ad["bhcoordinates"][i,:].value.tolist())
+            
+        savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
+        np.savez(savefile,nu = nu,fnu = fnu_compressed)
+        

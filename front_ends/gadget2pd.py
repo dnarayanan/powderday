@@ -121,18 +121,23 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         mdot = ad[("PartType5","BH_Mdot")]
         #give it a unit since usually these are dimensionless in yt
 
+        mdot = data.ds.arr(mdot,"code_mass/code_time")
 
+
+        '''
         if len(mdot == 1):
             mdot = data.ds.quan(mdot,"code_mass/code_time")
         else:
+            ipdb.set_trace()
             for i in range(len(mdot)): 
+            
                 mdot[i] = data.ds.quan(mdot[i],"code_mass/code_time")
-       
+        '''
         #assume eta = 10%
         c = yt.utilities.physical_constants.speed_of_light_cgs
         bhluminosity = (0.1 * mdot * c**2.).in_units("erg/s")
         return bhluminosity
-
+        
 
     def _bhcoordinates(field,data):
         return data["PartType5","Coordinates"]
@@ -239,6 +244,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         cfg.par.BH_SED  = None
 
     if cfg.par.BH_SED == True:
+
         ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
         ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
         ds.add_field(("bhnu"),function=_bhsed_nu,units='Hz',particle_type=True)
@@ -248,7 +254,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
 
     
-  
 
+   
 
     return ds

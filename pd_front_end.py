@@ -175,7 +175,14 @@ nstars = len(stars_list)
 
 
 
-from source_creation import add_newstars,add_binned_seds
+from source_creation import add_newstars,add_binned_seds,BH_source_add
+
+try:
+    cfg.par.BH_SED
+except:
+    cfg.par.BH_SED  = None
+
+if cfg.par.BH_SED == True: BH_source_add(m,pf,df_nu)
 
 
 #figure out N_METAL_BINS:
