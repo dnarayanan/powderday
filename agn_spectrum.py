@@ -12,6 +12,7 @@
 #Original C code Author: Philip Hopkins
 
 import numpy as np
+import ipdb
 
 
 
@@ -110,7 +111,8 @@ def agn_spectrum(log_L_bol,SLOAN_KEY=0,MODEL_SPECTRUM_KEY=0):
     for i_nu in np.arange(N_nu):
         print nu_vec[i_nu],l_band_vec[i_nu],l_band_vec[i_nu]+to_cgs
        
-    return None
+   
+    return nu_vec,l_band_vec+to_cgs
 
 
 
