@@ -428,8 +428,8 @@ def wavelength_compress(nu,fnu,df_nu):
     dum_lam = constants.c.cgs/dum_nu
     dum_lam = dum_lam.to(units.angstrom)
     wll = np.where(dum_lam.value >= 912)[0] #where are lambda is above the lyman limit
-    compressed_nu = compressed_nu[wll]
-    compressed_fnu = compressed_fnu[wll]
+    nu = nu[wll]
+    fnu = fnu[wll]
    
    
     return compressed_nu,compressed_fnu
