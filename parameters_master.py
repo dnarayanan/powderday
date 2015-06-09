@@ -92,10 +92,10 @@ metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_bas
 #===============================================
 
 NTHETA = 10 
-
 IMAGING = True
 filter_file = 'pdfilters.dat'
-
+npix_x = 128
+npix_y = 128
 
 #===============================================
 #GRID INFORMATION  

@@ -281,7 +281,7 @@ if cfg.par.IMAGING == True:
     
     image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
     image.set_track_origin('basic')
-    image.set_image_size(128,128)
+    image.set_image_size(cfg.par.npix_x,cfg.par.npix_y)
     image.set_image_limits(-dx,dx,-dy,dy)
     
     m_imaging.write(model.inputfile+'.image',overwrite=True)
