@@ -131,6 +131,11 @@ np.save('density.npy',dustdens)
 
 m = Model()
 
+try:
+    cfg.par.FORCE_RANDOM_SEED
+except:
+    cfg.par.FORCE_RANDOM_SEED  = None
+if cfg.par.FORCE_RANDOM_SEED == True: m.set_seed(cfg.par.seed)
 
 print 'Setting Octree Grid with Parameters: '
 

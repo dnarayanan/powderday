@@ -23,6 +23,8 @@ n_photons_imaging = 1.e8
 n_photons_raytracing_sources = 1.e8
 n_photons_raytracing_dust = 1.e8
 
+FORCE_RANDOM_SEED = False
+seed = -12345 #has to be an int, and negative.
 
 #===============================================
 #DUST INFORMATION 
