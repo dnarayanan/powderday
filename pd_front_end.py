@@ -249,7 +249,7 @@ m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
 
 sed = m.add_peeled_images(sed = True,image=False)
 sed.set_wavelength_range(250,0.001,1000.)
-sed.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
+sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
 sed.set_track_origin('basic')
 
 print 'Beginning RT Stage'
@@ -283,8 +283,7 @@ if cfg.par.IMAGING == True:
     m_imaging.set_n_initial_iterations(7)
     m_imaging.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
     image = m_imaging.add_peeled_images(sed = True, image = True)
-    
-    image.set_viewing_angles(np.linspace(0,90,par.NTHETA),np.repeat(20,par.NTHETA))
+    image.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
     image.set_track_origin('basic')
     image.set_image_size(cfg.par.npix_x,cfg.par.npix_y)
     image.set_image_limits(-dx,dx,-dy,dy)
