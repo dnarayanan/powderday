@@ -66,7 +66,7 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
 
 
     if fname != None:
-        ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+        ds = yt.load(fname,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
         ds.index
     
 
