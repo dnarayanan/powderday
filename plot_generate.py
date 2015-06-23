@@ -9,11 +9,11 @@ def proj_plots(pf):
     
     print '\n[plot_generate/proj_plots] Saving Diagnostic Projection Plots \n'
     p = ProjectionPlot(pf,"z",("deposit","PartType0_smoothed_density"))
-    p.save()
+    p.save(cfg.par.PD_output_dir+'/proj_plot_x.png')
     p = ProjectionPlot(pf,"x",("deposit","PartType0_smoothed_density"))
-    p.save()
+    p.save(cfg.par.PD_output_dir+'/proj_plot_y.png')
     p = ProjectionPlot(pf,"y",("deposit","PartType0_smoothed_density"))
-    p.save()
+    p.save(cfg.par.PD_output_dir+'/proj_plot_z.png')
  
     return None
 
