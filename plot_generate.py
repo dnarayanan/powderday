@@ -6,11 +6,11 @@ import pdb
 
 def proj_plots(pf):
     print '\n[plot_generate/proj_plots] Saving Diagnostic Projection Plots \n'
-    p = ProjectionPlot(pf,"x",("gas","density"))
+    p = yt.ProjectionPlot(pf,"x",("gas","density"))
     p.save(cfg.par.PD_output_dir+'/proj_plot_x.png')
-    p = ProjectionPlot(pf,"y",("gas","density"))
+    p = yt.ProjectionPlot(pf,"y",("gas","density"))
     p.save(cfg.par.PD_output_dir+'/proj_plot_y.png')
-    p = ProjectionPlot(pf,"z",("gas","density"))
+    p = yt.ProjectionPlot(pf,"z",("gas","density"))
     p.save(cfg.par.PD_output_dir+'/proj_plot_z.png')
     
  
