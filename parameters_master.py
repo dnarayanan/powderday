@@ -53,7 +53,7 @@ COSMOFLAG = False  #is this a cosmological simulation?
 imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 #weight given to post agb stars# 1 is the default
 add_neb_emission = False #add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
-
+add_agb_dust_model=True #add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 
 CF_on = False #if set to true, then we enable the Charlot & Fall birthcloud models 
 birth_cloud_clearing_age = 0.01 #Gyr - stars with age <
