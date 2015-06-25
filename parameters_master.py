@@ -85,7 +85,7 @@ N_STELLAR_AGE_BINS = 100
 N_MASS_BINS = 100  
 
 
-metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
+metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
 
 
 
