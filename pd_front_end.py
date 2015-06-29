@@ -43,7 +43,7 @@ from find_order import *
 import powderday_test_octree as pto
 import hyperion_octree_stats as hos
 import error_handling as eh
-
+import backwards_compatibility as bc
 
 
 #=========================================================
@@ -53,6 +53,11 @@ import error_handling as eh
 eh.file_exist(model.hydro_dir+model.Gadget_snap_name)
 eh.file_exist(par.dustdir+par.dustfile)
 
+
+#=========================================================
+#Enforce Backwards Compatibility for Non-Critical Variables
+#=========================================================
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING = bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -131,10 +136,6 @@ np.save('density.npy',dustdens)
 
 m = Model()
 
-try:
-    cfg.par.FORCE_RANDOM_SEED
-except:
-    cfg.par.FORCE_RANDOM_SEED  = None
 if cfg.par.FORCE_RANDOM_SEED == True: m.set_seed(cfg.par.seed)
 
 print 'Setting Octree Grid with Parameters: '
@@ -181,11 +182,6 @@ nstars = len(stars_list)
 
 
 from source_creation import add_newstars,add_binned_seds,BH_source_add
-
-try:
-    cfg.par.BH_SED
-except:
-    cfg.par.BH_SED  = None
 
 if cfg.par.BH_SED == True: BH_source_add(m,pf,df_nu)
 
@@ -260,11 +256,6 @@ m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=Tru
 
 
 #see if the variable exists to make code backwards compatible
-try:
-    cfg.par.IMAGING
-except:
-    cfg.par.IMAGING  = None
-
 
 if cfg.par.IMAGING == True:
     #read in the filters file
