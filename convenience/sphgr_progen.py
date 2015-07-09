@@ -5,7 +5,6 @@ import numpy as np
 import cPickle
 from progenner import *
 from dn_galinfo_return import *
-from progenner import *
 
 def progen(SNAPNUM,p):
 
@@ -34,7 +33,7 @@ def progen(SNAPNUM,p):
     
     #print whats available
     obj.galaxies[GAL].progen_galaxies[0].__dict__.keys()
-
+    ipdb.set_trace()
     #assign the physical quantities
 
     z = np.asarray([s.redshift for s in obj.galaxies[GAL].progen_galaxies])
@@ -48,7 +47,7 @@ def progen(SNAPNUM,p):
     
     snap = np.arange(len(z))
     snap += (SNAPNUM+1)-len(z)
-    ipdb.set_trace()
+    
     '''
     for i in range(0,len(gal.progen_z)):
         snap.append(SNAPNUM-i)
@@ -60,6 +59,6 @@ def progen(SNAPNUM,p):
                                                gal.progen_cmz[i])
         
     '''
-            
+    ipdb.set_trace()
     return snap,cmx,cmy,cmz
 

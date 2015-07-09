@@ -24,6 +24,8 @@ model_dir=$4
 hydro_dir=$5
 model_run_name=$6
 COSMOFLAG=$7
+model_dir_remote=$8
+hydro_dir_remote=$9
 
 #n_nodes=6
 #startsnap=1
@@ -69,10 +71,10 @@ do
     
     if [ $COSMOFLAG -eq 1 ]
     then
-	echo "hydro_dir = '$hydro_dir/snapdir_'+snapnum_str+'/'">>$filem
+	echo "hydro_dir = '$hydro_dir_remote/snapdir_'+snapnum_str+'/'">>$filem
 	echo "Gadget_snap_name = 'snapshot_'+snapnum_str+'.0.hdf5'" >>$filem
     else
-	echo "hydro_dir = '$hydro_dir/'">>$filem
+	echo "hydro_dir = '$hydro_dir_remote/'">>$filem
 	echo "Gadget_snap_name = 'snapshot_'+snapnum_str+'.hdf5'" >>$filem
     fi
 
@@ -80,7 +82,7 @@ do
     echo -e "\n" >>$filem
 
     echo "#where the files should go" >>$filem
-    echo "PD_output_dir = '${model_dir}/' ">>$filem
+    echo "PD_output_dir = '${model_dir_remote}/' ">>$filem
     echo "Auto_TF_file = 'snap'+snapnum_str+'.logical' ">>$filem
     echo "Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens' ">>$filem
 
@@ -123,6 +125,6 @@ echo "cd /home/desika/powderday" >>$qsubfile
 for (( i=$startsnap; i<=$endsnap; i++ ))
 do
     echo $i
-    echo "python pd_front_end.py $model_dir parameters_master model_$i  > $model_dir/snap$i.txt">>$qsubfile
+    echo "python pd_front_end.py $model_dir_remote parameters_master model_$i  > $model_dir_remote/snap$i.txt">>$qsubfile
 
 done
