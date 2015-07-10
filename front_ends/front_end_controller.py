@@ -10,6 +10,8 @@ def stream(fname):
     def gadget():
         if ('PartType0', 'CS Temperature') in ds.derived_field_list:
             from CSgadget2pd import gadget_field_add as field_add
+        elif ('PartType4', 'TemperatureMax') in ds.derived_field_list:
+            from benopp_gadget2pd import gadget_field_add as field_add
         else:
             from gadget2pd import gadget_field_add as field_add
         
@@ -49,6 +51,6 @@ def stream(fname):
 
     #grab the field from the right front end
     field_add = options[ds_type]()
-    
+   
         
     return field_add
