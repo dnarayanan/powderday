@@ -53,4 +53,4 @@ def stream(fname):
     field_add = options[ds_type]()
    
         
-    return field_add
+    return field_add,ds
