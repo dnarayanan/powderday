@@ -51,7 +51,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
             [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim]]
  
    
-    
+
     metals = ad["starmetals"].value
     mass = ad["starmasses"].value
     positions = ad["starcoordinates"].value

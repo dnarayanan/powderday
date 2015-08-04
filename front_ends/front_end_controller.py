@@ -28,6 +28,12 @@ def stream(fname):
         print '[front_end_controller:] ramses data set detected'
         return field_add
 
+    
+    def enzo():
+        from enzo2pd import enzo_field_add as field_add
+        print '[front_end_controller:] enzo data set detected'
+        return field_add
+
 
     bbox = [[-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
@@ -35,18 +41,21 @@ def stream(fname):
     
     try: 
         ds = yt.load(fname,bounding_box = bbox)
+        ds.index
         print '[front_end_controller:] bounding_box being used'
     except:
         ds = yt.load(fname)
+        ds.index
         print '[front_end_controller:] NO bounding_box being used'
 
     ds_type = ds.dataset_type 
     
- 
+  
     #define the options dictionary
     options = {'gadget_hdf5':gadget,
                'tipsy':tipsy,
-               'ramses':ramses}
+               'ramses':ramses,
+               'enzo_packed_3d':enzo}
 
 
     #grab the field from the right front end

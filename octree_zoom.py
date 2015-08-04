@@ -6,7 +6,6 @@ from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import sys
 import config as cfg
 
-
 from cutout_data import yt_field_map
 from yt.frontends.sph.data_structures import ParticleDataset
 

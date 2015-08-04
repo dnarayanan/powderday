@@ -9,6 +9,7 @@ from yt.geometry.oct_container import OctreeContainer
 import yt.units as units
 import ipdb
 
+
 def yt_smooth(pf):
 
     print 'starting yt_smooth'
@@ -19,7 +20,6 @@ def yt_smooth(pf):
     pf.field_info["gasmetals"].particle_type=True
     
     
-
     ad = pf.all_data()
     saved = pf.index.oct_handler.save_octree()
     

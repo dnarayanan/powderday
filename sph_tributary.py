@@ -115,15 +115,7 @@ def sph_m_gen(fname,field_add):
   
 
 
-    #generate dust model. This needs to preceed the generation of sources
-    #for hyperion since the wavelengths of the SEDs need to fit in the dust opacities.
-    
-    df = h5py.File(cfg.par.dustdir+cfg.par.dustfile,'r')
-    o = df['optical_properties']
-    df_nu = o['nu']
-    df_chi = o['chi']
-
-    df.close()
 
 
-    return m,xcent,ycent,zcent,dx,dy,dz,pf,boost,df_nu
+
+    return m,xcent,ycent,zcent,dx,dy,dz,pf,boost

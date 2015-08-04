@@ -80,7 +80,7 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
         #position = stars_list[i].positions)
         m.add_point_source(luminosity = lum,spectrum=(nu,fnu),position = stars_list[i].positions)
         
-
+      
                            
 
 
@@ -380,7 +380,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
                     #for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
                     for i in range(len(stars_in_bin[(wz,wa,wm)])):
                         pos[i,:] = stars_list[stars_in_bin[(wz,wa,wm)][i]].positions
-                        
+
                     source.position=pos
 
                     #source spectrum
@@ -437,7 +437,7 @@ def wavelength_compress(nu,fnu,df_nu):
 
 
 def BH_source_add(m,pf,df_nu):
-    
+ 
     ad = pf.all_data()
     nholes = ad["bhsed"].shape[0]
 

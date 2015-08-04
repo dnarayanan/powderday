@@ -43,7 +43,7 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
         return data[("diskstars","Mass")]
     
     
-    def _gasdensity(fied,data):
+    def _gasdensity(field,data):
         return data[('Gas', 'Density')]
         
     def _gasmetals(field,data):
@@ -74,8 +74,8 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
     #initalized with the simulation.  we'll call stars that are formed
     #in the simulation 'new_stars' (no matter how old they are), and
     #stars that are initalized with the simulation as 'diskstars'.
-    #Assume that no cosmology someone uses will give us a Hubbe time >
-    #15 Gyr.
+    #Assume that no cosmology someone uses will give us a Hubble time
+    #> 15 Gyr.
 
     def newstars(pfilter, data):
         age = data.ds.current_time - data[pfilter.filtered_type, "creation_time"]
@@ -118,6 +118,5 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
 
 
     ad = ds.all_data()
-    
     return ds
 
