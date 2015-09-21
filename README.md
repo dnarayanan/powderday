@@ -8,6 +8,11 @@ For documentation, please see the docs at:
 
 [http://powderday.readthedocs.org](http://powderday.readthedocs.org)
 
+The manual contains full installation instructions.  You can also try
+out the shell script all-in-one installer:
+
+[installer](https://bitbucket.org/desika/powderday/downloads)
+
 This code benefits from the contributions, either directly to this
 software, or indirectly by contributions to dependency software, by
 many astrophysicists:
