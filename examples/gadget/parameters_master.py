@@ -13,7 +13,7 @@ bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_li
 #PARALLELIZATION
 #===============================================
 
-n_processes = 12 #number of MPI processes to run
+n_processes = 1 #number of MPI processes to run
 
 
 #===============================================
@@ -24,11 +24,13 @@ n_photons_imaging = 1.e7
 n_photons_raytracing_sources = 1.e7
 n_photons_raytracing_dust = 1.e7
 
+FORCE_RANDOM_SEED = False
+seed = -12345 #has to be an int, and negative.
 
 #===============================================
 #DUST INFORMATION
 #===============================================
-dustdir = '/Users/desika/hyperion-dust-0.1.0/dust_files/' #location of your dust files
+dustdir = '/Users/desika/pd/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 dusttometals_ratio = 0.4
@@ -51,6 +53,8 @@ COSMOFLAG = False  #is this a cosmological simulation?
 
 imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 #weight given to post agb stars# 1 is the default
+add_neb_emission = False #add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
+add_agb_dust_model=True #add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 
 
 
@@ -84,7 +88,7 @@ N_STELLAR_AGE_BINS = 100
 N_MASS_BINS = 100  
 
 
-metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
+metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
 
 
 
@@ -93,6 +97,11 @@ metallicity_legend= "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_bas
 #===============================================
 
 NTHETA = 10
+NPHI = 1
+IMAGING = True
+filter_file = 'pdfilters.dat'
+npix_x = 128
+npix_y = 128
 
 
 #===============================================
