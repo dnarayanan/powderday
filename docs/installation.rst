@@ -54,10 +54,10 @@ each package one at a time. This can alert the user to package failures.
 Manual Installation
 --------------
 
- What follows is a self-contained installation manual, though
-for problematic installs of any of the sub packages, it's definitely
-best to visit the main docs on the main software site (which are
-always linked below in each subsection).
+ What follows is a self-contained installation manual, though for
+problematic installs of any of the sub packages, it's definitely best
+to visit the main docs on the main software site (which are always
+linked below in each subsection).
 
 .. _python:
 
@@ -120,19 +120,11 @@ fsps
 
 `fsps <https://code.google.com/p/fsps/source/checkout>`_ can be checked out with::
   
-  >svn checkout http://fsps.googlecode.com/svn/trunk/ fsps
+  > git clone https://github.com/cconroy20/fsps
 
 and directions to the installation are in the `Manual <https://www.cfa.harvard.edu/~cconroy/ FSPS_files/MANUAL.pdf>`_
 
-Currently, `python-fsps
-<http://dan.iel.fm/python-fsps/current/installation/>`_ is known to
-work with revision 145 of `fsps
-<https://code.google.com/p/fsps/source/checkout>`_ , so it is safest
-to revert to this version via::
-  
-  >svn update -r 145
-
-in the src directory of fsps.  It is almost certainly going to be necessary downstream when installing  `python-fsps
+It's likely going to be necessary downstream when installing  `python-fsps
 <http://dan.iel.fm/python-fsps/current/installation/>`_ to have the -fPIC flags set in `fsps <https://code.google.com/p/fsps/source/checkout>`_ when making.  So, in the Makefile of `fsps <https://code.google.com/p/fsps/source/checkout>`_ , set::
   
   >F90FLAGS = -O -cpp -fPIC
@@ -321,3 +313,13 @@ python-fsps installation issues
    Ben Johnson for finding this).
 
 
+3. Sometimes FSPS <https://code.google.com/p/fsps/source/checkout> can
+   compile, but `python-fsps
+   <http://dan.iel.fm/python-fsps/current/installation/>`_ won't
+   install propertly with a somewhat obtuse error.  This can actually
+   owe to a bad FSPS <https://code.google.com/p/fsps/source/checkout>
+   installation.  An issue that has come up a number of times is that
+   one has to be sure that the correct compiler flags are set in the
+   FSPS <https://code.google.com/p/fsps/source/checkout> Makefile.
+
+   
