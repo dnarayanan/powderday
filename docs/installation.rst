@@ -54,7 +54,7 @@ each package one at a time. This can alert the user to package failures.
 Manual Installation
 --------------
 
- What follows is a self-contained installation manual, though for
+What follows is a self-contained installation manual, though for
 problematic installs of any of the sub packages, it's definitely best
 to visit the main docs on the main software site (which are always
 linked below in each subsection).
@@ -313,13 +313,15 @@ python-fsps installation issues
    Ben Johnson for finding this).
 
 
-3. Sometimes FSPS <https://code.google.com/p/fsps/source/checkout> can
-   compile, but `python-fsps
+3. Sometimes 'FSPS <https://code.google.com/p/fsps/source/checkout>'_
+   can compile, but `python-fsps
    <http://dan.iel.fm/python-fsps/current/installation/>`_ won't
    install propertly with a somewhat obtuse error.  This can actually
-   owe to a bad FSPS <https://code.google.com/p/fsps/source/checkout>
-   installation.  An issue that has come up a number of times is that
-   one has to be sure that the correct compiler flags are set in the
-   FSPS <https://code.google.com/p/fsps/source/checkout> Makefile.
+   owe to a bad 'FSPS
+   <https://code.google.com/p/fsps/source/checkout>'_ installation.
+   An issue that has come up a number of times is that one has to be
+   sure that the correct compiler flags are set in the 'FSPS
+   <https://code.google.com/p/fsps/source/checkout>'_ Makefile.
+   Thanks to Ena Choi for pointing this one out.
 
    
