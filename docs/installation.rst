@@ -315,12 +315,10 @@ python-fsps installation issues
 
 3.  `python-fsps
 <http://dan.iel.fm/python-fsps/current/installation/>`_ has mysterious
-installation failures.
-
-Often this has to do with a bad `FSPS
-   <https://github.com/cconroy20/fsps>`_ compilation. Even if it seems
-   like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it
-   may not actually execute properly if the correct compilers aren't
-   set in the MakeFile.  Thanks to Ena Choi for pointing this one out.
+installation failures.  Often this has to do with a bad `FSPS
+<https://github.com/cconroy20/fsps>`_ compilation. Even if it seems
+like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it may
+not actually execute properly if the correct compilers aren't set in
+the MakeFile.  Thanks to Ena Choi for pointing this one out.
 
    
