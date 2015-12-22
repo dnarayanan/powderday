@@ -44,6 +44,7 @@ names to your .bashrc, as well as attempt to go package-by-package and
 install everything.  The plus side is that if it works, it's super
 easy.  The downside is that if a package installation fails, you might
 not catch it because the bash script will go on to the next package.
+This installer assume gnu C and Fortran compilers.
 
 Something that has worked for a number of users is to download the
 all-in-one installer, and then copy and paste the instructions for
@@ -282,16 +283,16 @@ Troubleshooting your Installation
 python-fsps installation issues
 --------------
 
-1.   `python-fsps
-   <http://dan.iel.fm/python-fsps/current/installation/>`_ can't find f2py:
+1.  `python-fsps
+<http://dan.iel.fm/python-fsps/current/installation/>`_ can't find f2py
    
    f2py is a numpy package that is sometimes named f2py2.7 by numpy.
    At the same time, `python-fsps
    <http://dan.iel.fm/python-fsps/current/installation/>`_ expects it
    to be called f2py (as it sometimes is; for example in Anaconda).
-   So, you might need to locate f2py (it ships with yt
-   <http://yt-project.org>, so if you for example use the yt
-   <http://yt-project.org> python) you need to link the following
+   So, you might need to locate f2py (it ships with `yt
+   <http://yt-project.org>`_, so if you for example use the `yt
+   <http://yt-project.org>`_ python) you need to link the following
    files::
 
    >cd /Users/desika/yt-x86_64/bin
@@ -312,16 +313,14 @@ python-fsps installation issues
    The easiest fix is to use a non 1.10.* version of numpy (thanks to
    Ben Johnson for finding this).
 
+3.  `python-fsps
+<http://dan.iel.fm/python-fsps/current/installation/>`_ has mysterious
+installation failures.
 
-3. Sometimes 'FSPS <https://code.google.com/p/fsps/source/checkout>'_
-   can compile, but `python-fsps
-   <http://dan.iel.fm/python-fsps/current/installation/>`_ won't
-   install propertly with a somewhat obtuse error.  This can actually
-   owe to a bad 'FSPS
-   <https://code.google.com/p/fsps/source/checkout>'_ installation.
-   An issue that has come up a number of times is that one has to be
-   sure that the correct compiler flags are set in the 'FSPS
-   <https://code.google.com/p/fsps/source/checkout>'_ Makefile.
-   Thanks to Ena Choi for pointing this one out.
+Often this has to do with a bad `FSPS
+   <https://github.com/cconroy20/fsps>`_ compilation. Even if it seems
+   like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it
+   may not actually execute properly if the correct compilers aren't
+   set in the MakeFile.  Thanks to Ena Choi for pointing this one out.
 
    
