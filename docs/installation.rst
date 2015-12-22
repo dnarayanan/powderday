@@ -6,7 +6,7 @@ Overview of Requirements
 
 	* **python2.x**
 
-	  * numpy
+	  * numpy (any version except 1.10.*)
 	  * scipy
 	  * astropy
 	  * Atpy
@@ -31,10 +31,15 @@ Overview of Requirements
 	  * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
 
 
-Installation
-============
+Installation - All in One Installer
+--------------
 
-We're working on an all-in-one installer for `powderday
+The first stop is to try the all-in-one installer for powderday.  This
+is available at the main download page
+<https://bitbucket.org/desika/powderday/downloads> from the Bitbucket
+repository.  This is a bash script that will 
+
+We're working on an all-in-one installer for`powderday
 <https://bitbucket.org/desika/powderday>`_.  For the time being, for
 better or worse, the installation of individual packages that
 `powderday <https://bitbucket.org/desika/powderday>`_ depends on is
