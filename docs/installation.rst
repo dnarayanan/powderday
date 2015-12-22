@@ -30,20 +30,31 @@ Overview of Requirements
 	  * Hyperion <http://www.hyperion-rt.org/>
 	  * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
 
-
-Installation - All in One Installer
+Installation
+============
+	    
+All in One Installer
 --------------
 
 The first stop is to try the all-in-one installer for powderday.  This
 is available at the main download page
 <https://bitbucket.org/desika/powderday/downloads> from the Bitbucket
-repository.  This is a bash script that will 
+repository.  This is a bash script that will append relevant path
+names to your .bashrc, as well as attempt to go package-by-package and
+install everything.  The plus side is that if it works, it's super
+easy.  The downside is that if a package installation fails, you might
+not catch it because the bash script will go on to the next package.
 
-We're working on an all-in-one installer for`powderday
-<https://bitbucket.org/desika/powderday>`_.  For the time being, for
-better or worse, the installation of individual packages that
-`powderday <https://bitbucket.org/desika/powderday>`_ depends on is
-manual.  What follows is a self-contained installation manual, though
+Something that has worked for a number of users is to download the
+all-in-one installer, and then copy and paste the instructions for
+each package one at a time. This can alert the user to package failures.
+
+
+
+Manual Installation
+--------------
+
+ What follows is a self-contained installation manual, though
 for problematic installs of any of the sub packages, it's definitely
 best to visit the main docs on the main software site (which are
 always linked below in each subsection).
@@ -274,15 +285,22 @@ especially section 3.4.2.
 Troubleshooting your Installation
 ============
 
-1. Issues with 'f2py' in the  `python-fsps
-   <http://dan.iel.fm/python-fsps/current/installation/>`_ installation
+  .. _python-fsps installation issues:
+
+python-fsps installation issues
+--------------
+
+1.   `python-fsps
+   <http://dan.iel.fm/python-fsps/current/installation/>`_ can't find f2py:
    
-   f2py is a numpy packages that ships with the `yt
-   <http://yt-project.org>`_ installation, but is named f2py2.7 by
-   numpy.  At the same time, `python-fsps
+   f2py is a numpy package that is sometimes named f2py2.7 by numpy.
+   At the same time, `python-fsps
    <http://dan.iel.fm/python-fsps/current/installation/>`_ expects it
    to be called f2py (as it sometimes is; for example in Anaconda).
-   So, you need to link the following files::
+   So, you might need to locate f2py (it ships with yt
+   <http://yt-project.org>, so if you for example use the yt
+   <http://yt-project.org> python) you need to link the following
+   files::
 
    >cd /Users/desika/yt-x86_64/bin
    >ln -s f2py2.7 f2py
@@ -293,3 +311,13 @@ Troubleshooting your Installation
    >ln -s numpy/f2py/ f2py
 
    This should hopefully fix it.
+
+
+2. Issues with 'f2py' in the  `python-fsps
+   <http://dan.iel.fm/python-fsps/current/installation/>`_ installation:
+
+   Numpy has made some changes to f2py in the 1.10.x version of numpy.
+   The easiest fix is to use a non 1.10.* version of numpy (thanks to
+   Ben Johnson for finding this).
+
+
