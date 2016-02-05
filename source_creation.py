@@ -206,9 +206,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
 
 
     #define the age bins (linearly)
-    delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
-    age_bins = np.arange(minimum_age,maximum_age,delta_age)
-    
+    #delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
+    #age_bins = np.arange(minimum_age,maximum_age,delta_age)
+    age_bins = np.linspace(minimum_age,maximum_age,cfg.par.N_STELLAR_AGE_BINS)
     #tack on the maximum age bin
     age_bins = np.append(age_bins,age_bins[-1]+delta_age)
 
