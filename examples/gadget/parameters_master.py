@@ -96,8 +96,9 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend_
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 10
-NPHI = 1
+NTHETA = 2
+NPHI = 2
+SED = True
 IMAGING = True
 filter_file = 'pdfilters.dat'
 npix_x = 128

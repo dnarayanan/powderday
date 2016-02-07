@@ -58,7 +58,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED = bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -161,24 +161,24 @@ print 'Done adding Sources'
 print 'Setting up Model'
 m_imaging = copy.deepcopy(m)
 
+if cfg.par.SED == True:
+    #set up the SEDs and images
+    m.set_raytracing(True)
+    m.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging,
+                    raytracing_sources=par.n_photons_raytracing_sources,raytracing_dust=par.n_photons_raytracing_dust)
+    m.set_n_initial_iterations(7)
+    m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
+    
 
-#set up the SEDs and images
-m.set_raytracing(True)
-m.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging,
-                raytracing_sources=par.n_photons_raytracing_sources,raytracing_dust=par.n_photons_raytracing_dust)
-m.set_n_initial_iterations(7)
-m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
-
-
-sed = m.add_peeled_images(sed = True,image=False)
-sed.set_wavelength_range(250,0.001,1000.)
-sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
-sed.set_track_origin('basic')
-
-print 'Beginning RT Stage'
-#Run the Model
-m.write(model.inputfile+'.sed',overwrite=True)
-m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
+    sed = m.add_peeled_images(sed = True,image=False)
+    sed.set_wavelength_range(250,0.001,1000.)
+    sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
+    sed.set_track_origin('basic')
+    
+    print 'Beginning RT Stage'
+    #Run the Model
+    m.write(model.inputfile+'.sed',overwrite=True)
+    m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
 
 
 
