@@ -215,7 +215,7 @@ if cfg.par.IMAGING == True:
     image.set_track_origin('basic')
     image.set_image_size(cfg.par.npix_x,cfg.par.npix_y)
     image.set_image_limits(-dx,dx,-dy,dy)
-    #image.set_wavelength_range(10,1,100)
+   
     m_imaging.write(model.inputfile+'.image',overwrite=True)
     m_imaging.run(model.outputfile+'.image',mpi=True,n_processes=par.n_processes,overwrite=True)
    
