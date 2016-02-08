@@ -104,7 +104,9 @@ filter_file = 'pdfilters.dat'
 npix_x = 128
 npix_y = 128
 
-
+IMAGING_TRANSMISSION_FILTER = False
+filter_list = ['filters/STIS_clear.filter']
+TRANSMISSION_FILTER_REDSHIFT = 3.1
 #===============================================
 #GRID INFORMATION  
 #===============================================

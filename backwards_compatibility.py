@@ -23,4 +23,11 @@ def variable_set():
     except:
         cfg.par.SED = True
 
-    return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED
+    try:
+        IMAGING_TRANSMISSION_FILTER
+    except:
+        IMAGING_TRANSMISSION_FILTER = False
+
+
+
+    return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER

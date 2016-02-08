@@ -46,7 +46,7 @@ import error_handling as eh
 import backwards_compatibility as bc
 
 from m_control_tools import *
-
+from image_processing import add_transmission_filters
 #=========================================================
 #CHECK FOR THE EXISTENCE OF A FEW CRUCIAL FILES FIRST
 #=========================================================
@@ -58,7 +58,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER = bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -190,22 +190,32 @@ if cfg.par.IMAGING == True:
     print "Beginning Monochromatic Imaging RT"
 
 
-    m_imaging.set_raytracing(True)
-    m_imaging.set_monochromatic(True,wavelengths=filters)
+
     
-    m_imaging.set_n_photons(initial = par.n_photons_initial,
-                            imaging_sources = par.n_photons_imaging,
-                            imaging_dust =  par.n_photons_imaging,
-                            raytracing_sources=par.n_photons_raytracing_sources,
-                            raytracing_dust = par.n_photons_raytracing_dust)
+    
+    if cfg.par.IMAGING_TRANSMISSION_FILTER == False:
+        m_imaging.set_monochromatic(True,wavelengths=filters)
+        m_imaging.set_n_photons(initial = par.n_photons_initial,
+                                imaging_sources = par.n_photons_imaging,
+                                imaging_dust =  par.n_photons_imaging,
+                                raytracing_sources=par.n_photons_raytracing_sources,
+                                raytracing_dust = par.n_photons_raytracing_dust)
+        m_imaging.set_raytracing(True)
+    else:
+        m_imaging.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging)
+
     m_imaging.set_n_initial_iterations(7)
     m_imaging.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
+
     image = m_imaging.add_peeled_images(sed = True, image = True)
+    if cfg.par.IMAGING_TRANSMISSION_FILTER == True:
+        add_transmission_filters(image)
+        
     image.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
     image.set_track_origin('basic')
     image.set_image_size(cfg.par.npix_x,cfg.par.npix_y)
     image.set_image_limits(-dx,dx,-dy,dy)
-    
+    #image.set_wavelength_range(10,1,100)
     m_imaging.write(model.inputfile+'.image',overwrite=True)
     m_imaging.run(model.outputfile+'.image',mpi=True,n_processes=par.n_processes,overwrite=True)
    
