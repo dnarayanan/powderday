@@ -10,8 +10,8 @@ from astropy import constants
 
 #========================================================
 #MODIFIABLE HEADER (make this a function later with argv)
-z = 4.
-run = '/Users/desika/Dropbox/powderday/examples/gadget/example.200.rtout'
+z = 3
+run = '/Volumes/pegasus/pd_runs/N512L64_fftw3s/halo500.snap085.ml12.mufasa/smg_survey/example.141.rtout.sed'
 #========================================================
 
 

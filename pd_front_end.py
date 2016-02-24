@@ -195,12 +195,13 @@ if cfg.par.IMAGING == True:
     
     if cfg.par.IMAGING_TRANSMISSION_FILTER == False:
         m_imaging.set_monochromatic(True,wavelengths=filters)
+        m_imaging.set_raytracing(True)
         m_imaging.set_n_photons(initial = par.n_photons_initial,
                                 imaging_sources = par.n_photons_imaging,
                                 imaging_dust =  par.n_photons_imaging,
                                 raytracing_sources=par.n_photons_raytracing_sources,
                                 raytracing_dust = par.n_photons_raytracing_dust)
-        m_imaging.set_raytracing(True)
+       
     else:
         m_imaging.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging)
 
