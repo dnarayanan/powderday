@@ -34,6 +34,8 @@ cfg.model = model
 
 from astropy.table import Table
 from astropy.io import ascii
+from astropy import units as u
+from astropy import constants as constants
 
 
 from front_ends.front_end_controller import stream
@@ -58,7 +60,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC = bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -163,22 +165,52 @@ m_imaging = copy.deepcopy(m)
 
 if cfg.par.SED == True:
     #set up the SEDs and images
-    m.set_raytracing(True)
-    m.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging,
-                    raytracing_sources=par.n_photons_raytracing_sources,raytracing_dust=par.n_photons_raytracing_dust)
-    m.set_n_initial_iterations(7)
-    m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
-    
 
-    sed = m.add_peeled_images(sed = True,image=False)
-    sed.set_wavelength_range(250,0.001,1000.)
-    sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
-    sed.set_track_origin('basic')
-    
-    print 'Beginning RT Stage'
-    #Run the Model
-    m.write(model.inputfile+'.sed',overwrite=True)
-    m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
+    if cfg.par.SED_MONOCHROMATIC == True:
+
+        
+         #since all sources have the same spectrum just take the nu
+         #from the input SED from the first source
+        monochromatic_nu = m.sources[0].spectrum['nu']*u.Hz
+        monochromatic_lam = (constants.c/monochromatic_nu).to(u.micron).value[::-1]
+        m.set_monochromatic(True,wavelengths = monochromatic_lam)
+        m.set_raytracing(True)
+        m.set_n_photons(initial = par.n_photons_initial,
+                                imaging_sources = par.n_photons_imaging,
+                                imaging_dust =  par.n_photons_imaging,
+                                raytracing_sources=par.n_photons_raytracing_sources,
+                                raytracing_dust = par.n_photons_raytracing_dust)
+        
+        m.set_n_initial_iterations(3)
+        m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
+        sed = m.add_peeled_images(sed = True,image=False)
+        
+        sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
+        sed.set_track_origin('basic')
+   
+        m.write(model.inputfile+'.sed',overwrite=True)
+        m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
+
+        print '[pd_front_end]: Beginning RT Stage: Calculating SED using a monochromatic spectrum equal to the input SED'
+
+    else:
+        
+        m.set_raytracing(True)
+        m.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging,
+                        raytracing_sources=par.n_photons_raytracing_sources,raytracing_dust=par.n_photons_raytracing_dust)
+        m.set_n_initial_iterations(7)
+        m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
+        
+
+        sed = m.add_peeled_images(sed = True,image=False)
+        sed.set_wavelength_range(2500,0.001,1000.)
+        sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
+        sed.set_track_origin('basic')
+        
+        print '[pd_front_end]: Beginning RT Stage: Calculating SED using a binned spectrum'
+        #Run the Model
+        m.write(model.inputfile+'.sed',overwrite=True)
+        m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
 
 
 

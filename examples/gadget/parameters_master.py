@@ -13,16 +13,16 @@ bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_li
 #PARALLELIZATION
 #===============================================
 
-n_processes = 1 #number of MPI processes to run
+n_processes = 3 #number of MPI processes to run
 
 
 #===============================================
 #RT INFORMATION
 #===============================================
-n_photons_initial = 1.e7
-n_photons_imaging = 1.e7
-n_photons_raytracing_sources = 1.e7
-n_photons_raytracing_dust = 1.e7
+n_photons_initial = 1.e5
+n_photons_imaging = 1.e5
+n_photons_raytracing_sources = 1.e5
+n_photons_raytracing_dust = 1.e5
 
 FORCE_RANDOM_SEED = False
 seed = -12345 #has to be an int, and negative.
@@ -84,11 +84,11 @@ bulge_stars_metals = 19 #in fsps metallicity units
 #>N_METALLICITY_BINS*N_STELLAR_AGE_BINS) stars; this is necessary for
 #reduction of memory load; see manual for details.
 
-N_STELLAR_AGE_BINS = 100
+N_STELLAR_AGE_BINS = 2
 N_MASS_BINS = 100  
 
 
-metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
+metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
 
 
 
@@ -99,7 +99,13 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend_
 NTHETA = 2
 NPHI = 2
 SED = True
+SED_MONOCHROMATIC = False
+
+
 IMAGING = True
+
+
+
 filter_file = 'pdfilters.dat'
 npix_x = 128
 npix_y = 128
