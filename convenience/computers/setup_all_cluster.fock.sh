@@ -114,10 +114,10 @@ echo "#! /bin/bash" >>$qsubfile
 echo "#PBS -N $model_run_name" >>$qsubfile
 echo "#PBS -l nodes=$n_nodes" >>$qsubfile
 echo "#PBS -m bea" >>$qsubfile
-echo "#PBS -M dnarayanan@as.arizona.edu" >>$qsubfile
+echo "#PBS -M dnarayan@haverford.edu" >>$qsubfile
 
 echo -e "\n" >>$qsubfile
-echo "cd /home/desika/powderday" >>$qsubfile
+echo "cd /home/desika/pd" >>$qsubfile
 
 
 
