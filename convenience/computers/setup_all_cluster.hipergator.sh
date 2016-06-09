@@ -1,11 +1,7 @@
 #!/bin/bash 
 
-#This script is a modified version of one originally written by Chris
-# Hayward back in the good old days.  The basic idea is to set up the
-# model and qsub files for a gang of sequential snapshots.
-# It's written for gadget-centric numbering to run on a Torque queue
-# scheduler (for the convenience of desika) but can be edited easily
-# enough.
+#Powderday cluster setup convenience script for SLURM queue mananger
+#on HiPerGator at the University of FLorida
 
 #Notes of interest:
 
@@ -15,7 +11,7 @@
 #2. This requires bash versions >= 3.0.  To check, type at the shell
 #prompt: 
 
-#> $echo $BASH_VERSION
+#> echo $BASH_VERSION
 
 n_nodes=$1
 startsnap=$2
@@ -27,18 +23,6 @@ COSMOFLAG=$7
 model_dir_remote=$8
 hydro_dir_remote=$9
 
-#n_nodes=6
-#startsnap=1
-#endsnap=23 #set the same as startsnap if you just want to do one snapshot
-#model_dir='/data/desika/db/pd_runs/sbw_mergers/mw_e_hr_DIND'
-#hydro_dir='/data/desika/gadgetruns/sbw_mergers/mw_e_hr_DIND'
-#model_run_name='mw_e_hr'
-#COSMOFLAG=0 #flag
-
-
-
-
- 
 for (( i=$startsnap; i<=$endsnap; i++ ))
 
 
@@ -105,23 +89,35 @@ done
 
 
 
-echo "writing qsub file"
-qsubfile="$model_dir/qsub_master.qsub"
+echo "writing slurm submission master script file"
+qsubfile="$model_dir/master.job"
 rm -f $qsubfile
 echo $qsubfile
 
 echo "#! /bin/bash" >>$qsubfile
-echo "#PBS -N $model_run_name" >>$qsubfile
-echo "#PBS -l nodes=$n_nodes" >>$qsubfile
-echo "#PBS -m bea" >>$qsubfile
-echo "#PBS -M dnarayanan@as.arizona.edu" >>$qsubfile
-
+echo "SBATCH --job-name=$model_run_name" >>$qsubfile
+echo "SBATCH --output=pd.master.o" >>$qsubfile
+echo "SBATCH --error=pd.master.e" >>$qsubfile
+echo "SBATCH --mail-type=ALL" >>$qsubfile
+echo "SBATCH --mail-user=desika.narayanan@gmail.com" >>$qsubfile
+echo "SBATCH --time=96:00:00" >>$qsubfile
+echo "SBATCH --tasks-per-node=32">>$qsubvile
+echo "SBATCH --nodes=$n_nodes">>$qsubfile
+echo "SBATCH --mem-per-cpu=3800">>$qsubfile
+echo "SBATCH --account=narayanan">>$qsubfile
+echo "SBATCH --qos=narayanan-b">>$qsubfile
+echo -e "\n">>$qsubfile
 echo -e "\n" >>$qsubfile
-echo "cd /home/desika/powderday" >>$qsubfile
 
+echo "module purge">>$qsubfile
+echo "module load git/1.9.0">>$qsubfile
+echo "module load gsl/1.16">>$qsubfile
+echo "module load gcc/5.2.0">>$qsubfile
+echo "module load hdf5/1.8.16">>$qsubfile
+echo "module load openmpi/1.10.2">>$qsubfile
+echo -e "\n">>$qsubfile
 
-
- 
+echo "cd /home/desika.narayanan/pd/">>$qsubfile
 for (( i=$startsnap; i<=$endsnap; i++ ))
 do
     echo $i
