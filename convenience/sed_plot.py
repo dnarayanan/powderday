@@ -27,10 +27,10 @@ ax = fig.add_subplot(1,1,1)
 m = ModelOutput(run)
 wav,flux = m.get_sed(inclination='all',aperture=-1)
 
-wav *= u.micron #wav is in micron
+wav  = np.asarray(wav)*u.micron #wav is in micron
 wav *= (1.+z)
 
-flux*= u.erg/u.s
+flux = np.asarray(flux)*u.erg/u.s
 dl = Planck13.luminosity_distance(z)
 dl = dl.to(u.cm)
     
