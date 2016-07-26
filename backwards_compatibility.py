@@ -24,14 +24,14 @@ def variable_set():
         cfg.par.SED = True
 
     try:
-        IMAGING_TRANSMISSION_FILTER
+        cfg.par.IMAGING_TRANSMISSION_FILTER
     except:
-        IMAGING_TRANSMISSION_FILTER = False
+        cfg.par.IMAGING_TRANSMISSION_FILTER = False
 
     try:
-        SED_MONOCHROMATIC
+        cfg.par.SED_MONOCHROMATIC
     except:
-        SED_MONOCHROMATIC = False
+        cfg.par.SED_MONOCHROMATIC = False
 
 
 
