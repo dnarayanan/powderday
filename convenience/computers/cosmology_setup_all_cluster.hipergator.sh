@@ -28,7 +28,6 @@ zpos=${10}
 halo=${11}
 snap=${12}
 
-
 echo "processing model file for halo,snapshot:  $halo,$snap"
 
 
@@ -90,40 +89,36 @@ echo "z_cent = ${zpos}" >>$filem
 
 
 
+echo "writing slurm submission master script file"
+qsubfile="$model_dir/master.snap${snap}.job"
+rm -f $qsubfile
+echo $qsubfile
 
+echo "#! /bin/bash" >>$qsubfile
+echo "#SBATCH --job-name=${model_run_name}.snap${snap}" >>$qsubfile
+echo "#SBATCH --output=pd.master.snap${snap}.o" >>$qsubfile
+echo "#SBATCH --error=pd.master.snap${snap}.e" >>$qsubfile
+echo "#SBATCH --mail-type=ALL" >>$qsubfile
+echo "#SBATCH --mail-user=desika.narayanan@gmail.com" >>$qsubfile
+echo "#SBATCH --time=48:00:00" >>$qsubfile
+echo "#SBATCH --tasks-per-node=32">>$qsubfile
+echo "#SBATCH --nodes=$n_nodes">>$qsubfile
+echo "#SBATCH --mem-per-cpu=3800">>$qsubfile
+echo "#SBATCH --account=narayanan">>$qsubfile
+echo "#SBATCH --qos=narayanan-b">>$qsubfile
+echo -e "\n">>$qsubfile
+echo -e "\n" >>$qsubfile
 
-#echo "writing slurm submission master script file"
-#qsubfile="$model_dir/master.job"
-#rm -f $qsubfile
-#echo $qsubfile
+echo "module purge">>$qsubfile
+echo "module load git/1.9.0">>$qsubfile
+echo "module load gsl/1.16">>$qsubfile
+echo "module load gcc/5.2.0">>$qsubfile
+echo "module load hdf5/1.8.16">>$qsubfile
+echo "module load openmpi/1.10.2">>$qsubfile
+echo -e "\n">>$qsubfile
 
-#echo "#! /bin/bash" >>$qsubfile
-#echo "SBATCH --job-name=$model_run_name" >>$qsubfile
-#echo "SBATCH --output=pd.master.o" >>$qsubfile
-#echo "SBATCH --error=pd.master.e" >>$qsubfile
-#echo "SBATCH --mail-type=ALL" >>$qsubfile
-#echo "SBATCH --mail-user=desika.narayanan@gmail.com" >>$qsubfile
-#echo "SBATCH --time=96:00:00" >>$qsubfile
-#echo "SBATCH --tasks-per-node=32">>$qsubfile
-#echo "SBATCH --nodes=$n_nodes">>$qsubfile
-#echo "SBATCH --mem-per-cpu=3800">>$qsubfile
-#echo "SBATCH --account=narayanan">>$qsubfile
-#echo "SBATCH --qos=narayanan-b">>$qsubfile
-#echo -e "\n">>$qsubfile
-#echo -e "\n" >>$qsubfile
+echo "cd /home/desika.narayanan/pd/">>$qsubfile
+echo "python pd_front_end.py $model_dir_remote parameters_master halo\$SLURM_ARRAY_TASK_ID_snap${snap}.py  > $model_dir_remote/halo\$SLURM_ARRAY_TASK_ID_snap${snap}.txt">>$qsubfile
 
-#echo "module purge">>$qsubfile
-#echo "module load git/1.9.0">>$qsubfile
-#echo "module load gsl/1.16">>$qsubfile
-#echo "module load gcc/5.2.0">>$qsubfile
-#echo "module load hdf5/1.8.16">>$qsubfile
-#echo "module load openmpi/1.10.2">>$qsubfile
-#echo -e "\n">>$qsubfile
-
-#echo "cd /home/desika.narayanan/pd/">>$qsubfile
-#for (( i=$startsnap; i<=$endsnap; i++ ))
-#do
-#    echo $snap
-#    echo "python pd_front_end.py $model_dir_remote parameters_master model_$snap  > $model_dir_remote/snap$snap.txt">>$qsubfile
 
 #done

@@ -46,9 +46,8 @@ NHALOS = data['NHALOS']
 
 #first call the initial setup_all_cluster shell
 
-
-for nh in range(NHALOS):
-    for snap in range(startsnap,endsnap):
+for snap in range(startsnap,endsnap):
+    for nh in range(NHALOS):
         
         xpos = pos['halo'+str(nh)]['snap'+str_snap(snap)][0]
         ypos = pos['halo'+str(nh)]['snap'+str_snap(snap)][1]
@@ -58,3 +57,4 @@ for nh in range(NHALOS):
         #print cmd
         call(cmd,shell=True)
 
+        
