@@ -118,7 +118,7 @@ echo "module load openmpi/1.10.2">>$qsubfile
 echo -e "\n">>$qsubfile
 
 echo "cd /home/desika.narayanan/pd/">>$qsubfile
-echo "python pd_front_end.py $model_dir_remote parameters_master halo\$SLURM_ARRAY_TASK_ID_snap${snap}.py  > $model_dir_remote/halo\$SLURM_ARRAY_TASK_ID_snap${snap}.txt">>$qsubfile
+echo "python pd_front_end.py $model_dir_remote parameters_master halo\$SLURM_ARRAY_TASK_ID_snap${snap}  > $model_dir_remote/halo\$SLURM_ARRAY_TASK_ID_snap${snap}.txt">>$qsubfile
 
 
 #done
