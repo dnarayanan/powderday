@@ -4,7 +4,7 @@ import ipdb
 from hyperion.model import Model
 from hyperion.grid import AMRGrid
 import config as cfg
-from plot_generate import proj_plots
+from analytics import proj_plots
 
 
     

@@ -8,7 +8,7 @@ import astropy.constants as constants
 from astropy import cosmology as cosmo
 import pdb,ipdb
 import sys
-from plot_generate import mass_weighted_distribution as mwd
+from analytics import mass_weighted_distribution as mwd
 from octree_zoom import octree_zoom_bbox_filter
 
 import fsps 

@@ -96,8 +96,8 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 2
-NPHI = 2
+NTHETA = 1
+NPHI = 1
 SED = True
 SED_MONOCHROMATIC = False
 

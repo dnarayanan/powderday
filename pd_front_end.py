@@ -18,7 +18,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from hyperion.model import ModelOutput
 import h5py
-
+from analytics import stellar_sed_write
 
 import yt
 from yt.units.yt_array import YTQuantity
@@ -35,7 +35,7 @@ cfg.model = model
 from astropy.table import Table
 from astropy.io import ascii
 from astropy import units as u
-from astropy import constants as constants
+from astropy import constants 
 
 
 from front_ends.front_end_controller import stream
@@ -124,10 +124,7 @@ if par.FORCE_BINNING == False:
     m=add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
     
 
-#potentially write the stellar SEDs to a npz file
-    if par.STELLAR_SED_WRITE == True:
-        np.savez('stellar_seds.npz',par.COSMOFLAG,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu)
-        
+
 else:
 #note - the generation of the SEDs is called within
 #add_binned_seds itself, unlike add_newstars, which requires
@@ -136,7 +133,10 @@ else:
     m=add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m)
 
 
+#save SEDs
 
+if par.STELLAR_SED_WRITE == True: stellar_sed_write(m)
+    
 
 nstars = len(stars_list)
 nstars_disk = len(diskstars_list)

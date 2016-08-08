@@ -16,16 +16,16 @@ nnodes=1
 
 startsnap = 135
 endsnap = 136
-npzfile = '/Volumes/pegasus/pd_runs/mufasa/m25n512/fh_qr/attenuation/mufasa_m25n512.halos_pos_for_pd.npz'
+npzfile = '/Volumes/pegasus/pd_runs/mufasa/m25n512/fh_qr/irxbeta/mufasa_m25n512.halos_pos_for_pd.npz'
 
-model_dir = '/Volumes/pegasus/pd_runs/mufasa/m25n512/fh_qr/attenuation/'
+model_dir = '/Volumes/pegasus/pd_runs/mufasa/m25n512/fh_qr/irxbeta/'
 hydro_dir = '/Volumes/pegasus2/gizmo_runs/mufasa/m25n512/fh_qr/output/'
 
 #if we want to write the files locally, but have the paths in the
 #parameters files lead to differnet paths (for a different computer),
 #put those paths here.  otherweise, set these equal to whatever is in
 #model_dir and hydro_dir
-model_dir_remote = '/astro/desika/pd_runs/mufasa/m25n512/fh_qr/attenuation/'
+model_dir_remote = '/astro/desika/pd_runs/mufasa/m25n512/fh_qr/irxbeta/'
 hydro_dir_remote = '/astro/desika/gizmo_runs/mufasa/m25n512/fh_qr/output/'
 
 model_run_name='mufasa_m25n512'
