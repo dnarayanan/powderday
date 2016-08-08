@@ -33,6 +33,9 @@ def variable_set():
     except:
         cfg.par.SED_MONOCHROMATIC = False
 
+    try:
+        cfg.par.SKIP_RT
+    except:
+        cfg.part.SKIP_RT = False
 
-
-    return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC
+    return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT

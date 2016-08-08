@@ -125,6 +125,7 @@ MANUAL_CENTERING = True
 
 SOURCES_IN_CENTER = False
 STELLAR_SED_WRITE = True
+SKIP_RT = False
 SUPER_SIMPLE_SED = False #just generate 1 oct of 100 pc on a side,
                          #centered on [0,0,0].  sources are added at
                          #random positions.

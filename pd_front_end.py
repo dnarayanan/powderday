@@ -60,7 +60,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT = bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -188,8 +188,9 @@ if cfg.par.SED == True:
         sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
         sed.set_track_origin('basic')
    
-        m.write(model.inputfile+'.sed',overwrite=True)
-        m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
+        if cfg.par.SKIP_RT == False:
+            m.write(model.inputfile+'.sed',overwrite=True)
+            m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
 
         print '[pd_front_end]: Beginning RT Stage: Calculating SED using a monochromatic spectrum equal to the input SED'
 
@@ -209,8 +210,9 @@ if cfg.par.SED == True:
         
         print '[pd_front_end]: Beginning RT Stage: Calculating SED using a binned spectrum'
         #Run the Model
-        m.write(model.inputfile+'.sed',overwrite=True)
-        m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
+        if cfg.par.SKIP_RT == False:
+            m.write(model.inputfile+'.sed',overwrite=True)
+            m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
 
 
 
@@ -249,10 +251,17 @@ if cfg.par.IMAGING == True:
     image.set_image_size(cfg.par.npix_x,cfg.par.npix_y)
     image.set_image_limits(-dx,dx,-dy,dy)
    
-    m_imaging.write(model.inputfile+'.image',overwrite=True)
-    m_imaging.run(model.outputfile+'.image',mpi=True,n_processes=par.n_processes,overwrite=True)
+    if cfg.par.SKIP_RT == False:
+        m_imaging.write(model.inputfile+'.image',overwrite=True)
+        m_imaging.run(model.outputfile+'.image',mpi=True,n_processes=par.n_processes,overwrite=True)
    
 
+
+    #Print a message in case that skip_rt debugging flag is set:
+    print '++++++++++++++++++++++++++++++++++++'
+    print 'WARNING: SKIP RT is set in the parameters_master file - this is why your code didnt run'
+    print '++++++++++++++++++++++++++++++++++++'
+        
 
 
 
