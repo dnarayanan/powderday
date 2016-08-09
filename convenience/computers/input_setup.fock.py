@@ -12,22 +12,21 @@ from sphgr_progen import progen
 
 #shell scripting
 nnodes=6
-startsnap=21
-endsnap=173 #set the same as startsnap if you just want to do one snapshot
-#model_dir='/Volumes/pegasus/pd_runs/m13m14_lr_Dec9_2013/geach_LAB1/'
-#hydro_dir='/Volumes/pegasus2/gadgetruns/m13m14_lr_Dec9_2013/'
 
-model_dir = '/Volumes/pegasus/pd_runs/N512L64_fftw3s/baryons/halo62/irxbeta/'
-hydro_dir = '/Volumes/pegasus2/gizmo_runs/N512L64_fftw3s/baryons/mufasa/halo62/output/'
+#startsnap=27
+#endsnap=123 #set the same as startsnap if you just want to do one snapshot
+
+model_dir = '/Volumes/pegasus/pd_runs/N512L64_fftw3s/baryons/halo25/attenuation/'
+hydro_dir = '/Volumes/pegasus2/gizmo_runs/N512L64_fftw3s/baryons/mufasa/halo25/output/'
 
 #if we want to write the files locally, but have the paths in the
 #parameters files lead to differnet paths (for a different computer),
 #put those paths here.  otherweise, set these equal to whatever is in
 #model_dir and hydro_dir
-model_dir_remote = '/astro/desika/pd_runs/N512L64_fftw3s/baryons/halo62/irxbeta/'
-hydro_dir_remote = '/astro/desika/gizmo_runs/N512L64_fftw3s/baryons/mufasa/halo62/output/'
+model_dir_remote = '/astro/desika/pd_runs/N512L64_fftw3s/baryons/halo25/attenuation/'
+hydro_dir_remote = '/astro/desika/gizmo_runs/N512L64_fftw3s/baryons/mufasa/halo25/output/'
 
-model_run_name='halo62_irxbeta'
+model_run_name='halo62_attenuation'
 COSMOFLAG=0 #flag for setting if the gadget snapshots are broken up into multiples or not
 
 
@@ -46,6 +45,9 @@ SPHGR_COORDINATE_REWRITE = True
 
 #first call the initial setup_all_cluster shell
 
+data = np.load(hydro_dir+'/Groups/caesar_physical_properties.halos.npz')
+startsnap = np.min(data['snaps'])
+endsnap = np.max(data['snaps'])
 
 cmd = "./setup_all_cluster.fock.sh "+str(nnodes)+' '+str(startsnap)+' '+str(endsnap)+' '+model_dir+' '+hydro_dir+' '+model_run_name+' '+str(COSMOFLAG)+' '+model_dir_remote+' '+hydro_dir_remote
 print cmd
