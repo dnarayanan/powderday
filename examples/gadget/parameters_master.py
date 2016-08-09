@@ -96,21 +96,21 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 1
-NPHI = 1
+NTHETA = 2
+NPHI = 2
 SED = True
 
 #monochromatic rt parameters
 SED_MONOCHROMATIC = True
 
 #
-FIX_SED_MONOCHROMATIC_WAVELENGTHS = False #if set, then we only use
+FIX_SED_MONOCHROMATIC_WAVELENGTHS = True #if set, then we only use
                                          #nlam wavelengths in the
                                          #range between min_lam and
                                          #max_lam
 SED_MONOCHROMATIC_min_lam = 0.1 #micron
 SED_MONOCHROMATIC_max_lam = 1 #micron
-SED_MONOCHROMATIC_nlam = 100 
+SED_MONOCHROMATIC_nlam = 300
 
 IMAGING = False
 filter_file = 'pdfilters.dat'
