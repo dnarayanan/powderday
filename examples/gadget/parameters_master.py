@@ -110,7 +110,7 @@ FIX_SED_MONOCHROMATIC_WAVELENGTHS = True #if set, then we only use
                                          #max_lam
 SED_MONOCHROMATIC_min_lam = 0.1 #micron
 SED_MONOCHROMATIC_max_lam = 1 #micron
-SED_MONOCHROMATIC_nlam = 300
+SED_MONOCHROMATIC_nlam = 100
 
 IMAGING = False
 filter_file = 'pdfilters.dat'

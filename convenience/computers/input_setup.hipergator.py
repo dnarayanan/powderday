@@ -12,8 +12,6 @@ import caesar
 #===============================================
 #shell scripting
 nnodes=2
-startsnap=31
-endsnap=100 #set the same as startsnap if you just want to do one snapshot
 
 model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/N512L64_fftw3s/halo62/FIRS/'
 hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/N512L64_fftw3s/baryons/halo62/output'
@@ -44,6 +42,9 @@ SPHGR_COORDINATE_REWRITE = True
 
 #first call the initial setup_all_cluster shell
 
+data = np.load(hydro_dir+'/Groups/caesar_physical_properties.halos.npz')
+startsnap = np.min(data['snaps'])
+endsnap = np.max(data['snaps'])
 
 cmd = "./setup_all_cluster.hipergator.sh "+str(nnodes)+' '+str(startsnap)+' '+str(endsnap)+' '+model_dir+' '+hydro_dir+' '+model_run_name+' '+str(COSMOFLAG)+' '+model_dir_remote+' '+hydro_dir_remote
 print cmd
@@ -51,8 +52,9 @@ call(cmd,shell=True)
 
 
 if SPHGR_COORDINATE_REWRITE == True: 
-    data = np.load(hydro_dir+'/Groups/sphgr_physical_properties.npz')
-
+    data = np.load(hydro_dir+'/Groups/caesar_physical_properties.halos.npz')
+    
+    
 
     sph_snap = data['snaps'][::-1]
     sph_cmx = data['xpos'][::-1]
