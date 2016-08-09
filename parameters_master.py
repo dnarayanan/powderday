@@ -109,7 +109,7 @@ SED_MONOCHROMATIC_nlam = 100
 
 
 
-IMAGING = Fals
+IMAGING = False
 filter_file = 'pdfilters.dat'
 npix_x = 128
 npix_y = 128
