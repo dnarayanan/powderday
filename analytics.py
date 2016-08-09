@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import config as cfg
 import pdb,ipdb
 from astropy import constants
+import astropy.units as u
 
 def proj_plots(pf):
     print '\n[analytics/proj_plots] Saving Diagnostic Projection Plots \n'
@@ -56,8 +57,19 @@ def stellar_sed_write(m):
 
     nu = tempnu 
 
-    README = "Note: nu is in Hz, and fnu is in Lsun/Hz"
+    README = "Note: nu is in Hz, and fnu is in Lsun/Hz; if monochromatic_idx == -1,then there was no monochromatic photons; else, monochromatic_idx refers to the indices in in the nu/fnu array that the monochromatic  photons were run at."
     #saving: nu is in Hz and fnu is in Lsun/Hz
     outfile = cfg.model.PD_output_dir+"stellar_seds."+cfg.model.snapnum_str+".npz"
-    np.savez(outfile,nu=nu,fnu=fnu,README=README)
+
+    #save monochromatic indexes if there are any
+    monochromatic_idx = -1 #default
+
+    if cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS == True:
+        monochromatic_nu = m.sources[0].spectrum['nu']*u.Hz
+        monochromatic_lam = (constants.c/monochromatic_nu).to(u.micron).value[::-1]
+        monochromatic_idx = np.round(np.linspace(np.min(np.where(monochromatic_lam > cfg.par.SED_MONOCHROMATIC_min_lam)[0]),\
+                                   np.max(np.where(monochromatic_lam < cfg.par.SED_MONOCHROMATIC_max_lam)[0]),\
+                                   cfg.par.SED_MONOCHROMATIC_nlam))
+
+    np.savez(outfile,nu=nu,fnu=fnu,README=README,monochromatic_idx = monochromatic_idx)
 

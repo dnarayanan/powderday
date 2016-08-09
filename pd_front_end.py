@@ -60,7 +60,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,FIX_SED_MONOCHROMATIC_WAVELENGTHS = bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -133,10 +133,7 @@ else:
     m=add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m)
 
 
-#save SEDs
 
-if par.STELLAR_SED_WRITE == True: stellar_sed_write(m)
-    
 
 nstars = len(stars_list)
 nstars_disk = len(diskstars_list)
@@ -171,8 +168,20 @@ if cfg.par.SED == True:
         
          #since all sources have the same spectrum just take the nu
          #from the input SED from the first source
+        
         monochromatic_nu = m.sources[0].spectrum['nu']*u.Hz
         monochromatic_lam = (constants.c/monochromatic_nu).to(u.micron).value[::-1]
+        
+        if cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS == True:
+            idx = np.round(np.linspace(np.min(np.where(monochromatic_lam > cfg.par.SED_MONOCHROMATIC_min_lam)[0]),\
+                                       np.max(np.where(monochromatic_lam < cfg.par.SED_MONOCHROMATIC_max_lam)[0]),\
+                                       cfg.par.SED_MONOCHROMATIC_nlam))
+
+            monochromatic_lam = np.take(monochromatic_lam,list(idx))
+
+        
+
+
         m.set_monochromatic(True,wavelengths = monochromatic_lam)
         m.set_raytracing(True)
         m.set_n_photons(initial = par.n_photons_initial,
@@ -263,6 +272,8 @@ if cfg.par.IMAGING == True:
     print '++++++++++++++++++++++++++++++++++++'
         
 
+#save SEDs
+if par.STELLAR_SED_WRITE == True: stellar_sed_write(m)
 
 
 

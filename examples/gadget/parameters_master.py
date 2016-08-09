@@ -60,7 +60,7 @@ add_agb_dust_model=True #add circumstellar AGB dust model (100%); Villaume, Conr
 
 CF_on = False #if set to true, then we enable the Charlot & Fall birthcloud models 
 birth_cloud_clearing_age = 0.01 #Gyr - stars with age <
-                                #birth_cloud_clearing_age have
+#birth_cloud_clearing_age have
                                 #charlot&fall birthclouds meaningless
                                 #of CF_on  == False
 
@@ -99,13 +99,20 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.
 NTHETA = 1
 NPHI = 1
 SED = True
-SED_MONOCHROMATIC = False
 
+#monochromatic rt parameters
+SED_MONOCHROMATIC = True
 
-IMAGING = True
+#
+FIX_SED_MONOCHROMATIC_WAVELENGTHS = False #if set, then we only use
+                                         #nlam wavelengths in the
+                                         #range between min_lam and
+                                         #max_lam
+SED_MONOCHROMATIC_min_lam = 0.1 #micron
+SED_MONOCHROMATIC_max_lam = 1 #micron
+SED_MONOCHROMATIC_nlam = 100 
 
-
-
+IMAGING = False
 filter_file = 'pdfilters.dat'
 npix_x = 128
 npix_y = 128
