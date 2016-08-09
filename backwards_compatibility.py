@@ -42,5 +42,5 @@ def variable_set():
     try:
         cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS 
     except:
-        FIX_SED_MONOCHROMATIC_WAVELENGTHS = True
+        cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS = True
     return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS
