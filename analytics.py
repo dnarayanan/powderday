@@ -70,7 +70,7 @@ def stellar_sed_write(m):
 
     #save monochromatic indexes if there are any
     monochromatic_lam = -1 #default
-
+    monochromatic_idx = -1 #default
     if cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS == True:
         monochromatic_nu = m.sources[0].spectrum['nu']*u.Hz
         monochromatic_lam = (constants.c/monochromatic_nu).to(u.micron).value[::-1]
