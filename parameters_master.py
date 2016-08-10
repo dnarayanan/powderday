@@ -82,7 +82,6 @@ bulge_stars_metals = 19 #in fsps metallicity units
 #reduction of memory load; see manual for details.
 
 N_STELLAR_AGE_BINS = 100
-N_MASS_BINS = 100  
 
 
 metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
@@ -142,3 +141,8 @@ CONSTANT_DUST_GRID = False #if set, then we don't create a dust grid by
                           #smoothing, but rather just make it the same
                           #size as the octree with a constant value of
                           #4e-20
+                          
+N_MASS_BINS = 1 #this is really just a place holder that exists in
+                #some loops to be able to insert some code downstream
+                #for spatially varying IMFs.  right now for speed best
+                #to set to 1 as it doesn't actually do anything.
