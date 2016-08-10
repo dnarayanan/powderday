@@ -205,14 +205,17 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
     metal_bins = np.arange(N_METAL_BINS)+1
 
 
-    #define the age bins (linearly)
+
     delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
-    #age_bins = np.arange(minimum_age,maximum_age,delta_age)
-    age_bins = np.linspace(minimum_age,maximum_age,cfg.par.N_STELLAR_AGE_BINS)
+
+    
+    
+    #define the age bins in log space so that we maximise resolution around young stars
+    age_bins = 10.**(np.linspace(np.log10(minimum_age),np.log10(maximum_age),cfg.par.N_STELLAR_AGE_BINS))
     #tack on the maximum age bin
     age_bins = np.append(age_bins,age_bins[-1]+delta_age)
 
-
+   
     #define the mass bins (log)
     #note - for some codes, all star particles have the same mass.  in this case, we have to have a trap:
     if minimum_mass == maximum_mass: 
