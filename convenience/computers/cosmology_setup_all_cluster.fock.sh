@@ -91,7 +91,7 @@ echo "z_cent = ${zpos}" >>$filem
 
 
 echo "writing qsub file"
-qsubfile="$model_dir/qsub_master.qsub"
+qsubfile="$model_dir/qsub_master.snap"${snap}".qsub"
 rm -f $qsubfile
 echo $qsubfile
 
