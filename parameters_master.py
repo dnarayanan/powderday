@@ -12,8 +12,9 @@ bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_li
 #PARALLELIZATION
 #===============================================
 
-n_processes = 64 #number of MPI processes to run
-
+n_processes = 64 #number of pool processes to run for stellar SED generation
+n_MPI_processes = 1 #number of MPI tasks to run. for TORQUE this is
+                    #best set as the same as n_processes, while for SLURM this may not be the case.
 
 #===============================================
 #RT INFORMATION

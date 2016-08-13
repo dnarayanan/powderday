@@ -60,7 +60,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,FIX_SED_MONOCHROMATIC_WAVELENGTHS = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes = bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -199,7 +199,7 @@ if cfg.par.SED == True:
    
         if cfg.par.SKIP_RT == False:
             m.write(model.inputfile+'.sed',overwrite=True)
-            m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
+            m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_MPI_processes,overwrite=True)
 
         print '[pd_front_end]: Beginning RT Stage: Calculating SED using a monochromatic spectrum equal to the input SED'
 
@@ -221,7 +221,7 @@ if cfg.par.SED == True:
         #Run the Model
         if cfg.par.SKIP_RT == False:
             m.write(model.inputfile+'.sed',overwrite=True)
-            m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_processes,overwrite=True)
+            m.run(model.outputfile+'.sed',mpi=True,n_processes=par.n_MPI_processes,overwrite=True)
 
 
 
@@ -262,7 +262,7 @@ if cfg.par.IMAGING == True:
    
     if cfg.par.SKIP_RT == False:
         m_imaging.write(model.inputfile+'.image',overwrite=True)
-        m_imaging.run(model.outputfile+'.image',mpi=True,n_processes=par.n_processes,overwrite=True)
+        m_imaging.run(model.outputfile+'.image',mpi=True,n_processes=par.n_MPI_processes,overwrite=True)
    
 
 

@@ -43,4 +43,11 @@ def variable_set():
         cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS 
     except:
         cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS = True
-    return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS
+
+
+    try:
+        cfg.par.n_MPI_processes
+    except:
+        cfg.par.n_MPI_processes = cfg.par.n_processes #default is to make the same as the number of pool processes
+
+    return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes
