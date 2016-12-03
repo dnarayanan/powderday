@@ -10,8 +10,7 @@ Answer - try running::
 
 2. Errors along the lines of
 --------------
-
-::
+Error::
      compiling Fortran sources
      Fortran f77 compiler: /usr/bin/gfortran -Wall -ffixed-form -fno-second-underscore -fPIC -O3 -funroll-loops
      Fortran f90 compiler: /usr/bin/gfortran -fPIC -fPIC -O3 -funroll-loops
@@ -22,7 +21,7 @@ Try re-compiling with the flag::
 
 3. When running pd via a SLURM scheduler, you get the error when importing fsps
 --------------
-::
+Error::
    build/bdist.linux-x86_64/egg/fsps/__init__.py in <module>()
    ImportError: Your FSPS version does not seem to be under git version control. FSPS is available on github at https://github.com/cconroy20/fsps and should be cloned from there
 
