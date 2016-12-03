@@ -8,7 +8,7 @@ Answer - try running::
 
   pip install -U Cython
 
-2. Errors along the lines of
+2. Python-fsps compilation returns errors along the lines of
 --------------
 Error::
 
@@ -28,4 +28,4 @@ Error::
    ImportError: Your FSPS version does not seem to be under git version control. FSPS is available on github at https://github.com/cconroy20/fsps and should be cloned from there
 
 Comment out the lines in python-fsps/fsps/__init__.py surrounding the
-checking of githashes.  (h/t to Ena Choi for uncovering this one)
+checking of githashes.  (h/t to 'Ena Choi <http://www.physics.rutgers.edu/~enachoi/EC/Ena_Choi.html>'_ for uncovering this one)
