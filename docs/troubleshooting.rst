@@ -2,12 +2,14 @@ Troubleshooting and Known Issues
 **********
 
 1. yt compilation complains with something like: "Error compiling Cython file"
+--------------
 
 Answer - try running::
 
-pip install -U Cython
+  pip install -U Cython
 
 2. Errors along the lines of::
+--------------
 
 
      compiling Fortran sources
@@ -18,4 +20,11 @@ Try re-compiling with the flag::
 
   -fPIC
 
-3. 
+3. When running pd via a SLURM scheduler, the::
+   >import fsps
+command returns the error::
+  build/bdist.linux-x86_64/egg/fsps/__init__.py in <module>()
+
+  ImportError: Your FSPS version does not seem to be under git version control. FSPS is available on github at https://github.com/cconroy20/fsps and should be cloned from there
+--------------
+
