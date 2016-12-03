@@ -28,4 +28,4 @@ Error::
    ImportError: Your FSPS version does not seem to be under git version control. FSPS is available on github at https://github.com/cconroy20/fsps and should be cloned from there
 
 Comment out the lines in python-fsps/fsps/__init__.py surrounding the
-checking of githashes.  (h/t to 'Ena Choi <http://www.physics.rutgers.edu/~enachoi/EC/Ena_Choi.html>'_ for uncovering this one)
+checking of githashes.  (h/t to `Ena Choi <http://www.physics.rutgers.edu/~enachoi/EC/Ena_Choi.html>`_ for uncovering this one).
