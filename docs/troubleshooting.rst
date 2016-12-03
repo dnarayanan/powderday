@@ -21,7 +21,8 @@ Try re-compiling with the flag::
 
 3. When running pd via a SLURM scheduler, you get the error when importing fsps
 --------------
-Error::
+Answer - try running::
+
    build/bdist.linux-x86_64/egg/fsps/__init__.py in <module>()
    ImportError: Your FSPS version does not seem to be under git version control. FSPS is available on github at https://github.com/cconroy20/fsps and should be cloned from there
 
