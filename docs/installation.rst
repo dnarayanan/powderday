@@ -130,6 +130,15 @@ It's likely going to be necessary downstream when installing  `python-fsps
   
   >F90FLAGS = -O -cpp -fPIC
 
+Additionally, at this time `powderday <https://bitbucket.org/desika/powderday>`_  doesn't work with the default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in `fsps <https://code.google.com/p/fsps/source/checkout>`_  to look like::
+  !------set the isochrone library------!
+  #define MIST 0
+  !Padova models circa 2008
+  #define PADOVA 1
+  #define PARSEC 0
+  #define BASTI 0
+  #define GENEVA 0
+
 Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
    
   >export SPS_HOME=/Users/desika/fsps/
