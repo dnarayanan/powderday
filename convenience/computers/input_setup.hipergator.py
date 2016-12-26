@@ -43,7 +43,7 @@ SPHGR_COORDINATE_REWRITE = True
 
 #first call the initial setup_all_cluster shell
 
-data = np.load(hydro_dir+'/Groups/caesar_physical_properties.halos.local.'+string(localhalo)+'.npz')
+data = np.load(hydro_dir+'/Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
 startsnap = np.min(data['snaps'])
 endsnap = np.max(data['snaps'])
 
