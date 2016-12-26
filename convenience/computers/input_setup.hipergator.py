@@ -53,7 +53,7 @@ call(cmd,shell=True)
 
 
 if SPHGR_COORDINATE_REWRITE == True: 
-    data = np.load(hydro_dir+'/Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
+    data = np.load(hydro_dir+'/output/Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
     
     
 
