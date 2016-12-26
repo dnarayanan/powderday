@@ -13,7 +13,7 @@ import caesar
 #shell scripting
 nnodes=2
 
-model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z2/halo4_ml11/'
+model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z2/halo4_ml11/local_4/'
 hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z2/halo4_ml11/'
 localhalo = 4
 
