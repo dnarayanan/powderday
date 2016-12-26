@@ -13,8 +13,9 @@ import caesar
 #shell scripting
 nnodes=2
 
-model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/N512L64_fftw3s/halo62/FIRS/'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/N512L64_fftw3s/baryons/halo62/output'
+model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z2/halo4_ml11/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z2/halo4_ml11/'
+localhalo = 4
 
 #if we want to write the files locally, but have the paths in the
 #parameters files lead to differnet paths (for a different computer),
@@ -42,7 +43,7 @@ SPHGR_COORDINATE_REWRITE = True
 
 #first call the initial setup_all_cluster shell
 
-data = np.load(hydro_dir+'/Groups/caesar_physical_properties.halos.npz')
+data = np.load(hydro_dir+'/Groups/caesar_physical_properties.halos.local.'+string(localhalo)+'.npz')
 startsnap = np.min(data['snaps'])
 endsnap = np.max(data['snaps'])
 
