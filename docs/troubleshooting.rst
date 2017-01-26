@@ -55,3 +55,27 @@ Error::
   OSError: [Errno 12] Cannot allocate memory
 
 Try reducing the number of n_processes in the parameters_master.py file
+
+5. Assertion Error in SED generation related to zmet being out of range
+--------------
+Error::
+
+  assigning stars to SED bins
+  Running SPS for Binned SEDs
+  calculating the SEDs for  105  bins
+  Traceback (most recent call last):
+  File "pd_front_end.py", line 134, in <module>
+  m=add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m)
+  File "source_creation.py", line 300, in add_binned_seds
+  binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,diskstars_list,bulgestars_list)
+  File "SED_gen.py", line 216, in allstars_sed_gen
+    add_neb_emission = cfg.par.add_neb_emission, add_agb_dust_model=cfg.par.add_agb_dust_model)
+  File "build/bdist.linux-x86_64/egg/fsps/fsps.py", line 468, in __init__
+    self.params[k] = kwargs.pop(k, v)
+  File "build/bdist.linux-x86_64/egg/fsps/fsps.py", line 1093, in __setitem__
+    self.check_params()
+  File "build/bdist.linux-x86_64/egg/fsps/fsps.py", line 1067, in check_params
+    "zmet={0} out of range [1, {1}]".format(self._params["zmet"], NZ)
+    AssertionError: zmet=20 out of range [1, 12]
+
+Recompile fsps with the libraries set to Padova (and not MIST) in sps_vars.f90. Also recompile python-fsps
