@@ -1,6 +1,8 @@
 import numpy as np
 import pdb
 import astropy.constants as constants
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from hyperion.model import ModelOutput
 

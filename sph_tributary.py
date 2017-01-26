@@ -9,6 +9,7 @@ import pdb,ipdb
 
 from hyperion.model import Model
 import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from hyperion.model import ModelOutput
 import config as cfg
