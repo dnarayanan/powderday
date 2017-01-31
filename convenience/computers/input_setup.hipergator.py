@@ -15,7 +15,9 @@ nnodes=2
 
 model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z2/halo4_ml11/local_4/smg_survey/'
 hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z2/halo4_ml11/output/'
-localhalo = 4
+
+HALOS = False #default: if set to True then we center on the Halo center instead of the central galaxy center
+localhalo = 0
 
 #if we want to write the files locally, but have the paths in the
 #parameters files lead to differnet paths (for a different computer),
@@ -43,7 +45,11 @@ SPHGR_COORDINATE_REWRITE = True
 
 #first call the initial setup_all_cluster shell
 
-data = np.load(hydro_dir+'Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
+if HALOS == False:
+    data = np.load(hydro_dir+'Groups/caesar_physical_properties.local.'+str(localhalo)+'.npz')
+else:
+    data = np.load(hydro_dir+'Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
+
 startsnap = np.min(data['snaps'])
 endsnap = np.max(data['snaps'])
 
@@ -52,9 +58,12 @@ print cmd
 call(cmd,shell=True)
 
 
-if SPHGR_COORDINATE_REWRITE == True: 
-    data = np.load(hydro_dir+'Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
-    
+if SPHGR_COORDINATE_REWRITE == True:
+    if HALOS == False:
+        data = np.load(hydro_dir+'Groups/caesar_physical_properties.local.'+str(localhalo)+'.npz')
+    else:
+        data = np.load(hydro_dir+'Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
+
     
 
     sph_snap = data['snaps'][::-1]
