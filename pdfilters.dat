@@ -2,6 +2,7 @@
 
 #wavelength (micron) #filter name (prepended by a "#")
 
+0.160	    #standard UV for IRX-b
 0.435	    #ACS_F435
 0.606	    #ACS_F606
 0.775	    #ACS_F775
