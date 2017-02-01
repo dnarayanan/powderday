@@ -259,7 +259,7 @@ if cfg.par.IMAGING == True:
     image.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
     image.set_track_origin('basic')
     image.set_image_size(cfg.par.npix_x,cfg.par.npix_y)
-    image.set_image_limits(-dx,dx,-dy,dy)
+    image.set_image_limits(-dx/2.,dx/2.,-dy/2.,dy/2.)
    
     if cfg.par.SKIP_RT == False:
         m_imaging.write(model.inputfile+'.image',overwrite=True)
