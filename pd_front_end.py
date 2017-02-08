@@ -61,7 +61,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS = bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -145,11 +145,30 @@ nstars_bulge = len(bulgestars_list)
 
     
 
+'''
+#EXPERIMENTAL FEATURES
 if par.SOURCES_IN_CENTER == True:
     for i in range(nstars):
-        stars_list[i].positions[:] = 0
-        bulgestars_list[i].positions[:] = 0
-        diskstars_list[i].positions[:] = 0 
+        stars_list[i].positions[:] =  np.array([xcent,ycent,zcent])
+    for i in range(nstars_bulge):
+        bulgestars_list[i].positions[:] =  np.array([xcent,ycent,zcent])
+    for i in range(nstars_disk):
+        diskstars_list[i].positions[:] = np.array([xcent,ycent,zcent])
+
+if par.SOURCES_RANDOM_POSITIONS == True:
+    print "================================"
+    print "SETTING SOURCES TO RANDOM POSITIONS"
+    print "================================"
+    for i in range(nstars):
+        xpos,ypos,zpos = np.random.uniform(-dx,dx),np.random.uniform(-dy,dy),np.random.uniform(-dz,dz)
+        stars_list[i].positions[:] = np.array([xpos,ypos,zpos])
+    for i in range(nstars_bulge):
+        xpos,ypos,zpos = np.random.uniform(-dx,dx),np.random.uniform(-dy,dy),np.random.uniform(-dz,dz)
+        bulgestars_list[i].positions[:] = np.array([xpos,ypos,zpos])
+    for i in range(nstars_disk):
+        xpos,ypos,zpos = np.random.uniform(-dx,dx),np.random.uniform(-dy,dy),np.random.uniform(-dz,dz)
+        diskstars_list[i].positions[:] = np.array([xpos,ypos,zpos])
+'''
 
 
 

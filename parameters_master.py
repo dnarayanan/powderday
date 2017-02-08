@@ -129,7 +129,7 @@ MANUAL_CENTERING = True
 #===============================================
 #DEBUGGING
 #===============================================
-
+SOURCES_RANDOM_POSITIONS = False
 SOURCES_IN_CENTER = False
 STELLAR_SED_WRITE = True
 SKIP_RT = False #skip radiative transfer (i.e. just read in the grids and maybe write some diagnostics)

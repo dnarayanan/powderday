@@ -11,7 +11,7 @@ from astropy import constants
 #========================================================
 #MODIFIABLE HEADER (make this a function later with argv)
 z = 3
-run = '/Users/desika/Dropbox/powderday/examples/gadget/example.200.rtout.sed'
+run = '/ufrc/narayanan/desika.narayanan/pd/examples/gadget/example.200.rtout.sed'
 #========================================================
 
 
@@ -52,7 +52,7 @@ ax.set_ylim([1e-6,1.])
 ax.set_xlim(0.05,15000)
 ax.grid()
 
-fig.savefig('/Users/desika/Dropbox/powderday/examples/gadget/sed.png')
+fig.savefig('./sed.png')
 
 
 
