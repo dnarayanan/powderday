@@ -30,7 +30,7 @@ seed = -12345 #has to be an int, and negative.
 #===============================================
 #DUST INFORMATION
 #===============================================
-dustdir = '/home/desika.narayanan/pd/hyperion-dust-0.1.0/dust_files/' #location of your dust files
+dustdir = '/ufrc/narayanan/desika.narayanan/pd/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 dusttometals_ratio = 0.4
@@ -88,7 +88,7 @@ N_STELLAR_AGE_BINS = 30
 N_MASS_BINS = 1
 
 
-metallicity_legend= "/home/desika.narayanan/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
+metallicity_legend= "/ufrc/narayanan/desika.narayanan/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
 
 
 
