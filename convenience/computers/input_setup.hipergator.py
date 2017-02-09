@@ -13,8 +13,8 @@ import caesar
 #shell scripting
 nnodes=2
 
-model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/FIRE/z0/latte/m12i_ref12/20kpc_box/draw_2/'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/N512L64_fftw3s/baryons/FIRE/z0/latte/m12i_ref12/output/'
+model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z2/halo45_dm2_ml10/smg_survey/10kpc_box/sources_in_center/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z2/halo45_dm2_ml10/output/'
 
 HALOS = False #default: if set to True then we center on the Halo center instead of the central galaxy center
 localhalo = 0

@@ -198,12 +198,12 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
     #EXPERIMENTAL FEATURES
     if cfg.par.SOURCES_IN_CENTER == True:
         for i in range(nstars):
-            stars_list[i].positions[:] =  np.array([xcent,ycent,zcent])
+            stars_list[i].positions[:] =  np.array([0,0,0])
         if ("bulgestarcoordinates") in pf.derived_field_list:
             for i in range(nstars_bulge):
-                bulgestars_list[i].positions[:] =  np.array([xcent,ycent,zcent])
+                bulgestars_list[i].positions[:] =  np.array([0,0,0])
             for i in range(nstars_disk):
-                diskstars_list[i].positions[:] = np.array([xcent,ycent,zcent])
+                diskstars_list[i].positions[:] = np.array([0,0,0])
 
     if cfg.par.SOURCES_RANDOM_POSITIONS == True:
         print "================================"

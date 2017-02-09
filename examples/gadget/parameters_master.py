@@ -132,7 +132,7 @@ MANUAL_CENTERING = True
 #DEBUGGING
 #===============================================
 SOURCES_RANDOM_POSITIONS = False
-SOURCES_IN_CENTER = False
+SOURCES_IN_CENTER = True
 STELLAR_SED_WRITE = True
 SKIP_RT = False
 SUPER_SIMPLE_SED = False #just generate 1 oct of 100 pc on a side,
