@@ -199,10 +199,11 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
     if cfg.par.SOURCES_IN_CENTER == True:
         for i in range(nstars):
             stars_list[i].positions[:] =  np.array([xcent,ycent,zcent])
-        for i in range(nstars_bulge):
-            bulgestars_list[i].positions[:] =  np.array([xcent,ycent,zcent])
-        for i in range(nstars_disk):
-            diskstars_list[i].positions[:] = np.array([xcent,ycent,zcent])
+        if ("bulgestarcoordinates") in pf.derived_field_list:
+            for i in range(nstars_bulge):
+                bulgestars_list[i].positions[:] =  np.array([xcent,ycent,zcent])
+            for i in range(nstars_disk):
+                diskstars_list[i].positions[:] = np.array([xcent,ycent,zcent])
 
     if cfg.par.SOURCES_RANDOM_POSITIONS == True:
         print "================================"
@@ -211,12 +212,14 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
         for i in range(nstars):
             xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
             stars_list[i].positions[:] = np.array([xpos,ypos,zpos])
-        for i in range(nstars_bulge):
-            xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
-            bulgestars_list[i].positions[:] = np.array([xpos,ypos,zpos])
-        for i in range(nstars_disk):
-            xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
-            diskstars_list[i].positions[:] = np.array([xpos,ypos,zpos])
+
+        if ("bulgestarcoordinates") in pf.derived_field_list:
+            for i in range(nstars_bulge):
+                xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
+                bulgestars_list[i].positions[:] = np.array([xpos,ypos,zpos])
+            for i in range(nstars_disk):
+                xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
+                diskstars_list[i].positions[:] = np.array([xpos,ypos,zpos])
 
 
     return stars_list,diskstars_list,bulgestars_list
