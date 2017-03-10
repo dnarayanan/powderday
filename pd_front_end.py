@@ -191,7 +191,7 @@ if cfg.par.SED == True:
         
         monochromatic_nu = m.sources[0].spectrum['nu']*u.Hz
         monochromatic_lam = (constants.c/monochromatic_nu).to(u.micron).value[::-1]
-        ipdb.set_trace()
+
         if cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS == True:
             #idx = np.round(np.linspace(np.min(np.where(monochromatic_lam > cfg.par.SED_MONOCHROMATIC_min_lam)[0]),\
             ##                           np.max(np.where(monochromatic_lam < cfg.par.SED_MONOCHROMATIC_max_lam)[0]),\
@@ -202,7 +202,7 @@ if cfg.par.SED == True:
             
             monochromatic_lam = np.take(monochromatic_lam,list(idx))
 
-            ipdb.set_trace()
+
 
         m.set_monochromatic(True,wavelengths = monochromatic_lam)
         m.set_raytracing(True)
