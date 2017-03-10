@@ -191,16 +191,18 @@ if cfg.par.SED == True:
         
         monochromatic_nu = m.sources[0].spectrum['nu']*u.Hz
         monochromatic_lam = (constants.c/monochromatic_nu).to(u.micron).value[::-1]
-        
+        ipdb.set_trace()
         if cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS == True:
-            idx = np.round(np.linspace(np.min(np.where(monochromatic_lam > cfg.par.SED_MONOCHROMATIC_min_lam)[0]),\
-                                       np.max(np.where(monochromatic_lam < cfg.par.SED_MONOCHROMATIC_max_lam)[0]),\
-                                       cfg.par.SED_MONOCHROMATIC_nlam))
+            #idx = np.round(np.linspace(np.min(np.where(monochromatic_lam > cfg.par.SED_MONOCHROMATIC_min_lam)[0]),\
+            ##                           np.max(np.where(monochromatic_lam < cfg.par.SED_MONOCHROMATIC_max_lam)[0]),\
+            #                           cfg.par.SED_MONOCHROMATIC_nlam))
 
+
+            idx = np.where( (monochromatic_lam > cfg.par.SED_MONOCHROMATIC_min_lam) & (monochromatic_lam < cfg.par.SED_MONOCHROMATIC_max_lam))[0]
+            
             monochromatic_lam = np.take(monochromatic_lam,list(idx))
 
-        
-
+            ipdb.set_trace()
 
         m.set_monochromatic(True,wavelengths = monochromatic_lam)
         m.set_raytracing(True)
@@ -209,7 +211,7 @@ if cfg.par.SED == True:
                                 imaging_dust =  par.n_photons_imaging,
                                 raytracing_sources=par.n_photons_raytracing_sources,
                                 raytracing_dust = par.n_photons_raytracing_dust)
-        
+
         m.set_n_initial_iterations(3)
         m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
         sed = m.add_peeled_images(sed = True,image=False)

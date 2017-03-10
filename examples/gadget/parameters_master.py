@@ -103,10 +103,10 @@ NPHI = 2
 SED = True
 
 #monochromatic rt parameters
-SED_MONOCHROMATIC = False
+SED_MONOCHROMATIC = True
 
 #
-FIX_SED_MONOCHROMATIC_WAVELENGTHS = False #if set, then we only use
+FIX_SED_MONOCHROMATIC_WAVELENGTHS = True #if set, then we only use
                                          #nlam wavelengths in the
                                          #range between min_lam and
                                          #max_lam
