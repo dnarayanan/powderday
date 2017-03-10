@@ -99,12 +99,12 @@ SED = True
 
 SED_MONOCHROMATIC = False
 FIX_SED_MONOCHROMATIC_WAVELENGTHS = True #if set, then we only use
-                                         #nlam wavelengths in the
+                                         #the wavelengths in the
                                          #range between min_lam and
                                          #max_lam
 SED_MONOCHROMATIC_min_lam = 0.1 #micron
 SED_MONOCHROMATIC_max_lam = 1 #micron
-SED_MONOCHROMATIC_nlam = 100 
+
 
 
 
