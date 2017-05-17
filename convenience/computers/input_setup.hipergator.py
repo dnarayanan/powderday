@@ -13,8 +13,11 @@ import caesar
 #shell scripting
 nnodes=2
 
-model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z2/halo45_dm2_ml10/smg_survey/10kpc_box/smc/'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z2/halo45_dm2_ml10/output/'
+model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z0/halo401_dm2_ml11_nq/smg_survey/10kpc_box/cf/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z0/halo401_dm2_ml11_nq/output/'
+
+#model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/MassiveFIRE/B100_N512_M3e13_TL00004_baryon_toz2_HR_9915/smg_survey/'
+#hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/MassiveFIRE/SMGs/B100_N512_M3e13_TL00004_baryon_toz2_HR_9915/output/'
 
 HALOS = False #default: if set to True then we center on the Halo center instead of the central galaxy center
 localhalo = 0
@@ -50,51 +53,55 @@ if HALOS == False:
 else:
     data = np.load(hydro_dir+'Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
 
-startsnap = np.min(data['snaps'])
-endsnap = np.max(data['snaps'])
 
-cmd = "./setup_all_cluster.hipergator.sh "+str(nnodes)+' '+str(startsnap)+' '+str(endsnap)+' '+model_dir+' '+hydro_dir+' '+model_run_name+' '+str(COSMOFLAG)+' '+model_dir_remote+' '+hydro_dir_remote
-print cmd
-call(cmd,shell=True)
+for snap in data['snaps']:
+    startsnap = snap
+    endsnap = snap
+    #startsnap = np.min(data['snaps'])
+    #endsnap = np.max(data['snaps'])
+
+    cmd = "./setup_all_cluster.hipergator.sh "+str(nnodes)+' '+str(startsnap)+' '+str(endsnap)+' '+model_dir+' '+hydro_dir+' '+model_run_name+' '+str(COSMOFLAG)+' '+model_dir_remote+' '+hydro_dir_remote
+    print cmd
+    call(cmd,shell=True)
 
 
-if SPHGR_COORDINATE_REWRITE == True:
-    if HALOS == False:
-        data = np.load(hydro_dir+'Groups/caesar_physical_properties.local.'+str(localhalo)+'.npz')
-    else:
-        data = np.load(hydro_dir+'Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
+    if SPHGR_COORDINATE_REWRITE == True:
+        if HALOS == False:
+            data = np.load(hydro_dir+'Groups/caesar_physical_properties.local.'+str(localhalo)+'.npz')
+        else:
+            data = np.load(hydro_dir+'Groups/caesar_physical_properties.halos.local.'+str(localhalo)+'.npz')
 
     
-
-    sph_snap = data['snaps'][::-1]
-    sph_cmx = data['xpos'][::-1]
-    sph_cmy = data['ypos'][::-1]
-    sph_cmz = data['zpos'][::-1]
-    snaps = np.arange(startsnap,endsnap)
-   
-    for i in snaps:
-    
+            
+        sph_snap = data['snaps'][::-1]
+        sph_cmx = data['xpos'][::-1]
+        sph_cmy = data['ypos'][::-1]
+        sph_cmz = data['zpos'][::-1]
+        snaps = np.arange(startsnap,endsnap+1)
         
-        wsph = (np.where(sph_snap == i))[0][0]
-        x_cent = sph_cmx[wsph]
-        y_cent = sph_cmy[wsph]
-        z_cent = sph_cmz[wsph]
+        for i in snaps:
+    
+            
+            wsph = (np.where(sph_snap == i))[0][0]
+            x_cent = sph_cmx[wsph]
+            y_cent = sph_cmy[wsph]
+            z_cent = sph_cmz[wsph]
 
 
         #append positions
-        modelfile = model_dir+'/model_'+str(i)+'.py'
-        print 'appending coordinates to: ', modelfile
-        with open(modelfile,"a") as myfile:
-            myfile.write("\n\n")
-            myfile.write("#===============================================\n")
-            myfile.write("#GRID POSITIONS\n")
-            myfile.write("#===============================================\n")
-            myfile.write("x_cent = %s\n" % x_cent)
-            myfile.write("y_cent = %s\n" % y_cent)
-            myfile.write("z_cent = %s\n" % z_cent)
-
+            modelfile = model_dir+'/model_'+str(i)+'.py'
+            print 'appending coordinates to: ', modelfile
+            with open(modelfile,"a") as myfile:
+                myfile.write("\n\n")
+                myfile.write("#===============================================\n")
+                myfile.write("#GRID POSITIONS\n")
+                myfile.write("#===============================================\n")
+                myfile.write("x_cent = %s\n" % x_cent)
+                myfile.write("y_cent = %s\n" % y_cent)
+                myfile.write("z_cent = %s\n" % z_cent)
+                
+    
+                myfile.write("\n")
             
-            myfile.write("\n")
-
    
 
