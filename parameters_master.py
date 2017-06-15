@@ -13,7 +13,7 @@ bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_li
 #===============================================
 
 n_processes = 64 #number of pool processes to run for stellar SED generation
-n_MPI_processes = 1 #number of MPI tasks to run. for TORQUE this is
+n_MPI_processes = 32 #number of MPI tasks to run. for TORQUE this is
                     #best set as the same as n_processes, while for SLURM this may not be the case.
 
 #===============================================
@@ -98,7 +98,7 @@ NPHI = 3
 SED = True
 
 SED_MONOCHROMATIC = False
-FIX_SED_MONOCHROMATIC_WAVELENGTHS = True #if set, then we only use
+FIX_SED_MONOCHROMATIC_WAVELENGTHS = False #if set, then we only use
                                          #the wavelengths in the
                                          #range between min_lam and
                                          #max_lam
