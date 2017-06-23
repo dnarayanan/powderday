@@ -2,8 +2,8 @@
 #RESOLUTION KEYWORDS
 #===============================================
 oref = 0 #over refine factor - should typically be set to 0
-n_ref = 32 #when n_particles > n_ref, octree refines further
-zoom_box_len = 200 #kpc; so the box will be +/- zoom_box_len from the center
+n_ref = 64 #when n_particles > n_ref, octree refines further
+zoom_box_len = 50 #kpc; so the box will be +/- zoom_box_len from the center
 bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_lim)
                #This *must* encompass all of the particles in the
                #simulation. if zoom is set, this is obviated; else, is
@@ -14,17 +14,17 @@ bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_li
 #===============================================
 
 n_processes = 8 #number of pool processes to run for stellar SED generation
-n_MPI_processes = 1 #number of MPI tasks to run. for TORQUE this is
+n_MPI_processes = 8 #number of MPI tasks to run. for TORQUE this is
                     #best set as the same as n_processes, while for SLURM this may not be the case.
 
 
 #===============================================
 #RT INFORMATION
 #===============================================
-n_photons_initial = 1.e5
-n_photons_imaging = 1.e5
-n_photons_raytracing_sources = 1.e5
-n_photons_raytracing_dust = 1.e5
+n_photons_initial = 1.e6
+n_photons_imaging = 1.e6
+n_photons_raytracing_sources = 1.e6
+n_photons_raytracing_dust = 1.e6
 
 FORCE_RANDOM_SEED = False
 seed = -12345 #has to be an int, and negative.
@@ -34,7 +34,7 @@ seed = -12345 #has to be an int, and negative.
 #===============================================
 dustdir = '/ufrc/narayanan/desika.narayanan/pd/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
-PAH = True
+PAH = False
 dusttometals_ratio = 0.4
 enforce_energy_range = False #False is the default;  ensures energy conservation
 

@@ -13,8 +13,8 @@ import caesar
 #shell scripting
 nnodes=2
 
-model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z0/halo401_dm2_ml11_nq/smg_survey/10kpc_box/cf/'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z0/halo401_dm2_ml11_nq/output/'
+model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z2/halo0_dm2_ml10_nq/smg_survey/quick_look_attenuation/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z2/halo0_dm2_ml10_nq/output/'
 
 #model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/MassiveFIRE/B100_N512_M3e13_TL00004_baryon_toz2_HR_9915/smg_survey/'
 #hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/MassiveFIRE/SMGs/B100_N512_M3e13_TL00004_baryon_toz2_HR_9915/output/'
