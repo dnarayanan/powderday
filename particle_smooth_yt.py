@@ -16,8 +16,8 @@ def yt_smooth(pf):
     pf.index
 
     #make sure the relevant fields make the transition
-    #pf.field_info["starmetals"].particle_type=True
-    #pf.field_info["gasmetals"].particle_type=True
+    pf.field_info["starmetals"].particle_type=True
+    pf.field_info["gasmetals"].particle_type=True
     
     
     ad = pf.all_data()
