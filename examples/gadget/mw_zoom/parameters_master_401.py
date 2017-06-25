@@ -81,7 +81,7 @@ bulge_stars_metals = 19 #in fsps metallicity units
 #>N_METALLICITY_BINS*N_STELLAR_AGE_BINS) stars; this is necessary for
 #reduction of memory load; see manual for details.
 
-N_STELLAR_AGE_BINS = 50
+N_STELLAR_AGE_BINS = 5
 
 
 metallicity_legend= "/ufrc/narayanan/desika.narayanan/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"

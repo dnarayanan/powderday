@@ -226,7 +226,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
 
 
-def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
+def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
 
     
     #NOTE this part is just for the gadget simulations - this will
@@ -240,9 +240,18 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
     
 
     #get just the wavelength array
+    sp.params["tage"] = stars_list[0].age
+    sp.params["imf_type"] = cfg.par.imf_type
+    sp.params["pagb"] = cfg.par.pagb
+    sp.params["sfh"] = 0
+    sp.params["zmet"] = stars_list[0].fsps_zmet
+    sp.params["add_neb_emission"] = cfg.par.add_neb_emission
+    sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+    
+    '''
     sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[0].fsps_zmet,
                                 add_neb_emission = cfg.par.add_neb_emission, add_agb_dust_model=cfg.par.add_agb_dust_model)
-    
+                                '''
     spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
     nu = 1.e8*constants.c.cgs.value/spec[0]
     nlam = len(nu)
@@ -323,14 +332,28 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list):
         #as there will be no disk/bulge star positions to add them to.
 
         #dust_tesc is an absolute value (not relative to min star age) as the ages of these stars are input by the user
-        sp = fsps.StellarPopulation(tage = cfg.par.disk_stars_age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=cfg.par.disk_stars_metals,
-                                    add_neb_emission = cfg.par.add_neb_emission, add_agb_dust_model=cfg.par.add_agb_dust_model)
-        spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=20)
+
+        sp.params["tage"] = cfg.par.disk_stars_age
+        sp.params["imf_type"] = cfg.par.imf_type
+        sp.params["pagb"] = cfg.par.pagb
+        sp.params["sfh"] = 0
+        sp.params["zmet"] = cfg.par.disk_stars_metals
+        sp.params["add_neb_emission"] = cfg.par.add_neb_emission
+        sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+        
+        spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=cfg.par.disk_stars_metals)
         disk_fnu = spec[1]
         
         #calculate the SED for bulge stars
-        sp = fsps.StellarPopulation(tage = cfg.par.bulge_stars_age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=cfg.par.bulge_stars_metals,add_neb_emission = cfg.par.add_neb_emission, add_agb_dust_model=cfg.par.add_agb_dust_model)
-        spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=20)
+        sp.params["tage"] = cfg.par.bulge_stars_age
+        sp.params["imf_type"] = cfg.par.imf_type
+        sp.params["pagb"] = cfg.par.pagb
+        sp.params["sfh"] = 0
+        sp.params["zmet"] = cfg.par.bulge_stars_metals
+        sp.params["add_neb_emission"] = cfg.par.add_neb_emission
+        sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+
+        spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=cfg.park.bulge_stars_metals)
         bulge_fnu = spec[1]
     
 
@@ -396,9 +419,19 @@ def newstars_gen(stars_list):
     #stars) are calculated in a separate function with just one argument so that it is can be fed 
     #into pool.map for multithreading.
     
+    sp = fsps.StellarPopulation()
+
+    sp.params["tage"] = stars_list[0].age
+    sp.params["imf_type"] = cfg.par.imf_type
+    sp.params["pagb"] = cfg.par.pagb
+    sp.params["sfh"] = 0
+    sp.params["zmet"] = stars_list[0].fsps_zmet
+    sp.params["add_neb_emission"] = cfg.par.add_neb_emission
+    sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+
 
     #first figure out how many wavelengths there are
-    sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[0].fsps_zmet,add_neb_emission = cfg.par.add_neb_emission, add_agb_dust_model=cfg.par.add_agb_dust_model)
+    
     spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
     nu = 1.e8*constants.c.cgs.value/spec[0]
     
@@ -420,11 +453,18 @@ def newstars_gen(stars_list):
     #calculate the SEDs for new stars
     for i in range(len(stars_list)):
         
+        sp.params["tage"] = stars_list[i].age
+        sp.params["imf_type"] = cfg.par.imf_type
+        sp.params["pagb"] = cfg.par.pagb
+        sp.params["sfh"] = 0
+        sp.params["zmet"] = stars_list[i].fsps_zmet
+        sp.params["add_neb_emission"] = cfg.par.add_neb_emission
+        sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+        
         if cfg.par.CF_on == True:
-            sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[i].fsps_zmet,dust_type=0,dust1=1,dust2=0,dust_tesc=tesc_age,add_neb_emission = cfg.par.add_neb_emission, add_agb_dust_model=cfg.par.add_agb_dust_model)
-        else:
-            sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[i].fsps_zmet,add_neb_emission = cfg.par.add_neb_emission, add_agb_dust_model=cfg.par.add_agb_dust_model)
-         
+            sp.params["dust_type"] = 0
+            sp.params["dust_tesc"] = tesc_age
+
 
         #sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=2,sfh=0,zmet=stars_list[i].fsps_zmet)
         spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)

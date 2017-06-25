@@ -163,7 +163,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
 
     
 
-def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
+def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp):
     
 
   
@@ -297,7 +297,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m):
             
     print 'Running SPS for Binned SEDs'
     print 'calculating the SEDs for ',len(sed_bins_list_has_stellar_mass),' bins'
-    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,diskstars_list,bulgestars_list)
+    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,diskstars_list,bulgestars_list,sp)
 
 
 
