@@ -18,6 +18,7 @@ from grid_construction import stars_coordinate_boost
 
 from multiprocessing import Pool
 import yt
+from functools import partial
 
 
 
@@ -247,7 +248,8 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
     sp.params["zmet"] = stars_list[0].fsps_zmet
     sp.params["add_neb_emission"] = cfg.par.add_neb_emission
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
-    
+    sp.params['gas_logu'] = cfg.par.gas_logu
+    sp.params['gas_logz'] = cfg.par.gas_logz
     '''
     sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[0].fsps_zmet,
                                 add_neb_emission = cfg.par.add_neb_emission, add_agb_dust_model=cfg.par.add_agb_dust_model)
@@ -340,7 +342,9 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
         sp.params["zmet"] = cfg.par.disk_stars_metals
         sp.params["add_neb_emission"] = cfg.par.add_neb_emission
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
-        
+        sp.params['gas_logu'] = cfg.par.gas_logu
+        sp.params['gas_logz'] = cfg.par.gas_logz
+
         spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=cfg.par.disk_stars_metals)
         disk_fnu = spec[1]
         
@@ -352,6 +356,8 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
         sp.params["zmet"] = cfg.par.bulge_stars_metals
         sp.params["add_neb_emission"] = cfg.par.add_neb_emission
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+        sp.params['gas_logu'] = cfg.par.gas_logu
+        sp.params['gas_logz'] = cfg.par.gas_logz
 
         spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=cfg.park.bulge_stars_metals)
         bulge_fnu = spec[1]
@@ -414,12 +420,14 @@ def redshift_gen(formation_z):
     age = cosmo.Planck13.age(formation_z)
     return age
 
+
+
 def newstars_gen(stars_list):
     #the newstars (particle type 4; so, for cosmological runs, this is all
     #stars) are calculated in a separate function with just one argument so that it is can be fed 
     #into pool.map for multithreading.
     
-    sp = fsps.StellarPopulation()
+    #sp = fsps.StellarPopulation()
 
     sp.params["tage"] = stars_list[0].age
     sp.params["imf_type"] = cfg.par.imf_type
@@ -428,7 +436,8 @@ def newstars_gen(stars_list):
     sp.params["zmet"] = stars_list[0].fsps_zmet
     sp.params["add_neb_emission"] = cfg.par.add_neb_emission
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
-
+    sp.params['gas_logu'] = cfg.par.gas_logu
+    sp.params['gas_logz'] = cfg.par.gas_logz
 
     #first figure out how many wavelengths there are
     
@@ -460,6 +469,8 @@ def newstars_gen(stars_list):
         sp.params["zmet"] = stars_list[i].fsps_zmet
         sp.params["add_neb_emission"] = cfg.par.add_neb_emission
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+        sp.params['gas_logu'] = cfg.par.gas_logu
+        sp.params['gas_logz'] = cfg.par.gas_logz
         
         if cfg.par.CF_on == True:
             sp.params["dust_type"] = 0
@@ -475,9 +486,8 @@ def newstars_gen(stars_list):
     return stellar_fnu
 
 
-
-
-
+sp = fsps.StellarPopulation()
+partial_newstars_gen = partial(newstars_gen,sp=sp)
 
 def fsps_metallicity_interpolate(metals):
 

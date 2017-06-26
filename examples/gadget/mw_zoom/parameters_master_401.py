@@ -53,6 +53,12 @@ COSMOFLAG = True  #is this a cosmological simulation?
 imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 #weight given to post agb stars# 1 is the default
 add_neb_emission = False #add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
+gas_logu = -2 #gas ionization parameter for HII regions; only relevant
+              #if add_neb_emission = True default = -2
+gas_logz = 0 #units of log(Z/Z_sun); metallicity of the HII region
+             #metallicity; only relevant if add_neb_emission = True;
+             #default is 0
+
 add_agb_dust_model=False #add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 
 CF_on = False #if set to true, then we enable the Charlot & Fall birthcloud models 
@@ -97,12 +103,12 @@ NPHI = 1
 SED = True
 
 SED_MONOCHROMATIC = False
-FIX_SED_MONOCHROMATIC_WAVELENGTHS = False #if set, then we only use
+FIX_SED_MONOCHROMATIC_WAVELENGTHS = True #if set, then we only use
                                          #nlam wavelengths in the
                                          #range between min_lam and
                                          #max_lam
-SED_MONOCHROMATIC_min_lam = 0.1 #micron
-SED_MONOCHROMATIC_max_lam = 1 #micron
+SED_MONOCHROMATIC_min_lam = 0.3 #micron
+SED_MONOCHROMATIC_max_lam = 0.4 #micron
 SED_MONOCHROMATIC_nlam = 100 
 
 
