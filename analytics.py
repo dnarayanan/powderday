@@ -66,21 +66,11 @@ def stellar_sed_write(m):
     lam = lam.to(u.micron)
 
 
-    README = "Note: nu is in Hz, and fnu is in Lsun/Hz; lam is in micron and flam is in Lsun/micron; if monochromatic_idx == -1,then there was no monochromatic photons; else, monochromatic_idx refers to the indices in in the nu/fnu array that the monochromatic  photons were run at."
+    README = "Note: nu is in Hz, and fnu is in Lsun/Hz; lam is in micron and flam is in Lsun/micron"
     #saving: nu is in Hz and fnu is in Lsun/Hz
     outfile = cfg.model.PD_output_dir+"stellar_seds."+cfg.model.snapnum_str+".npz"
 
-    #save monochromatic indexes if there are any
-    monochromatic_lam = -1 #default
-    monochromatic_idx = -1 #default
-    if cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS == True:
-        monochromatic_nu = m.sources[0].spectrum['nu']*u.Hz
-        monochromatic_lam = (constants.c/monochromatic_nu).to(u.micron).value[::-1]
-        monochromatic_idx = np.round(np.linspace(np.min(np.where(monochromatic_lam > cfg.par.SED_MONOCHROMATIC_min_lam)[0]),\
-                                   np.max(np.where(monochromatic_lam < cfg.par.SED_MONOCHROMATIC_max_lam)[0]),\
-                                   cfg.par.SED_MONOCHROMATIC_nlam))
 
-        monochromatic_lam = np.take(monochromatic_lam,list(monochromatic_idx))
 
-    np.savez(outfile,nu=nu,fnu=fnu,lam = lam.value, flam = flam.value, README=README,monochromatic_lam = monochromatic_lam,monochromatic_idx = monochromatic_idx)
+    np.savez(outfile,nu=nu,fnu=fnu,lam = lam.value, flam = flam.value, README=README)
    
