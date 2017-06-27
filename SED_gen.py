@@ -249,8 +249,12 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
     sp.params["add_neb_emission"] = cfg.par.add_neb_emission
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
     sp.params['gas_logu'] = cfg.par.gas_logu
-    sp.params['gas_logz'] = cfg.par.gas_logz
-    '''
+    if cfg.par.FORCE_gas_logz == False:
+        sp.params['gas_logz'] = np.log10(stars_list[0].metals/0.02)
+    else:
+        sp.params['gas_logz'] = cfg.par.gas_logz
+
+        '''
     sp = fsps.StellarPopulation(tage=stars_list[0].age,imf_type=cfg.par.imf_type,pagb = cfg.par.pagb,sfh=0,zmet=stars_list[0].fsps_zmet,
                                 add_neb_emission = cfg.par.add_neb_emission, add_agb_dust_model=cfg.par.add_agb_dust_model)
                                 '''
@@ -343,7 +347,10 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
         sp.params["add_neb_emission"] = cfg.par.add_neb_emission
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
         sp.params['gas_logu'] = cfg.par.gas_logu
-        sp.params['gas_logz'] = cfg.par.gas_logz
+        if cfg.par.FORCE_gas_logz == False:
+            sp.params['gas_logz'] = np.log10(cfg.par.disk_stars_metals/0.02)
+        else:
+            sp.params['gas_logz'] = cfg.par.gas_logz
 
         spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=cfg.par.disk_stars_metals)
         disk_fnu = spec[1]
@@ -357,7 +364,11 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
         sp.params["add_neb_emission"] = cfg.par.add_neb_emission
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
         sp.params['gas_logu'] = cfg.par.gas_logu
-        sp.params['gas_logz'] = cfg.par.gas_logz
+        if cfg.par.FORCE_gas_logz == False:
+            sp.params['gas_logz'] = np.log10(cfg.par.bulge_stars_metals/0.02)
+        else:
+            sp.params['gas_logz'] = cfg.par.gas_logz
+
 
         spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=cfg.park.bulge_stars_metals)
         bulge_fnu = spec[1]
@@ -437,7 +448,11 @@ def newstars_gen(stars_list):
     sp.params["add_neb_emission"] = cfg.par.add_neb_emission
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
     sp.params['gas_logu'] = cfg.par.gas_logu
-    sp.params['gas_logz'] = cfg.par.gas_logz
+
+    if cfg.par.FORCE_gas_logz == False:
+        sp.params['gas_logz'] = np.log10(stars_list[0].metals/0.02)
+    else:
+        sp.params['gas_logz'] = cfg.par.gas_logz
 
     #first figure out how many wavelengths there are
     
@@ -470,7 +485,10 @@ def newstars_gen(stars_list):
         sp.params["add_neb_emission"] = cfg.par.add_neb_emission
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
         sp.params['gas_logu'] = cfg.par.gas_logu
-        sp.params['gas_logz'] = cfg.par.gas_logz
+        if cfg.par.FORCE_gas_logz == False:
+            sp.params['gas_logz'] =np.log10(stars_list[i].metals/0.02)
+        else:
+            sp.params['gas_logz'] = cfg.par.gas_logz
         
         if cfg.par.CF_on == True:
             sp.params["dust_type"] = 0

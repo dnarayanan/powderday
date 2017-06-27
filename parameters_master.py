@@ -57,6 +57,8 @@ add_neb_emission = False #add nebular line emission from Cloudy Lookup tables (d
 add_agb_dust_model=False #add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 gas_logu = -2 #gas ionization parameter for HII regions; only relevant
               #if add_neb_emission = True default = -2
+FORCE_gas_logz = False #if set, then we force the gas_logz of HII
+                       #regions to be gas_logz (next parameter); else, it is taken to be the star particles metallicity.  default is False
 gas_logz = 0 #units of log(Z/Z_sun); metallicity of the HII region
              #metallicity; only relevant if add_neb_emission = True;
              #default is 0
