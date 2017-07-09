@@ -370,7 +370,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
             sp.params['gas_logz'] = cfg.par.gas_logz
 
 
-        spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=cfg.park.bulge_stars_metals)
+        spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=cfg.par.bulge_stars_metals)
         bulge_fnu = spec[1]
     
 
