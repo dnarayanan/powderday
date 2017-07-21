@@ -492,6 +492,8 @@ def newstars_gen(stars_list):
         
         if cfg.par.CF_on == True:
             sp.params["dust_type"] = 0
+            sp.params["dust1"] = 1
+            sp.params["dust2"] = 0
             sp.params["dust_tesc"] = tesc_age
 
 
