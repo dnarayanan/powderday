@@ -27,6 +27,8 @@ import hyperion_octree_stats as hos
 import error_handling as eh
 import backwards_compatibility as bc
 
+from hyperion.dust import SphericalDust
+
 
 
 def sph_m_gen(fname,field_add):
@@ -103,13 +105,19 @@ def sph_m_gen(fname,field_add):
 
 
     if cfg.par.PAH == True:
+
         frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063}
         for size in ['usg', 'vsg', 'big']:
-            m.add_density_grid(dustdens * frac[size], cfg.par.dustdir+'%s.hdf5' % size)
-        
+            d = SphericalDust(cfg.par.dustdir+'%s.hdf5'%size)
+            d.set_sublimation_temperature('fast',temperature=1600.)
+            #m.add_density_grid(dustdens * frac[size], cfg.par.dustdir+'%s.hdf5' % size)
+            m.add_density_grid(dustdens*frac[size],d)
         m.set_enforce_energy_range(cfg.par.enforce_energy_range)
     else:
-        m.add_density_grid(dustdens,cfg.par.dustdir+cfg.par.dustfile)
+        d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
+        d.set_sublimation_temperature('fast',temperature=1600)
+        m.add_density_grid(dustdens,d)
+        #m.add_density_grid(dustdens,cfg.par.dustdir+cfg.par.dustfile)
 
 
 

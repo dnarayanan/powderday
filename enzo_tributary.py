@@ -68,8 +68,11 @@ def enzo_m_gen(fname,field_add):
 
     m.set_amr_grid(amr)
                 
-    m.add_density_grid(amr['density'], cfg.par.dustdir+cfg.par.dustfile)
-   
+    d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
+    d.set_sublimation_temperature('fast',temperature=1600)
+    m.add_density_grid(amr['density'],d)
+ #m.add_density_grid(amr['density'], cfg.par.dustdir+cfg.par.dustfile)
+    
 
     #define the random things needed for parsing out the output args
     #center = pf.domain_center
