@@ -69,7 +69,8 @@ def enzo_m_gen(fname,field_add):
     m.set_amr_grid(amr)
                 
     d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
-    d.set_sublimation_temperature('fast',temperature=1600)
+    if cfg.par.SUBLIMATION == True:
+        d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
     m.add_density_grid(amr['density'],d)
  #m.add_density_grid(amr['density'], cfg.par.dustdir+cfg.par.dustfile)
     

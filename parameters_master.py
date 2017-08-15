@@ -36,6 +36,10 @@ PAH = True
 dusttometals_ratio = 0.4
 enforce_energy_range = False #False is the default;  ensures energy conservation
 
+SUBLIMATION = False #do we automatically kill dust grains above the
+                    #sublimation temperature; right now is set to fast
+                    #mode 
+SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 
 #===============================================
 #HYDRO CODE UNITS
