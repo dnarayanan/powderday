@@ -11,7 +11,7 @@ from astropy import constants
 #========================================================
 #MODIFIABLE HEADER (make this a function later with argv)
 z = 3
-run = '/ufrc/narayanan/desika.narayanan/pd_dev/examples/gadget/mw_zoom/example.134.rtout.sed'
+run = '/ufrc/narayanan/desika.narayanan/pd/examples/gadget/mw_zoom/example.134.rtout.sed'
 #========================================================
 
 

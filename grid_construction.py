@@ -128,7 +128,8 @@ def yt_octree_generate(fname,field_add):
     volume = np.zeros(len(refined))
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
-    volume[wFalse] = (fw1.in_units('cm'))**3.
+    #pdb.set_trace()
+    #volume[wFalse] = (fw1.in_units('cm'))**3.
     
 
    

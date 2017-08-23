@@ -93,7 +93,7 @@ bulge_stars_metals = 19 #in fsps metallicity units
 #>N_METALLICITY_BINS*N_STELLAR_AGE_BINS) stars; this is necessary for
 #reduction of memory load; see manual for details.
 
-N_STELLAR_AGE_BINS = 5
+N_STELLAR_AGE_BINS = 25
 
 
 metallicity_legend= "/ufrc/narayanan/desika.narayanan/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
@@ -104,12 +104,12 @@ metallicity_legend= "/ufrc/narayanan/desika.narayanan/pd/fsps/ISOCHRONES/Padova/
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 1
-NPHI = 1
+NTHETA = 2
+NPHI = 2
 SED = True
 
 SED_MONOCHROMATIC = False
-FIX_SED_MONOCHROMATIC_WAVELENGTHS = True #if set, then we only use
+FIX_SED_MONOCHROMATIC_WAVELENGTHS = False #if set, then we only use
                                          #nlam wavelengths in the
                                          #range between min_lam and
                                          #max_lam
