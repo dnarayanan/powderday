@@ -19,10 +19,7 @@ output should go.  To run, type (in the `powderday
   <parameters_model_file>
 
 Note - the .py extensions on the parameter files need to be left off.
-So, as an example, you might type the following to run a gadget
-example snapshot::
 
-  >python pd_front_end.py examples/gadget parameters_master parameters_model
 
 
 Gadget/Gizmo
@@ -32,7 +29,7 @@ The example simulation is a cosmological zoom simulation of a Milky Way mass gal
  <https://www.dropbox.com/s/g6d47z3pm8l18p7/snapshot_134.hdf5?dl=0>
 
 To run the code, you would type::
-  >python pd_front_end.py  examples/gadget/mw_zoom parameters_master_401 parameters_model_401
+  >python pd_front_end.py examples/gadget/mw_zoom parameters_master_401 parameters_model_401
 
 The SED (placed at z = 3 with a Planck13 cosmology) looks like:
 
