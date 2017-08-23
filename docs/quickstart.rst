@@ -27,12 +27,14 @@ example snapshot::
 
 Gadget/Gizmo
 ============
+The example simulation is a cosmological zoom simulation of a Milky Way mass galaxy that can be downloaded here (6 GB download):
 
-The snapshot is an idealized disk galaxy that can be downloaded here (13 MB download):
+ <https://www.dropbox.com/s/g6d47z3pm8l18p7/snapshot_134.hdf5?dl=0>
 
- <https://www.dropbox.com/s/vy6qu43056q5ii5/snapshot_200.hdf5?dl=0>
+To run the code, you would type::
+  >[desika.narayanan@c25b-s38 pd]$ python pd_front_end.py  examples/gadget/mw_zoom parameters_master_401 parameters_model_401
 
-The SED (placed at z=4 with a Planck13 cosmology) looks like:
+The SED (placed at z = 0.00001 with a Planck13 cosmology) looks like:
 
 .. image:: images/gadget_sed.png
    :align: center
