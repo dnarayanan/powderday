@@ -19,7 +19,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 from hyperion.model import ModelOutput
 import h5py
-from analytics import stellar_sed_write
+from analytics import stellar_sed_write,dump_data
 
 import yt
 from yt.units.yt_array import YTQuantity
@@ -302,6 +302,7 @@ if cfg.par.IMAGING == True:
 #save SEDs
 if par.STELLAR_SED_WRITE == True: stellar_sed_write(m)
 
+dump_data(ad,model)
 
 
 

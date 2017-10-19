@@ -7,6 +7,7 @@ import config as cfg
 import pdb,ipdb
 from astropy import constants
 import astropy.units as u
+from hyperion.model import ModelOutput
 
 def proj_plots(pf):
     print '\n[analytics/proj_plots] Saving Diagnostic Projection Plots \n'
@@ -76,15 +77,28 @@ def stellar_sed_write(m):
    
 
 
-def dump_data(pf,ad):
+def dump_data(ad,model):
 
-    fh2 = ad[('PartType0', 'FractionH2')]
-    fh1 = np.ones(len(fh2))-fh2
-    gas_mass = ad[('PartType0','Masses')].in_units('Msun')
-    gas_metallicity = ad[('PartType0','Metallicity_00')]
-    star_mass = ad[('PartType4','Masses')].in_units('Msun')
-    star_metallicity = ad[('PartType4','Metallicity_00')]
+    particle_fh2 = ad[('PartType0', 'FractionH2')]
+    particle_fh1 = np.ones(len(particle_fh2))-particle_fh2
+    particle_gas_mass = ad[('PartType0','Masses')].in_units('Msun')
+    particle_star_mass = ad[('PartType4','Masses')].in_units('Msun')
+    particle_star_metallicity = ad[('PartType4','Metallicity_00')]
+    particle_stellar_formation_time = ad[('PartType4', 'StellarFormationTime')]
+    grid_gas_mass = ad[('deposit', 'PartType0_mass')].in_units('Msun')
+    grid_gas_metallicity = ad[('deposit', 'PartType0_smoothed_metallicity')]
+    grid_star_mass = ad[ ('deposit', 'PartType4_mass')].in_units('Msun')
+    grid_star_metallicity = ad[('PartType4','Metallicity_00')]
+
+    #get tdust
+
+    m = ModelOutput(model.outputfile+'.sed')
+    oct = m.get_quantities()
+    tdust_pf = oct.to_yt()
+    tdust_ad = tdust_pf.all_data()
+    tdust = tdust_ad[ ('gas', 'temperature')]
+
     
     outfile = cfg.model.PD_output_dir+"grid_physical_properties."+cfg.model.snapnum_str+".npz"
-    np.savez(outfile,fh1=fh1,fh2=fh2,gas_mass = gas_mass,gas_metallicity = gas_metallicity,star_mass = star_mass,star_metallicity = star_metallicity)
+    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,grid_star_metallicity = grid_star_metallicity,tdust=tdust)
 
