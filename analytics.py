@@ -22,7 +22,7 @@ def proj_plots(pf):
 
 
 
-def mass_weighted_distribution(array,masses,fileout='junk.png',nbins=100):
+def mass_weighted_distribution(array,masses,fileout='mwd.png',nbins=100):
     
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -74,3 +74,17 @@ def stellar_sed_write(m):
 
     np.savez(outfile,nu=nu,fnu=fnu,lam = lam.value, flam = flam.value, README=README)
    
+
+
+def dump_data(pf,ad):
+
+    fh2 = ad[('PartType0', 'FractionH2')]
+    fh1 = np.ones(len(fh2))-fh2
+    gas_mass = ad[('PartType0','Masses')].in_units('Msun')
+    gas_metallicity = ad[('PartType0','Metallicity_00')]
+    star_mass = ad[('PartType4','Masses')].in_units('Msun')
+    star_metallicity = ad[('PartType4','Metallicity_00')]
+    
+    outfile = cfg.model.PD_output_dir+"grid_physical_properties."+cfg.model.snapnum_str+".npz"
+    np.savez(outfile,fh1=fh1,fh2=fh2,gas_mass = gas_mass,gas_metallicity = gas_metallicity,star_mass = star_mass,star_metallicity = star_metallicity)
+

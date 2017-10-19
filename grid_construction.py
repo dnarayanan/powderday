@@ -8,7 +8,7 @@ from astropy.io import ascii
 import hyperion_octree_stats as hos
 from gridstats import gridstats
 from octree_zoom import octree_zoom_bbox_filter
-from analytics import proj_plots
+from analytics import proj_plots,dump_data
 from yt.mods import *
 from yt.geometry.oct_container import OctreeContainer
 from yt.geometry.selection_routines import AlwaysSelector
@@ -72,7 +72,7 @@ def yt_octree_generate(fname,field_add):
     #---------------------------------------------------------------
     
     #proj_plots(pf)
-    
+    dump_data(pf,ad)
 
 
 
@@ -91,7 +91,9 @@ def yt_octree_generate(fname,field_add):
     #convert fc1 and fw1 to YTArrays
     fc1 = pf.arr(fc1,'code_length')
     fw1 = pf.arr(fw1,'code_length')
-    
+
+
+
 
     print '----------------------------'
     print 'yt Octree Construction Stats'
