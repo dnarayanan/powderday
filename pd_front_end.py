@@ -181,6 +181,7 @@ if par.SOURCES_RANDOM_POSITIONS == True:
 
 
 print 'Done adding Sources'
+if par.STELLAR_SED_WRITE == True: stellar_sed_write(m)
 
 print 'Setting up Model'
 m_imaging = copy.deepcopy(m)
@@ -299,8 +300,6 @@ if cfg.par.IMAGING == True:
     print '++++++++++++++++++++++++++++++++++++'
         
 
-#save SEDs
-if par.STELLAR_SED_WRITE == True: stellar_sed_write(m)
 
 dump_data(ad,model)
 
