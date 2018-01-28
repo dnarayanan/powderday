@@ -5,7 +5,7 @@ from hyperion.model import Model
 from hyperion.grid import AMRGrid
 import config as cfg
 from analytics import proj_plots
-
+from helpers import get_J_CMB,energy_density_absorbed_by_CMB
 
     
 
@@ -67,11 +67,16 @@ def enzo_m_gen(fname,field_add):
     m = Model()
 
     m.set_amr_grid(amr)
-                
+
+    energy_density_absorbed=energy_density_absorbed_by_CMB()
+    energy_density_absorbed = np.repeat(energy_density_absorbed.value,amr['density'].shape)
+
+
     d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
     if cfg.par.SUBLIMATION == True:
         d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
-    m.add_density_grid(amr['density'],d)
+    m.add_density_grid(amr['density'],d,specific_energy=energy_density_absorbed)
+    m.set_specific_energy_type('additional')
  #m.add_density_grid(amr['density'], cfg.par.dustdir+cfg.par.dustfile)
     
 

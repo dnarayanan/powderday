@@ -25,10 +25,14 @@ Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 inputfile = PD_output_dir+'/example.'+snapnum_str+'.rtin'
 outputfile = PD_output_dir+'/example.'+snapnum_str+'.rtout'
 
-
 #===============================================
 #GRID POSITIONS
 #===============================================
 x_cent=28077.51291590734
 y_cent=22251.040921986722
 z_cent=28531.439944942518
+
+#===============================================
+#CMB
+#===============================================
+TCMB = 2.73

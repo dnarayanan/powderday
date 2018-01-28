@@ -47,11 +47,13 @@ import powderday_test_octree as pto
 import hyperion_octree_stats as hos
 import error_handling as eh
 import backwards_compatibility as bc
+from helpers import get_J_CMB,energy_density_absorbed_by_CMB
 
 from m_control_tools import *
 from image_processing import add_transmission_filters
 
 import fsps
+
 
 #=========================================================
 #CHECK FOR THE EXISTENCE OF A FEW CRUCIAL FILES FIRST
@@ -64,7 +66,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.gas_logu,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.gas_logu,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB = bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -139,6 +141,8 @@ else:
     m=add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp)
 
 
+#save SEDs
+if par.STELLAR_SED_WRITE == True: stellar_sed_write(m)
 
 
 nstars = len(stars_list)
@@ -181,7 +185,25 @@ if par.SOURCES_RANDOM_POSITIONS == True:
 
 
 print 'Done adding Sources'
-if par.STELLAR_SED_WRITE == True: stellar_sed_write(m)
+
+
+#set up the CMB field -- place holder to put in haardt/madau eventually
+'''
+cmb = m.add_external_box_source()
+cmb.temperature = cfg.model.TCMB
+cmb_box_len = ds.quan(cfg.par.zoom_box_len,'kpc').in_units('cm').value
+cmb.bounds = [[-cmb_box_len,cmb_box_len],[-cmb_box_len,cmb_box_len],[-cmb_box_len,cmb_box_len]]
+pdb.set_trace()
+L_CMB = (constants.sigma_sb*(cfg.model.TCMB*u.K)**4.).to(u.erg/u.cm**2/u.s)*4*(cmb_box_len*u.cm)**2 #get_J_CMB()
+cmb.luminosity = L_CMB.cgs.value
+'''
+
+'''
+energy_density_absorbed=energy_density_absorbed_by_CMB()
+m.add_density_grid(density, dust, specific_energy=energy_density_absorbed)
+m.set_specific_energy_type('additional')
+'''
+
 
 print 'Setting up Model'
 m_imaging = copy.deepcopy(m)
