@@ -13,8 +13,8 @@ import caesar
 #shell scripting
 nnodes=2
 
-model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z2/halo10_dm2_ml11_nq/smg_survey/quick_look_attenuation/no_pah_test/'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z2/halo10_dm2_ml11_nq/output/'
+model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z0/halo401_dm2_ml11_nq/george_seds/cmb_100kpc'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z0/halo401_dm2_ml11_nq/output/'
 
 #model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/MassiveFIRE/B100_N512_M3e13_TL00004_baryon_toz2_HR_9915/smg_survey/'
 #hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/MassiveFIRE/SMGs/B100_N512_M3e13_TL00004_baryon_toz2_HR_9915/output/'
@@ -29,7 +29,7 @@ localhalo = 0
 model_dir_remote = model_dir
 hydro_dir_remote = hydro_dir
 
-model_run_name='halo62'
+model_run_name='halo401'
 COSMOFLAG=0 #flag for setting if the gadget snapshots are broken up into multiples or not
 
 
@@ -77,6 +77,7 @@ for snap in data['snaps']:
         sph_cmx = data['xpos'][::-1]
         sph_cmy = data['ypos'][::-1]
         sph_cmz = data['zpos'][::-1]
+        sph_redshifts = data['redshifts'][::-1]
         snaps = np.arange(startsnap,endsnap+1)
         
         for i in snaps:
@@ -86,8 +87,8 @@ for snap in data['snaps']:
             x_cent = sph_cmx[wsph]
             y_cent = sph_cmy[wsph]
             z_cent = sph_cmz[wsph]
-
-
+            redshift = sph_redshifts[wsph]
+            TCMB = 2.73*(1.+redshift)
         #append positions
             modelfile = model_dir+'/model_'+str(i)+'.py'
             print 'appending coordinates to: ', modelfile
@@ -99,7 +100,12 @@ for snap in data['snaps']:
                 myfile.write("x_cent = %s\n" % x_cent)
                 myfile.write("y_cent = %s\n" % y_cent)
                 myfile.write("z_cent = %s\n" % z_cent)
-                
+               
+                myfile.write("\n\n")
+                myfile.write("#===============================================\n")
+                myfile.write("#CMB\n")
+                myfile.write("#===============================================\n")
+                myfile.write("TCMB = %s\n" %TCMB)
     
                 myfile.write("\n")
             
