@@ -29,7 +29,7 @@ import backwards_compatibility as bc
 
 from hyperion.dust import SphericalDust
 
-
+from helpers import get_J_CMB,energy_density_absorbed_by_CMB
 
 def sph_m_gen(fname,field_add):
     
@@ -104,6 +104,11 @@ def sph_m_gen(fname,field_add):
     m.set_octree_grid(0,0,0,dx/2,dy/2,dz/2,refined)    
 
 
+    #get CMB:
+    
+    energy_density_absorbed=energy_density_absorbed_by_CMB()
+    specific_energy = np.repeat(energy_density_absorbed.value,dustdens.shape)
+
     if cfg.par.PAH == True:
 
         frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063}
@@ -112,18 +117,18 @@ def sph_m_gen(fname,field_add):
             if cfg.par.SUBLIMATION == True:
                 d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
             #m.add_density_grid(dustdens * frac[size], cfg.par.dustdir+'%s.hdf5' % size)
-            m.add_density_grid(dustdens*frac[size],d)
+            m.add_density_grid(dustdens*frac[size],d,specific_energy=specific_energy)
         m.set_enforce_energy_range(cfg.par.enforce_energy_range)
     else:
         d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
         if cfg.par.SUBLIMATION == True:
             d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
-        m.add_density_grid(dustdens,d)
-        #m.add_density_grid(dustdens,cfg.par.dustdir+cfg.par.dustfile)
+        m.add_density_grid(dustdens,d,specific_energy=specific_energy)
+        #m.add_density_grid(dustdens,cfg.par.dustdir+cfg.par.dustfile)  
+    m.set_specific_energy_type('additional')
 
 
 
-  
 
 
 

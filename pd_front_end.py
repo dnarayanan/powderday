@@ -47,7 +47,7 @@ import powderday_test_octree as pto
 import hyperion_octree_stats as hos
 import error_handling as eh
 import backwards_compatibility as bc
-from helpers import get_J_CMB,energy_density_absorbed_by_CMB
+
 
 from m_control_tools import *
 from image_processing import add_transmission_filters
