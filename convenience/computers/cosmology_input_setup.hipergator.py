@@ -17,19 +17,19 @@ nnodes=1
 
 startsnap = 135
 endsnap = 136
-npzfile = '/Volumes/pegasus/pd_runs/mufasa/m25n512/fh_qr/attenuation/mufasa_m25n512.halos_pos_for_pd.npz'
+npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m50n512/fh_qr/quick_look_attenuation/mufasa_m50n512.halos_pos_for_pd.npz'
 
-model_dir = '/Volumes/pegasus/pd_runs/mufasa/m25n512/fh_qr/attenuation/'
-hydro_dir = '/Volumes/pegasus2/gizmo_runs/mufasa/m25n512/fh_qr/output/'
+model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m50n512/fh_qr/quick_look_attenuation/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/m50n512/fh_qr'
 
 #if we want to write the files locally, but have the paths in the
 #parameters files lead to differnet paths (for a different computer),
 #put those paths here.  otherweise, set these equal to whatever is in
 #model_dir and hydro_dir
-model_dir_remote = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m25n512/fh_qr/attenuation/'
-hydro_dir_remote = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/m25n512/fh_qr/output/'
+model_dir_remote = model_dir
+hydro_dir_remote = hydro_dir
 
-model_run_name='mufasa_m25n512'
+model_run_name='mufasa_m50'
 COSMOFLAG=0 #flag for setting if the gadget snapshots are broken up into multiples or not
 
 
