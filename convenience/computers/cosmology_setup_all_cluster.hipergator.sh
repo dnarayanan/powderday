@@ -36,7 +36,7 @@ rm -f *.pyc
 
 #set up the model_**.py file
 
-filem="$model_dir/halo${halo}_snap${snap}.py"
+filem="$model_dir/snap${snap}_halo${halo}.py"
 echo "writing to $filem"
 rm -f $filem
 
