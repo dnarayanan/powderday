@@ -17,7 +17,7 @@ nnodes=1
 
 startsnap = 135
 endsnap = 136
-npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m50n512/fh_qr/quick_look_attenuation/mufasa_m50n512.halos_pos_for_pd.npz'
+npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m50n512/fh_qr/quick_look_attenuation/mufasa_m50n512.galaxies_pos_for_pd.npz'
 
 model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m50n512/fh_qr/quick_look_attenuation/'
 hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/m50n512/fh_qr'
@@ -41,17 +41,24 @@ SPHGR_COORDINATE_REWRITE = True
 
 data = np.load(npzfile)
 pos = data['pos'][()] #positions dictionary
-NHALOS = data['NHALOS']
+
+#ngalaxies is the dict that says how many galaxies each snapshot has, in case it's less than NGALAXIES_MAX
+ngalaxies = data['ngalaxies'][()]
+
+#NGALAXIES = data['NGALAXIES']
 
 
 #first call the initial setup_all_cluster shell
 
 for snap in range(startsnap,endsnap):
-    for nh in range(NHALOS):
+    
+    NGALAXIES = ngalaxies['snap'+str_snap(snap)]
+    
+    for nh in range(NGALAXIES):
         
-        xpos = pos['halo'+str(nh)]['snap'+str_snap(snap)][0]
-        ypos = pos['halo'+str(nh)]['snap'+str_snap(snap)][1]
-        zpos = pos['halo'+str(nh)]['snap'+str_snap(snap)][2]
+        xpos = pos['galaxy'+str(nh)]['snap'+str_snap(snap)][0]
+        ypos = pos['galaxy'+str(nh)]['snap'+str_snap(snap)][1]
+        zpos = pos['galaxy'+str(nh)]['snap'+str_snap(snap)][2]
         
         cmd = "./cosmology_setup_all_cluster.hipergator.sh "+str(nnodes)+' '+model_dir+' '+hydro_dir+' '+model_run_name+' '+str(COSMOFLAG)+' '+model_dir_remote+' '+hydro_dir_remote+' '+str(xpos)+' '+str(ypos)+' '+str(zpos)+' '+str(nh)+' '+str(snap)
         #print cmd
