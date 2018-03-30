@@ -165,7 +165,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
      
             #create the disk_list full of DiskStars objects
             for i in range(nstars_disk):
-                diskstars_list.append(Stars(disk_masses[i],0.02,disk_positions[i],cfg.par.disk_stars_age))
+                diskstars_list.append(Stars(disk_masses[i],cfg.par.solar,disk_positions[i],cfg.par.disk_stars_age))
 
             print 'boosting disk stars to coordinate center'    
             diskstars_list = stars_coordinate_boost(diskstars_list,boost)
@@ -184,7 +184,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
             #create the bulge_list full of BulgeStars objects
             
             for i in range(nstars_bulge):
-                bulgestars_list.append(Stars(bulge_masses[i],0.02,bulge_positions[i],cfg.par.bulge_stars_age))
+                bulgestars_list.append(Stars(bulge_masses[i],cfg.par.solar,bulge_positions[i],cfg.par.bulge_stars_age))
                 
 
             print 'boosting bulge stars to coordinate center'    
@@ -250,7 +250,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
     sp.params['gas_logu'] = cfg.par.gas_logu
     if cfg.par.FORCE_gas_logz == False:
-        sp.params['gas_logz'] = np.log10(stars_list[0].metals/0.02)
+        sp.params['gas_logz'] = np.log10(stars_list[0].metals/cfg.par.solar)
     else:
         sp.params['gas_logz'] = cfg.par.gas_logz
 
@@ -348,7 +348,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
         sp.params['gas_logu'] = cfg.par.gas_logu
         if cfg.par.FORCE_gas_logz == False:
-            sp.params['gas_logz'] = np.log10(cfg.par.disk_stars_metals/0.02)
+            sp.params['gas_logz'] = np.log10(cfg.par.disk_stars_metals/cfg.par.solar)
         else:
             sp.params['gas_logz'] = cfg.par.gas_logz
 
@@ -365,7 +365,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
         sp.params['gas_logu'] = cfg.par.gas_logu
         if cfg.par.FORCE_gas_logz == False:
-            sp.params['gas_logz'] = np.log10(cfg.par.bulge_stars_metals/0.02)
+            sp.params['gas_logz'] = np.log10(cfg.par.bulge_stars_metals/cfg.par.solar)
         else:
             sp.params['gas_logz'] = cfg.par.gas_logz
 
@@ -450,7 +450,7 @@ def newstars_gen(stars_list):
     sp.params['gas_logu'] = cfg.par.gas_logu
 
     if cfg.par.FORCE_gas_logz == False:
-        sp.params['gas_logz'] = np.log10(stars_list[0].metals/0.02)
+        sp.params['gas_logz'] = np.log10(stars_list[0].metals/cfg.par.solar)
     else:
         sp.params['gas_logz'] = cfg.par.gas_logz
 
@@ -486,7 +486,7 @@ def newstars_gen(stars_list):
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
         sp.params['gas_logu'] = cfg.par.gas_logu
         if cfg.par.FORCE_gas_logz == False:
-            sp.params['gas_logz'] =np.log10(stars_list[i].metals/0.02)
+            sp.params['gas_logz'] =np.log10(stars_list[i].metals/cfg.par.solar)
         else:
             sp.params['gas_logz'] = cfg.par.gas_logz
         
