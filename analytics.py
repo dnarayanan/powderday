@@ -106,7 +106,7 @@ def dump_data(ad,model):
 def dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer):
     
     fig = plt.figure()
-    
+    ax = fig.add_subplot(111)
     wFalse = np.where(np.array(refined) == False)[0]
     d_dtm = dust_smoothed_dtm[wFalse]
     d_dtm = d_dtm[d_dtm>0]
