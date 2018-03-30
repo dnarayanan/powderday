@@ -13,7 +13,7 @@ from yt.mods import *
 from yt.geometry.oct_container import OctreeContainer
 from yt.geometry.selection_routines import AlwaysSelector
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
-
+from dust_grid_gen import dtm_grid,remy_ruyer
 
 import astropy.constants as constants
 
@@ -128,17 +128,36 @@ def yt_octree_generate(fname,field_add):
     #smooth the data on to the octree
     
     volume = np.zeros(len(refined))
+
+    '''
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
-    #pdb.set_trace()
-    #volume[wFalse] = (fw1.in_units('cm'))**3.
+    '''
     
 
    
 
     if cfg.par.CONSTANT_DUST_GRID == False: 
 
+        dust_smoothed_dtm = dtm_grid(pf,refined)
+        dust_smoothed_remy_ruyer = remy_ruyer(pf,refined)
         
+        
+
+        '''
+        import matplotlib.pyplot as plt
+        fig = plt.figure()
+
+        wFalse = np.where(np.array(refined) == False)[0]
+        d1 = dust_smoothed[wFalse]
+        d1 = d1[d1>0]
+        d2 = dust_smoothed2[wFalse]
+        d2 = d2[d2>0]
+        histvals,binvals,patches = plt.hist(np.log10(d1),bins=100)
+        histvals,binvals,patches = plt.hist(np.log10(d2),bins=100)
+        fig.savefig('junk.png',dpi=300)
+        '''
+
         from particle_smooth_yt import yt_smooth
         metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
        
@@ -151,7 +170,7 @@ def yt_octree_generate(fname,field_add):
 
         
         dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
-        
+        '''
         
     else:
         print 'cfg.par.CONSTANT_DUST_GRID=True'
