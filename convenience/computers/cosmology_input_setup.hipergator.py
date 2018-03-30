@@ -15,12 +15,12 @@ from str_snap import str_snap
 #shell scripting
 nnodes=1
 
-startsnap = 135
-endsnap = 136
-npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m50n512/fh_qr/quick_look_attenuation/mufasa_m50n512.galaxies_pos_for_pd.npz'
+startsnap = 46
+endsnap = 47
+npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m25n512/fh_qr/quick_look_attenuation/mufasa_m25n512.galaxies_pos_for_pd.npz'
 
-model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m50n512/fh_qr/quick_look_attenuation/'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/m50n512/fh_qr'
+model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m25n512/fh_qr/quick_look_attenuation//snap046/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/m25n512/fh_qr/output'
 
 #if we want to write the files locally, but have the paths in the
 #parameters files lead to differnet paths (for a different computer),
@@ -29,7 +29,7 @@ hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/m50n512/fh_qr'
 model_dir_remote = model_dir
 hydro_dir_remote = hydro_dir
 
-model_run_name='mufasa_m50'
+model_run_name='mufasa_m25'
 COSMOFLAG=0 #flag for setting if the gadget snapshots are broken up into multiples or not
 
 

@@ -11,7 +11,7 @@ import ipdb
 from glob2 import glob
 
 directory = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/m25n512/fh_qr/output/'
-NGALAXIES_MAX = 1000
+NGALAXIES_MAX = 10000
 TESTING = False
 outfile = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m25n512/fh_qr/quick_look_attenuation/mufasa_m25n512.galaxies_pos_for_pd.npz'
 

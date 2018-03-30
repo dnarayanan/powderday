@@ -147,7 +147,7 @@ def yt_octree_generate(fname,field_add):
 
 
         if dust_grid_type == 'dtm': dust_smoothed = dust_smoothed_dtm
-        if dust_grid_type = 'rr': dust_smoothed = dust_smoothed_remy_ruyer
+        if dust_grid_type == 'rr': dust_smoothed = dust_smoothed_remy_ruyer
 
 
     else:
