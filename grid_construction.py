@@ -8,7 +8,7 @@ from astropy.io import ascii
 import hyperion_octree_stats as hos
 from gridstats import gridstats
 from octree_zoom import octree_zoom_bbox_filter
-from analytics import proj_plots
+from analytics import proj_plots,dust_histograms
 from yt.mods import *
 from yt.geometry.oct_container import OctreeContainer
 from yt.geometry.selection_routines import AlwaysSelector
@@ -129,49 +129,27 @@ def yt_octree_generate(fname,field_add):
     
     volume = np.zeros(len(refined))
 
-    '''
-    wTrue = np.where(np.array(refined) == True)[0]
-    wFalse = np.where(np.array(refined) == False)[0]
-    '''
-    
-
-   
 
     if cfg.par.CONSTANT_DUST_GRID == False: 
 
         dust_smoothed_dtm = dtm_grid(pf,refined)
         dust_smoothed_remy_ruyer = remy_ruyer(pf,refined)
-        
-        
 
-        '''
-        import matplotlib.pyplot as plt
-        fig = plt.figure()
+        dust_histogram(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer)
 
-        wFalse = np.where(np.array(refined) == False)[0]
-        d1 = dust_smoothed[wFalse]
-        d1 = d1[d1>0]
-        d2 = dust_smoothed2[wFalse]
-        d2 = d2[d2>0]
-        histvals,binvals,patches = plt.hist(np.log10(d1),bins=100)
-        histvals,binvals,patches = plt.hist(np.log10(d2),bins=100)
-        fig.savefig('junk.png',dpi=300)
-        '''
+        #crash the code if the parameter choice for dust grid type isn't in the hard coded valid list below
+        dust_grid_type_list = ['dtm','rr']
+        try:
+            dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
+        except ValueError:
+            print 'You chose a dust_choice that isnt a valid selection within the list: '+dust_grid_type_list+'....crashing now!'
+            sys.exit()
 
-        from particle_smooth_yt import yt_smooth
-        metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
-       
-        
-        
-        dust_smoothed = np.zeros(len(refined))
-        
-        print '[grid_construction: ] len(wFalse) = ',len(wFalse)
-        print '[grid_construction: ] len(metallicity_smoothed) = ',len(metallicity_smoothed)
 
-        
-        dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
-        '''
-        
+        if dust_grid_type == 'dtm': dust_smoothed = dust_smoothed_dtm
+        if dust_grid_type = 'rr': dust_smoothed = dust_smoothed_remy_ruyer
+
+
     else:
         print 'cfg.par.CONSTANT_DUST_GRID=True'
         print 'setting constant dust grid to 4.e-22'

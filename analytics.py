@@ -102,3 +102,18 @@ def dump_data(ad,model):
     outfile = cfg.model.PD_output_dir+"grid_physical_properties."+cfg.model.snapnum_str+".npz"
     np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,grid_star_metallicity = grid_star_metallicity,tdust=tdust)
 
+
+def dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer):
+    
+    fig = plt.figure()
+    
+    wFalse = np.where(np.array(refined) == False)[0]
+    d_dtm = dust_smoothed_dtm[wFalse]
+    d_dtm = d_dtm[d_dtm>0]
+    d_rr = dust_smoothed_remy_ruyer[wFalse]
+    d_rr = d_rr[d_rr>0]
+    histvals,binvals,patches = plt.hist(np.log10(d_dtm),bins=100)
+    histvals,binvals,patches = plt.hist(np.log10(d_rr),bins=100)
+    ax.set_xlabel('dust density')
+    ax.set_ylabel('N')
+    fig.savefig(cfg.model.PD_output+dir+'dust_density.'+cfg.model.snapnum_str+'.png',dpi=300)
