@@ -137,6 +137,13 @@ TRANSMISSION_FILTER_REDSHIFT = 3.1
 #center cell position #currently deprecated, though will be used for zooming later
 MANUAL_CENTERING = True
 
+
+#===============================================
+#OTHER INFORMATION
+#===============================================
+
+solar = 0.013
+
 #===============================================
 #DEBUGGING
 #===============================================
