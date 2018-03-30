@@ -116,4 +116,4 @@ def dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer):
     histvals,binvals,patches = plt.hist(np.log10(d_rr),bins=100)
     ax.set_xlabel('dust density')
     ax.set_ylabel('N')
-    fig.savefig(cfg.model.PD_output+dir+'dust_density.'+cfg.model.snapnum_str+'.png',dpi=300)
+    fig.savefig(cfg.model.PD_output_dir+'dust_density.'+cfg.model.snapnum_str+'.png',dpi=300)
