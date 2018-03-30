@@ -135,7 +135,7 @@ def yt_octree_generate(fname,field_add):
         dust_smoothed_dtm = dtm_grid(pf,refined)
         dust_smoothed_remy_ruyer = remy_ruyer(pf,refined)
 
-        dust_histogram(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer)
+        dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer)
 
         #crash the code if the parameter choice for dust grid type isn't in the hard coded valid list below
         dust_grid_type_list = ['dtm','rr']
