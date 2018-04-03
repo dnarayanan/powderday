@@ -42,7 +42,7 @@ def remy_ruyer(pf,refined):
     #this to some very low value
     metallicity_smoothed[metallicity_smoothed == 0] = 1.e-10
 
-    x = 12.+np.log10(metallicity_smoothed/cfg.par.solar * 10.**(8.69-12.) )
+    x = 12.+np.log10(metallicity_smoothed/cfg.par.solar * 10.**(x_sun-12.) )
     
     y = a + alpha*(x_sun-np.asarray(x))
 
