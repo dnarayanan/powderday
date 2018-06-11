@@ -76,6 +76,9 @@ def stellar_sed_write(m):
     np.savez(outfile,nu=nu,fnu=fnu,lam = lam.value, flam = flam.value, README=README)
    
 
+def dump_cell_info(refined,fc1,fw1,xmin,xmax,ymin,ymax,zmin,zmax):
+    outfile = cfg.model.PD_output_dir+"cell_info."+cfg.model.snapnum_str+".npz"
+    np.savez(outfile,refined=refined,fc1=fc1,fw1=fw1,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,zmin=zmin,zmax=zmax)
 
 def dump_data(ad,model):
 

@@ -30,6 +30,7 @@ import backwards_compatibility as bc
 from hyperion.dust import SphericalDust
 
 from helpers import get_J_CMB,energy_density_absorbed_by_CMB
+from analytics import dump_cell_info
 
 def sph_m_gen(fname,field_add):
     
@@ -82,7 +83,7 @@ def sph_m_gen(fname,field_add):
 
     pto.test_octree(refined,max_level)
 
-    
+    dump_cell_info(refined,fc1,fw1,xmin,xmax,ymin,ymax,zmin,zmax)
     np.save('refined.npy',refined)
     np.save('density.npy',dustdens)
     
