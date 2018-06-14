@@ -10,8 +10,8 @@ from astropy import constants
 
 #========================================================
 #MODIFIABLE HEADER (make this a function later with argv)
-z = 3
-run = '/ufrc/narayanan/desika.narayanan/pd/examples/gadget/mw_zoom/example.134.rtout.sed'
+z = 0.001
+run = '/home/desika.narayanan/pd/examples/gadget/mw_zoom/example.135.rtout.sed'
 #========================================================
 
 
@@ -48,7 +48,7 @@ for i in range(flux.shape[0]):
 
 ax.set_xlabel(r'$\lambda$ [$\mu$m]')
 ax.set_ylabel('Flux (mJy)')
-ax.set_ylim([1e-6,1.])
+ax.set_ylim([1,1e8])
 ax.set_xlim(0.05,15000)
 ax.grid()
 

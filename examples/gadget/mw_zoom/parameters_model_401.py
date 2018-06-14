@@ -9,12 +9,12 @@ elif Gadget_snap_num >= 10 and Gadget_snap_num <100:
 else:
     snapnum_str = str(Gadget_snap_num)
 
-hydro_dir = '/ufrc/narayanan/desika.narayanan/pd/examples/gadget/mw_zoom/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_safe_packages/pd/examples/gadget/mw_zoom/'
 
 Gadget_snap_name = 'snapshot_'+snapnum_str+'.hdf5'
 
 #where the files should go
-PD_output_dir = '/ufrc/narayanan/desika.narayanan/pd_dev/examples/gadget/mw_zoom/'
+PD_output_dir = '/home/desika.narayanan/pd/examples/gadget/mw_zoom/'
 Auto_TF_file = 'snap'+snapnum_str+'.logical'
 Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 

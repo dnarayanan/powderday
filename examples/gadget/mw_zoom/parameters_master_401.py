@@ -13,7 +13,7 @@ bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_li
 #===============================================
 
 n_processes = 16 #number of pool processes to run
-n_MPI_processes = 32 #number oF MPI processes to run
+n_MPI_processes = 1 #number oF MPI processes to run
 
 #===============================================
 #RT INFORMATION
@@ -29,7 +29,7 @@ seed = -12345 #has to be an int, and negative.
 #===============================================
 #DUST INFORMATION 
 #===============================================
-dustdir = '/ufrc/narayanan/desika.narayanan/pd/hyperion-dust-0.1.0/dust_files/' #location of your dust files
+dustdir = '/home/desika.narayanan/pd/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 dust_grid_type = 'dtm' #needs to be in ['dtm','rr']
@@ -97,7 +97,7 @@ bulge_stars_metals = 19 #in fsps metallicity units
 N_STELLAR_AGE_BINS = 25
 
 
-metallicity_legend= "/ufrc/narayanan/desika.narayanan/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
+metallicity_legend= "/home/desika.narayanan/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
 
 
 
@@ -105,8 +105,8 @@ metallicity_legend= "/ufrc/narayanan/desika.narayanan/pd/fsps/ISOCHRONES/Padova/
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 2
-NPHI = 2
+NTHETA = 1
+NPHI = 1
 SED = True
 
 SED_MONOCHROMATIC = False
@@ -122,7 +122,7 @@ SED_MONOCHROMATIC_nlam = 100
 
 
 IMAGING = False
-filter_file = '/ufrc/narayanan/desika.narayanan/pd/pdfilters.dat'
+filter_file = '/home/desika.narayanan/pd/pdfilters.dat'
 npix_x = 512
 npix_y = 512
 
