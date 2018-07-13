@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import config as cfg
 
@@ -43,7 +44,7 @@ class Stars:
 
 
 def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
-    print '[SED_gen/star_list_gen]: reading in stars particles for SPS calculation'
+    print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
 
     fname = cfg.model.hydro_dir+cfg.model.Gadget_snap_name
     
@@ -97,8 +98,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
   
     age = ad["stellarages"].value
     nstars = len(age)
-    print 'number of new stars =',nstars
-    
+    print ('number of new stars =',nstars)
 
     #calculate the fsps interpolated metallicity
 
@@ -108,7 +108,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
         metals = metals[:,0]
 
 
-    print '[SED_gen/star_list_gen:] Manually increasing the newstar metallicities by: ',cfg.par.Z_init
+    print ('[SED_gen/star_list_gen:] Manually increasing the newstar metallicities by: ',cfg.par.Z_init)
     metals += cfg.par.Z_init
 
 
@@ -125,7 +125,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
 
     #boost stellar positions to grid center
-    print 'boosting new stars to coordinate center'
+    print ('boosting new stars to coordinate center')
     stars_list = stars_coordinate_boost(stars_list,boost)
     
 
@@ -167,7 +167,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
             for i in range(nstars_disk):
                 diskstars_list.append(Stars(disk_masses[i],cfg.par.solar,disk_positions[i],cfg.par.disk_stars_age))
 
-            print 'boosting disk stars to coordinate center'    
+            print ('boosting disk stars to coordinate center')    
             diskstars_list = stars_coordinate_boost(diskstars_list,boost)
 
         orig_disk_stars_list_len = nstars_disk
@@ -187,7 +187,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
                 bulgestars_list.append(Stars(bulge_masses[i],cfg.par.solar,bulge_positions[i],cfg.par.bulge_stars_age))
                 
 
-            print 'boosting bulge stars to coordinate center'    
+            print ('boosting bulge stars to coordinate center')
             bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
 
            
@@ -207,9 +207,9 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
                 diskstars_list[i].positions[:] = np.array([0,0,0])
 
     if cfg.par.SOURCES_RANDOM_POSITIONS == True:
-        print "================================"
-        print "SETTING SOURCES TO RANDOM POSITIONS"
-        print "================================"
+        print ("================================")
+        print ("SETTING SOURCES TO RANDOM POSITIONS")
+        print ("================================")
         for i in range(nstars):
             xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
             stars_list[i].positions[:] = np.array([xpos,ypos,zpos])
@@ -273,7 +273,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
     chunk_start_indices.append(0) #the start index is obviously 0
 
     delta_chunk_indices = int(nstars / nchunks)
-    print 'delta_chunk_indices = ',delta_chunk_indices
+    print ('delta_chunk_indices = ',delta_chunk_indices)
     
     for n in range(1,nchunks):
         chunk_start_indices.append(chunk_start_indices[n-1]+delta_chunk_indices)
@@ -283,7 +283,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
     #because this can result in too many chunks sometimes given the number of processors:
     chunk_start_indices = chunk_start_indices[0:nchunks]
     '''
-    print 'Entering Pool.map multiprocessing for Stellar SED generation'
+    print ('Entering Pool.map multiprocessing for Stellar SED generation')
     list_of_chunks = []
     for n in range(nchunks):
         stars_list_chunk = stars_list[chunk_start_indices[n]:chunk_start_indices[n]+delta_chunk_indices]
@@ -300,7 +300,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
     chunk_sol = p.map(newstars_gen, [arg for arg in list_of_chunks])
     
     t2=datetime.now()
-    print 'Execution time for SED generation in Pool.map multiprocessing = '+str(t2-t1)
+    print ('Execution time for SED generation in Pool.map multiprocessing = '+str(t2-t1))
 
     
     stellar_fnu = np.zeros([nstars,nlam])
@@ -384,7 +384,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
     for i in range(stellar_fnu.shape[0]):
         total_lum_in_sed_gen += np.absolute(np.trapz(stellar_fnu[i,:],x=nu))
 
-    print '[SED_gen: ] total_lum_in_sed_gen = ',total_lum_in_sed_gen
+    print ('[SED_gen: ] total_lum_in_sed_gen = ',total_lum_in_sed_gen)
 
     #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
     return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
@@ -399,7 +399,7 @@ def redshift_multithread(formation_z):
         chunk_start_indices = []
         chunk_start_indices.append(0) #the start index is obviously 0
         delta_chunk_indices = int(len(formation_z_list) / nchunks)
-        print 'delta_chunk_indices = ',delta_chunk_indices
+        print ('delta_chunk_indices = ',delta_chunk_indices)
         for n in range(1,nchunks):
             chunk_start_indices.append(chunk_start_indices[n-1]+delta_chunk_indices)
         list_of_chunks = []
@@ -408,7 +408,7 @@ def redshift_multithread(formation_z):
             if n == nchunks-1: 
                 formation_z_chunk = formation_z_list[chunk_start_indices[n]::]
             list_of_chunks.append(formation_z_chunk)
-        print 'Entering Pool.map multiprocessing for Stellar Age calculations'
+        print ('Entering Pool.map multiprocessing for Stellar Age calculations')
         t1=datetime.now()
         chunk_sol = p.map(redshift_gen, [arg for arg in list_of_chunks])
         
@@ -420,7 +420,7 @@ def redshift_multithread(formation_z):
                 formation_time.append(sub_chunk_sol[j])
 
         t2=datetime.now()
-        print 'Execution time for Stellar Age calculations in Pool.map multiprocessing = '+str(t2-t1)
+        print ('Execution time for Stellar Age calculations in Pool.map multiprocessing = '+str(t2-t1))
         
       
         

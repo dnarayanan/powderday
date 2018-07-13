@@ -1,7 +1,10 @@
+from __future__ import print_function
 import numpy as np
 import yt
 import ipdb
 import config as cfg
+
+
 
 def stream(fname):
 
@@ -13,25 +16,25 @@ def stream(fname):
         elif ('PartType4', 'TemperatureMax') in ds.derived_field_list:
             from benopp_gadget2pd import gadget_field_add as field_add
         else:
-            from gadget2pd import gadget_field_add as field_add
+            from front_ends.gadget2pd import gadget_field_add as field_add
         
-        print '[front_end_controller:] gadget data set detected'
+        print ('[front_end_controller:] gadget data set detected')
         return field_add
 
     def tipsy():
         from tipsy2pd import tipsy_field_add as field_add
-        print '[front_end_controller:] tipsy data set detected'
+        print ('[front_end_controller:] tipsy data set detected')
         return field_add
 
     def ramses():
         from ramses2pd import ramses_field_add as field_add
-        print '[front_end_controller:] ramses data set detected'
+        print ('[front_end_controller:] ramses data set detected')
         return field_add
 
     
     def enzo():
         from enzo2pd import enzo_field_add as field_add
-        print '[front_end_controller:] enzo data set detected'
+        print ('[front_end_controller:] enzo data set detected')
         return field_add
 
 
@@ -42,11 +45,11 @@ def stream(fname):
     try: 
         ds = yt.load(fname,bounding_box = bbox)
         ds.index
-        print '[front_end_controller:] bounding_box being used'
+        print ('[front_end_controller:] bounding_box being used')
     except:
         ds = yt.load(fname)
         ds.index
-        print '[front_end_controller:] NO bounding_box being used'
+        print ('[front_end_controller:] NO bounding_box being used')
 
     ds_type = ds.dataset_type 
     

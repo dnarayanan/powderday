@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import yt
 from yt import derived_field
@@ -6,7 +7,7 @@ import config as cfg
 
 from astropy.cosmology import Planck13
 import astropy.units as u
-from redshift_multithread import *
+from front_ends.redshift_multithread import *
 
 from yt.data_objects.particle_filters import add_particle_filter
 from pprint import pprint

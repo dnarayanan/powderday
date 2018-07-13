@@ -1,3 +1,4 @@
+from __future__ import print_function
 import yt
 import numpy as np
 import ipdb
@@ -7,7 +8,6 @@ import config as cfg
 from analytics import proj_plots
 from helpers import get_J_CMB,energy_density_absorbed_by_CMB
 
-    
 
 
 def enzo_m_gen(fname,field_add):

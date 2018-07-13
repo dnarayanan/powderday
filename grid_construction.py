@@ -1,3 +1,4 @@
+from __future__ import print_function
 import random
 import numpy as np
 #import parameters as par
@@ -18,6 +19,7 @@ from dust_grid_gen import dtm_grid,remy_ruyer
 import astropy.constants as constants
 
 
+
 random.seed('octree-demo')
  
 import pdb,ipdb
@@ -33,7 +35,7 @@ def yt_octree_generate(fname,field_add):
 
     
 
-    print '[grid_construction]: bbox_lim = ',cfg.par.bbox_lim
+    print ('[grid_construction]: bbox_lim = ',cfg.par.bbox_lim)
 
     
     bbox = [[-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
@@ -95,13 +97,13 @@ def yt_octree_generate(fname,field_add):
 
 
 
-    print '----------------------------'
-    print 'yt Octree Construction Stats'
-    print '----------------------------'
-    print ' n_ref = ',pf.index.oct_handler.n_ref
-    print ' max_level = ',pf.index.oct_handler.max_level
-    print ' nocts = ',pf.index.oct_handler.nocts
-    print '----------------------------'
+    print ('----------------------------')
+    print ('yt Octree Construction Stats')
+    print ('----------------------------')
+    print (' n_ref = ',pf.index.oct_handler.n_ref)
+    print (' max_level = ',pf.index.oct_handler.max_level)
+    print (' nocts = ',pf.index.oct_handler.nocts)
+    print ('----------------------------')
         
     gridstats(ir1,fc1,fw1)
     
@@ -141,8 +143,8 @@ def yt_octree_generate(fname,field_add):
         dust_grid_type_list = ['dtm','rr']
         try:
             dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
-        except ValueError:
-            print 'You chose a dust_choice that isnt a valid selection within the list: '+dust_grid_type_list+'....crashing now!'
+        except ValueError as e:
+            print ('You chose a dust_choice that isnt a valid selection within the list: '+dust_grid_type_list+'....crashing now!')
             sys.exit()
 
 
@@ -151,8 +153,8 @@ def yt_octree_generate(fname,field_add):
 
 
     else:
-        print 'cfg.par.CONSTANT_DUST_GRID=True'
-        print 'setting constant dust grid to 4.e-22'
+        print ('cfg.par.CONSTANT_DUST_GRID=True')
+        print ('setting constant dust grid to 4.e-22')
         dust_smoothed = np.zeros(len(refined))+4.e-23
 
 
@@ -171,7 +173,7 @@ def yt_octree_generate(fname,field_add):
 
 def grid_coordinate_boost(xmin,xmax,ymin,ymax,zmin,zmax):
     
-    print '\n boosting coordinates to [0,0,0] centering \n'
+    print ('\n boosting coordinates to [0,0,0] centering \n')
     xcent,ycent,zcent,dx,dy,dz = grid_center(xmin,xmax,ymin,ymax,zmin,zmax)
     xmin -= xcent
     xmax -= xcent

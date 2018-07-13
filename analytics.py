@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import yt
 import matplotlib
@@ -9,8 +10,10 @@ from astropy import constants
 import astropy.units as u
 from hyperion.model import ModelOutput
 
+
+
 def proj_plots(pf):
-    print '\n[analytics/proj_plots] Saving Diagnostic Projection Plots \n'
+    print ('\n[analytics/proj_plots] Saving Diagnostic Projection Plots \n')
     p = yt.ProjectionPlot(pf,"x",("gas","density"),width=(cfg.par.zoom_box_len,'kpc'))
     p.save(cfg.model.PD_output_dir+'/proj_plot_x.png')
     p = yt.ProjectionPlot(pf,"y",("gas","density"),width=(cfg.par.zoom_box_len,'kpc'))

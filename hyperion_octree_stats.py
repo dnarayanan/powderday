@@ -31,7 +31,7 @@ def hyperion_octree_stats(refined):
 
     try:
         final_i, max_level = check_recursive(refined)
-    except IndexError:
+    except IndexError as e:
         max_level = 'unknown'
         consistent = False
     else:

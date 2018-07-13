@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 script,pardir,parfile,modelfile = sys.argv
 import numpy as np
@@ -32,6 +33,8 @@ from hyperion.dust import SphericalDust
 from helpers import get_J_CMB,energy_density_absorbed_by_CMB
 from analytics import dump_cell_info
 
+
+
 def sph_m_gen(fname,field_add):
     
     refined,dustdens,fc1,fw1,pf,ad = yt_octree_generate(fname,field_add)
@@ -54,7 +57,7 @@ def sph_m_gen(fname,field_add):
     zcent = np.mean([np.min(zmin),np.max(zmax)])
     
     boost = np.array([xcent,ycent,zcent])
-    print '[pd_front end] boost = ',boost
+    print ('[pd_front end] boost = ',boost)
 
     
     #Tom Robitaille's conversion from z-first ordering (yt's default) to
@@ -96,7 +99,7 @@ def sph_m_gen(fname,field_add):
     
     if cfg.par.FORCE_RANDOM_SEED == True: m.set_seed(cfg.par.seed)
 
-    print 'Setting Octree Grid with Parameters: '
+    print ('Setting Octree Grid with Parameters: ')
 
 
 

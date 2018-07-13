@@ -1,7 +1,10 @@
+from __future__ import print_function
 import numpy as np
 import yt
 import config as cfg
 from particle_smooth_yt import yt_smooth
+
+
 
 def dtm_grid(pf,refined):
     wTrue = np.where(np.array(refined) == True)[0]
@@ -10,8 +13,8 @@ def dtm_grid(pf,refined):
     
     dust_smoothed = np.zeros(len(refined))
     
-    print '[grid_construction/dust_grid_gen/dtm_grid: ] len(wFalse) = ',len(wFalse)
-    print '[grid_construction/dust_grid_gen/dtm_grid: ] len(metallicity_smoothed) = ',len(metallicity_smoothed)
+    print ('[grid_construction/dust_grid_gen/dtm_grid: ] len(wFalse) = ',len(wFalse))
+    print ('[grid_construction/dust_grid_gen/dtm_grid: ] len(metallicity_smoothed) = ',len(metallicity_smoothed))
     
     dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
 

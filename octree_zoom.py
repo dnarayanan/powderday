@@ -1,3 +1,4 @@
+from __future__ import print_function
 
 import numpy as np
 import pdb,ipdb
@@ -8,6 +9,7 @@ import config as cfg
 
 from cutout_data import yt_field_map
 from yt.frontends.sph.data_structures import ParticleDataset
+
 
 
 ParticleDataset.filter_bbox = True
@@ -22,10 +24,10 @@ def octree_zoom(fname,pf,bbox):
     pf.index
     ad = pf.all_data()
 
-    print '\n\n'
-    print '----------------------------'
-    print '[octree zoom] Entering Octree Zoom with parameters: '
-    print "[octree zoom] (...Calculating Center of Mass in octree_zoom)"
+    print ('\n\n')
+    print ('----------------------------')
+    print ('[octree zoom] Entering Octree Zoom with parameters: ')
+    print ("[octree zoom] (...Calculating Center of Mass in octree_zoom)")
     #    com = ad.quantities.center_of_mass()
 
     
@@ -35,7 +37,7 @@ def octree_zoom(fname,pf,bbox):
     
     com = [gas_com_x,gas_com_y,gas_com_z]
 
-    print "[octree zoom] Center of Mass is at coordinates (kpc): ",com
+    print ("[octree zoom] Center of Mass is at coordinates (kpc): ",com)
 
 
 
@@ -47,10 +49,10 @@ def octree_zoom(fname,pf,bbox):
     region = pf.region(com,minbox,maxbox)
 
 
-    print '[octree zoom] minimum edges of the zoomed box are: (kpc)',minbox
-    print '[octree zoom] maximum edges of the zoomed box are: (kpc)',maxbox
-    print '----------------------------'
-    print '\n'
+    print ('[octree zoom] minimum edges of the zoomed box are: (kpc)',minbox)
+    print ('[octree zoom] maximum edges of the zoomed box are: (kpc)',maxbox)
+    print ('----------------------------')
+    print ('\n')
 
     
     
@@ -101,9 +103,9 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
     ds0.index
     ad = ds0.all_data()
 
-    print '\n\n'
-    print '----------------------------'
-    print "[octree zoom_bbox_filter:] Calculating Center of Mass"
+    print ('\n\n')
+    print ('----------------------------')
+    print ("[octree zoom_bbox_filter:] Calculating Center of Mass")
 
 
     gas_com_x = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,0])/np.sum(ad["gasdensity"])
@@ -113,10 +115,10 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
 
     com = [gas_com_x,gas_com_y,gas_com_z]
 
-    print "[octree zoom_bbox_filter:] Center of Mass is at coordinates (kpc): ",com
+    print ("[octree zoom_bbox_filter:] Center of Mass is at coordinates (kpc): ",com)
     
 
-    print "[octree zoom_bbox_filter:] Calculating Central Density Peak"
+    print ("[octree zoom_bbox_filter:] Calculating Central Density Peak")
     
     density = ad["gasdensity"]
     wdens = np.where(density == np.max(density))[0]
@@ -131,7 +133,7 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
         center = maxdens_coordinates[0]
         center = center.value
     
-    print '[octree zoom_bbox_filter:] using center: ',center
+    print ('[octree zoom_bbox_filter:] using center: ',center)
 
     
     box_len = cfg.par.zoom_box_len
@@ -152,7 +154,7 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
     bbox1 = [[center[0]-bbox_lim,center[0]+bbox_lim],
             [center[1]-bbox_lim,center[1]+bbox_lim],
             [center[2]-bbox_lim,center[2]+bbox_lim]]
-    print '[octree zoom] new zoomed bbox (comoving/h) = ',bbox1
+    print ('[octree zoom] new zoomed bbox (comoving/h) = ',bbox1)
     
 
     try: #particle

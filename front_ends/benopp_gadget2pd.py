@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import yt
 from yt import derived_field
@@ -7,7 +8,8 @@ import config as cfg
 
 from astropy.cosmology import Planck13
 import astropy.units as u
-from redshift_multithread import *
+from front_ends.redshift_multithread import *
+
 
 
 
@@ -105,9 +107,9 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
             age[np.where(age < 1.e6)[0]] = 1.e6
             
             
-            print '\n--------------'
-            print '[SED_gen/star_list_gen: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ',simtime
-            print '--------------\n'
+            print ('\n--------------')
+            print ('[SED_gen/star_list_gen: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ',simtime)
+            print ('--------------\n')
         else:
             simtime = data.ds.current_time.in_units('Gyr')
             simtime = simtime.value
@@ -119,9 +121,9 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
                 age[np.where(age < 1.e6)[0]] = 1.e6
 
         
-            print '\n--------------'
-            print '[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime
-            print '--------------\n'
+            print ('\n--------------')
+            print ('[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime)
+            print ('--------------\n')
      
         age = data.ds.arr(age,'yr')
 

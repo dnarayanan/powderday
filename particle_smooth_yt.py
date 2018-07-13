@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 from yt.mods import *
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
@@ -10,9 +11,10 @@ import yt.units as units
 import ipdb
 
 
+
 def yt_smooth(pf):
 
-    print 'starting yt_smooth'
+    print ('starting yt_smooth')
     pf.index
 
     #make sure the relevant fields make the transition
@@ -44,5 +46,5 @@ def yt_smooth(pf):
    
     for i in sorted(saved):
         if not hasattr(saved[i], 'shape'): continue
-        print "% 20s => %s" % (i, saved[i].shape)
+        print ("% 20s => %s" % (i, saved[i].shape))
 

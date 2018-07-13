@@ -10,10 +10,11 @@
 #Author of Python adaptation: Desika Narayanan
 
 #Original C code Author: Philip Hopkins
-
+from __future__ import print_function
 import numpy as np
 import ipdb
 
+#py2.* compatibility
 
 
 def agn_spectrum(log_L_bol,SLOAN_KEY=0,MODEL_SPECTRUM_KEY=0):
@@ -92,24 +93,24 @@ def agn_spectrum(log_L_bol,SLOAN_KEY=0,MODEL_SPECTRUM_KEY=0):
     
 
     to_cgs = np.log10(3.9)+33
-    print '\n'
-    print ";;//         \n"
-    print ";;// Intrinsic ,un-reddened) AGN spectrum for \n"
-    print ";;//   log_{10}(L_bol/L_sun)   = %5.2f \n",log_L_bol
-    print ";;//   log_{10}(L_bol/[erg/s]) = %5.2f \n",log_L_bol+to_cgs
-    print ";;//     (throughout, L_sun is the bolometric solar L = 3.9x10^33 erg/s)  \n",log_L_bol
-    print ";;// columns are frequency, AGN spectrum (nu*L_nu) in solar and CGS units :  \n"
-    print ";;//   log_{10}(nu/Hz)   log_{10}(nu*L_nu/L_sun)  log_{10}(nu*L_nu/[erg/s])  \n"
-    print ";;// the output frequency list spans ~300 microns to ~100 keV  \n"
-    print ";;// the last four rows compute bands frequently adopted :  \n"
-    print ";;//   nu = -1.00  ::  B-band (4400 Angstroms)  \n"
-    print ";;//   nu = -2.00  ::  mid-IR (15 microns)  \n"
-    print ";;//   nu = -3.00  ::  soft X-ray (integrated luminosity from 0.5-2 keV)  \n"
-    print ";;//   nu = -4.00  ::  hard X-ray (integrated luminosity from 2-10  keV)  \n"
-    print ";;//         \n"
+    print ('\n')
+    print (";;//         \n")
+    print (";;// Intrinsic ,un-reddened) AGN spectrum for \n")
+    print (";;//   log_{10}(L_bol/L_sun)   = %5.2f \n",log_L_bol)
+    print (";;//   log_{10}(L_bol/[erg/s]) = %5.2f \n",log_L_bol+to_cgs)
+    print (";;//     (throughout, L_sun is the bolometric solar L = 3.9x10^33 erg/s)  \n",log_L_bol)
+    print (";;// columns are frequency, AGN spectrum (nu*L_nu) in solar and CGS units :  \n")
+    print (";;//   log_{10}(nu/Hz)   log_{10}(nu*L_nu/L_sun)  log_{10}(nu*L_nu/[erg/s])  \n")
+    print (";;// the output frequency list spans ~300 microns to ~100 keV  \n")
+    print (";;// the last four rows compute bands frequently adopted :  \n")
+    print (";;//   nu = -1.00  ::  B-band (4400 Angstroms)  \n")
+    print (";;//   nu = -2.00  ::  mid-IR (15 microns)  \n")
+    print (";;//   nu = -3.00  ::  soft X-ray (integrated luminosity from 0.5-2 keV)  \n")
+    print (";;//   nu = -4.00  ::  hard X-ray (integrated luminosity from 2-10  keV)  \n")
+    print (";;//         \n")
     
     for i_nu in np.arange(N_nu):
-        print nu_vec[i_nu],l_band_vec[i_nu],l_band_vec[i_nu]+to_cgs
+        print (nu_vec[i_nu],l_band_vec[i_nu],l_band_vec[i_nu]+to_cgs)
        
    
     return nu_vec,l_band_vec+to_cgs

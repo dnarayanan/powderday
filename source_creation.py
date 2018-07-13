@@ -1,3 +1,4 @@
+from __future__ import print_function
 #source_creation.py
 #purpose: to add new star sources, disks and bulge stars
 #import parameters as par
@@ -15,6 +16,8 @@ import astropy.units as units
 import astropy.constants as constants
 from helpers import *
 
+
+
 class Sed_Bins:
     def __init__(self,mass,metals,age,fsps_zmet):
         self.mass = mass
@@ -26,7 +29,7 @@ class Sed_Bins:
 
 def add_super_simple_sed(stars_list,diskstars_list,bulgestars_list,m,lum,temp):
 
-    print 'entering add_super_simple_sed function in source_creation'
+    print ('entering add_super_simple_sed function in source_creation')
 
     nstars = len(stars_list)
     nstars_disk = len(diskstars_list)
@@ -54,7 +57,7 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
     
         
     nstars = len(stars_list)
-    print 'adding new stars to the grid'
+    print ('adding new stars to the grid')
     
     totallum_newstars = 0.
 
@@ -84,7 +87,7 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
                            
 
 
-    print '[source_creation/add_newstars:] totallum_newstars = ',totallum_newstars
+    print ('[source_creation/add_newstars:] totallum_newstars = ',totallum_newstars)
         
     if cfg.par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
             
@@ -93,7 +96,7 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
     return m
 
 def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m):
-    print 'Non-Cosmological Simulation: Adding Disk and Bulge Stars:'
+    print ('Non-Cosmological Simulation: Adding Disk and Bulge Stars:')
     
 
     nu = stellar_nu[:]
@@ -118,7 +121,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
         fnu = fnu[::-1]
 
 
-        print 'adding disk stars to the grid: adding as a point source collection'   
+        print ('adding disk stars to the grid: adding as a point source collection')
         disksource = m.add_point_source_collection()
             
         
@@ -136,7 +139,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
         
         disksource.spectrum = (nu,fnu)
     
-        print '[source_creation/add_bulge_disk_stars:] totallum_disktars = ',disksource.luminosity[0]
+        print ('[source_creation/add_bulge_disk_stars:] totallum_disktars = ',disksource.luminosity[0])
     
 
 
@@ -148,7 +151,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
 
 
 
-        print 'adding bulge stars to the grid: adding as a point source collection'
+        print ('adding bulge stars to the grid: adding as a point source collection')
         bulgesource = m.add_point_source_collection()
         bulge_lum = np.absolute(np.trapz(fnu,x=nu))*bulgestars_list[0].mass/constants.M_sun.cgs.value
         bulge_lum *= constants.L_sun.cgs.value
@@ -159,7 +162,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
         bulgesource.position=bulge_pos
         bulgesource.spectrum = (nu,fnu)
         
-        print '[source_creation/add_bulge_disk_stars:] totallum_bulgetars = ',bulgesource.luminosity[0]
+        print ('[source_creation/add_bulge_disk_stars:] totallum_bulgetars = ',bulgesource.luminosity[0])
 
     
 
@@ -229,9 +232,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp):
         mass_bins = 10.**mass_bins
         
 
-    print 'mass_bins = ',mass_bins
-    print 'metal_bins = ',metal_bins
-    print 'age_bins = ',age_bins
+    print ('mass_bins = ',mass_bins)
+    print ('metal_bins = ',metal_bins)
+    print ('age_bins = ',age_bins)
 
 
     #has_stellar_mass is a 3D boolean array that's [wz,wa,wm] big and
@@ -271,7 +274,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp):
 
    
     
-    print 'assigning stars to SED bins'
+    print ('assigning stars to SED bins')
     sed_bins_list=[]
     sed_bins_list_has_stellar_mass = []
 
@@ -295,8 +298,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp):
     #to re-create the SED for each of these bins - rather, we can just
     #calculate the SED for the bins that have any actual stellar mass.
             
-    print 'Running SPS for Binned SEDs'
-    print 'calculating the SEDs for ',len(sed_bins_list_has_stellar_mass),' bins'
+    print ('Running SPS for Binned SEDs')
+    print ('calculating the SEDs for ',len(sed_bins_list_has_stellar_mass),' bins')
     binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,diskstars_list,bulgestars_list,sp)
 
 
@@ -343,7 +346,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp):
     #these
 
 
-    print 'adding point source collections'
+    print ('adding point source collections')
     t1=datetime.now()
 
 
@@ -408,8 +411,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp):
     m.set_sample_sources_evenly(True)
 
     t2=datetime.now()
-    print '[source_creation/add_binned_seds:] Execution time for point source collection adding = '+str(t2-t1)
-    print '[source_creation/add_binned_seds:] Total Luminosity of point source collection is: ',totallum
+    print ('[source_creation/add_binned_seds:] Execution time for point source collection adding = '+str(t2-t1))
+    print ('[source_creation/add_binned_seds:] Total Luminosity of point source collection is: ',totallum)
 
 
     return m
