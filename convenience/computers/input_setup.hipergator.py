@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 #script intended to set up the slurm files and model*.py files
 #assuming caesar have been written out to an npz file, and that the
 #system we're running on is the University of Florida's HiPerGator2 cluster
@@ -13,8 +15,8 @@ import caesar
 #shell scripting
 nnodes=2
 
-model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m25n256lch/'
-hydro_dir = '/ufrc/narayanan/pg3552/gizmo/m25n256_best/output_ngrackle_lgx5/'
+model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa_zooms/m50n512/z0/halo401_dm2_ml11_nq/george_seds/cmb_25kpc/CF/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa_zooms/m50n512/z0/halo401_dm2_ml11_nq/output/'
 
 #model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/MassiveFIRE/B100_N512_M3e13_TL00004_baryon_toz2_HR_9915/smg_survey/'
 #hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/MassiveFIRE/SMGs/B100_N512_M3e13_TL00004_baryon_toz2_HR_9915/output/'
@@ -61,7 +63,7 @@ for snap in data['snaps']:
     #endsnap = np.max(data['snaps'])
 
     cmd = "./setup_all_cluster.hipergator.sh "+str(nnodes)+' '+str(startsnap)+' '+str(endsnap)+' '+model_dir+' '+hydro_dir+' '+model_run_name+' '+str(COSMOFLAG)+' '+model_dir_remote+' '+hydro_dir_remote
-    print cmd
+    print(cmd)
     call(cmd,shell=True)
 
 
@@ -91,7 +93,7 @@ for snap in data['snaps']:
             TCMB = 2.73*(1.+redshift)
         #append positions
             modelfile = model_dir+'/model_'+str(i)+'.py'
-            print 'appending coordinates to: ', modelfile
+            print('appending coordinates to: ', modelfile)
             with open(modelfile,"a") as myfile:
                 myfile.write("\n\n")
                 myfile.write("#===============================================\n")
