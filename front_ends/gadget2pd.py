@@ -78,6 +78,9 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     def _metalsmoothedmasses(field,data):
         return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
 
+    def _dustmass(field_data):
+        return (data["PartType0","DustMass"].in_units("Msun").value)
+
     def _stellarages(field,data):
         ad = data.ds.all_data()
         if cfg.par.COSMOFLAG == False:
@@ -214,7 +217,10 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
                                                   ds.field_info)
     ds.add_field(('metalsmoothedmasses'),function=_metalsmoothedmasses,units='code_metallicity',particle_type=True)
 
-
+    #get the dust mass
+    
+    #if  ('PartType0', 'Dust_Masses') in ds.derived_field_list:
+    #    ds.add_field(('dustmass'),function=_dustmass,units='Msun',particle_type=True)
 
     ds.add_field(('starmasses'),function=_starmasses,units='g',particle_type=True)
     ds.add_field(('starcoordinates'),function=_starcoordinates,units='cm',particle_type=True)

@@ -6,6 +6,25 @@ from particle_smooth_yt import yt_smooth
 
 
 
+def manual(pf,refined):
+    wTrue = np.where(np.array(refined) == True)[0]
+    wFalse = np.where(np.array(refined) == False)[0]
+    metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
+    ad = pf.all_data()
+    pf.add_deposited_particle_field(("PartType0","Dust_Masses"),"sum")
+
+    #it seems like the dust masses aren't currently read in with a
+    #mass in yt -- this may be fixed downstream
+    smoothed_dust_masses = pf.arr(ad[('deposit', 'PartType0_sum_Dust_Masses')],'code_mass')
+    dust_to_gas_ratio = smoothed_dust_masses.in_units('g')/masses_smoothed
+    #masses_smoothed can be 0 at some places; this will make dtg nan
+    #out even though it would eventually get multiplied to 0 when we
+    #multiply by density smoothed.  So, to be stable we nan_to_num it.
+    dust_to_gas_ratio = np.nan_to_num(dust_to_gas_ratio)
+    dust_smoothed = np.zeros(len(refined))
+    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
+    return dust_smoothed
+
 def dtm_grid(pf,refined):
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
@@ -17,6 +36,7 @@ def dtm_grid(pf,refined):
     print ('[grid_construction/dust_grid_gen/dtm_grid: ] len(metallicity_smoothed) = ',len(metallicity_smoothed))
     
     dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
+
 
     return dust_smoothed
 

@@ -14,7 +14,7 @@ from yt.mods import *
 from yt.geometry.oct_container import OctreeContainer
 from yt.geometry.selection_routines import AlwaysSelector
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
-from dust_grid_gen import dtm_grid,remy_ruyer
+from dust_grid_gen import dtm_grid,remy_ruyer,manual
 
 import astropy.constants as constants
 
@@ -73,7 +73,7 @@ def yt_octree_generate(fname,field_add):
     #PLOTTING DIAGNOSTIC PROJECTION PLOTS
     #---------------------------------------------------------------
     
-    proj_plots(pf)
+    #proj_plots(pf)
 
 
 
@@ -134,13 +134,14 @@ def yt_octree_generate(fname,field_add):
 
     if cfg.par.CONSTANT_DUST_GRID == False: 
 
+        dust_smoothed_manual = manual(pf,refined)
         dust_smoothed_dtm = dtm_grid(pf,refined)
         dust_smoothed_remy_ruyer = remy_ruyer(pf,refined)
-
+        
         dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer)
 
         #crash the code if the parameter choice for dust grid type isn't in the hard coded valid list below
-        dust_grid_type_list = ['dtm','rr']
+        dust_grid_type_list = ['dtm','rr','manual']
         try:
             dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
         except ValueError as e:
@@ -150,6 +151,7 @@ def yt_octree_generate(fname,field_add):
 
         if cfg.par.dust_grid_type == 'dtm': dust_smoothed = dust_smoothed_dtm
         if cfg.par.dust_grid_type == 'rr': dust_smoothed = dust_smoothed_remy_ruyer
+        if cfg.par.dust_grid_type == 'manual': dust_smoothed = dust_smoothed_manual
 
 
     else:
