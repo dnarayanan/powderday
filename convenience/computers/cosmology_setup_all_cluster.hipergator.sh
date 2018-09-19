@@ -27,6 +27,7 @@ ypos=$9
 zpos=${10}
 galaxy=${11}
 snap=${12}
+tcmb=${13}
 
 echo "processing model file for galaxy,snapshot:  $galaxy,$snap"
 
@@ -35,6 +36,10 @@ echo "processing model file for galaxy,snapshot:  $galaxy,$snap"
 rm -f *.pyc
 
 #set up the model_**.py file
+echo "setting up the output directory in case it doesnt already exist"
+echo "snap is: $snap"
+echo "model dir is: $model_dir"
+mkdir $model_dir
 
 filem="$model_dir/snap${snap}_galaxy${galaxy}.py"
 echo "writing to $filem"
@@ -98,7 +103,11 @@ echo "x_cent = ${xpos}" >>$filem
 echo "y_cent = ${ypos}" >>$filem
 echo "z_cent = ${zpos}" >>$filem
 
-
+echo -e "\n\n" >>$filem
+echo "#===============================================" >>$filem
+echo "#CMB INFORMATION" >>$filem
+echo "#===============================================" >>$filem
+echo "TCMB = ${tcmb}" >>$filem
 
 echo "writing slurm submission master script file"
 qsubfile="$model_dir/master.snap${snap}.job"

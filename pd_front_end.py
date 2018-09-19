@@ -4,6 +4,7 @@
 #IMPORT STATEMENTS
 #=========================================================
 from __future__ import print_function
+import pdb,ipdb
 import sys
 script,pardir,parfile,modelfile = sys.argv
 import numpy as np
@@ -11,7 +12,7 @@ import scipy.interpolate
 import scipy.ndimage
 import os.path
 import copy
-import pdb,ipdb
+
 
 from hyperion.model import Model
 import matplotlib as mpl
@@ -52,6 +53,8 @@ import backwards_compatibility as bc
 from m_control_tools import *
 from image_processing import add_transmission_filters
 
+
+
 import fsps
 
 
@@ -59,7 +62,6 @@ import fsps
 #=========================================================
 #CHECK FOR THE EXISTENCE OF A FEW CRUCIAL FILES FIRST
 #=========================================================
-
 eh.file_exist(model.hydro_dir+model.Gadget_snap_name)
 eh.file_exist(par.dustdir+par.dustfile)
 

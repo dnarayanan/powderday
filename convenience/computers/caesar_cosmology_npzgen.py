@@ -3,17 +3,17 @@
 #purpose: to read in a series of caesar files for a cosmology run and
 #write an npz file that has dictionaries for the top N galaxies and
 #their positions
-
+from __future__ import print_function
 import numpy as np
 import yt
 import caesar
 import ipdb
 from glob2 import glob
 
-directory = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/m25n512/fh_qr/output/'
+directory = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/simba/m50n512/Groups//'
 NGALAXIES_MAX = 10000
 TESTING = False
-outfile = '/ufrc/narayanan/desika.narayanan/pd_runs/mufasa/m25n512/fh_qr/quick_look_attenuation/mufasa_m25n512.galaxies_pos_for_pd.npz'
+outfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m50n512/simba_m50n512.galaxies_pos_for_pd.npz'
 
 
 
