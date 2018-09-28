@@ -10,7 +10,7 @@ import caesar
 import ipdb
 from glob2 import glob
 
-directory = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/simba/m50n512/Groups//'
+directory = '/ufrc/narayanan/desika.narayanan/gizmo_runs/simba/m50n512/output/Groups//'
 NGALAXIES_MAX = 10000
 TESTING = False
 outfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m50n512/simba_m50n512.galaxies_pos_for_pd.npz'
@@ -36,9 +36,8 @@ for file in MEMBERS:
     else:
         NGALAXIES = NGALAXIES_MAX
 
-
-    snapnum = file[file.find('.hdf5')-3:file.find('.hdf5')]
-
+    #this gets snaps in 3 digit format
+    snapnum = file[file.find('caesar_')+8:file.find('_z')]
     ngalaxies['snap'+snapnum] = NGALAXIES
     
    

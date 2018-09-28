@@ -133,12 +133,8 @@ def yt_octree_generate(fname,field_add):
 
 
     if cfg.par.CONSTANT_DUST_GRID == False: 
-
-        dust_smoothed_manual = manual(pf,refined)
-        dust_smoothed_dtm = dtm_grid(pf,refined)
-        dust_smoothed_remy_ruyer = remy_ruyer(pf,refined)
         
-        dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer)
+        #dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer)
 
         #crash the code if the parameter choice for dust grid type isn't in the hard coded valid list below
         dust_grid_type_list = ['dtm','rr','manual']
@@ -149,9 +145,17 @@ def yt_octree_generate(fname,field_add):
             sys.exit()
 
 
-        if cfg.par.dust_grid_type == 'dtm': dust_smoothed = dust_smoothed_dtm
-        if cfg.par.dust_grid_type == 'rr': dust_smoothed = dust_smoothed_remy_ruyer
-        if cfg.par.dust_grid_type == 'manual': dust_smoothed = dust_smoothed_manual
+        if cfg.par.dust_grid_type == 'dtm': 
+            dust_smoothed_dtm = dtm_grid(pf,refined)
+            dust_smoothed = dust_smoothed_dtm
+
+        if cfg.par.dust_grid_type == 'rr': 
+            dust_smoothed_remy_ruyer = remy_ruyer(pf,refined)
+            dust_smoothed = dust_smoothed_remy_ruyer
+
+        if cfg.par.dust_grid_type == 'manual': 
+            dust_smoothed_manual = manual(pf,refined)
+            dust_smoothed = dust_smoothed_manual
 
 
     else:

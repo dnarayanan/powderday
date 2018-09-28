@@ -15,12 +15,12 @@ from str_snap import str_snap
 #shell scripting
 nnodes=1
 
-startsnap = 80
-endsnap = 81
+startsnap = 150
+endsnap = 152
 npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m50n512/simba_m50n512.galaxies_pos_for_pd.npz'
 
-model_dir = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m50n512//manual/snap080'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/mufasa/simba/m50n512/output'
+model_dir_base = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m50n512//NSF_AAG_2018_BPT/lines_off/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/simba/m50n512/output'
 
 hydro_outputfile = '/ufrc/narayanan/pg3552/gizmo/output_time/output_m50.txt'
 
@@ -28,7 +28,6 @@ hydro_outputfile = '/ufrc/narayanan/pg3552/gizmo/output_time/output_m50.txt'
 #parameters files lead to differnet paths (for a different computer),
 #put those paths here.  otherweise, set these equal to whatever is in
 #model_dir and hydro_dir
-model_dir_remote = model_dir
 hydro_dir_remote = hydro_dir
 
 model_run_name='simba_m50'
@@ -62,6 +61,9 @@ for snap in range(len(scalefactor)):
 #first call the initial setup_all_cluster shell
 
 for snap in range(startsnap,endsnap):
+
+    model_dir = model_dir_base+'/snap'+str_snap(snap)
+    model_dir_remote = model_dir
     
     redshift = snaps_to_redshift[str(snap)]
     tcmb = 2.73*(1.+redshift)
