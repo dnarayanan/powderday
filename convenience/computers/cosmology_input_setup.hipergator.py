@@ -15,11 +15,11 @@ from str_snap import str_snap
 #shell scripting
 nnodes=1
 
-startsnap = 150
-endsnap = 152
+startsnap = 25
+endsnap = 86
 npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m50n512/simba_m50n512.galaxies_pos_for_pd.npz'
 
-model_dir_base = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m50n512//NSF_AAG_2018_BPT/lines_off/'
+model_dir_base = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m50n512/manual_CF/'
 hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/simba/m50n512/output'
 
 hydro_outputfile = '/ufrc/narayanan/pg3552/gizmo/output_time/output_m50.txt'

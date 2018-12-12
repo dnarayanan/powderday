@@ -10,10 +10,10 @@ import caesar
 import ipdb
 from glob2 import glob
 
-directory = '/ufrc/narayanan/desika.narayanan/gizmo_runs/simba/m50n512/output/Groups//'
+directory = '/ufrc/narayanan/desika.narayanan/gizmo_runs/simba/m25n512/output/Groups//'
 NGALAXIES_MAX = 10000
 TESTING = False
-outfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m50n512/simba_m50n512.galaxies_pos_for_pd.npz'
+outfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/simba_m25n512.galaxies_pos_for_pd.npz'
 
 
 
@@ -29,21 +29,29 @@ if TESTING:MEMBERS=[MEMBERS[-1]]
 
 
 for file in MEMBERS:
-    obj = caesar.load(file)
-
-    if obj.ngalaxies < NGALAXIES_MAX:
-        NGALAXIES = obj.ngalaxies
-    else:
-        NGALAXIES = NGALAXIES_MAX
 
     #this gets snaps in 3 digit format
     snapnum = file[file.find('caesar_')+8:file.find('_z')]
-    ngalaxies['snap'+snapnum] = NGALAXIES
+
+    #this try/except is in case the caesar was run on snaps so early there are no galaxies
+    try:
+        obj = caesar.load(file)
+    
+    
+        if obj.ngalaxies < NGALAXIES_MAX:
+            NGALAXIES = obj.ngalaxies
+        else:
+            NGALAXIES = NGALAXIES_MAX
+
+        #this gets snaps in 3 digit format
+        
+        ngalaxies['snap'+snapnum] = NGALAXIES
     
    
-    for nh in range(NGALAXIES):
-        pos['galaxy'+str(nh)]['snap'+snapnum] = obj.galaxies[nh].pos.in_units('code_length').value
+        for nh in range(NGALAXIES):
+            pos['galaxy'+str(nh)]['snap'+snapnum] = obj.galaxies[nh].pos.in_units('code_length').value
 
-    
+    except AttributeError as e:
+        pos['galaxy0']['snap'+snapnum] = np.asarray([-1,-1,-1])
     
 np.savez(outfile,ngalaxies=ngalaxies,pos=pos)
