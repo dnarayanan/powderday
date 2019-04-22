@@ -111,6 +111,16 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
     print ('[SED_gen/star_list_gen:] Manually increasing the newstar metallicities by: ',cfg.par.Z_init)
     metals += cfg.par.Z_init
 
+    #ADVANCED FEATURE - if force_stellar_metallcities or force_stellar_ages are set, then we set to those values
+    if cfg.par.FORCE_STELLAR_AGES:
+        print ("[SED_GEN/stars_list_gen:]  FORCE_STELLAR_AGES is set to True: setting all stars to age: %e Gyr"%cfg.par.FORCE_STELLAR_AGES_VALUE)
+        age = np.repeat(cfg.par.FORCE_STELLAR_AGES_VALUE,nstars)
+
+    if cfg.par.FORCE_STELLAR_METALLICITIES:
+        print ("[SED_GEN/stars_list_gen:]  FORCE_STELLAR_METALLICITIES is set to True: setting all stars to metallicity: %e "%cfg.par.FORCE_STELLAR_METALLICITIES_VALUE)
+        metals = np.repeat(cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,nstars)
+
+
 
     zmet = fsps_metallicity_interpolate(metals)
     #mwd(zmet,mass,'zmet_distribution.png')
@@ -229,7 +239,6 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
 def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
 
-    
     #NOTE this part is just for the gadget simulations - this will
     #eventually become obviated as it gets passed into a function to
     #populate the stars_list with objects as we start to feed in new
@@ -262,17 +271,19 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
     nu = 1.e8*constants.c.cgs.value/spec[0]
     nlam = len(nu)
 
-
+    nprocesses = np.min([cfg.par.n_processes,len(stars_list)]) #the pool.map will barf if there are less star bins than process threads
 
     #initialize the process pool and build the chunks
-    p = Pool(processes = cfg.par.n_processes)
-    nchunks = cfg.par.n_processes
+    p = Pool(processes = nprocesses)
+    nchunks = nprocesses
 
 
     chunk_start_indices = []
     chunk_start_indices.append(0) #the start index is obviously 0
 
-    delta_chunk_indices = int(nstars / nchunks)
+
+    #this should just be int(nstars/nchunks) but in case nstars < nchunks, we need to ensure that this is at least  1
+    delta_chunk_indices = np.max([int(nstars / nchunks),1]) 
     print ('delta_chunk_indices = ',delta_chunk_indices)
     
     for n in range(1,nchunks):
