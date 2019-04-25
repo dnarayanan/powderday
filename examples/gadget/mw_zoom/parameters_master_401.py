@@ -18,10 +18,10 @@ n_MPI_processes = 1 #number oF MPI processes to run
 #===============================================
 #RT INFORMATION
 #===============================================
-n_photons_initial = 1.e6
-n_photons_imaging = 1.e6
-n_photons_raytracing_sources = 1.e6
-n_photons_raytracing_dust = 1.e6
+n_photons_initial = 1.e5
+n_photons_imaging = 1.e5
+n_photons_raytracing_sources = 1.e5
+n_photons_raytracing_dust = 1.e5
 
 FORCE_RANDOM_SEED = False
 seed = -12345 #has to be an int, and negative.
@@ -32,8 +32,8 @@ seed = -12345 #has to be an int, and negative.
 dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
-dust_grid_type = 'dtm' #needs to be in ['dtm','rr']
-dusttometals_ratio = 0.4
+dust_grid_type = 'dtm' #needs to be in ['dtm','rr','manual']
+dusttometals_ratio = 1.e-10
 enforce_energy_range = False #False is the default;  ensures energy conservation
 
 SUBLIMATION = False #do we automatically kill dust grains above the
@@ -56,7 +56,7 @@ FORCE_BINNING = True #force SED binning
 COSMOFLAG = True  #is this a cosmological simulation?
 
 imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
-pagb = 1 #weight given to post agb stars# 1 is the default
+pagb = 0 #weight given to post agb stars# 1 is the default
 add_neb_emission = False #add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
 gas_logu = -2 #gas ionization parameter for HII regions; only relevant
               #if add_neb_emission = True default = -2
@@ -94,7 +94,7 @@ bulge_stars_metals = 19 #in fsps metallicity units
 #>N_METALLICITY_BINS*N_STELLAR_AGE_BINS) stars; this is necessary for
 #reduction of memory load; see manual for details.
 
-N_STELLAR_AGE_BINS = 25
+N_STELLAR_AGE_BINS = 100
 
 
 metallicity_legend= "/home/desika.narayanan/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
@@ -166,3 +166,9 @@ N_MASS_BINS = 1 #this is really just a place holder that exists in
                 #some loops to be able to insert some code downstream
                 #for spatially varying IMFs.  right now for speed best
                 #to set to 1 as it doesn't actually do anything.
+
+FORCE_STELLAR_AGES = True
+FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
+
+FORCE_STELLAR_METALLICITIES = True
+FORCE_STELLAR_METALLICITIES_VALUE = 0.012 #absolute values (so 0.013 ~ solar)

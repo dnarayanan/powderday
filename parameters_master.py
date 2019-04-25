@@ -101,6 +101,12 @@ N_STELLAR_AGE_BINS = 100
 
 metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
 
+#===============================================
+#BLACK HOLE STUFF
+#===============================================
+
+BH_SED = True
+BH_eta = 0.1 #bhluminosity = BH_eta * mdot * c**2.
 
 
 #===============================================

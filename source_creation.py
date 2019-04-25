@@ -433,6 +433,7 @@ def wavelength_compress(nu,fnu,df_nu):
     dum_nu = compressed_nu*units.Hz
     dum_lam = constants.c.cgs/dum_nu
     dum_lam = dum_lam.to(units.angstrom)
+
     wll = np.where(dum_lam.value >= 912)[0] #where are lambda is above the lyman limit
     nu = nu[wll]
     fnu = fnu[wll]
@@ -442,7 +443,11 @@ def wavelength_compress(nu,fnu,df_nu):
 
 
 
-def BH_source_add(m,pf,df_nu):
+def BH_source_add(m,pf,df_nu,boost):
+
+    print("--------------------------------\n")
+    print("Adding Black Holes to Source List\n")
+    print("--------------------------------\n")
  
     ad = pf.all_data()
     nholes = ad["bhsed"].shape[0]
@@ -450,22 +455,48 @@ def BH_source_add(m,pf,df_nu):
     if ad["bhluminosity"][0].value != None:
 
         for i in range(nholes):
-            
-            nu = ad["bhnu"].value
-            fnu = ad["bhsed"][i,:].value.tolist()
-            
-            nu,fnu = wavelength_compress(nu,fnu,df_nu)
-
-            if i == 0:
-                fnu_compressed = np.zeros([nholes,len(nu)])
-            fnu_compressed[i,:] = fnu
 
 
-            #the tolist gets rid of the array brackets
-            bh = m.add_point_source(luminosity = ad["bhluminosity"][i].value.tolist(), 
-                                    spectrum = (nu,fnu),
-                                    position = ad["bhcoordinates"][i,:].value.tolist())
-            
-        savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
-        np.savez(savefile,nu = nu,fnu = fnu_compressed)
+            #don't create a BH luminsoity source if there's no luminosity since the SED will be nans/infs
+            if ad["bhluminosity"][i].value > 0 :
+
+                nu = ad["bhnu"].value
+                fnu = ad["bhsed"][i,:].value#.tolist()
+                nu,fnu = wavelength_compress(nu,fnu,df_nu)
+
+                if i == 0:
+                    fnu_compressed = np.zeros([nholes,len(nu)])
+                fnu_compressed[i,:] = fnu
+
+
+                #since the BH was added in a front end, we don't know
+                #if the hole is in the actual cut out region of the yt
+                #dataset.  so we need to filter out any holes that
+                #might not be in the simulation domain.
+                
+                if ((ad["bhcoordinates"][i,0].in_units('kpc') <  (pf.domain_center[0].in_units('kpc')+(0.5*pf.domain_width[0].in_units('kpc'))))
+                    and
+                    (ad["bhcoordinates"][i,0].in_units('kpc') >  (pf.domain_center[0].in_units('kpc')-(0.5*pf.domain_width[0].in_units('kpc'))))
+                    and
+                    (ad["bhcoordinates"][i,1].in_units('kpc') <  (pf.domain_center[1].in_units('kpc')+(0.5*pf.domain_width[1].in_units('kpc'))))
+                    and
+                    (ad["bhcoordinates"][i,1].in_units('kpc') >  (pf.domain_center[1].in_units('kpc')-(0.5*pf.domain_width[1].in_units('kpc'))))
+                    and
+                    (ad["bhcoordinates"][i,2].in_units('kpc') <  (pf.domain_center[2].in_units('kpc')+(0.5*pf.domain_width[2].in_units('kpc'))))
+                    and
+                    (ad["bhcoordinates"][i,2].in_units('kpc') >  (pf.domain_center[2].in_units('kpc')-(0.5*pf.domain_width[2].in_units('kpc'))))
+                ):
+
+                    print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
+                #the tolist gets rid of the array brackets
+                    bh = m.add_point_source(luminosity = ad["bhluminosity"][i].value.tolist(), 
+                                            spectrum = (nu,fnu),
+                                            position = (ad["bhcoordinates"][i,:].in_units('cm').value-boost).tolist())
+                else:
+                    print('black hole #%d is not in the domain: rejecting adding it to the source list'%i)
+
+
+
+        #savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
+        #np.savez(savefile,nu = nu,fnu = fnu_compressed)
         

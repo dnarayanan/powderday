@@ -137,9 +137,9 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
             
                 mdot[i] = data.ds.quan(mdot[i],"code_mass/code_time")
         '''
-        #assume eta = 10%
+
         c = yt.utilities.physical_constants.speed_of_light_cgs
-        bhluminosity = (0.1 * mdot * c**2.).in_units("erg/s")
+        bhluminosity = (cfg.par.BH_eta * mdot * c**2.).in_units("erg/s")
         return bhluminosity
         
 

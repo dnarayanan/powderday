@@ -109,8 +109,8 @@ def agn_spectrum(log_L_bol,SLOAN_KEY=0,MODEL_SPECTRUM_KEY=0):
     print (";;//   nu = -4.00  ::  hard X-ray (integrated luminosity from 2-10  keV)  \n")
     print (";;//         \n")
     
-    for i_nu in np.arange(N_nu):
-        print (nu_vec[i_nu],l_band_vec[i_nu],l_band_vec[i_nu]+to_cgs)
+   # for i_nu in np.arange(N_nu):
+   #     print (nu_vec[i_nu],l_band_vec[i_nu],l_band_vec[i_nu]+to_cgs)
        
    
     return nu_vec,l_band_vec+to_cgs

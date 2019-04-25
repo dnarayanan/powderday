@@ -9,7 +9,7 @@ import config as cfg
 from astropy.cosmology import Planck13
 import astropy.units as u
 from front_ends.redshift_multithread import *
-
+from agn_spectrum import *
 
 
 def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
@@ -134,13 +134,63 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         age = data.ds.arr(age,'Gyr')
         return age
         
-    #load the ds
+    def _bhluminosity(field,data):
+        ad = data.ds.all_data()
+        mdot = ad[("PartType5","BH_Mdot")]
+        #give it a unit since usually these are dimensionless in yt
+        
+        mdot = data.ds.arr(mdot,"code_mass/code_time")
+
+        
+        c = yt.utilities.physical_constants.speed_of_light_cgs
+        bhluminosity = (cfg.par.BH_eta * mdot * c**2.).in_units("erg/s")
+        return bhluminosity
+        
+    def _bhcoordinates(field,data):
+        return data["PartType5","Coordinates"]
+
+
+    def _bhsed_nu(field,data):
+        bhluminosity = data["bhluminosity"]
+        log_lum_lsun = np.log10(bhluminosity[0].in_units("Lsun"))
+        nu,bhlum = agn_spectrum(log_lum_lsun)
+        #the last 4 numbers aren't part of the SED
+        nu = nu[0:-4]
+        nu = 10.**nu
+        nu = yt.YTArray(nu,"Hz")
+        
+        return nu
+        
+    def _bhsed_sed(field,data):
+        bhluminosity = data["bhluminosity"]
+        nholes = len(bhluminosity)
+        
+        #get len of nu just for the 0th hole so we know how long the vector is
+        log_lum_lsun = np.log10(bhluminosity[0].in_units("Lsun"))
+        nu,l_band_vec = agn_spectrum(log_lum_lsun)
+        nu = nu[0:-4]
+        n_nu = len(nu)
+        
+        bh_sed = np.zeros([nholes,n_nu])
+
+        for i in range(nholes):
+            
+            log_lum_lsun = np.log10(bhluminosity[i].in_units("Lsun"))
+            nu,l_band_vec = agn_spectrum(log_lum_lsun)
+            
+            l_band_vec = 10.**l_band_vec
+            l_band_vec = l_band_vec[0:-4]
+            for l in range(len(l_band_vec)):
+                l_band_vec[l] = data.ds.quan(l_band_vec[l],"erg/s")
+
+            bh_sed[i,:] = l_band_vec
+        bh_sed = yt.YTArray(bh_sed,"erg/s")
+        return bh_sed
+
+   #load the ds
     if fname != None:
         ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
         ds.index
-
-
-
 
     #------------------
     #Munich Group Gadget Metallicity Fields based on Cecila Scannapieco's Metallicity Implementation
@@ -196,6 +246,22 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
     ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
     
+
+    #optionally add BH
+    #first see if the keyword even exists (to make it backwards compatible)
+    try:
+        cfg.par.BH_SED
+    except:
+        cfg.par.BH_SED  = None
+
+    if cfg.par.BH_SED == True:
+
+        ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
+        ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
+        ds.add_field(("bhnu"),function=_bhsed_nu,units='Hz',particle_type=True)
+        ds.add_field(("bhsed"),function=_bhsed_sed,units="erg/s",particle_type=True)
+
+
     if starages == True:
         ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
 

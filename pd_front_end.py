@@ -20,7 +20,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 from hyperion.model import ModelOutput
 import h5py
-from analytics import stellar_sed_write,dump_data
+from analytics import stellar_sed_write,dump_data,SKIRT_data_dump
 
 import yt
 from yt.units.yt_array import YTQuantity
@@ -123,7 +123,7 @@ nstars = len(stars_list)
 
 from source_creation import add_newstars,add_binned_seds,BH_source_add
 
-if cfg.par.BH_SED == True: BH_source_add(m,pf,df_nu)
+if cfg.par.BH_SED == True: BH_source_add(m,pf,df_nu,boost)
 
 
 #figure out N_METAL_BINS:
@@ -145,7 +145,12 @@ else:
 
 
 #save SEDs
-if par.STELLAR_SED_WRITE == True: stellar_sed_write(m)
+#stars and black holes can't both be in the sim and write stellar SEDs to a file becuase they have different wavelength sizes
+if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED): 
+    stellar_sed_write(m)
+
+#provisional and not tested or implemented yet
+SKIRT_data_dump(pf,m,stars_list,10)
 
 
 nstars = len(stars_list)

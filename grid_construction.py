@@ -199,7 +199,6 @@ def stars_coordinate_boost(star_list,boost):
         star_list[i].positions[0] -= boost[0]
         star_list[i].positions[1] -= boost[1]
         star_list[i].positions[2] -= boost[2]
-        
     return star_list
 
 
