@@ -452,10 +452,18 @@ def BH_source_add(m,pf,df_nu,boost):
     ad = pf.all_data()
     nholes = ad["bhsed"].shape[0]
 
+    
     if ad["bhluminosity"][0].value != None:
 
-        for i in range(nholes):
+        #temporary wavelength compress just to get the length of the
+        #compressed nu for a master array
+        dumnu,dumfnu = wavelength_compress(ad["bhnu"].value,ad["bhsed"][0,:].value,df_nu)
 
+        master_bh_fnu = np.zeros([nholes,len(dumnu)])
+        
+
+        for i in range(nholes):
+            
 
             #don't create a BH luminsoity source if there's no luminosity since the SED will be nans/infs
             if ad["bhluminosity"][i].value > 0 :
@@ -463,6 +471,8 @@ def BH_source_add(m,pf,df_nu,boost):
                 nu = ad["bhnu"].value
                 fnu = ad["bhsed"][i,:].value#.tolist()
                 nu,fnu = wavelength_compress(nu,fnu,df_nu)
+
+                master_bh_fnu[i,:] = fnu
 
                 if i == 0:
                     fnu_compressed = np.zeros([nholes,len(nu)])
@@ -497,6 +507,6 @@ def BH_source_add(m,pf,df_nu,boost):
 
 
 
-        #savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
-        #np.savez(savefile,nu = nu,fnu = fnu_compressed)
-        
+    savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
+    np.savez(savefile,nu = nu,fnu = master_bh_fnu,luminosity = ad["bhluminosity"].value)
+    
