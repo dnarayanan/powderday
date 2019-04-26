@@ -85,7 +85,8 @@ def dump_cell_info(refined,fc1,fw1,xmin,xmax,ymin,ymax,zmin,zmax):
 
 def dump_data(ad,model):
 
-    particle_fh2 = ad[('PartType0', 'FractionH2')]
+    try: particle_fh2 = ad[('PartType0', 'FractionH2')]
+    except: particle_fh2 = np.zeros(len(ad[('PartType0','Masses')]))
     particle_fh1 = np.ones(len(particle_fh2))-particle_fh2
     particle_gas_mass = ad[('PartType0','Masses')].in_units('Msun')
     particle_star_mass = ad[('PartType4','Masses')].in_units('Msun')
@@ -106,7 +107,7 @@ def dump_data(ad,model):
 
 
     try: outfile = cfg.model.PD_output_dir+"grid_physical_properties."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".npz"
-    except NameError:
+    except:
         outfile = cfg.model.PD_output_dir+"grid_physical_properties."+cfg.model.snapnum_str+".npz"
 
     np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,grid_star_metallicity = grid_star_metallicity,tdust=tdust)
@@ -126,3 +127,31 @@ def dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer):
     ax.set_xlabel('dust density')
     ax.set_ylabel('N')
     fig.savefig(cfg.model.PD_output_dir+'dust_density.'+cfg.model.snapnum_str+'.png',dpi=300)
+
+def SKIRT_data_dump(pf,m,stars_list,hsml_in_pc):
+
+    #create stars file.  this assumes SI units for SKIRT
+    stars_pos_x = [pf.quan(stars.positions[0],'code_length').in_units('pc').value for stars in stars_list]
+    stars_pos_y = [pf.quan(stars.positions[1],'code_length').in_units('pc').value for stars in stars_list]
+    stars_pos_z = [pf.quan(stars.positions[2],'code_length').in_units('pc').value for stars in stars_list]
+
+    metallicity = [stars.metals for stars in stars_list]
+
+    masses = [(stars.mass*u.g).to(u.Msun).value for stars in stars_list]
+    age = [(stars.age*u.Gyr).to(u.yr).value for stars in stars_list] #to get in yr
+    hsml = np.repeat(hsml_in_pc,len(age))
+
+
+
+    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".particles.txt"
+    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".particles.txt"
+    np.savetxt(outfile, np.column_stack((stars_pos_x,stars_pos_y,stars_pos_z,hsml,masses,metallicity,age)))
+    
+    #create wavelength grid
+    '''
+    nu = m.sources[0].spectrum["nu"]*u.Hz
+    lam = ((constants.c)/nu).to(u.micron).value
+    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".wavelengths.txt"
+    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".wavelengths.txt"
+    np.savetxt(outfile,lam[::-1])
+    '''
