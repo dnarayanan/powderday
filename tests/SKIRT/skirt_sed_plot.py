@@ -24,23 +24,9 @@ m = ModelOutput(run)
 pd_wav,pd_flux = m.get_sed(inclination='all',aperture=-1,units='ergs/s')
 distance = 1.*u.Mpc.to(u.cm)
 pd_flux *= u.erg/u.s
-pd_flux/=(4.*np.pi*distance**2.)
+pd_flux/=(distance**2.)  #SKIRT seems to say F = L/d^2 instead of F = L/(4*pi*d^2)
 pd_wav *= u.micron
 pd_flux/=pd_wav.to(u.angstrom)
-
-'''
-#plot an fsps sed for 50 Myr and 0.012 metallicity
-sp = fsps.StellarPopulation(sfh=0,logzsol=0.0)
-wave,spec = sp.get_spectrum(tage = 0.05)
-spec *= u.Lsun/u.Hz
-wave *= u.angstrom
-wave = wave.to(u.micron)
-nu = const.c/wave
-spec *= nu
-spec/=wave
-spec = spec.to(u.erg/u.s/u.angstrom)
-spec/=(4.*np.pi*distance**2.)
-'''
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
