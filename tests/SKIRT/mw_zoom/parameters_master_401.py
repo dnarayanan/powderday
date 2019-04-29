@@ -33,7 +33,7 @@ dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of 
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 dust_grid_type = 'dtm' #needs to be in ['dtm','rr','manual']
-dusttometals_ratio = 1.e-10
+dusttometals_ratio = 1.e-10 #what skirt assumes: see http://www.skirt.ugent.be/tutorials/_tutorial_hydro_s_p_h.html (DUST system subheading) 
 enforce_energy_range = False #False is the default;  ensures energy conservation
 
 SUBLIMATION = False #do we automatically kill dust grains above the
@@ -167,8 +167,8 @@ N_MASS_BINS = 1 #this is really just a place holder that exists in
                 #for spatially varying IMFs.  right now for speed best
                 #to set to 1 as it doesn't actually do anything.
 
-FORCE_STELLAR_AGES = True
+FORCE_STELLAR_AGES = False
 FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
 
-FORCE_STELLAR_METALLICITIES = True
+FORCE_STELLAR_METALLICITIES = False
 FORCE_STELLAR_METALLICITIES_VALUE = 0.012 #absolute values (so 0.013 ~ solar)

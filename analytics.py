@@ -128,30 +128,35 @@ def dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer):
     ax.set_ylabel('N')
     fig.savefig(cfg.model.PD_output_dir+'dust_density.'+cfg.model.snapnum_str+'.png',dpi=300)
 
-def SKIRT_data_dump(pf,m,stars_list,hsml_in_pc):
+def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
 
-    #create stars file.  this assumes SI units for SKIRT
-    stars_pos_x = [pf.quan(stars.positions[0],'code_length').in_units('pc').value for stars in stars_list]
-    stars_pos_y = [pf.quan(stars.positions[1],'code_length').in_units('pc').value for stars in stars_list]
-    stars_pos_z = [pf.quan(stars.positions[2],'code_length').in_units('pc').value for stars in stars_list]
+    #create stars file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 
-    metallicity = [stars.metals for stars in stars_list]
+    #ages and metallicities need to come from the stars list in case
+    #we do something in parameters master to change the values
+    smetallicity = [stars.metals for stars in stars_list]
+    sage = [(stars.age*u.Gyr).to(u.yr).value for stars in stars_list] #to get in yr
+    shsml = np.repeat(hsml_in_pc,len(sage))
 
-    masses = [(stars.mass*u.g).to(u.Msun).value for stars in stars_list]
-    age = [(stars.age*u.Gyr).to(u.yr).value for stars in stars_list] #to get in yr
-    hsml = np.repeat(hsml_in_pc,len(age))
-
-
-
+ 
+    spos_x = ad[('PartType4','particle_position')][:,0].in_units('pc').value
+    spos_y = ad[('PartType4','particle_position')][:,1].in_units('pc').value
+    spos_z = ad[('PartType4','particle_position')][:,2].in_units('pc').value
+    smasses = ad[('PartType4', 'Masses')].in_units('Msun').value
+ 
     try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".particles.txt"
     except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".particles.txt"
-    np.savetxt(outfile, np.column_stack((stars_pos_x,stars_pos_y,stars_pos_z,hsml,masses,metallicity,age)))
+    np.savetxt(outfile, np.column_stack((spos_x,spos_y,spos_z,shsml,smasses,smetallicity,sage)))
     
-    #create wavelength grid
-    '''
-    nu = m.sources[0].spectrum["nu"]*u.Hz
-    lam = ((constants.c)/nu).to(u.micron).value
-    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".wavelengths.txt"
-    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".wavelengths.txt"
-    np.savetxt(outfile,lam[::-1])
-    '''
+
+    #create the gas file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
+    gpos_x = ad[('PartType0', 'particle_position')][:,0].in_units('pc').value
+    gpos_y = ad[('PartType0', 'particle_position')][:,1].in_units('pc').value
+    gpos_z = ad[('PartType0', 'particle_position')][:,2].in_units('pc').value
+
+    ghsml = np.repeat(hsml_in_pc,len(gpos_x))
+    gmass = ad[('PartType0', 'Masses')].in_units('Msun').value
+    gmetallicity = ad[('PartType0', 'Metallicity_00')].value
+
+
+                      
