@@ -56,6 +56,7 @@ Contents:
    parameters_description.rst
    algorithm_description.rst
    convenience.rst
+   tests.rst
    referencing.rst 
    troubleshooting.rst
    getting_help.rst
