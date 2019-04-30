@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A SKIRT parameter file © Astronomical Observatory, Ghent University -->
+<skirt-simulation-hierarchy type="MonteCarloSimulation" format="6.1" producer="SKIRT v8.0 (git 96e8be9-dirty built on 19/06/2018 at 09:57:17)" time="2019-04-30T10:01:46.672">
+    <PanMonteCarloSimulation numPackages="1e5" minWeightReduction="1e4" minScattEvents="0" scattBias="0.5" continuousScattering="false">
+        <random type="Random">
+            <Random seed="4357"/>
+        </random>
+        <units type="Units">
+            <ExtragalacticUnits fluxOutputStyle="Wavelength"/>
+        </units>
+        <wavelengthGrid type="PanWavelengthGrid">
+            <NestedLogWavelengthGrid writeWavelengths="true" minWavelengthBaseGrid="0.0912 micron" maxWavelengthBaseGrid="1000 micron" numWavelengthsBaseGrid="75" minWavelengthSubGrid="6 micron" maxWavelengthSubGrid="25 micron" numWavelengthsSubGrid="25"/>
+        </wavelengthGrid>
+
+        <stellarSystem type="StellarSystem">
+            <StellarSystem emissionBias="0.5">
+                <components type="StellarComp">
+                    <SPHStellarComp filename="pd_test/SKIRT.134.stars.particles.txt" importVelocity="false" writeLuminosities="false">
+                        <sedFamily type="SEDFamily">
+                            <BruzualCharlotSEDFamily/>
+                        </sedFamily>
+                    </SPHStellarComp>
+                </components>
+            </StellarSystem>
+        </stellarSystem>
+        <dustSystem type="PanDustSystem">
+            <PanDustSystem numSamples="100" writeConvergence="true" writeDensity="true" writeDepthMap="false" writeQuality="false" writeCellProperties="false" writeCellsCrossed="false" writeStellarDensity="false" includeSelfAbsorption="false" writeTemperature="true" emissionBias="0.5" emissionBoost="1" minIterations="1" maxIterations="10" maxFractionOfStellar="0.01" maxFractionOfPrevious="0.03" writeEmissivity="false" writeISRF="false">
+                <dustDistribution type="DustDistribution">
+                    <SPHDustDistribution filename="pd_test/SKIRT.134.gas.particles.txt" dustFraction="0.25" maxTemperature="75000 K">
+		       <dustMix type="DustMix">
+                             <WeingartnerDraineDustMix writeMix="true" writeMeanMix="true" writeSize="true" numGraphiteSizes="5" numSilicateSizes="5" numPAHSizes="5" environment="MilkyWay"/>
+                       </dustMix>
+                    </SPHDustDistribution>
+                </dustDistribution>
+                <dustGrid type="DustGrid">
+                    <OctTreeDustGrid writeGrid="true" minX="40183000 pc" maxX="40383000 pc" minY="31824000 pc" maxY="32024000 pc" minZ="40834635 pc" maxZ="41034635.70342197 pc" minLevel="3" maxLevel="14" searchMethod="Neighbor" numSamples="100" maxOpticalDepth="0" maxMassFraction="2e-5" maxDensityDispersion="0" writeTree="false" useBarycentric="false"/>
+                </dustGrid>
+                <dustEmissivity type="DustEmissivity">
+                    <GreyBodyDustEmissivity/>
+                </dustEmissivity>
+                <dustLib type="DustLib">
+                    <Dim1DustLib numFieldStrengths="5000"/>
+                </dustLib>
+            </PanDustSystem>
+        </dustSystem>
+        <instrumentSystem type="InstrumentSystem">
+            <InstrumentSystem>
+                <instruments type="Instrument">
+                    <SEDInstrument instrumentName="i90" distance="1 Mpc" inclination="90 deg" azimuth="0 deg" positionAngle="0 deg"/>
+                </instruments>
+            </InstrumentSystem>
+        </instrumentSystem>
+    </PanMonteCarloSimulation>
+</skirt-simulation-hierarchy>
