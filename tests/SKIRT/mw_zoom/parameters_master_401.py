@@ -2,7 +2,7 @@
 #RESOLUTION KEYWORDS
 #===============================================
 oref = 0 #over refine factor - should typically be set to 0
-n_ref = 32 #when n_particles > n_ref, octree refines further
+n_ref = 128 #when n_particles > n_ref, octree refines further
 zoom_box_len = 100 #kpc; so the box will be +/- zoom_box_len from the center
 bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_lim)
                #This *must* encompass all of the particles in the
@@ -31,12 +31,12 @@ seed = -12345 #has to be an int, and negative.
 #===============================================
 dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
-PAH = True
+PAH = False
 dust_grid_type = 'dtm' #needs to be in ['dtm','rr','manual']
-dusttometals_ratio = 1.e-10 #what skirt assumes: see http://www.skirt.ugent.be/tutorials/_tutorial_hydro_s_p_h.html (DUST system subheading) 
+dusttometals_ratio = 0.25 #skirt assumes 0.25: see http://www.skirt.ugent.be/tutorials/_tutorial_hydro_s_p_h.html ("dust system"subheading) 
 enforce_energy_range = False #False is the default;  ensures energy conservation
 
-SUBLIMATION = False #do we automatically kill dust grains above the
+SUBLIMATION = True #do we automatically kill dust grains above the
                     #sublimation temperature; right now is set to fast
                     #mode
 SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
@@ -55,7 +55,7 @@ unit_velocity = 1.e5 #cm/s
 FORCE_BINNING = True #force SED binning
 COSMOFLAG = True  #is this a cosmological simulation?
 
-imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
+imf_type = 1 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 0 #weight given to post agb stars# 1 is the default
 add_neb_emission = False #add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
 gas_logu = -2 #gas ionization parameter for HII regions; only relevant

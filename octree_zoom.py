@@ -154,7 +154,7 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
     bbox1 = [[center[0]-bbox_lim,center[0]+bbox_lim],
             [center[1]-bbox_lim,center[1]+bbox_lim],
             [center[2]-bbox_lim,center[2]+bbox_lim]]
-    print ('[octree zoom] new zoomed bbox (comoving/h) = ',bbox1)
+    print ('[octree zoom] new zoomed bbox (comoving/h) in code units= ',bbox1)
     
 
     try: #particle

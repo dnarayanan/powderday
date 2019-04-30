@@ -144,8 +144,8 @@ def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
     spos_z = ad[('PartType4','particle_position')][:,2].in_units('pc').value
     smasses = ad[('PartType4', 'Masses')].in_units('Msun').value
  
-    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".particles.txt"
-    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".particles.txt"
+    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".stars.particles.txt"
+    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".stars.particles.txt"
     np.savetxt(outfile, np.column_stack((spos_x,spos_y,spos_z,shsml,smasses,smetallicity,sage)))
     
 
@@ -157,6 +157,11 @@ def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
     ghsml = np.repeat(hsml_in_pc,len(gpos_x))
     gmass = ad[('PartType0', 'Masses')].in_units('Msun').value
     gmetallicity = ad[('PartType0', 'Metallicity_00')].value
+    
+    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".gas.particles.txt"
+    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".gas.particles.txt"
+    np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+    
 
-
+    
                       
