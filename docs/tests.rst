@@ -34,11 +34,7 @@ here.  The tests run here were done with hash `16f281e
   Currently, the `SKIRT <http://www.skirt.ugent.be/root/index.html>`_
 tests have only been developed for ``Gadget/Gizmo`` simulations.
    	    
-Actually Running the Tests
---------------
-
-
-Powderday:
+Actually Running the Tests: Powderday:
 --------------
 
 To run the `powderday <https://bitbucket.org/desika/powderday>`_ test
@@ -52,15 +48,14 @@ the `Gadget/Gizmo quickstart
 
 The tests run here were done with hash `16f281e <https://bitbucket.org/desika/powderday/commits/16f281e9fa156d7ef0d412a8acbc253bd1aa1389>`_
 
-SKIRT:
+Actually Running the Tests: SKIRT:
 --------------
 
- `SKIRT <http://www.skirt.ugent.be/root/index.html>`_ needs to know
- the stellar and gas particle information from the hydrodynamic
- simulation.  In ```analytics.py``, there's a function
- ``SKIRT_data_dump()`` that dumps these files to your  `powderday <https://bitbucket.org/desika/powderday>`_ output directory.  Here, it should have dumped files with a path like::
-   
-   tests/SKIRT/mw_zoom/SKIRT.134.gas.particles.txt
+`SKIRT <http://www.skirt.ugent.be/root/index.html>`_ needs to know
+the stellar and gas particle information from the hydrodynamic
+simulation.  In ```analytics.py``, there's a function
+``SKIRT_data_dump()`` that dumps these files to your  `powderday <https://bitbucket.org/desika/powderday>`_ output directory.  Here, it should have dumped files with a path like::
+  tests/SKIRT/mw_zoom/SKIRT.134.gas.particles.txt
 
 `SKIRT <http://www.skirt.ugent.be/root/index.html>`_ also requires an
 input parameter file which can be created via a terminal input
@@ -85,10 +80,10 @@ arbitrarily chosen).  Then you can run::
   cd <path_to_powderday>
   python tests/SKIRT/skirt_sed_plot.py
 
-and it should produce an image like:
-.. image:: images/gadget_sed.png
-   :align: center
-
+and it should produce an image like
+..image::images/powderday_skirt_comparison.png (in case the image
+doesn't actually embed, this is also found in the repo in the
+tests/SKIRT directory).
 	   
 
   
