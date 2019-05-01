@@ -25,11 +25,11 @@ SKIRT tests
 In::
    tests/SKIRT/mw_zoom
 
-   you'll find the ``parameters_master`` and
- ``parameters_model`` parameter files to successfully run the a
- `powderday <https://bitbucket.org/desika/powderday>`_ run performed
- here.  The tests run here were done with hash `16f281e
- <https://bitbucket.org/desika/powderday/commits/16f281e9fa156d7ef0d412a8acbc253bd1aa1389>`_
+you'll find the ``parameters_master`` and
+``parameters_model`` parameter files to successfully run the a
+`powderday <https://bitbucket.org/desika/powderday>`_ run performed
+here.  The tests run here were done with hash `16f281e
+<https://bitbucket.org/desika/powderday/commits/16f281e9fa156d7ef0d412a8acbc253bd1aa1389>`_
 
   Currently, the `SKIRT <http://www.skirt.ugent.be/root/index.html>`_
 tests have only been developed for ``Gadget/Gizmo`` simulations.
@@ -50,8 +50,7 @@ file for your specific paths.  The model snapshot is the same as in
 the `Gadget/Gizmo quickstart
 <https://powderday.readthedocs.io/en/latest/quickstart.html#gadget-gizmo>`_ section.
 
-The tests run here were done with hash `16f281e
- <https://bitbucket.org/desika/powderday/commits/16f281e9fa156d7ef0d412a8acbc253bd1aa1389>`_
+The tests run here were done with hash `16f281e <https://bitbucket.org/desika/powderday/commits/16f281e9fa156d7ef0d412a8acbc253bd1aa1389>`_
 
 SKIRT:
 --------------
@@ -60,6 +59,7 @@ SKIRT:
  the stellar and gas particle information from the hydrodynamic
  simulation.  In ```analytics.py``, there's a function
  ``SKIRT_data_dump()`` that dumps these files to your  `powderday <https://bitbucket.org/desika/powderday>`_ output directory.  Here, it should have dumped files with a path like::
+   
    tests/SKIRT/mw_zoom/SKIRT.134.gas.particles.txt
 
 `SKIRT <http://www.skirt.ugent.be/root/index.html>`_ also requires an
@@ -86,10 +86,10 @@ arbitrarily chosen).  Then you can run::
   python tests/SKIRT/skirt_sed_plot.py
 
 and it should produce an image like:
+.. image:: images/gadget_sed.png
+   :align: center
 
-.. image:: images/powderday_skirt_comparison.png
-   :align:center
-
+	   
 
   
 
