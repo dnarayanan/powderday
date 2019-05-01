@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import config as cfg
-import pdb,ipdb
+import pdb
 from astropy import constants
 import astropy.units as u
 from hyperion.model import ModelOutput
@@ -83,22 +83,24 @@ def dump_cell_info(refined,fc1,fw1,xmin,xmax,ymin,ymax,zmin,zmax):
     outfile = cfg.model.PD_output_dir+"cell_info."+cfg.model.snapnum_str+".npz"
     np.savez(outfile,refined=refined,fc1=fc1,fw1=fw1,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,zmin=zmin,zmax=zmax)
 
-def dump_data(ad,model):
-
-    try: particle_fh2 = ad[('PartType0', 'FractionH2')]
-    except: particle_fh2 = np.zeros(len(ad[('PartType0','Masses')]))
+def dump_data(pf,model):
+    ad = pf.all_data()
+    particle_fh2 = ad["gasfh2"]
     particle_fh1 = np.ones(len(particle_fh2))-particle_fh2
-    particle_gas_mass = ad[('PartType0','Masses')].in_units('Msun')
-    particle_star_mass = ad[('PartType4','Masses')].in_units('Msun')
-    particle_star_metallicity = ad[('PartType4','Metallicity_00')]
-    particle_stellar_formation_time = ad[('PartType4', 'StellarFormationTime')]
-    grid_gas_mass = ad[('deposit', 'PartType0_mass')].in_units('Msun')
-    grid_gas_metallicity = ad[('deposit', 'PartType0_smoothed_metallicity')]
-    grid_star_mass = ad[ ('deposit', 'PartType4_mass')].in_units('Msun')
-    grid_star_metallicity = ad[('PartType4','Metallicity_00')]
+    particle_gas_mass = ad["gasmasses"]
+    particle_star_mass = ad["starmasses"]
+    particle_star_metallicity = ad["starmetals"]
+    particle_stellar_formation_time = ad["starformationtime"]
+
+    #these are in try/excepts in case we're not dealing with gadget and yt 3.x
+    try: grid_gas_mass = ad["gassmoothedmasses"]
+    except: grid_gas_mass = -1
+    try: grid_gas_metallicity = ad["gassmoothedmetals"]
+    except: grid_gas_metallicity = -1
+    try: grid_star_mass = ad["starsmoothedmasses"]
+    except: grid_star_mass = -1
 
     #get tdust
-
     m = ModelOutput(model.outputfile+'.sed')
     oct = m.get_quantities()
     tdust_pf = oct.to_yt()
@@ -110,7 +112,7 @@ def dump_data(ad,model):
     except:
         outfile = cfg.model.PD_output_dir+"grid_physical_properties."+cfg.model.snapnum_str+".npz"
 
-    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,grid_star_metallicity = grid_star_metallicity,tdust=tdust)
+    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,tdust = tdust)
 
 
 def dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer):

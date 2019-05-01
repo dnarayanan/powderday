@@ -75,6 +75,14 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         metals /= gasmass
         return data.ds.arr(metals,'code_metallicity')
         
+    def _gasmasses(field,data):
+        return data[('PartType0','Masses')]
+        
+    def _gasfh2(field,data):
+            try: return data[('PartType0','FractionH2')]
+        except: return np.zeros(len(data[('PartType0','Masses')]))
+        
+
     def _gascoordinates(field,data):
         return data[('PartType0','Coordinates')]
 
@@ -133,6 +141,10 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
                 
         age = data.ds.arr(age,'Gyr')
         return age
+
+    def _starsmoothedmasses(field,data):
+            return data[('deposit','PartType4_mass')]
+
         
     def _bhluminosity(field,data):
         ad = data.ds.all_data()
@@ -230,6 +242,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     ds.add_field(('starmasses'),function=_starmasses,units='g',particle_type=True)
     ds.add_field(('starcoordinates'),function=_starcoordinates,units='cm',particle_type=True)
     ds.add_field(('starformationtime'),function=_starformationtime,units='dimensionless',particle_type=True)
+    ds.add_field(('starsmoothedmasses'),function=_starsmoothedmasses,units='g',particle_type=True)
 
     if ('PartType2','Masses') in ds.derived_field_list:
         ds.add_field(('diskstarmasses'),function=_diskstarmasses,units='g',particle_type=True)
@@ -245,6 +258,8 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='g/cm**3',particle_type=True)
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
     ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
+    ds.add_field(('gasmasses'),function=_gasmasses,units='g',particle_type=True)
+    ds.add_field(('gasfh2'),function=_gasfh2,units='dimensionless',particle_type=True)
     
 
     #optionally add BH

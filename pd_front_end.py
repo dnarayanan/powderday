@@ -331,7 +331,7 @@ if cfg.par.IMAGING == True:
         
 
 
-dump_data(ad,model)
+dump_data(pf,model)
 
 
 
