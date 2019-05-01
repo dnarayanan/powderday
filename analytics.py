@@ -91,6 +91,7 @@ def dump_data(pf,model):
     particle_star_mass = ad["starmasses"]
     particle_star_metallicity = ad["starmetals"]
     particle_stellar_formation_time = ad["starformationtime"]
+    particle_sfr = ad['gassfr'].in_units('Msun/yr')
 
     #these are in try/excepts in case we're not dealing with gadget and yt 3.x
     try: grid_gas_mass = ad["gassmoothedmasses"]
@@ -112,7 +113,7 @@ def dump_data(pf,model):
     except:
         outfile = cfg.model.PD_output_dir+"grid_physical_properties."+cfg.model.snapnum_str+".npz"
 
-    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,tdust = tdust)
+    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,tdust = tdust)
 
 
 def dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer):

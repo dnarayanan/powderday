@@ -81,8 +81,10 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     def _gasfh2(field,data):
             try: return data[('PartType0','FractionH2')]
         except: return np.zeros(len(data[('PartType0','Masses')]))
-        
 
+    def _gassfr(field,data):
+        return data[('PartType0','StarFormationRate')]
+        
     def _gascoordinates(field,data):
         return data[('PartType0','Coordinates')]
 
@@ -260,7 +262,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
     ds.add_field(('gasmasses'),function=_gasmasses,units='g',particle_type=True)
     ds.add_field(('gasfh2'),function=_gasfh2,units='dimensionless',particle_type=True)
-    
+    ds.add_field(('gassfr'),function=_gassfr,units='g/s',particle_type=True)
 
     #optionally add BH
     #first see if the keyword even exists (to make it backwards compatible)
