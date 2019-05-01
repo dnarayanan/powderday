@@ -66,8 +66,11 @@ python
 --------------
 
 `powderday <https://bitbucket.org/desika/powderday>`_ currently only
-works with python 2.x.  The code was developed on, and principally
-tested with python 2.7. 
+works with python 2.x with provisional support for python 3.x.  The
+code was developed on, and principally tested with python 2.7.
+
+This said, the code will be robust with python 3.x starting in Summer
+of 2019.
 
 .. _mercurial:
 
@@ -112,7 +115,12 @@ it's super easy!  There are many ways to do this (as directed on the
 `yt <http://yt-project.org>`_ project website.  We require the
 standalone installer script for the Development version.  This will
 ensure that bugs caught in or bleeding-edge features of `yt
-<http://yt-project.org>`_ are included.  
+<http://yt-project.org>`_ are included.
+
+Note: starting in Summer 2019, we will begin requiring the usage of
+`yt <http://yt-project.org>`_ 4.x (under development), the 'demeshed'
+version of `yt <http://yt-project.org>`_ .  These docs will update
+accordingly when this is the case.
 
 .. _fsps:
 
