@@ -17,7 +17,7 @@ SKIRT tests
  run model tests between the two codes.
 
 
-A few notes:
+ A few notes:
 
 :Relevant Hash:
    
