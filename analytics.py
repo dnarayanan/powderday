@@ -141,26 +141,24 @@ def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
     sage = [(stars.age*u.Gyr).to(u.yr).value for stars in stars_list] #to get in yr
     shsml = np.repeat(hsml_in_pc,len(sage))
 
- 
-    spos_x = ad[('PartType4','particle_position')][:,0].in_units('pc').value
-    spos_y = ad[('PartType4','particle_position')][:,1].in_units('pc').value
-    spos_z = ad[('PartType4','particle_position')][:,2].in_units('pc').value
-    smasses = ad[('PartType4', 'Masses')].in_units('Msun').value
- 
+    spos_x = ad["starcoordinates"][:,0].in_units('pc').value
+    spos_y = ad["starcoordinates"][:,1].in_units('pc').value
+    spos_z = ad["starcoordinates"][:,2].in_units('pc').value
+    smasses = ad["starmasses"].in_units('Msun').value
+
     try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".stars.particles.txt"
     except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".stars.particles.txt"
     np.savetxt(outfile, np.column_stack((spos_x,spos_y,spos_z,shsml,smasses,smetallicity,sage)))
     
-
     #create the gas file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
-    gpos_x = ad[('PartType0', 'particle_position')][:,0].in_units('pc').value
-    gpos_y = ad[('PartType0', 'particle_position')][:,1].in_units('pc').value
-    gpos_z = ad[('PartType0', 'particle_position')][:,2].in_units('pc').value
+    gpos_x = ad["gascoordinates"][:,0].in_units('pc').value
+    gpos_y = ad["gascoordinates"][:,1].in_units('pc').value
+    gpos_z = ad["gascoordinates"][:,2].in_units('pc').value
+    gmass = ad["gasmasses"].in_units('Msun').value
 
     ghsml = np.repeat(hsml_in_pc,len(gpos_x))
-    gmass = ad[('PartType0', 'Masses')].in_units('Msun').value
-    gmetallicity = ad[('PartType0', 'Metallicity_00')].value
-    
+    gmetallicity = ad["gasmetals"].value
+
     try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".gas.particles.txt"
     except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".gas.particles.txt"
     np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
