@@ -22,8 +22,8 @@ Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 #===============================================
 #FILE I/O
 #===============================================
-inputfile = PD_output_dir+'/example.'+snapnum_str+'.rtin'
-outputfile = PD_output_dir+'/example.'+snapnum_str+'.rtout'
+inputfile = PD_output_dir+'/pd_skirt_comparison.'+snapnum_str+'.rtin'
+outputfile = PD_output_dir+'/pd_skirt_comparison.'+snapnum_str+'.rtout'
 
 #===============================================
 #GRID POSITIONS
