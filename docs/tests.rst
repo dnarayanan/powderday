@@ -17,43 +17,11 @@ SKIRT tests
  run model tests between the two codes.
 
 
- ``analytics.py`` dumps out
- the stellar and gas information via a function ``SKIRT_data_dump``.
- This will dump files similar to, for example::
-   tests/SKIRT/mw_zoom/SKIRT.134.gas.particles.txt
-
-In::
-   tests/SKIRT/mw_zoom
-
-you'll find the ``parameters_master`` and
-``parameters_model`` parameter files to successfully run the a
-`powderday <https://bitbucket.org/desika/powderday>`_ run performed
-here.  The tests run here were done with hash `16f281e
-<https://bitbucket.org/desika/powderday/commits/16f281e9fa156d7ef0d412a8acbc253bd1aa1389>`_
-
-A few notes:
-
-::Simulation Codes:: Currently, the `SKIRT <http://www.skirt.ugent.be/root/index.html>`_
-tests have only been developed for ``Gadget/Gizmo`` simulations.
-
-::Downloads:: All files that you need to download (i.e. the 
-
-
-SKIRT tests
-============
-
- `SKIRT <http://www.skirt.ugent.be/root/index.html>`_ is an
- outstanding dust radiative transfer code developed by the Ghent group
- with a number of features that distinguish it from `powderday
- <https://bitbucket.org/desika/powderday>`_.  Here, we describe how to
- run model tests between the two codes.
-
-
 A few notes:
 
 :Relevant Hash:
    
-The `powderday <https://bitbucket.org/desika/powderday>` hash for
+   The `powderday <https://bitbucket.org/desika/powderday>`_ hash for
    the most recent set of tests is `21204f2
    <https://bitbucket.org/desika/powderday/commits/21204f296c2765322751c3631bb825d46d40ad14>`_
    and the relevant `SKIRT
@@ -63,8 +31,7 @@ The `powderday <https://bitbucket.org/desika/powderday>` hash for
 
 :Simulation Codes:
 
-  
- The tests done here have only been done for Gadget/Gizmo simulations.
+  The tests done here have only been done for Gadget/Gizmo simulations.
 
 :Downloads:
 
