@@ -28,7 +28,7 @@
                 <dustDistribution type="DustDistribution">
                     <SPHDustDistribution filename="pd_test/SKIRT.134.gas.particles.txt" dustFraction="0.25" maxTemperature="75000 K">
 		       <dustMix type="DustMix">
-                             <WeingartnerDraineDustMix writeMix="true" writeMeanMix="true" writeSize="true" numGraphiteSizes="5" numSilicateSizes="5" numPAHSizes="5" environment="MilkyWay"/>
+                         <DraineLiDustMix writeMix="true" writeMeanMix="true"/>
                        </dustMix>
                     </SPHDustDistribution>
                 </dustDistribution>

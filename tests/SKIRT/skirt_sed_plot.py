@@ -12,8 +12,7 @@ import h5py
 import fsps
 
 #SKIRT STUFF
-#sedfile = '/home/desika.narayanan/SKIRT/run/pd_test.dust_i90_sed.dat'
-sedfile = '/home/desika.narayanan/SKIRT/run/test_i90_sed.dat'
+sedfile = '/home/desika.narayanan/SKIRT/run/pd_test.dust_i90_sed.dat'
 run = '/ufrc/narayanan/desika.narayanan/pd/tests/SKIRT/mw_zoom/example.134.rtout.sed'
 
 data = np.loadtxt(sedfile)
