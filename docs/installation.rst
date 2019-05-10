@@ -33,23 +33,6 @@ Overview of Requirements
 Installation
 ============
 	    
-All in One Installer
---------------
-
-The first stop is to try the all-in-one installer for powderday.  This
-is available at the main download page
-<https://bitbucket.org/desika/powderday/downloads> from the Bitbucket
-repository.  This is a bash script that will append relevant path
-names to your .bashrc, as well as attempt to go package-by-package and
-install everything.  The plus side is that if it works, it's super
-easy.  The downside is that if a package installation fails, you might
-not catch it because the bash script will go on to the next package.
-This installer assume gnu C and Fortran compilers.
-
-Something that has worked for a number of users is to download the
-all-in-one installer, and then copy and paste the instructions for
-each package one at a time. This can alert the user to package failures.
-
 
 
 Manual Installation
@@ -66,11 +49,29 @@ python
 --------------
 
 `powderday <https://bitbucket.org/desika/powderday>`_ currently only
-works with python 2.x with provisional support for python 3.x.  The
+works with python 2.x with provisional support for python 3.x (i.e. it
+*should* work though there may be issues yet outstanding -- please do
+file an issue in on the BitBucket site if you find a 3.x issue)).  The
 code was developed on, and principally tested with python 2.7.
 
 This said, the code will be robust with python 3.x starting in Summer
 of 2019.
+
+As you will see, `powderday <https://bitbucket.org/desika/powderday>`_
+currently requires a particular branch of `yt
+<http://yt-project.org>`_ As a result, one path that we have seen work
+well for users is to set up a different python environment for the
+`powderday <https://bitbucket.org/desika/powderday>`_ installation.   This could look something like (assuming a ``conda`` installation of python)::
+
+  >conda create --name pd_environment python=2.7
+  >source activate pd_environment
+
+(And then when you want to exit the environment, you can type)::
+  >source deactivate pd_environment
+
+Then, whenever you're in the ``pd_environment``, everything you
+install will remain contained to that particular installation of
+python, and not conflict with any of your other installed packages.
 
 .. _mercurial:
 
@@ -80,11 +81,11 @@ mercurial
 
 You'll need this to clone `powderday
 <https://bitbucket.org/desika/powderday>`_ using mercurial (hg).  If
-you don't want to install mercurial, then first install `yt
-<http://yt-project.org>`_ (before `powderday
-<https://bitbucket.org/desika/powderday>`_ ) - `yt
-<http://yt-project.org>`_ ships with its own hg which you can
-optionally use.
+you don't have mercurial, you can install it in your
+``pd_environment`` via::
+
+  >source activate pd_environment
+  >conda install mercurial
 
 
 .. _powderday:
@@ -184,12 +185,24 @@ Hyperion
 
 `Hyperion <http://www.hyperion-rt.org>`_ is the main work horse of
 `powderday <https://bitbucket.org/desika/powderday>`_.  The full
-directions for installation are well-described on the main `Hyperion
-<http://www.hyperion-rt.org>`_ website.  Here, we summarize the
-installation which should get most users through without any real
-difficulty.
+directions for installation are well-described on the main
+`Installation page for Hyperion
+<http://docs.hyperion-rt.org/en/stable/installation/installation.html>`_
+Here, we summarize the installation which should get most users
+through without any real difficulty.
 
+There are two ways to install `Hyperion <http://www.hyperion-rt.org>`_ .  The first is via ``conda``::
 
+  >conda install -c conda-forge hyperion
+
+Note, this will eventually become deprecated for `powderday
+<https://bitbucket.org/desika/powderday>`_ (or at least modified as
+the `Hyperion <http://www.hyperion-rt.org>`_ ``conda`` install ships
+with `yt 3.x<http://yt-project.org>`_, and eventual upgrade to `yt
+4.x<http://yt-project.org>`_ is coming in Summer 2019.
+
+The second and manual way to install `Hyperion
+<http://www.hyperion-rt.org>`_ follows:
 1. First download the tarball and unpack it.::
 
      >tar -xzvf hyperion.xxx
@@ -213,11 +226,7 @@ following commands return something sensible::
   >which h5fc
 
 if not, your path probably needs to include wherever the <prefix> directory pointed to.
-  
-
- 
 3. Install any remaining python dependencies. These are listed `here <http://docs.hyperion-rt.org/en/stable/installation/python_dependencies.html>`_  
-   
 4. Install `Hyperion <http://www.hyperion-rt.org>`_  itself.  To do this::
      
      >cd hyperion.xxx
