@@ -9,7 +9,7 @@
             <ExtragalacticUnits fluxOutputStyle="Wavelength"/>
         </units>
         <wavelengthGrid type="PanWavelengthGrid">
-            <NestedLogWavelengthGrid writeWavelengths="true" minWavelengthBaseGrid="0.0912 micron" maxWavelengthBaseGrid="1000 micron" numWavelengthsBaseGrid="75" minWavelengthSubGrid="6 micron" maxWavelengthSubGrid="25 micron" numWavelengthsSubGrid="25"/>
+            <NestedLogWavelengthGrid writeWavelengths="true" minWavelengthBaseGrid="0.0912 micron" maxWavelengthBaseGrid="1000 micron" numWavelengthsBaseGrid="75" minWavelengthSubGrid="0.1 micron" maxWavelengthSubGrid="25 micron" numWavelengthsSubGrid="250"/>
         </wavelengthGrid>
 
         <stellarSystem type="StellarSystem">
