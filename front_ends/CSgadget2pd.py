@@ -54,7 +54,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     def _bulgestarmasses(field,data):
         return data[("PartType3","Masses")]
 
-    def _gasdensity(fied,data):
+    def _gasdensity(field,data):
         return data[('PartType0', 'Density')]
 
     def _gasmetals_00_CS(field,data):
