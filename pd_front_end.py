@@ -109,6 +109,11 @@ df_chi = o['chi']
 
 df.close()
 
+#creating a empty file for logU diagnostic
+if cfg.par.neb_debug:
+    outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
+    f = open(outfile, "w")
+    f.close()
 
   
 

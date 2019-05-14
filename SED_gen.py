@@ -20,8 +20,8 @@ from grid_construction import stars_coordinate_boost
 from multiprocessing import Pool
 import yt
 from functools import partial
-
-
+from scipy.integrate import simps
+from analytics import logu_diagnostic
 
 
 
@@ -40,6 +40,35 @@ class Stars:
 
 
 
+def calc_LogU(nuin0, specin0, age, zmet, T, Rin= 10.**19., mstar=1.0,dop=True):
+    '''
+    Claculates the number of lyman ionizing photons for given a spectrum
+    Input spectrum must be in ergs/s/Hz!!
+    Q = int(Lnu/hnu dnu, nu_0, inf) , number of hydrogen ionizing photons
+    mstar is in units of solar mass
+    Rin is in unites of cm-3
+    nh is in units of cm-3
+    '''
+
+    c = constants.c.cgs.value  # cm/s
+    h = constants.h.cgs.value  # erg/s
+    alpha = 2.5e-13*((T/(10**4))**(-0.85)) # cm3/s
+    lam_0 = 911.6 * 1e-8  # Halpha wavelength in cm
+    nh = cfg.par.gas_nh
+
+    nuin = np.asarray(nuin0)
+    specin = np.asarray(specin0)
+    nu_0 = c / lam_0
+    inds, = np.where(nuin >= nu_0)
+    hlam, hflu = nuin[inds], specin[inds]
+    nu = hlam[::-1]
+    f_nu = hflu[::-1]
+    integrand = f_nu / (h * nu)
+    Q = simps(integrand, x=nu)*mstar
+    U = (np.log10((Q*nh*(alpha**2))/(4*np.pi*(c**3))))*(1./3.)
+    if dop:
+        logu_diagnostic(U, Q, mstar, age, zmet)   #Saves important parameters in a seperate file for running diagnostics
+    return U
 
 
 
@@ -110,7 +139,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
     print ('[SED_gen/star_list_gen:] Manually increasing the newstar metallicities by: ',cfg.par.Z_init)
     metals += cfg.par.Z_init
-
+    
     #ADVANCED FEATURE - if force_stellar_metallcities or force_stellar_ages are set, then we set to those values
     if cfg.par.FORCE_STELLAR_AGES:
         print ("[SED_GEN/stars_list_gen:]  FORCE_STELLAR_AGES is set to True: setting all stars to age: %e Gyr"%cfg.par.FORCE_STELLAR_AGES_VALUE)
@@ -239,6 +268,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
 def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
 
+    
     #NOTE this part is just for the gadget simulations - this will
     #eventually become obviated as it gets passed into a function to
     #populate the stars_list with objects as we start to feed in new
@@ -248,7 +278,6 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
     nstars_disk = len(diskstars_list)
     nstars_bulge = len(bulgestars_list)
     
-
     #get just the wavelength array
     sp.params["tage"] = stars_list[0].age
     sp.params["imf_type"] = cfg.par.imf_type
@@ -448,15 +477,13 @@ def newstars_gen(stars_list):
     #the newstars (particle type 4; so, for cosmological runs, this is all
     #stars) are calculated in a separate function with just one argument so that it is can be fed 
     #into pool.map for multithreading.
-    
     #sp = fsps.StellarPopulation()
-
     sp.params["tage"] = stars_list[0].age
     sp.params["imf_type"] = cfg.par.imf_type
     sp.params["pagb"] = cfg.par.pagb
     sp.params["sfh"] = 0
     sp.params["zmet"] = stars_list[0].fsps_zmet
-    sp.params["add_neb_emission"] = cfg.par.add_neb_emission
+    sp.params["add_neb_emission"] = False
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
     sp.params['gas_logu'] = cfg.par.gas_logu
 
@@ -469,7 +496,6 @@ def newstars_gen(stars_list):
     
     spec = sp.get_spectrum(tage=stars_list[0].age,zmet=stars_list[0].fsps_zmet)
     nu = 1.e8*constants.c.cgs.value/spec[0]
-    
 
     nlam = len(nu)
 
@@ -485,6 +511,8 @@ def newstars_gen(stars_list):
     tesc_age = np.log10((minage+cfg.par.birth_cloud_clearing_age)*1.e9)
 
 
+    # Get the number of ionizing photons from SED
+
     #calculate the SEDs for new stars
     for i in range(len(stars_list)):
         
@@ -493,7 +521,7 @@ def newstars_gen(stars_list):
         sp.params["pagb"] = cfg.par.pagb
         sp.params["sfh"] = 0
         sp.params["zmet"] = stars_list[i].fsps_zmet
-        sp.params["add_neb_emission"] = cfg.par.add_neb_emission
+        sp.params["add_neb_emission"] = False
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
         sp.params['gas_logu'] = cfg.par.gas_logu
         if cfg.par.FORCE_gas_logz == False:
@@ -510,9 +538,30 @@ def newstars_gen(stars_list):
 
         #sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=2,sfh=0,zmet=stars_list[i].fsps_zmet)
         spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
-
+	f = spec[1]
+	print (stars_list[i].age)
+        # Age limit of 10 Myr is imposed is to ensure there is enough ionizing radiation to ionize elements that are of interest. 
+	#For more info refer Byler et al. 2017
+	if cfg.par.add_neb_emission and stars_list[i].age <= 2e-3:
+	    num = int(np.floor((stars_list[i].mass/constants.M_sun.cgs.value)/(cfg.par.stellar_cluster_mass)))
+	    f = np.zeros(nlam)
+	    do_print = True  # If true dumps parameters in a file (uses logU_diagnostics() in analytics.py) for debugging.
+	    for num1 in range(num):
+		sp.params["add_neb_emission"] = False
+		spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+		
+	        if cfg.par.FORCE_gas_logu:
+                    LogU = cfg.par.gas_logu
+                else:
+                    LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.gas_T, mstar=cfg.par.stellar_cluster_mass,dop=do_print)
+		do_print = False
+		sp.params['gas_logu'] = LogU
+                sp.params["add_neb_emission"] = True
+                spec = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+		f = f + spec[1]
+            
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
-        stellar_fnu[i,:] = spec[1]
+        stellar_fnu[i,:] = f
 
     return stellar_fnu
 
@@ -543,5 +592,3 @@ def find_nearest_zmet(array,value):
     idx = (np.abs(array-value)).argmin()
     
     return idx+1
-
-
