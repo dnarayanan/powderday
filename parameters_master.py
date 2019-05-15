@@ -59,6 +59,10 @@ COSMOFLAG = True  #is this a cosmological simulation?
 
 imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 #weight given to post agb stars# 1 is the default
+
+#===============================================
+#NEBULAR EMISSION INFO
+#===============================================
 add_neb_emission = False #add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
 add_agb_dust_model=False #add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 FORCE_gas_logu = False #if set, then we force the gas_logu of HII
@@ -71,8 +75,12 @@ FORCE_gas_logz = False #if set, then we force the gas_logz of HII
 gas_logz = 0.0 #units of log(Z/Z_sun); metallicity of the HII region
               #metallicity; only relevant if add_neb_emission = True and and FORCE_gas_logz=True;
               #default is 0
-HII_T = 1.e4  #Ionized gas temperature in K for calculating nebular emission
-HII_nh = 1.e2 #Gas hydrogen density for calcualting nebular emission
+HII_T = 1.e4  #Ionized gas temperature in K for calculating nebular emission, default = 1.e4
+HII_nh = 1.e2 #Gas hydrogen density for calcualting nebular emission, default = 1.e2
+HII_max_age = 2.e-3 # Maximum age limit for calculating nebular emission, default = 2.e-3
+neb_file_output = True # Creates an output file with logU, Q ,stellar mass, age and metallicity(zmet) for each particle
+
+
 
 stellar_cluster_mass = 1.e4 #Mass of star clusters in Msun
 
@@ -190,9 +198,9 @@ N_MASS_BINS = 1 #this is really just a place holder that exists in
                 #for spatially varying IMFs.  right now for speed best
                 #to set to 1 as it doesn't actually do anything.
 
-FORCE_STELLAR_AGES = True
+FORCE_STELLAR_AGES = False
 FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
 
-FORCE_STELLAR_METALLICITIES = True
+FORCE_STELLAR_METALLICITIES = False
 FORCE_STELLAR_METALLICITIES_VALUE = 0.013 #absolute values (so 0.013 ~ solar)i
 NEB_DEBUG = True #dumps parameters related to nebular line emission in a file for debugging 

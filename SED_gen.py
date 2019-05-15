@@ -40,13 +40,13 @@ class Stars:
 
 
 
-def calc_LogU(nuin0, specin0, age, zmet, T, Rin= 10.**19., mstar=1.0,dop=True):
+def calc_LogU(nuin0, specin0, age, zmet, T, mstar=1.0, file_output=True):
     '''
     Claculates the number of lyman ionizing photons for given a spectrum
     Input spectrum must be in ergs/s/Hz!!
     Q = int(Lnu/hnu dnu, nu_0, inf) , number of hydrogen ionizing photons
     mstar is in units of solar mass
-    Rin is in unites of cm-3
+    Rin is in units of cm-3
     nh is in units of cm-3
     '''
 
@@ -66,8 +66,8 @@ def calc_LogU(nuin0, specin0, age, zmet, T, Rin= 10.**19., mstar=1.0,dop=True):
     integrand = f_nu / (h * nu)
     Q = simps(integrand, x=nu)*mstar
     U = (np.log10((Q*nh*(alpha**2))/(4*np.pi*(c**3))))*(1./3.)
-    if dop:
-        logu_diagnostic(U, Q, mstar, age, zmet)   #Saves important parameters in a seperate file for running diagnostics
+    if file_output:
+        logu_diagnostic(U, Q, mstar, age, zmet)   #Saves important parameters in an output file.
     return U
 
 
@@ -539,12 +539,12 @@ def newstars_gen(stars_list):
         #sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=2,sfh=0,zmet=stars_list[i].fsps_zmet)
         spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
 	f = spec[1]
-        # Age limit of 10 Myr is imposed is to ensure there is enough ionizing radiation to ionize elements that are of interest. 
-	#For more info refer Byler et al. 2017
-	if cfg.par.add_neb_emission and stars_list[i].age <= 2e-3:
+        
+	#Only including particles below the maximum age limit for calulating nebular emission
+	if cfg.par.add_neb_emission and stars_list[i].age <= cfg.par.HII_max_age:
 	    num = int(np.floor((stars_list[i].mass/constants.M_sun.cgs.value)/(cfg.par.stellar_cluster_mass)))
 	    f = np.zeros(nlam)
-	    do_print = cfg.par.NEB_DEBUG
+	    neb_file_output = cfg.par.neb_file_output
 	    for num1 in range(num):
 		sp.params["add_neb_emission"] = False
 		spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
@@ -552,8 +552,8 @@ def newstars_gen(stars_list):
 	        if cfg.par.FORCE_gas_logu:
                     LogU = cfg.par.gas_logu
                 else:
-                    LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.HII_T, mstar=cfg.par.stellar_cluster_mass,dop=do_print)
-		do_print = False
+                    LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.HII_T, mstar=cfg.par.stellar_cluster_mass,file_output=neb_file_output)
+		neb_file_output = False
 		sp.params['gas_logu'] = LogU
                 sp.params["add_neb_emission"] = True
                 spec = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
