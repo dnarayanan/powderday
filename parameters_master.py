@@ -184,8 +184,8 @@ N_MASS_BINS = 1 #this is really just a place holder that exists in
                 #for spatially varying IMFs.  right now for speed best
                 #to set to 1 as it doesn't actually do anything.
 
-FORCE_STELLAR_AGES = True
+FORCE_STELLAR_AGES = False
 FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
 
-FORCE_STELLAR_METALLICITIES = True
+FORCE_STELLAR_METALLICITIES = False
 FORCE_STELLAR_METALLICITIES_VALUE = 0.013 #absolute values (so 0.013 ~ solar)
