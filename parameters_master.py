@@ -59,16 +59,30 @@ COSMOFLAG = True  #is this a cosmological simulation?
 
 imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 #weight given to post agb stars# 1 is the default
+
+#===============================================
+#NEBULAR EMISSION INFO
+#===============================================
 add_neb_emission = False #add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
 add_agb_dust_model=False #add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
-gas_logu = -2 #gas ionization parameter for HII regions; only relevant
-              #if add_neb_emission = True default = -2
+FORCE_gas_logu = False #if set, then we force the gas_logu of HII
+                       #regions to be gas_logu (next parameter); else, it is taken to be variable
+                       #and dependent on ionizing radiation from star particles. default is False
+gas_logu = -2.0 #gas ionization parameter for HII regions; only relevant
+                #if add_neb_emission = True and FORCE_gas_logu=True ,default = -2
 FORCE_gas_logz = False #if set, then we force the gas_logz of HII
                        #regions to be gas_logz (next parameter); else, it is taken to be the star particles metallicity.  default is False
-gas_logz = 0 #units of log(Z/Z_sun); metallicity of the HII region
-             #metallicity; only relevant if add_neb_emission = True;
-             #default is 0
+gas_logz = 0.0 #units of log(Z/Z_sun); metallicity of the HII region
+              #metallicity; only relevant if add_neb_emission = True and and FORCE_gas_logz=True;
+              #default is 0
+HII_T = 1.e4  #Ionized gas temperature in K for calculating nebular emission, default = 1.e4
+HII_nh = 1.e2 #Gas hydrogen density for calcualting nebular emission, default = 1.e2
+HII_max_age = 2.e-3 # Maximum age limit for calculating nebular emission, default = 2.e-3
+neb_file_output = True # Creates an output file with logU, Q ,stellar mass, age and metallicity(zmet) for each particle
 
+
+
+stellar_cluster_mass = 1.e4 #Mass of star clusters in Msun
 
 CF_on = False #if set to true, then we enable the Charlot & Fall birthcloud models 
 birth_cloud_clearing_age = 0.01 #Gyr - stars with age <
@@ -189,3 +203,4 @@ FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
 
 FORCE_STELLAR_METALLICITIES = False
 FORCE_STELLAR_METALLICITIES_VALUE = 0.013 #absolute values (so 0.013 ~ solar)
+NEB_DEBUG = True #dumps parameters related to nebular line emission in a file for debugging 

@@ -110,9 +110,6 @@ df_chi = o['chi']
 df.close()
 
 
-  
-
-
 #add sources to hyperion
 ad = pf.all_data()
 stars_list,diskstars_list,bulgestars_list = sg.star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad)
