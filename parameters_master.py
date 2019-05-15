@@ -202,5 +202,5 @@ FORCE_STELLAR_AGES = False
 FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
 
 FORCE_STELLAR_METALLICITIES = False
-FORCE_STELLAR_METALLICITIES_VALUE = 0.013 #absolute values (so 0.013 ~ solar)i
+FORCE_STELLAR_METALLICITIES_VALUE = 0.013 #absolute values (so 0.013 ~ solar)
 NEB_DEBUG = True #dumps parameters related to nebular line emission in a file for debugging 
