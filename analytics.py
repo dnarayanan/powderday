@@ -11,7 +11,6 @@ import astropy.units as u
 from hyperion.model import ModelOutput
 
 
-
 def proj_plots(pf):
     print ('\n[analytics/proj_plots] Saving Diagnostic Projection Plots \n')
     p = yt.ProjectionPlot(pf,"x",("gas","density"),width=(cfg.par.zoom_box_len,'kpc'))
@@ -166,7 +165,7 @@ def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
 # Saves logU, Q and other related parameters in a file (sperate file is created for each galaxy)
 def logu_diagnostic(logU, Q, mstar, age, zmet):
     outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
-    f = open(outfile, "a")
+    f = open(outfile, 'a+')
     f.write(str(logU) + "\t" + str(Q) + "\t" + str(mstar) + "\t"+ str(age) + "\t" + str(zmet) + "\n")
     f.close()
     
