@@ -162,11 +162,7 @@ python-fsps
 python hooks for `fsps
 <https://code.google.com/p/fsps/source/checkout>`_ written by Daniel
 Foreman-Mackey and others called `python-fsps
-<http://dan.iel.fm/python-fsps/current/installation/>`_.  There are a
-few ways to install it.  Perhaps the easiest is via a pip installer::
-  >pip install fsps
-  
-Though you could also install the development version::
+<http://dan.iel.fm/python-fsps/current/installation/>`_.  You can install from the GitHub page::
   
   >git clone https://github.com/dfm/python-fsps.git
   >cd python-fsps
