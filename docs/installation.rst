@@ -280,7 +280,7 @@ To install these download them here:
 http://docs.hyperion-rt.org/en/stable/dust/dust.html.  Then to
 install::
 
-  >tar xvzf hyperion-dust-xxx.tar.gz
+  >tar -xvzf hyperion-dust-xxx.tar.gz
   >cd hyperion-dust-0.1.0
   >python setup.py build_dust
 
