@@ -67,6 +67,7 @@ well for users is to set up a different python environment for the
   >source activate pd_environment
 
 (And then when you want to exit the environment, you can type)::
+
   >source deactivate pd_environment
 
 Then, whenever you're in the ``pd_environment``, everything you
@@ -195,8 +196,8 @@ There are two ways to install `Hyperion <http://www.hyperion-rt.org>`_.  The fir
 Note, this will eventually become deprecated for `powderday
 <https://bitbucket.org/desika/powderday>`_ (or at least modified as
 the `Hyperion <http://www.hyperion-rt.org>`_ ``conda`` install ships
-with `yt 3.x<http://yt-project.org>`_, and eventual upgrade to `yt
-4.x<http://yt-project.org>`_ is coming in Summer 2019.
+with `yt 3.x <http://yt-project.org>`_, and eventual upgrade to `yt
+4.x <http://yt-project.org>`_ is coming in Summer 2019.
 
 The second and manual way to install `Hyperion
 <http://www.hyperion-rt.org>`_ follows:
