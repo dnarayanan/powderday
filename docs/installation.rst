@@ -147,6 +147,11 @@ default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in
   #define BASTI 0
   #define GENEVA 0
 
+To explicitly compile::
+
+  make clean
+  make
+  
 Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
    
   >export SPS_HOME=/Users/desika/fsps/
@@ -162,11 +167,7 @@ python-fsps
 python hooks for `fsps
 <https://code.google.com/p/fsps/source/checkout>`_ written by Daniel
 Foreman-Mackey and others called `python-fsps
-<http://dan.iel.fm/python-fsps/current/installation/>`_.  There are a
-few ways to install it.  Perhaps the easiest is via a pip installer::
-  >pip install fsps
-  
-Though you could also install the development version::
+<http://dan.iel.fm/python-fsps/current/installation/>`_.  You can install from the GitHub page::
   
   >git clone https://github.com/dfm/python-fsps.git
   >cd python-fsps
@@ -346,7 +347,7 @@ like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it may
 not actually execute properly if the correct compilers aren't set in
 the MakeFile.  Thanks to Ena Choi for pointing this one out.
 
-Other installation issues
+Runtime Issues
 ---------------
 
 1. Freezing during ``Pool.map`` and `'metallicity outside of range'` errors::
