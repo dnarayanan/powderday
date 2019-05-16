@@ -105,22 +105,9 @@ And that's it!  Once it's cloned, there's no subsidiary installation commands.
 yt
 --------------
 
-`powderday <https://bitbucket.org/desika/powderday>`_ has `yt
-<http://yt-project.org>`_ threaded throughout, and thus needs the
-software to be installed to function.  If you already have `yt
-<http://yt-project.org>`_ installed, be sure that it's `yt
-<http://yt-project.org>`_ 3.x (i.e at least the 'stable' branch).
-
-If you don't have `yt <http://yt-project.org>`_ already installed,
-it's super easy!  There are many ways to do this (as directed on the
-`yt <http://yt-project.org>`_ project website.  We require the
-standalone installer script for the Development version.  This will
-ensure that bugs caught in or bleeding-edge features of `yt
-<http://yt-project.org>`_ are included.
-
-Note: starting in Summer 2019, we will begin requiring the usage of
+`yt <http://yt-project.org>`_ 3.x comes bundled with `Hyperion <http://www.hyperion-rt.org>`_, so it is not necessary to install it on its own. However, starting in Summer 2019, we will begin requiring the usage of
 `yt <http://yt-project.org>`_ 4.x (under development), the 'demeshed'
-version of `yt <http://yt-project.org>`_ .  These docs will update
+version of `yt <http://yt-project.org>`_ .  These docs will updated
 accordingly when this is the case.
 
 .. _fsps:
@@ -139,7 +126,11 @@ It's likely going to be necessary downstream when installing  `python-fsps
   
   >F90FLAGS = -O -cpp -fPIC
 
-Additionally, at this time `powderday <https://bitbucket.org/desika/powderday>`_  doesn't work with the default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in `fsps <https://code.google.com/p/fsps/source/checkout>`_  to look like::
+if your ``gcc`` version is lower than 4.3.0, or::
+
+  >F90FLAGS = -03 -march=native -cpp -fPIC
+
+if ``gcc`` is version 4.3.0 or higher. This can be checked with ``gcc --version``. Additionally, at this time `powderday <https://bitbucket.org/desika/powderday>`_  doesn't work with the default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in `fsps <https://code.google.com/p/fsps/source/checkout>`_  to look like::
   
   !------set the isochrone library------!
   #define MIST 0
@@ -348,4 +339,14 @@ like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it may
 not actually execute properly if the correct compilers aren't set in
 the MakeFile.  Thanks to Ena Choi for pointing this one out.
 
-   
+Other installation issues
+---------------
+
+1. Freezing during ``Pool.map`` and `'metallicity outside of range'` errors::
+
+    Entering Pool.map multiprocessing for Stellar SED generation
+    SSP_GEN ERROR: metallicity outside of range          14
+    SSP_GEN ERROR: metallicity outside of range          15
+    ...
+
+Some installations have encountered this issue, but its cause has not yet been determined. One potential fix could be using `Miniconda <https://repo.continuum.io/miniconda/>`_ instead of `Anaconda <https://www.anaconda.com/distribution/>`_ Python, although this has not been confirmed to be the source of the problem. If something went wrong at any point in the installation process, starting from scratch and doing a fresh installation may also fix the issue.
