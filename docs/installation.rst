@@ -147,6 +147,11 @@ default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in
   #define BASTI 0
   #define GENEVA 0
 
+To explicitly compile::
+
+  make clean
+  make
+  
 Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
    
   >export SPS_HOME=/Users/desika/fsps/
