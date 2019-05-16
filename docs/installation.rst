@@ -59,7 +59,7 @@ of 2019.
 
 As you will see, `powderday <https://bitbucket.org/desika/powderday>`_
 currently requires a particular branch of `yt
-<http://yt-project.org>`_ As a result, one path that we have seen work
+<http://yt-project.org>`_. As a result, one path that we have seen work
 well for users is to set up a different python environment for the
 `powderday <https://bitbucket.org/desika/powderday>`_ installation.   This could look something like (assuming a ``conda`` installation of python)::
 
@@ -107,9 +107,9 @@ yt
 
 `yt <http://yt-project.org>`_ 3.x comes bundled with 
 `Hyperion <http://www.hyperion-rt.org>`_, so it is not necessary to install it 
-on its own. However, starting in Summer 2019, we will begin requiring the usage
- of `yt <http://yt-project.org>`_ 4.x (under development), the 'demeshed'
-version of `yt <http://yt-project.org>`_ .  These docs will updated
+on its own. However, starting in Summer 2019, we will begin requiring the 
+usage of `yt <http://yt-project.org>`_ 4.x (under development), the 'demeshed' 
+version of `yt <http://yt-project.org>`_ .  These docs will updated 
 accordingly when this is the case.
 
 .. _fsps:
@@ -121,10 +121,10 @@ fsps
   
   > git clone https://github.com/cconroy20/fsps
 
-and directions to the installation are in the `Manual <https://www.cfa.harvard.edu/~cconroy/ FSPS_files/MANUAL.pdf>`_
+and directions to the installation are in the `Manual <https://www.cfa.harvard.edu/~cconroy/ FSPS_files/MANUAL.pdf>`_.
 
 It's likely going to be necessary downstream when installing  `python-fsps
-<http://dan.iel.fm/python-fsps/current/installation/>`_ to have the -fPIC flags set in `fsps <https://code.google.com/p/fsps/source/checkout>`_ when making.  So, in the Makefile of `fsps <https://code.google.com/p/fsps/source/checkout>`_ , set::
+<http://dan.iel.fm/python-fsps/current/installation/>`_ to have the -fPIC flags set in `fsps <https://code.google.com/p/fsps/source/checkout>`_ when making.  So, in the Makefile of `fsps <https://code.google.com/p/fsps/source/checkout>`_, set::
   
   >F90FLAGS = -O -cpp -fPIC
 
@@ -184,11 +184,11 @@ Hyperion
 `powderday <https://bitbucket.org/desika/powderday>`_.  The full
 directions for installation are well-described on the main
 `Installation page for Hyperion
-<http://docs.hyperion-rt.org/en/stable/installation/installation.html>`_
+<http://docs.hyperion-rt.org/en/stable/installation/installation.html>`_.
 Here, we summarize the installation which should get most users
 through without any real difficulty.
 
-There are two ways to install `Hyperion <http://www.hyperion-rt.org>`_ .  The first is via ``conda``::
+There are two ways to install `Hyperion <http://www.hyperion-rt.org>`_.  The first is via ``conda``::
 
   >conda install -c conda-forge hyperion
 
