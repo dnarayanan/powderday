@@ -346,7 +346,7 @@ like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it may
 not actually execute properly if the correct compilers aren't set in
 the MakeFile.  Thanks to Ena Choi for pointing this one out.
 
-Other installation issues
+Runtime Issues
 ---------------
 
 1. Freezing during ``Pool.map`` and `'metallicity outside of range'` errors::
