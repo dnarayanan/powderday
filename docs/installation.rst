@@ -105,8 +105,10 @@ And that's it!  Once it's cloned, there's no subsidiary installation commands.
 yt
 --------------
 
-`yt <http://yt-project.org>`_ 3.x comes bundled with `Hyperion <http://www.hyperion-rt.org>`_, so it is not necessary to install it on its own. However, starting in Summer 2019, we will begin requiring the usage of
-`yt <http://yt-project.org>`_ 4.x (under development), the 'demeshed'
+`yt <http://yt-project.org>`_ 3.x comes bundled with 
+`Hyperion <http://www.hyperion-rt.org>`_, so it is not necessary to install it 
+on its own. However, starting in Summer 2019, we will begin requiring the usage
+ of `yt <http://yt-project.org>`_ 4.x (under development), the 'demeshed'
 version of `yt <http://yt-project.org>`_ .  These docs will updated
 accordingly when this is the case.
 
@@ -130,7 +132,11 @@ if your ``gcc`` version is lower than 4.3.0, or::
 
   >F90FLAGS = -03 -march=native -cpp -fPIC
 
-if ``gcc`` is version 4.3.0 or higher. This can be checked with ``gcc --version``. Additionally, at this time `powderday <https://bitbucket.org/desika/powderday>`_  doesn't work with the default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in `fsps <https://code.google.com/p/fsps/source/checkout>`_  to look like::
+if ``gcc`` is version 4.3.0 or higher. This can be checked with 
+``gcc --version``. Additionally, at this time 
+`powderday <https://bitbucket.org/desika/powderday>`_  doesn't work with the 
+default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in 
+`fsps <https://code.google.com/p/fsps/source/checkout>`_  to look like::
   
   !------set the isochrone library------!
   #define MIST 0
@@ -349,4 +355,10 @@ Other installation issues
     SSP_GEN ERROR: metallicity outside of range          15
     ...
 
-Some installations have encountered this issue, but its cause has not yet been determined. One potential fix could be using `Miniconda <https://repo.continuum.io/miniconda/>`_ instead of `Anaconda <https://www.anaconda.com/distribution/>`_ Python, although this has not been confirmed to be the source of the problem. If something went wrong at any point in the installation process, starting from scratch and doing a fresh installation may also fix the issue.
+Some installations have encountered this issue, but its cause has not yet been 
+determined. One potential fix could be using 
+`Miniconda <https://repo.continuum.io/miniconda/>`_ instead of 
+`Anaconda <https://www.anaconda.com/distribution/>`_ Python, although this has 
+not been confirmed to be the source of the problem. If something went wrong at 
+any point in the installation process, starting from scratch and doing a fresh 
+installation may also fix the issue.
