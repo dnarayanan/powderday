@@ -81,7 +81,9 @@ Error::
 Recompile fsps with the libraries set to Padova (and not MIST) in sps_vars.f90. Also recompile python-fsps
 
 
-6. If in powderday you start getting memory errors on the Pool process call that look like this:
+6. Pool.map errors in powderday
+--------------
+
 Freezing during ``Pool.map`` and `'metallicity outside of range'` errors::
 
     Entering Pool.map multiprocessing for Stellar SED generation
