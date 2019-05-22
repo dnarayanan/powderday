@@ -273,7 +273,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     if cfg.par.BH_SED == True:
 	if cfg.par.BH_MODEL == 'Nenkova':
 	    from agn_models.nenkova import Nenkova2008
-	    agn_spectrum = Nenkova2008().agn_spectrum
+	    agn_spectrum = Nenkova2008(cfg.model.nenkova_params).agn_spectrum
 	else:
 	    from agn_models.hopkins import agn_spectrum
 

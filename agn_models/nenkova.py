@@ -11,8 +11,9 @@ import config as cfg
     - Ray Sharma
 '''
 class Nenkova2008:
-    def __init__(self, N0=5, Y=30, i=0, q=1.5, sig=30, tv=40):
-        self.N0 = N0
+    def __init__(self, params=[5,30,0,1.5,30,40]):
+        N0, Y, i, q, sig, tv = params
+	self.N0 = N0
         self.Y = Y
         self.i = i
         self.q = q
