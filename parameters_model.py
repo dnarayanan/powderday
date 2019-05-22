@@ -18,6 +18,9 @@ PD_output_dir = '/Volumes/pegasus/pd_runs/test/'
 Auto_TF_file = 'snap'+snapnum_str+'.logical'
 Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 
+#orientation of snapshot
+THETA = [0]
+PHI = [0]
 
 #===============================================
 #FILE I/O
