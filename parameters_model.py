@@ -18,6 +18,8 @@ PD_output_dir = '/Volumes/pegasus/pd_runs/test/'
 Auto_TF_file = 'snap'+snapnum_str+'.logical'
 Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 
+#agn parameters
+nenkova_params = [5,30,0,1.5,30,40]
 
 #===============================================
 #FILE I/O
