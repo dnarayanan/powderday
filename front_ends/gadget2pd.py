@@ -9,7 +9,6 @@ import config as cfg
 from astropy.cosmology import Planck13
 import astropy.units as u
 from front_ends.redshift_multithread import *
-from agn_spectrum import *
 
 
 def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
@@ -266,7 +265,13 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         cfg.par.BH_SED  = None
 
     if cfg.par.BH_SED == True:
-
+	print ('BH Model: ',cfg.par.BH_MODEL)
+	if cfg.par.BH_MODEL == 'Nenkova':
+	    from agn_models.nenkova import Nenkova2008
+	    agn_spectrum = Nenkova2008().agn_spectrum
+	else:
+	    from agn_models.hopkins import *
+	
         ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
         ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
         ds.add_field(("bhnu"),function=_bhsed_nu,units='Hz',particle_type=True)
