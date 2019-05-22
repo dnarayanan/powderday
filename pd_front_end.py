@@ -248,8 +248,10 @@ if cfg.par.SED == True:
         m.set_n_initial_iterations(3)
         m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
         sed = m.add_peeled_images(sed = True,image=False)
-        
-        sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
+        if cfg.par.MANUAL_ORIENTATION == True:
+            sed.set_viewing_angles(np.array(cfg.model.THETA), np.array(cfg.model.PHI))
+        else:
+            sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
         sed.set_track_origin('basic')
    
         if cfg.par.SKIP_RT == False:
@@ -269,7 +271,10 @@ if cfg.par.SED == True:
 
         sed = m.add_peeled_images(sed = True,image=False)
         sed.set_wavelength_range(2500,0.001,1000.)
-        sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
+        if cfg.par.MANUAL_ORIENTATION == True:
+            sed.set_viewing_angles(np.array(cfg.model.THETA), np.array(cfg.model.PHI))
+        else:
+            sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
         sed.set_track_origin('basic')
         
         print('[pd_front_end]: Beginning RT Stage: Calculating SED using a binned spectrum')
@@ -309,8 +314,11 @@ if cfg.par.IMAGING == True:
     image = m_imaging.add_peeled_images(sed = True, image = True)
     if cfg.par.IMAGING_TRANSMISSION_FILTER == True:
         add_transmission_filters(image)
-        
-    image.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
+    
+    if cfg.par.MANUAL_ORIENTATION == True:
+        image.set_viewing_angles(np.array(cfg.model.THETA), np.array(cfg.model.PHI))
+    else:    
+        image.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
     image.set_track_origin('basic')
     image.set_image_size(cfg.par.npix_x,cfg.par.npix_y)
     image.set_image_limits(-dx/2.,dx/2.,-dy/2.,dy/2.)
