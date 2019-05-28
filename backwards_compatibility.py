@@ -56,6 +56,10 @@ def variable_set():
     except:
         cfg.par.SOURCES_RANDOM_POSITIONS = False
         
+    try:
+        cfg.par.FORCE_gas_logu
+    except:
+        cfg.par.FORCE_gas_logu = False
 
     try:
         cfg.par.gas_logu
@@ -89,6 +93,21 @@ def variable_set():
         cfg.model.TCMB = 2.73
 
     try:
+	cfg.model.THETA
+    except:
+	cfg.model.THETA = 0
+
+    try:
+	cfg.model.PHI
+    except:
+	cfg.model.PHI = 0
+
+    try:
+	cfg.par.MANUAL_ORIENTATION
+    except:
+	cfg.par.MANUAL_ORIENTATION = False
+
+    try:
         cfg.par.solar
     except:
         cfg.par.solar = 0.013
@@ -118,5 +137,29 @@ def variable_set():
     except:
         FORCE_STELLAR_METALLICITIES_VALUE = 0.013
 
+    try:
+        HII_T
+    except:
+        HII_T = 1.e4
 
-    return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.gas_logu,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE
+    try: 
+        HII_nh
+    except:
+        HII_nh = 1.e2
+
+    try:
+        HII_max_age
+    except: 
+        HII_max_age = 2.e-3
+        
+    try:
+        neb_file_output
+    except:
+        neb_file_output = True
+
+    try:
+        stellar_cluster_mass
+    except:
+        stellar_cluster_mass = 1.e4
+
+    return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,HII_T,HII_nh,HII_max_age,neb_file_output,stellar_cluster_mass
