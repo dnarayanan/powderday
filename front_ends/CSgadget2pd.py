@@ -9,7 +9,6 @@ import config as cfg
 from astropy.cosmology import Planck13
 import astropy.units as u
 from front_ends.redshift_multithread import *
-from agn_spectrum import *
 
 
 def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
@@ -79,7 +78,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         return data[('PartType0','Masses')]
         
     def _gasfh2(field,data):
-            try: return data[('PartType0','FractionH2')]
+        try: return data[('PartType0','FractionH2')]
         except: return np.zeros(len(data[('PartType0','Masses')]))
 
     def _gassfr(field,data):
@@ -264,14 +263,16 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     ds.add_field(('gasfh2'),function=_gasfh2,units='dimensionless',particle_type=True)
     ds.add_field(('gassfr'),function=_gassfr,units='g/s',particle_type=True)
 
-    #optionally add BH
-    #first see if the keyword even exists (to make it backwards compatible)
-    try:
-        cfg.par.BH_SED
-    except:
-        cfg.par.BH_SED  = None
-
     if cfg.par.BH_SED == True:
+	if cfg.par.BH_MODEL == 'Nenkova':
+	    from agn_models.nenkova import Nenkova2008
+	    try:
+		model = Nenkova2008(cfg.par.nenkova_params)
+	    except:
+		model = Nenkova2008()
+	    agn_spectrum = model.agn_spectrum
+	else:
+	    from agn_models.hopkins import agn_spectrum
 
         ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
         ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)

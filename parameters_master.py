@@ -120,7 +120,10 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.
 
 BH_SED = True
 BH_eta = 0.1 #bhluminosity = BH_eta * mdot * c**2.
+BH_model = "Nenkova"
+BH_modelfile = "./clumpy_models_201410_tvavg.hdf5"
 
+nenkova_params = [5,30,0,1.5,30,40] #Nenkova+ (2008) model parameters
 
 #===============================================
 #IMAGES AND SED
