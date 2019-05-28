@@ -461,23 +461,22 @@ def BH_source_add(m,pf,df_nu,boost):
 
         master_bh_fnu = np.zeros([nholes,len(dumnu)])
         
-
+        holecounter = 0
         for i in range(nholes):
             
 
             #don't create a BH luminsoity source if there's no luminosity since the SED will be nans/infs
             if ad["bhluminosity"][i].value > 0 :
-
+                
                 nu = ad["bhnu"].value
                 fnu = ad["bhsed"][i,:].value#.tolist()
                 nu,fnu = wavelength_compress(nu,fnu,df_nu)
 
                 master_bh_fnu[i,:] = fnu
-
-                if i == 0:
+                
+                if holecounter == 0:
                     fnu_compressed = np.zeros([nholes,len(nu)])
                 fnu_compressed[i,:] = fnu
-
 
                 #since the BH was added in a front end, we don't know
                 #if the hole is in the actual cut out region of the yt
@@ -505,7 +504,7 @@ def BH_source_add(m,pf,df_nu,boost):
                 else:
                     print('black hole #%d is not in the domain: rejecting adding it to the source list'%i)
 
-
+                holecounter += 1
 
     savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
     np.savez(savefile,nu = nu,fnu = master_bh_fnu,luminosity = ad["bhluminosity"].value)
