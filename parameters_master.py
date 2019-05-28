@@ -79,10 +79,9 @@ HII_T = 1.e4  #Ionized gas temperature in K for calculating nebular emission, de
 HII_nh = 1.e2 #Gas hydrogen density for calcualting nebular emission, default = 1.e2
 HII_max_age = 2.e-3 # Maximum age limit for calculating nebular emission, default = 2.e-3
 neb_file_output = True # Creates an output file with logU, Q ,stellar mass, age and metallicity(zmet) for each particle
-
-
-
 stellar_cluster_mass = 1.e4 #Mass of star clusters in Msun
+
+
 
 CF_on = False #if set to true, then we enable the Charlot & Fall birthcloud models 
 birth_cloud_clearing_age = 0.01 #Gyr - stars with age <
@@ -162,7 +161,7 @@ TRANSMISSION_FILTER_REDSHIFT = 3.1
 
 #center cell position #currently deprecated, though will be used for zooming later
 MANUAL_CENTERING = True
-
+MANUAL_ORIENTATION = False
 
 #===============================================
 #OTHER INFORMATION
