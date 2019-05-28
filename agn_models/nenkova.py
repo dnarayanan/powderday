@@ -12,7 +12,7 @@ import config as cfg
 '''
 class Nenkova2008:
     def __init__(self, params=[5,30,0,1.5,30,40]):
-        N0, Y, i, q, sig, tv = params
+	N0, Y, i, q, sig, tv = params
 	self.N0 = N0
         self.Y = Y
         self.i = i

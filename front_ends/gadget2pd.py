@@ -257,20 +257,16 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     ds.add_field(('gasfh2'),function=_gasfh2,units='dimensionless',particle_type=True)
     ds.add_field(('gassfr'),function=_gassfr,units='g/s',particle_type=True)
 
-    #optionally add BH
-    #first see if the keyword even exists (to make it backwards compatible)
-    try:
-        cfg.par.BH_SED
-    except:
-        cfg.par.BH_SED  = None
-
     if cfg.par.BH_SED == True:
-	print ('BH Model: ',cfg.par.BH_MODEL)
 	if cfg.par.BH_MODEL == 'Nenkova':
 	    from agn_models.nenkova import Nenkova2008
-	    agn_spectrum = Nenkova2008(cfg.model.nenkova_params).agn_spectrum
+	    try:
+		model = Nenkova2008(cfg.par.nenkova_params)
+	    except:
+		model = Nenkova2008()
+	    agn_spectrum = model.agn_spectrum
 	else:
-	    from agn_models.hopkins import *
+	    from agn_models.hopkins import agn_spectrum
 	
         ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
         ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
