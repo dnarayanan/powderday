@@ -15,7 +15,7 @@ from yt.mods import *
 import astropy.units as units
 import astropy.constants as constants
 from helpers import *
-
+from analytics import dump_AGN_SEDs
 
 
 class Sed_Bins:
@@ -506,6 +506,7 @@ def BH_source_add(m,pf,df_nu,boost):
 
                 holecounter += 1
 
-    savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
-    np.savez(savefile,nu = nu,fnu = master_bh_fnu,luminosity = ad["bhluminosity"].value)
+    dump_AGN_SEDs(nu,master_bh_fnu,ad["bhluminosity"].value)
+    #savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
+    #np.savez(savefile,nu = nu,fnu = master_bh_fnu,luminosity = ad["bhluminosity"].value)
     
