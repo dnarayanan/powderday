@@ -33,7 +33,7 @@ dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of 
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 dust_grid_type = 'dtm' #needs to be in ['dtm','rr','manual']
-dusttometals_ratio = 1.e-10
+dusttometals_ratio = 0.4
 enforce_energy_range = False #False is the default;  ensures energy conservation
 
 SUBLIMATION = False #do we automatically kill dust grains above the
@@ -122,14 +122,97 @@ SED_MONOCHROMATIC_nlam = 100
 
 
 IMAGING = False
-filter_file = '/ufrc/narayanan/desika.narayanan/pd/pdfilters.dat'
-npix_x = 512
-npix_y = 512
+filterdir = '/home/desika.narayanan/powderday/filters/'
+filterfiles = [
+    'arbitrary.filter',
+#    'ACS_F475W.filter',
+#    'ACS_F606W.filter',
+#    'ACS_F814W.filter',
+#    'B_subaru.filter',
+#    'F300W_WFPC2.filter',
+#    'F450W_WFPC2.filter',
+#    'flamingos_Ks.filter',
+#    'galex1500.filter',
+#    'galex2500.filter',
+#    'g_HSC.filter',
+#    'g_megaprime_sagem.filter',
+#    'g_SDSS.filter',
+#    'g_subaru.filter',
+#    'H1.filter',
+#    'H2.filter',
+#    'H_2mass.filter',
+#    'H_uv.filter',
+#    'IB427.SuprimeCam.filter',
+#    'IB464.SuprimeCam.filter',
+#    'IB484.SuprimeCam.filter',
+#    'IB505.SuprimeCam.filter',
+#    'IB527.SuprimeCam.filter',
+#    'IB574.SuprimeCam.filter',
+#    'IB624.SuprimeCam.filter',
+#    'IB679.SuprimeCam.filter',
+#    'IB709.SuprimeCam.filter',
+#    'IB738.SuprimeCam.filter',
+#    'IB767.SuprimeCam.filter',
+#    'IB827.SuprimeCam.filter',
+#    'i_HSC.filter',
+#    'i_megaprime_sagem.filter',
+#    'irac_ch1.filter',
+#    'irac_ch2.filter',
+#    'irac_ch3.filter',
+#    'irac_ch4.filter',
+#    'i_SDSS.filter',
+#    'i_subaru.filter',
+#    'J1.filter',
+#    'J2.filter',
+#    'J_2mass.filter',
+#    'J3.filter',
+#    'J_uv.filter',
+#    'J_wfcam.filter',
+#    'Ks_2mass.filter',
+#    'Ks_newfirm.filter',
+#    'K_uv.filter',
+#    'mips160.filter',
+#    'mips24.filter',
+#    'mips70.filter',
+#    'NB711.SuprimeCam.filter',
+#    'NB816.SuprimeCam.filter',
+#    'NICMOS_F160W.filter',
+#    'PACS_filter_100.filter',
+#    'PACS_filter_160.filter',
+#    'r_HSC.filter',
+#    'r_megaprime_sagem.filter',
+#    'r_SDSS.filter',
+#    'r_subaru.filter',
+#    'SPIRE_filter_250.filter',
+#    'SPIRE_filter_350.filter',
+#    'SPIRE_filter_500.filter',
+#    'STIS_clear.filter',
+#    'suprime_FDCCD_z.filter',
+#    'u_megaprime_sagem.filter',
+#    'u_SDSS.filter',
+#    'V_subaru.filter',
+#    'wfc3_f105w.filter',
+#    'wfc3-F125W.filter',
+#    'wfc3-F140W.filter',
+#    'wfc3-F160W.filter',
+#    'WFCAM_Y.filter',
+#    'wircam_H.filter',
+#    'wircam_Ks.filter',
+#    'y_HSC.filter',
+#    'Y_uv.filter',
+#    'z_HSC.filter',
+#    'z_megaprime_sagem.filter',
+#    'z_SDSS.filter',
+#    'z_subaru.filter',
+        ]
+
+npix_x = 128
+npix_y = 128
 
 #experimental and under development - not advised for use
 IMAGING_TRANSMISSION_FILTER = False
-filter_list = ['filters/STIS_clear.filter']
-TRANSMISSION_FILTER_REDSHIFT = 3.1
+filter_list = ['filters/arbitrary.filter']
+TRANSMISSION_FILTER_REDSHIFT = 0.001
 
 #===============================================
 #GRID INFORMATION  

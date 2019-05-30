@@ -283,16 +283,17 @@ if cfg.par.SED == True:
 #see if the variable exists to make code backwards compatible
 
 if cfg.par.IMAGING == True:
-    #read in the filters file
-    filters = np.loadtxt(par.filter_file)
+
+    #read in the filters files
+    filters = [np.loadtxt(par.filterdir+f) for f in par.filterfiles]
     print ("Beginning Monochromatic Imaging RT")
-
-
-
     
-    
+    # Extract and flatten all wavelengths in the filter files
+    wavs = [wav[0] for single_filter in filters for wav in single_filter]
+    wavs = list(set(wavs))      # Remove duplicates, if they exist
+
     if cfg.par.IMAGING_TRANSMISSION_FILTER == False:
-        m_imaging.set_monochromatic(True,wavelengths=filters)
+        m_imaging.set_monochromatic(True, wavelengths=wavs)
         m_imaging.set_raytracing(True)
         m_imaging.set_n_photons(initial = par.n_photons_initial,
                                 imaging_sources = par.n_photons_imaging,
