@@ -69,7 +69,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.BH_model,cfg.par.BH_modelfile,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,cfg.par.HII_T,cfg.par.HII_nh,cfg.par.HII_max_age,cfg.par.neb_file_output,cfg.par.stellar_cluster_mass= bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.BH_model,cfg.par.BH_modelfile,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,cfg.par.HII_T,cfg.par.HII_nh,cfg.par.HII_max_age,cfg.par.neb_file_output,cfg.par.stellar_cluster_mass, filterdir, filterfiles= bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -290,15 +290,20 @@ if cfg.par.SED == True:
 
 if cfg.par.IMAGING == True:
 
-    #read in the filters files
-    filters = [np.loadtxt(par.filterdir+f) for f in par.filterfiles]
     print ("Beginning Monochromatic Imaging RT")
-    
-    # Extract and flatten all wavelengths in the filter files
-    wavs = [wav[0] for single_filter in filters for wav in single_filter]
-    wavs = list(set(wavs))      # Remove duplicates, if they exist
 
     if cfg.par.IMAGING_TRANSMISSION_FILTER == False:
+       
+        #read in the filters file
+        try:
+            filters = [np.loadtxt(par.filterdir+f) for f in par.filterfiles]
+        except:
+            raise ValueError("Filters not found. Check 'filterdir' and 'filterfiles' parameters.")
+
+        # Extract and flatten all wavelengths in the filter files
+        wavs = [wav[0] for single_filter in filters for wav in single_filter]
+        wavs = list(set(wavs))      # Remove duplicates, if they exist
+
         m_imaging.set_monochromatic(True, wavelengths=wavs)
         m_imaging.set_raytracing(True)
         m_imaging.set_n_photons(initial = par.n_photons_initial,
@@ -306,7 +311,7 @@ if cfg.par.IMAGING == True:
                                 imaging_dust =  par.n_photons_imaging,
                                 raytracing_sources=par.n_photons_raytracing_sources,
                                 raytracing_dust = par.n_photons_raytracing_dust)
-       
+
     else:
         m_imaging.set_n_photons(initial=par.n_photons_initial,imaging=par.n_photons_imaging)
 

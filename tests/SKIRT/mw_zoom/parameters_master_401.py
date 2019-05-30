@@ -122,14 +122,27 @@ SED_MONOCHROMATIC_nlam = 100
 
 
 IMAGING = False
-filter_file = '/ufrc/narayanan/desika.narayanan/pd/pdfilters.dat'
-npix_x = 512
-npix_y = 512
+filterdir = '/home/desika.narayanan/powderday/filters/'
+filterfiles = [
+    'arbitrary.filter',
+#    'ACS_F475W.filter',
+#    'ACS_F606W.filter',
+#    'ACS_F814W.filter',
+#    'B_subaru.filter',
+]
+
+# Insert additional filter files as above. In bash, the following command 
+# formats the filenames for easy copying/pasting.
+# $ shopt -s globstar; printf "#    '%s'\n" *.filter
+
+
+npix_x = 128
+npix_y = 128
 
 #experimental and under development - not advised for use
 IMAGING_TRANSMISSION_FILTER = False
-filter_list = ['filters/STIS_clear.filter']
-TRANSMISSION_FILTER_REDSHIFT = 3.1
+filter_list = ['filters/arbitrary.filter']
+TRANSMISSION_FILTER_REDSHIFT = 0.001
 
 #===============================================
 #GRID INFORMATION  
