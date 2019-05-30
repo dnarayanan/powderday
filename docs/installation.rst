@@ -147,6 +147,11 @@ default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in
   #define BASTI 0
   #define GENEVA 0
 
+To explicitly compile::
+
+  make clean
+  make
+  
 Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
    
   >export SPS_HOME=/Users/desika/fsps/
@@ -162,11 +167,7 @@ python-fsps
 python hooks for `fsps
 <https://code.google.com/p/fsps/source/checkout>`_ written by Daniel
 Foreman-Mackey and others called `python-fsps
-<http://dan.iel.fm/python-fsps/current/installation/>`_.  There are a
-few ways to install it.  Perhaps the easiest is via a pip installer::
-  >pip install fsps
-  
-Though you could also install the development version::
+<http://dan.iel.fm/python-fsps/current/installation/>`_.  You can install from the GitHub page::
   
   >git clone https://github.com/dfm/python-fsps.git
   >cd python-fsps
@@ -280,7 +281,7 @@ To install these download them here:
 http://docs.hyperion-rt.org/en/stable/dust/dust.html.  Then to
 install::
 
-  >tar xvzf hyperion-dust-xxx.tar.gz
+  >tar -xvzf hyperion-dust-xxx.tar.gz
   >cd hyperion-dust-0.1.0
   >python setup.py build_dust
 
@@ -346,20 +347,27 @@ like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it may
 not actually execute properly if the correct compilers aren't set in
 the MakeFile.  Thanks to Ena Choi for pointing this one out.
 
-Other installation issues
+Hyperion Installation Issues
 ---------------
 
-1. Freezing during ``Pool.map`` and `'metallicity outside of range'` errors::
+1. Manual installations seem to not be fully updated from the
+   `Hyperion <http://www.hyperion-rt.org>`_ website.  The following
+   issues are known (uncovered by Katarina Kraljic)
 
-    Entering Pool.map multiprocessing for Stellar SED generation
-    SSP_GEN ERROR: metallicity outside of range          14
-    SSP_GEN ERROR: metallicity outside of range          15
-    ...
+   a. Hyperion-0.9.10 does not contain the /deps/fortran directory. It
+      will be necesary to take this from version 0.9.9
 
-Some installations have encountered this issue, but its cause has not yet been 
-determined. One potential fix could be using 
-`Miniconda <https://repo.continuum.io/miniconda/>`_ instead of 
-`Anaconda <https://www.anaconda.com/distribution/>`_ Python, although this has 
-not been confirmed to be the source of the problem. If something went wrong at 
-any point in the installation process, starting from scratch and doing a fresh 
-installation may also fix the issue.
+   b. /deps/fortran/install.py hardcodes some links that do not exist
+      anymore.  The URLs should be updated as:
+
+      ZLIB_URL = "http://zlib.net/zlib-1.2.11.tar.gz"  
+      HDF5_URL = 'http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.tar.gz'
+
+   c. Hyperions configure file doesn't have an option for an MPI
+    compiler that is mpif90.openmpi.  One option is to add this to the configure file around line 1940::
+
+      if test "$mpi_compiler" == mpif90.openmpi
+         then
+            mpi_compiler=`basename $(mpif90 -show | awk {'print $1'})`
+      fi
+   

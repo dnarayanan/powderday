@@ -79,3 +79,22 @@ Error::
     AssertionError: zmet=20 out of range [1, 12]
 
 Recompile fsps with the libraries set to Padova (and not MIST) in sps_vars.f90. Also recompile python-fsps
+
+
+6. Pool.map errors in powderday
+--------------
+
+Freezing during ``Pool.map`` and `'metallicity outside of range'` errors::
+
+    Entering Pool.map multiprocessing for Stellar SED generation
+    SSP_GEN ERROR: metallicity outside of range          14
+    SSP_GEN ERROR: metallicity outside of range          15
+    ...
+
+Some installations have encountered this issue, but its cause has not yet been 
+determined. One potential fix could be using 
+`Miniconda <https://repo.continuum.io/miniconda/>`_ instead of 
+`Anaconda <https://www.anaconda.com/distribution/>`_ Python, although this has 
+not been confirmed to be the source of the problem. If something went wrong at 
+any point in the installation process, starting from scratch and doing a fresh 
+installation may also fix the issue.

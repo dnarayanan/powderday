@@ -79,10 +79,9 @@ HII_T = 1.e4  #Ionized gas temperature in K for calculating nebular emission, de
 HII_nh = 1.e2 #Gas hydrogen density for calcualting nebular emission, default = 1.e2
 HII_max_age = 2.e-3 # Maximum age limit for calculating nebular emission, default = 2.e-3
 neb_file_output = True # Creates an output file with logU, Q ,stellar mass, age and metallicity(zmet) for each particle
-
-
-
 stellar_cluster_mass = 1.e4 #Mass of star clusters in Msun
+
+
 
 CF_on = False #if set to true, then we enable the Charlot & Fall birthcloud models 
 birth_cloud_clearing_age = 0.01 #Gyr - stars with age <
@@ -121,7 +120,10 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.
 
 BH_SED = True
 BH_eta = 0.1 #bhluminosity = BH_eta * mdot * c**2.
+BH_model = "Nenkova"
+BH_modelfile = "./clumpy_models_201410_tvavg.hdf5"
 
+nenkova_params = [5,30,0,1.5,30,40] #Nenkova+ (2008) model parameters
 
 #===============================================
 #IMAGES AND SED
@@ -242,7 +244,7 @@ TRANSMISSION_FILTER_REDSHIFT = 0.001
 
 #center cell position #currently deprecated, though will be used for zooming later
 MANUAL_CENTERING = True
-
+MANUAL_ORIENTATION = False
 
 #===============================================
 #OTHER INFORMATION
