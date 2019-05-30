@@ -141,7 +141,7 @@ npix_y = 128
 
 #experimental and under development - not advised for use
 IMAGING_TRANSMISSION_FILTER = False
-filter_list = ['filters/arbitrary.filter']
+filter_list = ['filters/irac_ch1.filter']
 TRANSMISSION_FILTER_REDSHIFT = 0.001
 
 #===============================================
