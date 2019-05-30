@@ -12,7 +12,7 @@
 #Original C code Author: Philip Hopkins
 from __future__ import print_function
 import numpy as np
-import ipdb
+#import ipdb
 
 #py2.* compatibility
 
@@ -93,7 +93,6 @@ def agn_spectrum(log_L_bol,SLOAN_KEY=0,MODEL_SPECTRUM_KEY=0):
     
 
     to_cgs = np.log10(3.9)+33
-    '''
     print ('\n')
     print (";;//         \n")
     print (";;// Intrinsic ,un-reddened) AGN spectrum for \n")
@@ -109,7 +108,7 @@ def agn_spectrum(log_L_bol,SLOAN_KEY=0,MODEL_SPECTRUM_KEY=0):
     print (";;//   nu = -3.00  ::  soft X-ray (integrated luminosity from 0.5-2 keV)  \n")
     print (";;//   nu = -4.00  ::  hard X-ray (integrated luminosity from 2-10  keV)  \n")
     print (";;//         \n")
-    '''
+    
    # for i_nu in np.arange(N_nu):
    #     print (nu_vec[i_nu],l_band_vec[i_nu],l_band_vec[i_nu]+to_cgs)
        

@@ -41,7 +41,7 @@ w = w.to(u.kpc)
 #plot the beast
 
 cax = ax.imshow(np.log(image.val[0,:, :, iwav]),
-                cmap = plt.cm.spectral, origin='lower', extent=[-w.value, w.value, -w.value, w.value])
+                cmap = plt.cm.viridis, origin='lower', extent=[-w.value, w.value, -w.value, w.value])
 
 
 plt.xlim([-image_width,image_width])

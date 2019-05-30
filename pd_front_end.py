@@ -69,7 +69,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 #=========================================================
 #Enforce Backwards Compatibility for Non-Critical Variables
 #=========================================================
-cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.gas_logu,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE= bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.BH_model,cfg.par.BH_modelfile,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,cfg.par.HII_T,cfg.par.HII_nh,cfg.par.HII_max_age,cfg.par.neb_file_output,cfg.par.stellar_cluster_mass= bc.variable_set()
 
 #=========================================================
 #GRIDDING
@@ -248,8 +248,11 @@ if cfg.par.SED == True:
         m.set_n_initial_iterations(3)
         m.set_convergence(True,percentile=99.,absolute=1.01,relative=1.01)
         sed = m.add_peeled_images(sed = True,image=False)
-        
-        sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
+	
+	if cfg.par.MANUAL_ORIENTATION == True:
+	    sed.set_viewing_angles(np.array(cfg.model.THETA), np.array(cfg.model.PHI))
+	else:
+            sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
         sed.set_track_origin('basic')
    
         if cfg.par.SKIP_RT == False:
@@ -269,7 +272,10 @@ if cfg.par.SED == True:
 
         sed = m.add_peeled_images(sed = True,image=False)
         sed.set_wavelength_range(2500,0.001,1000.)
-        sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
+	if cfg.par.MANUAL_ORIENTATION == True:
+	    sed.set_viewing_angles(np.array(cfg.model.THETA), np.array(cfg.model.PHI))
+	else:
+            sed.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
         sed.set_track_origin('basic')
         
         print('[pd_front_end]: Beginning RT Stage: Calculating SED using a binned spectrum')
@@ -310,8 +316,11 @@ if cfg.par.IMAGING == True:
     image = m_imaging.add_peeled_images(sed = True, image = True)
     if cfg.par.IMAGING_TRANSMISSION_FILTER == True:
         add_transmission_filters(image)
-        
-    image.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
+    
+    if cfg.par.MANUAL_ORIENTATION == True:
+	image.set_viewing_angles(np.array(cfg.model.THETA), np.array(cfg.model.PHI))
+    else:
+	image.set_viewing_angles(np.linspace(0,90,par.NTHETA).tolist()*par.NPHI,np.repeat(np.linspace(0,90,par.NPHI),par.NPHI))
     image.set_track_origin('basic')
     image.set_image_size(cfg.par.npix_x,cfg.par.npix_y)
     image.set_image_limits(-dx/2.,dx/2.,-dy/2.,dy/2.)
