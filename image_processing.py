@@ -5,8 +5,8 @@ import ipdb
 
 def add_transmission_filters(image):
 
-    for i in range(len(cfg.par.filter_list)):
-        lam,throughput = np.loadtxt(cfg.par.filter_list[i],unpack=True)
+    for i in range(len(cfg.par.filterfiles)):
+        lam,throughput = np.loadtxt(cfg.par.filterfiles[i],unpack=True)
         f = image.add_filter()
         f.name = 'dum'
         lam /= (1.+cfg.par.TRANSMISSION_FILTER_REDSHIFT)
