@@ -272,12 +272,12 @@ if cfg.par.IMAGING == True:
 
         # read in the filters file
         try:
-            filters = [np.loadtxt(par.filterdir+f) for f in par.filterfiles]
+            filter_data = [np.loadtxt(par.filterdir+f) for f in par.filterfiles]
         except:
             raise ValueError("Filters not found. Check 'filterdir' and 'filterfiles' parameters.")
 
         # Extract and flatten all wavelengths in the filter files
-        wavs = [wav[0] for single_filter in filters for wav in single_filter]
+        wavs = [wav[0] for single_filter in filter_data for wav in single_filter]
         wavs = list(set(wavs))      # Remove duplicates, if they exist
 
         m_imaging.set_monochromatic(True, wavelengths=wavs)
@@ -310,6 +310,8 @@ if cfg.par.IMAGING == True:
     if cfg.par.SKIP_RT == False:
         m_imaging.write(model.inputfile+'.image', overwrite=True)
         m_imaging.run(model.outputfile+'.image', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+
+        convolve(model.outputfile+'.image', par.filterfiles, filter_data)
 
     # Print a message in case that skip_rt debugging flag is set:
     print('++++++++++++++++++++++++++++++++++++')

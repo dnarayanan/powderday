@@ -3,10 +3,11 @@ import numpy as np
 from astropy import units as u
 import ipdb
 
+
 def add_transmission_filters(image):
 
     for i in range(len(cfg.par.filterfiles)):
-        lam,throughput = np.loadtxt(cfg.par.filterfiles[i],unpack=True)
+        lam, throughput = np.loadtxt(cfg.par.filterfiles[i], unpack=True)
         f = image.add_filter()
         f.name = 'dum'
         lam /= (1.+cfg.par.TRANSMISSION_FILTER_REDSHIFT)
@@ -17,3 +18,60 @@ def add_transmission_filters(image):
         f.central_spectral_coord = np.mean(lam)*u.micron
 
     return None
+
+
+def convolve(image_file, filterfilenames, filter_data):
+
+    # Load the model output object
+    m = ModelOutput(image_file)
+
+    # Get the image
+    image = m.get_image(units='ergs/s')
+
+    # This is where the convolved images will go
+    image_data = []
+
+    # Loop through the filters and match wavelengths to those in the image
+    for i in range(len(filterfilenames)):
+
+        # Skip "arbitrary.filter" if it is selected
+        if filterfilenames[i] == 'arbitrary.filter':
+            print("Skipping convolution of arbitrary filter")
+            continue
+
+        print("\nConvolving filter {}...".format(filterfilenames[i]))
+        wavs = filter_data[i][:, 0]
+
+        # Figure out which indices of the image wavelengths correspond to
+        # this filter
+        indices = []
+        for wav in wavs:
+            diffs = np.abs(image.wav - wav)
+            if min(diffs) <= np.std(diffs)/100.:
+                indices.append(diffs.argmin())
+
+        if len(indices) != len(wavs):
+            raise ValueError(
+                "Filter wavelength mismatch with available image wavelengths")
+
+        # Get the monochromatic images at each wavelength in the filter
+        images = [image.val[0, :, :, j] for j in indices]
+        print('Found {} monochromatic images'.format(len(images)))
+
+        # Show wavelengths and weights from filter file
+        wavelengths = [image.wav[j] for j in indices]
+        print('Wavelengths: {}'.format(wavelengths))
+
+        weights = filter_data[i][:, 1]
+        print('Weights: {}'.format(weights))
+
+        # Apply appropriate transmissivities from filter file
+        image_data.append(np.average(images, axis=0, weights=weights))
+
+    # Save the image data and filter information as an .hdf5 file
+    f = h5py.File(cfg.model.PD_output_dir+"convolved." +
+                  cfg.model.snapnum_str+".hdf5", "w")
+    f.create_dataset("image_data", data=image_data)
+    f.create_dataset("filter_data", data=filter_data)
+    f.create_dataset("filter_names", data=filterfilenames)
+    f.close()
