@@ -38,10 +38,10 @@ def convolve(image_file, filterfilenames, filter_data):
 
         # Skip "arbitrary.filter" if it is selected
         if filterfilenames[i] == 'arbitrary.filter':
-            print("Skipping convolution of arbitrary filter")
+            print(" Skipping convolution of arbitrary filter")
             continue
 
-        print("\nConvolving filter {}...".format(filterfilenames[i]))
+        print("\n Convolving filter {}...".format(filterfilenames[i]))
         wavs = filter_data[i][:, 0]
 
         # Figure out which indices of the image wavelengths correspond to
@@ -77,6 +77,6 @@ def convolve(image_file, filterfilenames, filter_data):
     f = h5py.File(cfg.model.PD_output_dir+"convolved." +
                   cfg.model.snapnum_str+".hdf5", "w")
     f.create_dataset("image_data", data=image_data)
-    f.create_dataset("filter_data", data=filter_data)
-    f.create_dataset("filter_names", data=filterfilenames)
+    for i in range(len(filterfilenames)):
+        f.create_dataset(filterfilenames[i], data=filter_data[i])
     f.close()

@@ -43,3 +43,50 @@ subdirectory of the `powderday
 
 Gasoline/Changa
 ============
+
+
+Imaging
+=======
+Monochromatic images can be produced from `powderday
+<https://bitbucket.org/desika/powderday>`_ image output files, which are 
+produced when ``IMAGING`` is set to true in the parameters master file.
+The procedure to plot an image is demonstrated in the convenience script 
+``make_image_single_wavelength.py``, found in the convenience subdirectory.
+
+If filters other than the default filter (arbitrary.filter) are used,
+`powderday <https://bitbucket.org/desika/powderday>`_ will convolve the
+monochromatic image outputs with each filter's transmission function and save
+the result in the output directory as ``convolved.XXX.hdf5``.
+
+Say we've set the following in the parameters master file:
+
+.. codeblock:: python
+
+    IMAGING = True
+    filterdir = '/home/cmcclellan1010/pd_cm/filters/'
+    filterfiles = [
+        'arbitrary.filter',
+        'galex1500.filter',
+    ]
+
+`powderday <https://bitbucket.org/desika/powderday>`_ will run at each 
+wavelength in all of the specified filter files, and produce convolved image
+data for each filter.
+
+After running 
+
+    >python pd_front_end.py examples/gadget/mw_zoom parameters_master_401 parameters_model_401
+
+we get the standard output files, along with the convolved image data (in this
+case, it is named ``convolved.134.hdf5``).
+
+To load in the image data, use
+
+.. codeblock:: python
+
+    import h5py
+    f = h5py.File('convolved.134.hdf5')
+
+Now, the image and filter data can be accessed in the hdf5 file format
+(thoroughly described in the `h5py documentation
+ <http://docs.h5py.org/en/stable/quick.html#quick>`_).
