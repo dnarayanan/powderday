@@ -90,11 +90,11 @@ Now, the image and filter data can be accessed in the hdf5 file format
 
 Image data is stored in a 3-dimensional array, with the first axis across the
 filters. The image's index is matched to its respective filter filename, stored
-in the ``filter_names`` dataset. So, if you wanted to access a convolved image
-and its corresponding filter name, you could do::
+in the ``filter_names`` dataset in the ``np.bytes_`` format. So, if you wanted 
+to access a convolved image and its corresponding filter name, you could do::
 
     >>> convolved_image = f['image_data'][0]
-    >>> filter_name = f['filter_names'][0]
+    >>> filter_name = f['filter_names'][0].astype(str)
     >>> print(filter_name)
     'galex1500.filter'
 
