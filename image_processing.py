@@ -62,10 +62,13 @@ def convolve(image_file, filterfilenames, filter_data):
 
         # Show wavelengths and weights from filter file
         wavelengths = [image.wav[j] for j in indices]
-        print('Wavelengths: {}'.format(wavelengths))
-
         weights = filter_data[i][:, 1]
-        print('Weights: {}'.format(weights))
+
+        print('Wavelength              Weight')
+        print('----------              ------')
+        for k in range(len(wavelengths)):
+            print(' {0:.2E}              {0:.2E}'.format(wavelengths[k], 
+                                                         weights[k]))
 
         # Apply appropriate transmissivities from filter file
         image_data.append(np.average(images, axis=0, weights=weights))
