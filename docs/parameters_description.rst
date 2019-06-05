@@ -259,6 +259,42 @@ Images and SED Parameters
 
    Number of polar angles to view galaxy at
 
+:IMAGING:
+
+   Must be set to ``True`` for 
+   `powderday <https://bitbucket.org/desika/powderday>`_ to produce an image
+   output file.
+
+:filterdir:
+
+   Directory where filter files are stored. They should be located in
+   "/home/desika/powderday/filters/".
+
+:filterfiles:
+
+   A list of the names of all filters to be used. 
+   `powderday <https://bitbucket.org/desika/powderday>`_ will run at each 
+   wavelength in all specified filter files, and will produce a ``.hdf5`` file
+   containing images convolved with each filter transmission function. Note 
+   that this can be quite computationally intensive and scales with the number
+   of wavelengths. Following the example in ``parameters_master``, additional 
+   filters matching the names in the ``filterdir``can be added to this list. 
+   In bash, ``cd`` into your ``filterdir`` and use the following command to 
+   format the filenames for easy copying and pasting into this list.
+   
+    .. code-block:: bash
+
+       >>> shopt -s globstar; printf "#    '%s'\n" *.filter
+
+:IMAGING_TRANSMISSION_FILTER:
+
+   If enabled, filter convolution will be performed through 
+   `Hyperion <http://www.hyperion-rt.org>`_ instead of through `powderday 
+   <https://bitbucket.org/desika/powderday>`_. This is much faster, but is 
+   still an experimental feature and does not seem to produce accurate 
+   convolved images.
+
+
 GRID INFORMATION
 ------------
 
