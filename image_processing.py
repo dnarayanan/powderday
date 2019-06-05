@@ -2,6 +2,8 @@ import config as cfg
 import numpy as np
 from astropy import units as u
 import ipdb
+from hyperion.model import ModelOutput
+import h5py
 
 
 def add_transmission_filters(image):
