@@ -9,7 +9,7 @@ from grid_construction import yt_octree_generate, grid_coordinate_boost, grid_ce
 from analytics import stellar_sed_write, dump_data, SKIRT_data_dump
 from astropy import constants
 import fsps
-from image_processing import add_transmission_filters
+from image_processing import add_transmission_filters, convolve
 from m_control_tools import *
 import backwards_compatibility as bc
 import error_handling as eh
