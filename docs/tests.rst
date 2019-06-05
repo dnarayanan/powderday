@@ -93,9 +93,11 @@ arbitrarily chosen).  Then you can run::
   python tests/SKIRT/skirt_sed_plot.py
 
 and it should produce an image like
-..image::images/powderday_skirt_comparison.png (in case the image
-doesn't actually embed, this is also found in the repo in the
-tests/SKIRT directory).
+
+.. image :: images/powderday_skirt_comparison.png 
+    :align: center
+
+This image is also found in the repo in the tests/SKIRT directory.
 	   
 
   
