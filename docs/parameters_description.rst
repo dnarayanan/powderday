@@ -278,9 +278,9 @@ Images and SED Parameters
    containing images convolved with each filter transmission function. Note 
    that this can be quite computationally intensive and scales with the number
    of wavelengths. Following the example in ``parameters_master``, additional 
-   filters matching the names in the ``filterdir``can be added to this list. 
-   In bash, ``cd`` into your ``filterdir`` and use the following command to 
-   format the filenames for easy copying and pasting into this list.
+   filters can be added to this list. In bash, ``cd`` into your ``filterdir`` 
+   and use the following command to format the filenames for easy copying and 
+   pasting into this list.
    
     .. code-block:: bash
 
