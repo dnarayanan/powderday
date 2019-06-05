@@ -58,17 +58,17 @@ def convolve(image_file, filterfilenames, filter_data):
 
         # Get the monochromatic images at each wavelength in the filter
         images = [image.val[0, :, :, j] for j in indices]
-        print('Found {} monochromatic images'.format(len(images)))
+        print(' Found {} monochromatic images'.format(len(images)))
 
         # Show wavelengths and weights from filter file
         wavelengths = [image.wav[j] for j in indices]
         weights = filter_data[i][:, 1]
 
-        print('Wavelength              Weight')
-        print('----------              ------')
+        print('\n Wavelength              Weight')
+        print(' ----------              ------')
         for k in range(len(wavelengths)):
-            print(' {0:.2E}              {0:.2E}'.format(wavelengths[k], 
-                                                         weights[k]))
+            print('  {:.2E}              {:.2E}'.format(wavelengths[k], 
+                                                        weights[k]))
 
         # Apply appropriate transmissivities from filter file
         image_data.append(np.average(images, axis=0, weights=weights))
