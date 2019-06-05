@@ -73,7 +73,7 @@ Say we've set the following in the parameters master file:
 wavelength in all of the specified filter files, and produce convolved image
 data for each filter.
 
-After running 
+After running::
 
     >python pd_front_end.py examples/gadget/mw_zoom parameters_master_401 parameters_model_401
 
@@ -86,8 +86,7 @@ To load in the image data, use::
     f = h5py.File('convolved.134.hdf5')
 
 Now, the image and filter data can be accessed in the hdf5 file format
-(thoroughly described in the `h5py documentation
- <http://docs.h5py.org/en/stable/quick.html#quick>`_).
+(thoroughly described in the `h5py <http://docs.h5py.org/en/stable/quick.html>`_ documentation).
 
 Image data is stored in a 3-dimensional array, with the first axis across the
 filters. The image's index is matched to its respective filter filename, stored
