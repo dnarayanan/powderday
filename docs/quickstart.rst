@@ -90,3 +90,46 @@ To load in the image data, use
 Now, the image and filter data can be accessed in the hdf5 file format
 (thoroughly described in the `h5py documentation
  <http://docs.h5py.org/en/stable/quick.html#quick>`_).
+
+Image data is stored in a 3-dimensional array, with the first axis across the
+filters. The image's index is matched to its respective filter filename, stored
+in the ``filter_names`` dataset. So, if you wanted to access a convolved image
+and its corresponding filter name, you could do
+
+.. codeblock:: python
+
+    >>> convolved_image = f['image_data'][0]
+    >>> filter_name = f['filter_names'][0]
+    >>> print(filter_name)
+    'galex1500.filter'
+
+The filter's transmission function must be accessed differently. Each filter's 
+transmission function is saved in its own dataset and can be called using its
+name.
+
+.. codeblock:: python
+
+    >>> f['galex1500.filter'][...]
+    array([[ 1.3406205e-01,  9.0700000e-07],
+           [ 1.3504851e-01,  1.1537571e-01],
+           [ 1.3702143e-01,  1.7650714e-01],
+           ...
+
+To plot an image, one might do something like this:
+
+.. codeblock:: python
+
+    import matplotlib.pyplot as plt
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    cax = ax.imshow(np.log(convolved_image), cmap=plt.cm.viridis, origin='lower')
+    ax.tick_params(axis='both', which='major', labelsize=10)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    plt.colorbar(cax, label='log Flux (ergs/s)', format='%.0e')
+    plt.title("Convolved image: {}".format(filter_name))
+    plt.show()
+
+.. image:: images/galex1500_sample.png
+    :align: center

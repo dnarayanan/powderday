@@ -74,9 +74,10 @@ def convolve(image_file, filterfilenames, filter_data):
         image_data.append(np.average(images, axis=0, weights=weights))
 
     # Save the image data and filter information as an .hdf5 file
-    f = h5py.File(cfg.model.PD_output_dir+"convolved." +
-                  cfg.model.snapnum_str+".hdf5", "w")
+    f = h5py.File(cfg.model.PD_output_dir+"convolved."+cfg.model.snapnum_str+".hdf5", "w")
     f.create_dataset("image_data", data=image_data)
+    f.create_dataset("filter_names", data=[filterfilenames[filterfilenames != 'arbitrary.filter']])
+
     for i in range(len(filterfilenames)):
         f.create_dataset(filterfilenames[i], data=filter_data[i])
     f.close()
