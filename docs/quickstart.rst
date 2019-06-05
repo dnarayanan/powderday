@@ -80,9 +80,7 @@ After running
 we get the standard output files, along with the convolved image data (in this
 case, it is named ``convolved.134.hdf5``).
 
-To load in the image data, use
-
-.. codeblock:: python
+To load in the image data, use::
 
     import h5py
     f = h5py.File('convolved.134.hdf5')
@@ -94,9 +92,7 @@ Now, the image and filter data can be accessed in the hdf5 file format
 Image data is stored in a 3-dimensional array, with the first axis across the
 filters. The image's index is matched to its respective filter filename, stored
 in the ``filter_names`` dataset. So, if you wanted to access a convolved image
-and its corresponding filter name, you could do
-
-.. codeblock:: python
+and its corresponding filter name, you could do::
 
     >>> convolved_image = f['image_data'][0]
     >>> filter_name = f['filter_names'][0]
@@ -105,9 +101,7 @@ and its corresponding filter name, you could do
 
 The filter's transmission function must be accessed differently. Each filter's 
 transmission function is saved in its own dataset and can be called using its
-name.
-
-.. codeblock:: python
+name::
 
     >>> f['galex1500.filter'][...]
     array([[ 1.3406205e-01,  9.0700000e-07],
@@ -115,9 +109,7 @@ name.
            [ 1.3702143e-01,  1.7650714e-01],
            ...
 
-To plot an image, one might do something like this:
-
-.. codeblock:: python
+To plot an image, one might do something like this::
 
     import matplotlib.pyplot as plt
     
