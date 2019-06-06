@@ -131,7 +131,7 @@ It's likely going to be necessary downstream when installing  `python-fsps
 
 if your ``gcc`` version is lower than 4.3.0, or::
 
-  >F90FLAGS = -03 -march=native -cpp -fPIC
+  >F90FLAGS = -03 -mtune=native -cpp -fPIC
 
 if ``gcc`` is version 4.3.0 or higher. This can be checked with 
 ``gcc --version``. Additionally, at this time 
