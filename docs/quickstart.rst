@@ -108,9 +108,9 @@ name::
            [ 1.3702143e-01,  1.7650714e-01],
            ...
 
-The image width (``float``) and its units (``str``) are stored as attributes of
-the ``image_data`` dataset. To plot an image, one might do something like 
-this::
+The image width (``float``) and its units (``np.bytes_`` string) are stored as 
+attributes of the ``image_data`` dataset. To plot an image, one might do 
+something like this::
 
     import matplotlib.pyplot as plt
     import numpy as np
@@ -119,15 +119,16 @@ this::
     ax = fig.add_subplot(111)
 
     w = f['image_data'].attrs['width']
-    w_unit = f['image_data'].attrs['width_unit']
+    w_unit = f['image_data'].attrs['width_unit'].astype(str)
 
-    cax = ax.imshow(np.log(convolved_image), cmap=plt.cm.viridis, origin='lower',
-                    extent=[-w, w, -w, w])
+    cax = ax.imshow(np.log(convolved_image), cmap=plt.cm.viridis, 
+                    origin='lower', extent=[-w, w, -w, w])
     ax.tick_params(axis='both', which='major', labelsize=10)
     ax.set_xlabel('x ({})'.format(w_unit))
     ax.set_ylabel('y ({})'.format(w_unit))
-    plt.colorbar(cax, label='log Flux (ergs/s)', format='%.0e')
+    plt.colorbar(cax, label='log Luminosity (ergs/s)', format='%.0e')
     plt.title("Convolved image: {}".format(filter_name))
+    plt.tight_layout()
     plt.show()
 
 .. image:: images/galex1500_sample.png
