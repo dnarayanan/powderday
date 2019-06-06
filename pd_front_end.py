@@ -274,7 +274,7 @@ if cfg.par.IMAGING == True:
         try:
             filter_data = [np.loadtxt(par.filterdir+f) for f in par.filterfiles]
         except:
-            raise ValueError("Filters not found. Check 'filterdir' and 'filterfiles' parameters.")
+            raise ValueError("Filters not found. You may be running above changeset 'f1f16eb' with an outdated parameters_master file. Please update to the most recent parameters_master format or ensure that the 'filterdir' and 'filterfiles' parameters are set properly.")
 
         # Extract and flatten all wavelengths in the filter files
         wavs = [wav[0] for single_filter in filter_data for wav in single_filter]
