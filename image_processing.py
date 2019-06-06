@@ -30,6 +30,10 @@ def convolve(image_file, filterfilenames, filter_data):
     # Get the image
     image = m.get_image(units='ergs/s')
 
+    # Get image bounds for correct scaling
+    w = image.x_max * u.cm
+    w = w.to(u.kpc)
+
     # This is where the convolved images will go
     image_data = []
 
@@ -49,7 +53,11 @@ def convolve(image_file, filterfilenames, filter_data):
         indices = []
         for wav in wavs:
             diffs = np.abs(image.wav - wav)
-            if min(diffs) <= np.std(diffs)/100.:
+
+            # Make sure the closest wavelength is *really* close --- there
+            # could be rounding errors, but we don't want to accidentally grab
+            # the wrong wavelength
+            if min(diffs) <= 1e-10:
                 indices.append(diffs.argmin())
 
         if len(indices) != len(wavs):
@@ -67,16 +75,20 @@ def convolve(image_file, filterfilenames, filter_data):
         print('\n Wavelength              Weight')
         print(' ----------              ------')
         for k in range(len(wavelengths)):
-            print('  {:.2E}              {:.2E}'.format(wavelengths[k], 
+            print('  {:.2E}              {:.2E}'.format(wavelengths[k],
                                                         weights[k]))
 
         # Apply appropriate transmissivities from filter file
         image_data.append(np.average(images, axis=0, weights=weights))
 
     # Save the image data and filter information as an .hdf5 file
-    f = h5py.File(cfg.model.PD_output_dir+"convolved."+cfg.model.snapnum_str+".hdf5", "w")
+    f = h5py.File(cfg.model.PD_output_dir+"convolved." +
+                  cfg.model.snapnum_str+".hdf5", "w")
     f.create_dataset("image_data", data=image_data)
-    f.create_dataset("filter_names", data=[filterfilenames[filterfilenames != 'arbitrary.filter']])
+    f['image_data'].attrs['width'] = w.value
+    f['image_data'].attrs['width_unit'] = np.bytes_('kpc')
+    f.create_dataset("filter_names", data=[
+                     filterfilenames[filterfilenames != 'arbitrary.filter']])
 
     for i in range(len(filterfilenames)):
         f.create_dataset(filterfilenames[i], data=filter_data[i])
