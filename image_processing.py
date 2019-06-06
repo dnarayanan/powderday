@@ -37,11 +37,14 @@ def convolve(image_file, filterfilenames, filter_data):
     # This is where the convolved images will go
     image_data = []
 
+    # List the filters that shouldn't be used in convolution
+    skip_conv = ['arbitrary.filter', 'pdfilters.dat']
+
     # Loop through the filters and match wavelengths to those in the image
     for i in range(len(filterfilenames)):
 
         # Skip "arbitrary.filter" if it is selected
-        if filterfilenames[i] in ['arbitrary.filter', 'pdfilters.dat']:
+        if filterfilenames[i] in skip_conv:
             print(" Skipping convolution of default filter")
             continue
 
@@ -87,8 +90,10 @@ def convolve(image_file, filterfilenames, filter_data):
     f.create_dataset("image_data", data=image_data)
     f['image_data'].attrs['width'] = w.value
     f['image_data'].attrs['width_unit'] = np.bytes_('kpc')
-    f.create_dataset("filter_names", data=[
-                     filterfilenames[filterfilenames != 'arbitrary.filter']])
+
+    # Don't add the names of filters that were skipped
+    trimmed_names = list(set(filterfilenames) - set(skip_conv))
+    f.create_dataset("filter_names", data=trimmed_names)
 
     for i in range(len(filterfilenames)):
         f.create_dataset(filterfilenames[i], data=filter_data[i])
