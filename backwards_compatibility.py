@@ -180,6 +180,10 @@ def variable_set():
     try:
         cfg.par.filterfiles
     except:
-        cfg.par.filterfiles = None
+        try:
+            cfg.par.filter_file
+            cfg.par.filterfiles = [cfg.par.filter_file]
+        except:
+            cfg.par.filterfiles = ['pdfilters.dat']
 
     return cfg.par.FORCE_RANDOM_SEED,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.BH_model,cfg.par.BH_modelfile,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,HII_T,HII_nh,HII_max_age,neb_file_output,stellar_cluster_mass, cfg.par.filterdir, cfg.par.filterfiles
