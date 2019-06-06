@@ -41,8 +41,8 @@ def convolve(image_file, filterfilenames, filter_data):
     for i in range(len(filterfilenames)):
 
         # Skip "arbitrary.filter" if it is selected
-        if filterfilenames[i] == 'arbitrary.filter':
-            print(" Skipping convolution of arbitrary filter")
+        if filterfilenames[i] in ['arbitrary.filter', 'pdfilters.dat']:
+            print(" Skipping convolution of default filter")
             continue
 
         print("\n Convolving filter {}...".format(filterfilenames[i]))
