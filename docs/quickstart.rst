@@ -83,7 +83,7 @@ case, it is named ``convolved.134.hdf5``).
 To load in the image data, use::
 
     import h5py
-    f = h5py.File('convolved.134.hdf5')
+    f = h5py.File('convolved.134.hdf5', 'r')
 
 Now, the image and filter data can be accessed in the hdf5 file format
 (thoroughly described in the `h5py <http://docs.h5py.org/en/stable/quick.html>`_ documentation).
@@ -108,16 +108,24 @@ name::
            [ 1.3702143e-01,  1.7650714e-01],
            ...
 
-To plot an image, one might do something like this::
+The image width (``float``) and its units (``str``) are stored as attributes of
+the ``image_data`` dataset. To plot an image, one might do something like 
+this::
 
     import matplotlib.pyplot as plt
-    
+    import numpy as np
+
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    cax = ax.imshow(np.log(convolved_image), cmap=plt.cm.viridis, origin='lower')
+
+    w = f['image_data'].attrs['width']
+    w_unit = f['image_data'].attrs['width_unit']
+
+    cax = ax.imshow(np.log(convolved_image), cmap=plt.cm.viridis, origin='lower',
+                    extent=[-w, w, -w, w])
     ax.tick_params(axis='both', which='major', labelsize=10)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
+    ax.set_xlabel('x ({})'.format(w_unit))
+    ax.set_ylabel('y ({})'.format(w_unit))
     plt.colorbar(cax, label='log Flux (ergs/s)', format='%.0e')
     plt.title("Convolved image: {}".format(filter_name))
     plt.show()

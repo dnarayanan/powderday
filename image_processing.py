@@ -29,6 +29,10 @@ def convolve(image_file, filterfilenames, filter_data):
 
     # Get the image
     image = m.get_image(units='ergs/s')
+    
+    # Get image bounds for correct scaling    
+    w = image.x_max * u.cm
+    w = w.to(u.kpc)
 
     # This is where the convolved images will go
     image_data = []
@@ -76,7 +80,10 @@ def convolve(image_file, filterfilenames, filter_data):
     # Save the image data and filter information as an .hdf5 file
     f = h5py.File(cfg.model.PD_output_dir+"convolved."+cfg.model.snapnum_str+".hdf5", "w")
     f.create_dataset("image_data", data=image_data)
+    f['image_data'].attrs['width'] = w.value
+    f['image_data'].attrs['width_unit'] = 'kpc'    
     f.create_dataset("filter_names", data=[filterfilenames[filterfilenames != 'arbitrary.filter']])
+    
 
     for i in range(len(filterfilenames)):
         f.create_dataset(filterfilenames[i], data=filter_data[i])
