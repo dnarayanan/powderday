@@ -7,7 +7,7 @@ import numpy as np
 from subprocess import call
 import pdb,ipdb
 import caesar
-from str_snap import str_snap
+#from str_snap import str_snap
 
 #===============================================
 #MODIFIABLE HEADER
@@ -15,14 +15,14 @@ from str_snap import str_snap
 #shell scripting
 nnodes=1
 
-startsnap = 83
-endsnap = 86
+startsnap = 25
+endsnap = 305
 npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/simba_m25n512.galaxies_pos_for_pd.npz'
 
-model_dir_base = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/manual_jackiematus/'
+model_dir_base = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/manual/'
 hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/simba/m25n512/output'
 
-hydro_outputfile = '/ufrc/narayanan/pg3552/gizmo/output_time/output_m50.txt'
+hydro_outputfile = '/ufrc/narayanan/pg3552/gizmo/output_time/output_m25.txt'
 
 #if we want to write the files locally, but have the paths in the
 #parameters files lead to differnet paths (for a different computer),
@@ -62,19 +62,19 @@ for snap in range(len(scalefactor)):
 
 for snap in range(startsnap,endsnap):
 
-    model_dir = model_dir_base+'/snap'+str_snap(snap)
+    model_dir = model_dir_base+'/snap'+str(snap).zfill(3)
     model_dir_remote = model_dir
     
     redshift = snaps_to_redshift[str(snap)]
     tcmb = 2.73*(1.+redshift)
 
-    NGALAXIES = ngalaxies['snap'+str_snap(snap)]
+    NGALAXIES = ngalaxies['snap'+str(snap).zfill(3)]
     
     for nh in range(NGALAXIES):
         
-        xpos = pos['galaxy'+str(nh)]['snap'+str_snap(snap)][0]
-        ypos = pos['galaxy'+str(nh)]['snap'+str_snap(snap)][1]
-        zpos = pos['galaxy'+str(nh)]['snap'+str_snap(snap)][2]
+        xpos = pos['galaxy'+str(nh)]['snap'+str(snap).zfill(3)][0]
+        ypos = pos['galaxy'+str(nh)]['snap'+str(snap).zfill(3)][1]
+        zpos = pos['galaxy'+str(nh)]['snap'+str(snap).zfill(3)][2]
 
         #figure out tcmb
 
