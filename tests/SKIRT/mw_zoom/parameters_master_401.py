@@ -42,14 +42,6 @@ SUBLIMATION = True #do we automatically kill dust grains above the
 SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 
 #===============================================
-#HYDRO CODE UNITS
-#===============================================
-unit_mass = 1.e10 #msun
-unit_length = 1. #kpc
-unit_age = 1. #Gyr
-unit_velocity = 1.e5 #cm/s
-
-#===============================================
 #STELLAR SEDS INFO
 #===============================================
 FORCE_BINNING = True #force SED binning
