@@ -5,8 +5,8 @@ matplotlib.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-sys.path.insert(0,'../')
-from agn_spectrum import *
+sys.path.insert(0,'../agn_models/')
+from hopkins import *
 
 from astropy import units as u
 from astropy import constants as const
@@ -54,6 +54,7 @@ for i in range(nholes):
     if data['luminosity'][i] > 0:
         ax.plot(pd_lam.value,pd_fnu)
 
+'''
 #now plot the powderday SED
 run = '/ufrc/narayanan/desika.narayanan/pd_runs/ena/example.094.rtout.bhon.sed'
 m = ModelOutput(run)
@@ -64,6 +65,7 @@ fullrun_nu = (const.c/fullrun_wav).to(u.Hz)
 fullrun_fnu = fullrun_flux/fullrun_nu
 
 ax.plot(fullrun_wav.value,fullrun_fnu[0,:].value/1.e20)
+'''
 
 ax.set_xlabel(r'Wavelength ($\mu$m)')
 ax.set_ylabel(r'F$_\nu$')

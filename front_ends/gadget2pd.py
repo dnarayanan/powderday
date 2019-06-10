@@ -258,7 +258,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     ds.add_field(('gassfr'),function=_gassfr,units='g/s',particle_type=True)
 
     if cfg.par.BH_SED == True:
-	if cfg.par.BH_MODEL == 'Nenkova':
+	if cfg.par.BH_Model == 'Nenkova':
 	    from agn_models.nenkova import Nenkova2008
 	    try:
 		model = Nenkova2008(cfg.par.nenkova_params)
