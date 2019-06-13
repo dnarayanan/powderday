@@ -65,24 +65,24 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
 
     def _gassmootheddensity(field,data):
         ## yt-3.x
-        # return data[("deposit","PartType0_smoothed_density")]
+        return data[("deposit","PartType0_smoothed_density")]
 
         ## yt-4.x
-        return data.ds.parameters['octree'][('PartType0', 'density')]
+        # return data.ds.parameters['octree'][('PartType0', 'density')]
 
     def _gassmoothedmetals(field,data):
         ## yt-3.x        
-        # return data[("deposit","PartType0_smoothed_metallicity")]
+        return data[("deposit","PartType0_smoothed_metallicity")]
 
         ## yt-4.x
-        return data.ds.parameters['octree'][('PartType0', 'metallicity')]
+        # return data.ds.parameters['octree'][('PartType0', 'metallicity')]
 
     def _gassmoothedmasses(field,data):
         ## yt-3.x
-        # return data[('deposit', 'PartType0_mass')]
+        return data[('deposit', 'PartType0_mass')]
 
         # yt-4.x
-        return data.ds.parameters['octree'][('PartType0', 'Masses')]
+        # return data.ds.parameters['octree'][('PartType0', 'Masses')]
     
     def _metaldens_00(field,data):
         return (data["PartType0","Density"]*data["PartType0","Metallicity_00"])
@@ -98,11 +98,11 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
 
     def _metalsmoothedmasses(field,data):
         ## yt-3.x
-        # return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
+        return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
 
         ## yt-4.x
-        return (data.ds.parameters['octree'][('PartType0', 'Masses')]
-            * data.ds.parameters['octree'][('PartType0','metallicity')])
+        # return (data.ds.parameters['octree'][('PartType0', 'Masses')]
+        #     * data.ds.parameters['octree'][('PartType0','metallicity')])
 
     def _dustmass(field_data):
         return (data["PartType0","DustMass"].in_units("Msun").value)
@@ -145,8 +145,8 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         return age
 
     ## yt-3.x
-    # def _starsmoothedmasses(field,data):
-    #    return data[('deposit','PartType4_mass')]
+    def _starsmoothedmasses(field,data):
+       return data[('deposit','PartType4_mass')]
 
 
     def _bhluminosity(field,data):
@@ -217,18 +217,18 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     #load the ds
     if fname != None:
         ## yt-3.x
-        # ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
-        # ds.index
-        # ad = ds.all_data()
-
-        ## yt-4.x
-        ds = yt.load(fname)
+        ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
         ds.index
         ad = ds.all_data()
-        left = np.array([pos[0] for pos in bounding_box])
-        right = np.array([pos[1] for pos in bounding_box])
-        octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref)
-        ds.parameters['octree'] = octree
+
+        ## yt-4.x
+        # ds = yt.load(fname)
+        # ds.index
+        # ad = ds.all_data()
+        # left = np.array([pos[0] for pos in bounding_box])
+        # right = np.array([pos[1] for pos in bounding_box])
+        # octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref)
+        # ds.parameters['octree'] = octree
 
 
     #for the metal fields have a few options since gadget can have different nomenclatures
@@ -251,9 +251,9 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         ds.add_field(('PartType0','metalmass'),function=_metalmass,units="g", particle_type=True)
         
     ## yt-3.x
-    # metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
-    #                                              "SmoothingLength", "Density","metalmass",
-    #                                              ds.field_info)
+    metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
+                                                 "SmoothingLength", "Density","metalmass",
+                                                 ds.field_info)
 
     ds.add_field(('metalsmoothedmasses'),function=_metalsmoothedmasses,units='code_metallicity',particle_type=True)
 
@@ -275,7 +275,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         ds.add_field(('bulgestarcoordinates'),function=_bulgestarcoordinates,units='cm',particle_type=True)
     
     ## yt-3.x
-    # ds.add_field(('starsmoothedmasses'),function=_starsmoothedmasses,units='g',particle_type=True)
+    ds.add_field(('starsmoothedmasses'),function=_starsmoothedmasses,units='g',particle_type=True)
 
     ds.add_field(('gasdensity'),function=_gasdensity,units='g/cm**3',particle_type=True)
     #Gas Coordinates need to be in Comoving/h as they'll get converted later.
