@@ -76,16 +76,20 @@ def yt_octree_generate(fname, field_add):
 
     # ==================================
 
-    refined = saved['octree']
-    refined2 = []
+    refined = saved['octree'].astype('bool')
+    
+    try:
+        refined.reshape(len(ir1))
+    except:
+        refinements = 2**(3*cfg.par.oref)
+        refined2 = []
+        for r in refined:
+            if r == 1:
+                refined2.append(True)
+            if r == 0:
+                refined2.append(np.zeros(refinements).astype('bool'))
+        refined = np.hstack(refined2)
 
-    for i in range(len(refined)):
-        if refined[i] == 1:
-            refined2.append(True)
-        if refined[i] == 0:
-            refined2.append(False)
-
-    refined = refined2
 
     # smooth the data on to the octree
 
