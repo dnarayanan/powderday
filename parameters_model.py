@@ -11,7 +11,7 @@ else:
 
 hydro_dir = '/Volumes/pegasus/gadgetruns/SIGS/G2/'
 
-Gadget_snap_name = 'snapshot_'+snapnum_str+'.hdf5'
+snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
 #where the files should go
 PD_output_dir = '/Volumes/pegasus/pd_runs/test/'

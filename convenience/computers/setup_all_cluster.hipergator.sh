@@ -56,10 +56,10 @@ do
     if [ $COSMOFLAG -eq 1 ]
     then
 	echo "hydro_dir = '$hydro_dir_remote/snapdir_'+snapnum_str+'/'">>$filem
-	echo "Gadget_snap_name = 'snapshot_'+snapnum_str+'.0.hdf5'" >>$filem
+	echo "snapshot_name = 'snapshot_'+snapnum_str+'.0.hdf5'" >>$filem
     else
 	echo "hydro_dir = '$hydro_dir_remote/'">>$filem
-	echo "Gadget_snap_name = 'snapshot_'+snapnum_str+'.hdf5'" >>$filem
+	echo "snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'" >>$filem
     fi
 
 

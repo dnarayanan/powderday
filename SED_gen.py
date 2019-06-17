@@ -75,7 +75,7 @@ def calc_LogU(nuin0, specin0, age, zmet, T, mstar=1.0, file_output=True):
 def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
 
-    fname = cfg.model.hydro_dir+cfg.model.Gadget_snap_name
+    fname = cfg.model.hydro_dir+cfg.model.snapshot_name
     
     bbox = [[-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],

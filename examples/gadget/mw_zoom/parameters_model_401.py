@@ -11,7 +11,7 @@ else:
 
 hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_safe_packages/pd/examples/gadget/mw_zoom/'
 
-Gadget_snap_name = 'snapshot_'+snapnum_str+'.hdf5'
+snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
 #where the files should go
 PD_output_dir = '/ufrc/narayanan/desika.narayanan/pd/examples/gadget/mw_zoom/'

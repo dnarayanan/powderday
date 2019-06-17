@@ -22,7 +22,7 @@ gadget snapshot naming conventions, it can be useful to have a snippet along the
   else:
      snapnum_str = str(Gadget_snap_num)
 
-  Gadget_snap_name = 'snapshot_'+snapnum_str+'.hdf5'
+  snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
 
 That puts the correct number of 0's in front of the snapshot name.
@@ -314,7 +314,7 @@ You should probably never touch any of these.
 parameters_model
 ============
 
-:Gadget_snap_name:
+:snapshot_name:
 
    String - currently the snapshot name of your galaxy run. (Naming
    will change as other front ends built).
