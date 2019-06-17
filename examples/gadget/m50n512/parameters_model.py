@@ -1,13 +1,13 @@
 #snapshot parameters
 
-Gadget_snap_num = 80
+snapshot_num = 80
 
-if Gadget_snap_num < 10:
-    snapnum_str = '00'+str(Gadget_snap_num)
-elif Gadget_snap_num >= 10 and Gadget_snap_num <100:
-    snapnum_str = '0'+str(Gadget_snap_num)
+if snapshot_num < 10:
+    snapnum_str = '00'+str(snapshot_num)
+elif snapshot_num >= 10 and snapshot_num <100:
+    snapnum_str = '0'+str(snapshot_num)
 else:
-    snapnum_str = str(Gadget_snap_num)
+    snapnum_str = str(snapshot_num)
 
 hydro_dir = '/ufrc/narayanan/desika.narayanan/pd/examples/gadget/m50n512/'
 

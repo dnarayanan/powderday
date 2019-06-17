@@ -1,13 +1,13 @@
 #snapshot parameters
 
-Gadget_snap_num = 20
+snapshot_num = 20
 
-if Gadget_snap_num < 10:
-    snapnum_str = '00'+str(Gadget_snap_num)
-elif Gadget_snap_num >= 10 and Gadget_snap_num <100:
-    snapnum_str = '0'+str(Gadget_snap_num)
+if snapshot_num < 10:
+    snapnum_str = '00'+str(snapshot_num)
+elif snapshot_num >= 10 and snapshot_num <100:
+    snapnum_str = '0'+str(snapshot_num)
 else:
-    snapnum_str = str(Gadget_snap_num)
+    snapnum_str = str(snapshot_num)
 
 hydro_dir = '/Volumes/pegasus/gadgetruns/SIGS/G2/'
 

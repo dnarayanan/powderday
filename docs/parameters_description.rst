@@ -14,13 +14,13 @@ python code files because this enables you to embed little snippets in
 them that may be particular to your galaxy run.  For example, for
 gadget snapshot naming conventions, it can be useful to have a snippet along the lines of::
 
-  Gadget_snap_num = 20
-  if Gadget_snap_num < 10:
-     snapnum_str = '00'+str(Gadget_snap_num)
-  elif Gadget_snap_num >= 10 and Gadget_snap_num <100:
-     snapnum_str = '0'+str(Gadget_snap_num)
+  snapshot_num = 20
+  if snapshot_num < 10:
+     snapnum_str = '00'+str(snapshot_num)
+  elif snapshot_num >= 10 and snapshot_num <100:
+     snapnum_str = '0'+str(snapshot_num)
   else:
-     snapnum_str = str(Gadget_snap_num)
+     snapnum_str = str(snapshot_num)
 
   snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
