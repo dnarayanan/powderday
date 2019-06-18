@@ -15,8 +15,7 @@ def manual(pf,refined):
     try:
         smoothed_dust_masses = ad[('dustsmoothedmasses')]
     except:
-        raise KeyError('Dust mass information not present in this snapshot. '
-                       'Please set another dust grid type in the parameters.')
+        raise KeyError('Dust mass information not present in this snapshot. Please set another dust grid type in the parameters.')
     dust_to_gas_ratio = smoothed_dust_masses.in_units('g')/masses_smoothed
     #masses_smoothed can be 0 at some places; this will make dtg nan
     #out even though it would eventually get multiplied to 0 when we
