@@ -11,8 +11,12 @@ def manual(pf,refined):
     wFalse = np.where(np.array(refined) == False)[0]
     metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
     ad = pf.all_data()
-
-    smoothed_dust_masses = ad[('dustsmoothedmasses')]
+    
+    try:
+        smoothed_dust_masses = ad[('dustsmoothedmasses')]
+    except:
+        raise KeyError('Dust mass information not present in this snapshot. '
+                       'Please set another dust grid type in the parameters.')
     dust_to_gas_ratio = smoothed_dust_masses.in_units('g')/masses_smoothed
     #masses_smoothed can be 0 at some places; this will make dtg nan
     #out even though it would eventually get multiplied to 0 when we
