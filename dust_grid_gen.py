@@ -11,11 +11,8 @@ def manual(pf,refined):
     wFalse = np.where(np.array(refined) == False)[0]
     metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
     ad = pf.all_data()
-    pf.add_deposited_particle_field(("PartType0","Dust_Masses"),"sum")
 
-    #it seems like the dust masses aren't currently read in with a
-    #mass in yt -- this may be fixed downstream
-    smoothed_dust_masses = pf.arr(ad[('deposit', 'PartType0_sum_Dust_Masses')],'code_mass')
+    smoothed_dust_masses = ad[('dustsmoothedmasses')]
     dust_to_gas_ratio = smoothed_dust_masses.in_units('g')/masses_smoothed
     #masses_smoothed can be 0 at some places; this will make dtg nan
     #out even though it would eventually get multiplied to 0 when we

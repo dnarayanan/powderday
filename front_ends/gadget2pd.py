@@ -87,8 +87,11 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     def _metalsmoothedmasses(field,data):
         return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
 
-    def _dustmass(field_data):
-        return (data["PartType0","DustMass"].in_units("Msun").value)
+    def _dustmass(field, data):
+        return (data.ds.arr(data[("PartType0","Dust_Masses")].value, 'code_mass'))
+
+    def _dustsmoothedmasses(field, data):
+        return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
 
     def _stellarages(field,data):
         ad = data.ds.all_data()
@@ -230,8 +233,10 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
 
     #get the dust mass
     
-    #if  ('PartType0', 'Dust_Masses') in ds.derived_field_list:
-    #    ds.add_field(('dustmass'),function=_dustmass,units='Msun',particle_type=True)
+    if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
+        ds.add_field(('dustmass'),function=_dustmass,units='code_mass',particle_type=True)
+        ds.add_deposited_particle_field(("PartType0","Dust_Masses"),"sum")
+        ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
 
     ds.add_field(('starmasses'),function=_starmasses,units='g',particle_type=True)
     ds.add_field(('starcoordinates'),function=_starcoordinates,units='cm',particle_type=True)
