@@ -1,13 +1,7 @@
 #snapshot parameters
 
 snapshot_num = 134
-
-if snapshot_num < 10:
-    snapnum_str = '00'+str(snapshot_num)
-elif snapshot_num >= 10 and snapshot_num <100:
-    snapnum_str = '0'+str(snapshot_num)
-else:
-    snapnum_str = str(snapshot_num)
+snapnum_str = '{:03d}'.format(snapshot_num)
 
 hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_safe_packages/pd/examples/gadget/mw_zoom/'
 
