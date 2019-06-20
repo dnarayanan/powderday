@@ -132,7 +132,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
 
 
     def _starsmoothedmasses(field,data):
-       return data[('deposit','PartType4_mass')]
+        return data[('deposit','PartType4_mass')]
 
 
     def _bhluminosity(field,data):
