@@ -26,33 +26,6 @@ class Sed_Bins:
         self.fsps_zmet=fsps_zmet
 
 
-
-def add_super_simple_sed(stars_list,diskstars_list,bulgestars_list,m,lum,temp):
-
-    print ('entering add_super_simple_sed function in source_creation')
-
-    nstars = len(stars_list)
-    nstars_disk = len(diskstars_list)
-    nstars_bulge = len(bulgestars_list)
-
-    for i in range(nstars):
-
-        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*constants.R_sun.cgs.value,
-                               position = stars_list[i].positions)
-    
-    
-    for i in range(nstars_disk):
-        
-        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*constants.R_sun.cgs.value,
-                               position = diskstars_list[i].positions)
-    
-    for i in range(nstars_bulge):
-        
-        m.add_spherical_source(luminosity = lum, temperature = temp, radius = 10.*constants.R_sun.cgs.value,
-                               position = bulgestars_list[i].positions)
-    
-
-
 def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m):
     
         

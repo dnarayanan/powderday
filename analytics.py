@@ -24,16 +24,6 @@ def proj_plots(pf):
     return None
 
 
-
-def mass_weighted_distribution(array,masses,fileout='mwd.png',nbins=100):
-    
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.hist(array,bins=nbins,weights=masses,log=True,normed=True)
-    
-    fig.savefig(fileout)
-
-
 def stellar_sed_write(m):
     
     totallum = 0
@@ -114,21 +104,6 @@ def dump_data(pf,model):
 
     np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,tdust = tdust)
 
-
-def dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer):
-    
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    wFalse = np.where(np.array(refined) == False)[0]
-    d_dtm = dust_smoothed_dtm[wFalse]
-    d_dtm = d_dtm[d_dtm>0]
-    d_rr = dust_smoothed_remy_ruyer[wFalse]
-    d_rr = d_rr[d_rr>0]
-    histvals,binvals,patches = plt.hist(np.log10(d_dtm),bins=100)
-    histvals,binvals,patches = plt.hist(np.log10(d_rr),bins=100)
-    ax.set_xlabel('dust density')
-    ax.set_ylabel('N')
-    fig.savefig(cfg.model.PD_output_dir+'dust_density.'+cfg.model.snapnum_str+'.png',dpi=300)
 
 def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
 
