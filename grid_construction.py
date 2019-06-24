@@ -12,7 +12,7 @@ from astropy.io import ascii
 import hyperion_octree_stats as hos
 from gridstats import gridstats
 from octree_zoom import octree_zoom_bbox_filter
-from analytics import proj_plots, dust_histograms
+from analytics import proj_plots
 from yt.mods import *
 from yt.geometry.oct_container import OctreeContainer
 from yt.geometry.selection_routines import AlwaysSelector
@@ -96,8 +96,6 @@ def yt_octree_generate(fname, field_add):
     volume = np.zeros(len(refined))
 
     if cfg.par.CONSTANT_DUST_GRID == False:
-
-        # dust_histograms(refined,dust_smoothed_dtm,dust_smoothed_remy_ruyer)
 
         # crash the code if the parameter choice for dust grid type isn't in 
         # the hard coded valid list below
