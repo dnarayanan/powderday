@@ -67,6 +67,14 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
     def _metaldens(field,data):
         return (data["Gas","Density"]*data["Gas","Metals"])
 
+    def _gasfh2(field,data):
+        try: return data[('PartType0','FractionH2')] # change this
+        except: return (data.ds.arr(data[("Gas", "Mass")].value*0, 'dimensionless'))
+
+    def _gassfr(field,data):
+        try: return data[('PartType0','StarFormationRate')] # change this
+        except: return (data.ds.arr(data[("Gas", "Mass")].value*0, 'code_mass/code_time'))
+
 
     if fname != None:
         ds = yt.load(fname,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
@@ -113,6 +121,8 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
     ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
     ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
     ds.add_field(('gasmasses'),function=_gasmasses,units='g',particle_type=True)
+    ds.add_field(('gasfh2'),function=_gasfh2,units='dimensionless',particle_type=True)
+    ds.add_field(('gassfr'),function=_gassfr,units='g/s',particle_type=True)
 
     #only add the disk star fields if there are any disk stars
     if len(ad["diskstars","Mass"]) > 0 :
