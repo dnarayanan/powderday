@@ -61,6 +61,9 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
     def _gassmoothedmasses(field,data):
         return data[('deposit', 'Gas_mass')]
 
+    def _gasmasses(field,data):
+        return data[('Gas','Mass')]
+
     def _metaldens(field,data):
         return (data["Gas","Density"]*data["Gas","Metals"])
 
@@ -109,6 +112,7 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
     ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
     ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
     ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
+    ds.add_field(('gasmasses'),function=_gasmasses,units='g',particle_type=True)
 
     #only add the disk star fields if there are any disk stars
     if len(ad["diskstars","Mass"]) > 0 :
