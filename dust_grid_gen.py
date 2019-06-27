@@ -35,8 +35,6 @@ def dtm_grid(pf,refined):
     print ('[grid_construction/dust_grid_gen/dtm_grid: ] len(wFalse) = ',len(wFalse))
     print ('[grid_construction/dust_grid_gen/dtm_grid: ] len(metallicity_smoothed) = ',len(metallicity_smoothed))
 
-    import pdb
-    pdb.set_trace()
     dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
     return dust_smoothed
 
