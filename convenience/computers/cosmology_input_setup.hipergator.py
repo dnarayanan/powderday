@@ -19,8 +19,8 @@ startsnap = 25
 endsnap = 305
 npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/simba_m25n512.galaxies_pos_for_pd.npz'
 
-model_dir_base = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/manual/'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/gizmo_runs/simba/m25n512/output'
+model_dir_base = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/manual/nebular_lines_off/'
+hydro_dir = '/orange/narayanan/desika.narayanan/gizmo_runs/simba/m25n512/output'
 
 hydro_outputfile = '/ufrc/narayanan/pg3552/gizmo/output_time/output_m25.txt'
 
