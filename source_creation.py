@@ -419,7 +419,7 @@ def wavelength_compress(nu,fnu,df_nu):
 def BH_source_add(m,pf,df_nu,boost):
 
     print("--------------------------------\n")
-    print("Adding Black Holes to Source List\n")
+    print("Adding Black Holes to Source List in source_creation\n")
     print("--------------------------------\n")
  
     ad = pf.all_data()
