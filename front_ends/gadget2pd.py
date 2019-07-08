@@ -265,7 +265,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
                     model = Nenkova2008
 
             else:
-                from agn_models.hopkinds import agn_spectrum
+                from agn_models.hopkins import agn_spectrum
 
                 ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
                 ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
