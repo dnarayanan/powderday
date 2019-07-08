@@ -263,7 +263,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     ds.add_field(('gassfr'),function=_gassfr,units='g/s',particle_type=True)
 
     if cfg.par.BH_SED == True:
-        if len(ds.all_data()[('PartType5', 'BH_Mass')] > 0:
+        if len(ds.all_data()[('PartType5', 'BH_Mass')] > 0):
 	        if cfg.par.BH_model == 'Nenkova':
 	            from agn_models.nenkova import Nenkova2008
 	            try:
