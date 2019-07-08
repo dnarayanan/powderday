@@ -257,16 +257,15 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
 
     if cfg.par.BH_SED == True:
         if len(ds.all_data()[('PartType5', 'BH_Mass')]) > 0:
-	        if cfg.par.BH_model == 'Nenkova':
+            if cfg.par.BH_model == 'Nenkova':
                 from agn_models.nenkova import Nenkova2008
                 try:
                     model = Nenkova2008(cfg.par.nenkova_params)
                 except:
-                    model = Nenkova2008()
-                agn_spectrum = model.agn_spectrum
+                    model = Nenkova2008
 
             else:
-                from agn_models.hopkins import agn_spectrum
+                from agn_models.hopkinds import agn_spectrum
 
                 ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
                 ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
@@ -274,9 +273,11 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
                 ds.add_field(("bhsed"),function=_bhsed_sed,units="erg/s",particle_type=True)
         else:
             print('No black holes found (length of BH_Mass field is 0)')
+    else:
+        pass
 
     if starages == True:
         ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
-   
+
 
     return ds
