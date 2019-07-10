@@ -23,7 +23,14 @@ class Nenkova2008:
         self.tv = tv
 
     def agn_spectrum(self, log_L_bol):
-        h = h5py.File(cfg.par.BH_modelfile, 'r')
+        try:
+            h = h5py.File(cfg.par.BH_modelfile, 'r')
+        except:
+            raise FileNotFoundError('Unable to find Nenkova BH model file. '
+                                    'Check the path in parameters master, or '
+                                    'download the file here: https://www.clump'
+                                    'y.org/downloads/clumpy_models_201410_tvav'
+                                    'g.hdf5')
 
         ix = ((h['N0'][:] == self.N0) &
               (h['Y'][:] == self.Y) &
