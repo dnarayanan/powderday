@@ -266,7 +266,8 @@ Black Holes
 :BH_modelfile:
 
     The path to the Nenkova model file if BH_model is set to Nenkova. This file
-    can be downloaded here: 
+    can be downloaded here and placed anywhere in the repository, as long as 
+    the correct path is set in ``parameters_master``: 
     <https://www.clumpy.org/downloads/clumpy_models_201410_tvavg.hdf5>
 
 :nenkova_params:
