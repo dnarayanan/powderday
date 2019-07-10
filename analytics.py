@@ -109,16 +109,45 @@ def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
 
     #create stars file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 
-    #ages and metallicities need to come from the stars list in case
-    #we do something in parameters master to change the values
-    smetallicity = [stars.metals for stars in stars_list]
-    sage = [(stars.age*u.Gyr).to(u.yr).value for stars in stars_list] #to get in yr
-    shsml = np.repeat(hsml_in_pc,len(sage))
-
     spos_x = ad["starcoordinates"][:,0].in_units('pc').value
     spos_y = ad["starcoordinates"][:,1].in_units('pc').value
     spos_z = ad["starcoordinates"][:,2].in_units('pc').value
     smasses = ad["starmasses"].in_units('Msun').value
+
+    try:
+        disk_x = ad["diskstarcoordinates"][:,0].in_units('pc').value
+        disk_y = ad["diskstarcoordinates"][:,1].in_units('pc').value
+        disk_z = ad["diskstarcoordinates"][:,2].in_units('pc').value
+        diskmasses = ad["diskstarmasses"].in_units('Msun').value
+    except:
+        disk_x, disk_y, disk_z, diskmasses = (np.array([]),)*4
+
+    try:
+        bulge_x = ad["bulgestarcoordinates"][:,0].in_units('pc').value
+        bulge_y = ad["bulgestarcoordinates"][:,1].in_units('pc').value
+        bulge_z = ad["bulgestarcoordinates"][:,2].in_units('pc').value
+        bulgemasses = ad["bulgestarmasses"].in_units('Msun').value
+    except:
+        bulge_x, bulge_y, bulge_z, bulgemasses = (np.array([]),)*4
+
+    spos_x = np.concatenate((spos_x, disk_x, bulge_x))
+    spos_y = np.concatenate((spos_y, disk_y, bulge_y))
+    spos_z = np.concatenate((spos_z, disk_z, bulge_z))
+    smasses = np.concatenate((smasses, diskmasses, bulgemasses))
+
+    fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+
+    dmet = [fsps_metals[cfg.par.disk_stars_metals]]*len(diskmasses)
+    dage = [(cfg.par.disk_stars_age*u.Gyr).to(u.yr).value]*len(diskmasses)
+
+    bmet = [fsps_metals[cfg.par.bulge_stars_metals]]*len(bulgemasses)
+    bage = [(cfg.par.bulge_stars_age*u.Gyr).to(u.yr).value]*len(bulgemasses)
+
+    #ages and metallicities need to come from the stars list in case
+    #we do something in parameters master to change the values
+    smetallicity = [stars.metals for stars in stars_list] + dmet + bmet
+    sage = [(stars.age*u.Gyr).to(u.yr).value for stars in stars_list] + dage + bage
+    shsml = np.repeat(hsml_in_pc,len(sage))
 
     try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".stars.particles.txt"
     except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".stars.particles.txt"
