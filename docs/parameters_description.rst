@@ -15,12 +15,7 @@ them that may be particular to your galaxy run.  For example, for
 gadget snapshot naming conventions, it can be useful to have a snippet along the lines of::
 
   snapshot_num = 20
-  if snapshot_num < 10:
-     snapnum_str = '00'+str(snapshot_num)
-  elif snapshot_num >= 10 and snapshot_num <100:
-     snapnum_str = '0'+str(snapshot_num)
-  else:
-     snapnum_str = str(snapshot_num)
+  snapnum_str = '{:03d}'.format(snapshot_num)
 
   snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
@@ -250,7 +245,34 @@ Stellar SEDs Info
    this should point to something like:
    "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
    
-   
+
+Black Holes
+------------
+
+:BH_SED:
+
+    If true, `powderday <https://bitbucket.org/desika/powderday>`_ will 
+    attempt to load black hole information from the snapshot.
+
+:BH_eta:
+
+    Used in calculating the black hole luminosity (bhluminosity = 
+    BH_eta * mdot * c**2.)
+
+:BH_model:
+
+    BH model type, either Nenkova or other.
+
+:BH_modelfile:
+
+    The path to the Nenkova model file if BH_model is set to Nenkova. This file
+    can be downloaded here: 
+    <https://www.clumpy.org/downloads/clumpy_models_201410_tvavg.hdf5>
+
+:nenkova_params:
+
+    Nenkova+ (2008) model parameters.
+
 
 Images and SED Parameters
 ------------
