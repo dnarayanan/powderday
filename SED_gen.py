@@ -265,7 +265,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
 
 
-def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
+def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,cosmoflag,sp):
 
     
     #NOTE this part is just for the gadget simulations - this will
@@ -362,7 +362,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
 
 
 
-    if ad.ds.cosmological_simulation == False:
+    if cosmoflag == False:
 
         #calculate the SED for disk stars; note, this gets calculated
         #whether or not disk stars actually exist.  if they don't exist,

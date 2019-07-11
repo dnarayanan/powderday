@@ -116,7 +116,7 @@ fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
 N_METAL_BINS = len(fsps_metals)
 
 if par.FORCE_BINNING == False:
-    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(stars_list, diskstars_list, bulgestars_list, sp)
+    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(stars_list, diskstars_list, bulgestars_list, pf.cosmological_simulation, sp)
     m = add_newstars(df_nu, stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, stars_list, diskstars_list, bulgestars_list, pf.cosmological_simulation, m)
 
 
