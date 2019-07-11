@@ -6,7 +6,6 @@ import numpy as np
 from subprocess import call
 import pdb,ipdb
 import caesar
-from str_snap import str_snap
 
 #===============================================
 #MODIFIABLE HEADER
@@ -48,9 +47,9 @@ NHALOS = data['NHALOS']
 for snap in range(startsnap,endsnap):
     for nh in range(NHALOS):
         
-        xpos = pos['halo'+str(nh)]['snap'+str_snap(snap)][0]
-        ypos = pos['halo'+str(nh)]['snap'+str_snap(snap)][1]
-        zpos = pos['halo'+str(nh)]['snap'+str_snap(snap)][2]
+        xpos = pos['halo'+str(nh)]['snap{:03d}'.format(snap)][0]
+        ypos = pos['halo'+str(nh)]['snap{:03d}'.format(snap)][1]
+        zpos = pos['halo'+str(nh)]['snap{:03d}'.format(snap)][2]
         
         cmd = "./cosmology_setup_all_cluster.fock.sh "+str(nnodes)+' '+model_dir+' '+hydro_dir+' '+model_run_name+' '+str(COSMOFLAG)+' '+model_dir_remote+' '+hydro_dir_remote+' '+str(xpos)+' '+str(ypos)+' '+str(zpos)+' '+str(nh)+' '+str(snap)+' '+str(NHALOS)
         #print cmd
