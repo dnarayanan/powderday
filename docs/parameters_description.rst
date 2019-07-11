@@ -159,11 +159,6 @@ Stellar SEDs Info
    (as opposed to broken up into bins).  This said, this can be very
    slow to run, and extremely hard on the memory.
 
-:COSMOFLAG:
-
-   Boolean.  True means this is a cosmological simulation, False means
-   idealized galaxy simulation.
-
 :imf_type:
 
    IMF parameter for stellar pops calculations.
@@ -175,7 +170,6 @@ Stellar SEDs Info
    4. Dave
 
    Though note options 3 and 4 are currently not supported.
-
 
 :pagb:
 
