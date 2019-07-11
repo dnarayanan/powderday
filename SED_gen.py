@@ -88,7 +88,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
     
     '''
-    if cfg.par.COSMOFLAG == False:
+    if ad.ds.cosmological_simulation == False:
     
         #this commented code needs to be switched with the next two line block if the yt fix isn't in place yet
         simtime = pf.current_time.in_units('Gyr')
@@ -191,7 +191,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
     #use PartType2 and 3 as 'filler' particle types, so they may exist
     #even if they don't correspond to disk/bulge stars.
 
-    if cfg.par.COSMOFLAG == False:
+    if ad.ds.cosmological_simulation == False:
 
         #Disk Stars
 
@@ -362,14 +362,14 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,sp):
 
 
 
-    if cfg.par.COSMOFLAG == False:
+    if ad.ds.cosmological_simulation == False:
 
         #calculate the SED for disk stars; note, this gets calculated
         #whether or not disk stars actually exist.  if they don't exist,
         #bogus values for the disk age and metallicity are assigned based
         #on whatever par.disk_stars_age and metallicity are.  it's no big
         #deal since these SEDs don't end up getting added to the model in
-        #source_creation as long as COSMOFLAG == True.  
+        #source_creation.  
         
         #note, even if there are no disk/bulge stars, these are still
         #created since they're completely based on input parameters in

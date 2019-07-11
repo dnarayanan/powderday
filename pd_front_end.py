@@ -117,7 +117,7 @@ N_METAL_BINS = len(fsps_metals)
 
 if par.FORCE_BINNING == False:
     stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(stars_list, diskstars_list, bulgestars_list, sp)
-    m = add_newstars(df_nu, stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, stars_list, diskstars_list, bulgestars_list, m)
+    m = add_newstars(df_nu, stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, stars_list, diskstars_list, bulgestars_list, pf.cosmological_simulation, m)
 
 
 else:
@@ -126,7 +126,7 @@ else:
     # that sg.allstars_sed_gen() be called first.
 
     m = add_binned_seds(df_nu, stars_list, diskstars_list,
-                        bulgestars_list, m, sp)
+                        bulgestars_list, pf.cosmological_simulation, m, sp)
 
 
 # save SEDs
