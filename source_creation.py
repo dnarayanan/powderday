@@ -26,7 +26,7 @@ class Sed_Bins:
         self.fsps_zmet=fsps_zmet
 
 
-def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m):
+def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m):
     
         
     nstars = len(stars_list)
@@ -62,7 +62,7 @@ def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,disk
 
     print ('[source_creation/add_newstars:] totallum_newstars = ',totallum_newstars)
         
-    if cfg.par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
+    if cosmoflag == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
             
     m.set_sample_sources_evenly(True)
     
@@ -139,7 +139,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
 
     
 
-def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp):
+def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,sp):
     
 
   
@@ -273,7 +273,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp):
             
     print ('Running SPS for Binned SEDs')
     print ('calculating the SEDs for ',len(sed_bins_list_has_stellar_mass),' bins')
-    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,diskstars_list,bulgestars_list,sp)
+    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,diskstars_list,bulgestars_list,cosmoflag,sp)
 
 
 
@@ -379,7 +379,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,m,sp):
                 counter+=1
 
                 
-    if cfg.par.COSMOFLAG == False: add_bulge_disk_stars(df_nu,binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
+    if cosmoflag == False: add_bulge_disk_stars(df_nu,binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
 
     m.set_sample_sources_evenly(True)
 

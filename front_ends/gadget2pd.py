@@ -95,7 +95,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
-        if cfg.par.COSMOFLAG == False:
+        if data.ds.cosmological_simulation == False:
 
             simtime = data.ds.current_time.in_units('Gyr')
             simtime = simtime.value
