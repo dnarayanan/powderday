@@ -53,7 +53,6 @@ unit_velocity = 1.e5 #cm/s
 #STELLAR SEDS INFO
 #===============================================
 FORCE_BINNING = True #force SED binning
-COSMOFLAG = True  #is this a cosmological simulation?
 
 imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 #weight given to post agb stars# 1 is the default
@@ -82,8 +81,8 @@ Z_init = 0 #force a metallicity increase in the newstar particles.
            #runs)
 
 #Idealized Galaxy SED Parameters
-disk_stars_age = 8 #Gyr ;meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
-bulge_stars_age = 8 #Gyr ; meaningless if COSMOFLAG = True; note, if this is <= 7, then these will live in birth clouds
+disk_stars_age = 8 #Gyr ;meaningless if this is a cosmological simulation; note, if this is <= 7, then these will live in birth clouds
+bulge_stars_age = 8 #Gyr ; meaningless if this is a cosmological simulation; note, if this is <= 7, then these will live in birth clouds
 disk_stars_metals = 19 #in fsps metallicity units
 bulge_stars_metals = 19 #in fsps metallicity units
 
