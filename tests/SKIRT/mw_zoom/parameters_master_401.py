@@ -146,13 +146,6 @@ IMAGING_TRANSMISSION_FILTER = False
 filter_list = ['filters/irac_ch1.filter']
 TRANSMISSION_FILTER_REDSHIFT = 0.001
 
-#===============================================
-#GRID INFORMATION  
-#===============================================
-
-#center cell position #currently deprecated, though will be used for zooming later
-MANUAL_CENTERING = True
-
 
 #===============================================
 #OTHER INFORMATION

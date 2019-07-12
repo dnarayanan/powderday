@@ -130,11 +130,6 @@ IMAGING_TRANSMISSION_FILTER = False
 filter_list = ['filters/STIS_clear.filter']
 TRANSMISSION_FILTER_REDSHIFT = 3.1
 
-#===============================================
-#GRID INFORMATION  
-#===============================================
-MANUAL_CENTERING = True
-
 
 #===============================================
 #OTHER INFORMATION

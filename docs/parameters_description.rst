@@ -312,16 +312,6 @@ Images and SED Parameters
    convolved images.
 
 
-GRID INFORMATION
-------------
-
-:MANUAL_CENTERING:
-
-   Boolean.  False means the simulation automatically centers on the
-   cell with the highest gas density peak.  True means you center on
-   x_cent,y_cent,z_cent as given in parameters_model.
-
-
 DEBUGGING
 ------------
 

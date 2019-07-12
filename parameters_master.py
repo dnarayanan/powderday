@@ -165,9 +165,9 @@ TRANSMISSION_FILTER_REDSHIFT = 0.001
 #GRID INFORMATION  
 #===============================================
 
-#center cell position #currently deprecated, though will be used for zooming later
-MANUAL_CENTERING = True
 MANUAL_ORIENTATION = False
+THETA = 0
+PHI = 0
 
 #===============================================
 #OTHER INFORMATION
