@@ -130,13 +130,6 @@ IMAGING_TRANSMISSION_FILTER = False
 filter_list = ['filters/STIS_clear.filter']
 TRANSMISSION_FILTER_REDSHIFT = 3.1
 
-#===============================================
-#GRID INFORMATION  
-#===============================================
-
-#center cell position #currently deprecated, though will be used for zooming later
-MANUAL_CENTERING = True
-
 
 #===============================================
 #OTHER INFORMATION

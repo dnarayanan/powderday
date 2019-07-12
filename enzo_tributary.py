@@ -21,10 +21,7 @@ def enzo_m_gen(fname,field_add):
  
 
     #cutout
-    if cfg.par.MANUAL_CENTERING == True:
-        center = pf.arr([cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent],'code_length')
-    else:
-        center = pf.domain_center
+    center = pf.arr([cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent],'code_length')
     
     box_len = pf.quan(cfg.par.zoom_box_len,'kpc').in_units('code_length')
    

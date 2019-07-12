@@ -36,26 +36,12 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
     com = [gas_com_x,gas_com_y,gas_com_z]
 
     print ("[octree zoom_bbox_filter:] Center of Mass is at coordinates (kpc): ",com)
-    
 
-    print ("[octree zoom_bbox_filter:] Calculating Central Density Peak")
-    
-    density = ad["gasdensity"]
-    wdens = np.where(density == np.max(density))[0]
 
-    coordinates = ad["gascoordinates"]
-    maxdens_coordinates = coordinates[wdens]
-    
-
-    if cfg.par.MANUAL_CENTERING == True:
-        center = [cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent]
-    else:
-        center = maxdens_coordinates[0]
-        center = center.value
-    
+    center = [cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent]
     print ('[octree zoom_bbox_filter:] using center: ',center)
 
-    
+
     box_len = cfg.par.zoom_box_len
     #now begin the process of converting box_len to physical units in
     #case we're in a cosmological simulation.  We'll first give it
