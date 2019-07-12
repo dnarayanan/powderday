@@ -174,6 +174,7 @@ MANUAL_ORIENTATION = False
 #===============================================
 
 solar = 0.013
+PAH_frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063} # values will be normalized to 1
 
 #===============================================
 #DEBUGGING

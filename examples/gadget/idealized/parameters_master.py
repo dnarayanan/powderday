@@ -129,11 +129,19 @@ npix_y = 128
 IMAGING_TRANSMISSION_FILTER = False
 filter_list = ['filters/STIS_clear.filter']
 TRANSMISSION_FILTER_REDSHIFT = 3.1
+
 #===============================================
 #GRID INFORMATION  
 #===============================================
 MANUAL_CENTERING = True
 
+
+#===============================================
+#OTHER INFORMATION
+#===============================================
+
+solar = 0.013
+PAH_frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063} # values will be normalized to 1
 
 #===============================================
 #DEBUGGING
