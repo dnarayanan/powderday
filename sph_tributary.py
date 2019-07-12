@@ -114,9 +114,15 @@ def sph_m_gen(fname,field_add):
     specific_energy = np.repeat(energy_density_absorbed.value,dustdens.shape)
 
     if cfg.par.PAH == True:
+        
+        # load PAH fractions for usg, vsg, and big (grain sizes)
+        frac = cfg.par.PAH_frac
 
-        frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063}
-        for size in ['usg', 'vsg', 'big']:
+        # Normalize to 1
+        total = sum(frac.values())
+        frac = {k: v / total for k, v in frac.items()}
+
+        for size in frac.keys():
             d = SphericalDust(cfg.par.dustdir+'%s.hdf5'%size)
             if cfg.par.SUBLIMATION == True:
                 d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
