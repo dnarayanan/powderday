@@ -378,6 +378,9 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,cosmoflag,sp):
 
         #dust_tesc is an absolute value (not relative to min star age) as the ages of these stars are input by the user
 
+        # Load in the metallicity legend
+        fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+
         sp.params["tage"] = cfg.par.disk_stars_age
         sp.params["imf_type"] = cfg.par.imf_type
         sp.params["pagb"] = cfg.par.pagb
@@ -387,7 +390,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,cosmoflag,sp):
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
         sp.params['gas_logu'] = cfg.par.gas_logu
         if cfg.par.FORCE_gas_logz == False:
-            sp.params['gas_logz'] = np.log10(cfg.par.disk_stars_metals/cfg.par.solar)
+            sp.params['gas_logz'] = np.log10(fsps_metals[cfg.par.disk_stars_metals]/cfg.par.solar)
         else:
             sp.params['gas_logz'] = cfg.par.gas_logz
 
@@ -404,7 +407,7 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,cosmoflag,sp):
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
         sp.params['gas_logu'] = cfg.par.gas_logu
         if cfg.par.FORCE_gas_logz == False:
-            sp.params['gas_logz'] = np.log10(cfg.par.bulge_stars_metals/cfg.par.solar)
+            sp.params['gas_logz'] = np.log10(fsps_metals[cfg.par.bulge_stars_metals]/cfg.par.solar)
         else:
             sp.params['gas_logz'] = cfg.par.gas_logz
 
