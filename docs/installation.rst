@@ -108,10 +108,18 @@ yt
 
 `yt <http://yt-project.org>`_ 3.x comes bundled with 
 `Hyperion <http://www.hyperion-rt.org>`_, so it is not necessary to install it 
-on its own. However, starting in Summer 2019, we will begin requiring the 
-usage of `yt <http://yt-project.org>`_ 4.x (under development), the 'demeshed' 
-version of `yt <http://yt-project.org>`_ .  These docs will updated 
-accordingly when this is the case.
+on its own. However, as of Summer 2019, development has begun to make
+`powderday <https://bitbucket.org/desika/powderday>`_ use
+`yt <http://yt-project.org>`_ 4.x, the 'demeshed' 
+version of `yt <http://yt-project.org>`_. The 
+`powderday <https://bitbucket.org/desika/powderday>`_ -
+`yt <http://yt-project.org>`_ 4.x update is in its early stages and is not 
+expected to function properly just yet. That being said, development is taking
+place on the ``pd-4.x`` branch of 
+`powderday <https://bitbucket.org/desika/powderday>`_, and instructions for
+setting up  to run with
+`yt <http://yt-project.org>`_ 4.x are at the bottom of this section.
+
 
 .. _fsps:
 
@@ -299,6 +307,49 @@ approxmations described in `Robitaille et
 al. <http://www.aanda.org/articles/aa/abs/2012/09/aa19073-12/aa19073-12.html>`_,
 and we encourage the user of these PAH files to read this paper,
 especially section 3.4.2.
+
+
+yt-4.x configuration [WIP]
+--------------------
+
+First, it is recommended to make a new python environment in which to run the 
+4.x development branch::
+
+    > conda create -n pd4env python=2.7
+    > conda activate pd4env
+
+Since `Hyperion <http://www.hyperion-rt.org>`_ comes with 
+`yt <http://yt-project.org>`_ 3.x, it must be installed using the ``--no-deps``
+flag, since you will install the dependencies manually in the next step::
+
+    > conda install --no-deps -c conda-forge hyperion
+
+Now, install all of the dependencies `Hyperion <http://www.hyperion-rt.org>`_
+needs, *except* `yt <http://yt-project.org>`_::
+
+    > conda install -c conda-forge astropy atomicwrites attrs backports backports.functools_lru_cache backports.shutil_get_terminal_size backports_abc configparser contextlib2 cycler cython dbus decorator enum34 expat fastcache fontconfig freetype funcsigs functools32 futures gettext glib gmp gmpy2 gst-plugins-base gstreamer h5py hdf5 hyperion-fortran icu importlib_metadata ipython ipython_genutils jpeg kiwisolver libblas libcblas libgfortran-ng libiconv liblapack libpng libuuid libxcb libxml2 linecache2 matplotlib more-itertools mpc mpfr mpi mpich mpmath numpy openblas packaging pathlib2 pcre pexpect pickleshare pluggy prompt_toolkit pthread-stubs ptyprocess py pygments pyparsing pyqt pytest python-dateutil pytz qt scandir simplegeneric singledispatch sip six subprocess32 sympy tornado traceback2 traitlets unittest2 wcwidth xorg-libxau xorg-libxdmcp xz zipp
+
+Now, clone the 4.x development branch from the `yt <http://yt-project.org>`_
+source repository and build it::
+
+    > git clone https://github.com/yt-project/yt.git
+    > cd yt/
+    > git checkout yt-4.0
+    > python setup.py develop
+
+Now, to check that everything worked, make sure the output of the following 
+commands look something like this::
+
+    > which yt
+    ~/miniconda3/envs/myenv/bin/yt
+
+    > ipython
+    In [1]: import yt
+    In [2]: yt.__version__
+    Out[2]: '4.0.dev0'
+
+As long as the rest of `powderday <https://bitbucket.org/desika/powderday>`_'s
+dependencies have been installed, at this point you should be good to go.
 
 
 Troubleshooting your Installation
