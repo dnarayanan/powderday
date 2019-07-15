@@ -61,10 +61,15 @@ Parallelization
 
 :n_processes:
 
-   Number of MPI processes to run the radiative transfer on.  Note,
+   Number of pool processes to run the radiative transfer on.  Note,
    the stellar population synthesis will only run on as many
    processors as are on a core since its parallelization is pool.map
    (not MPI)
+
+:n_MPI_processes:
+
+    Number of MPI tasks to run. For TORQUE this is best set as the same 
+    as n_processes, while for SLURM this may not be the case.
 
 
 RT Information
@@ -91,6 +96,16 @@ convergence properties of your simulation.
 :n_photons_raytracing_dust:
 
    Similar to n_photons_raytracing_sources but for dust emission.
+
+:FORCE_RANDOM_SEED:
+
+    Boolean. True means the seed specified below will be used for random number
+    generation in the Hyperion model. False means no seed will be set.
+
+:seed:
+
+    The seed with which to initialize random number generation in Hyperion. 
+    Must be a negative integer.
 
 Dust Information
 ------------
@@ -122,7 +137,17 @@ Dust Information
    See:
    <http://docs.hyperion-rt.org/en/latest/api/hyperion.model.Model.html?highlight=enforce#hyperion.model.Model.set_enforce_energy_range>
 
+:SUBLIMATION:
+
+    Boolean. If true, dust grains above the sublimation 
+    temperature are automatically killed. Fast mode is to set this to False.
+
+:SUBLIMATION_TEMPERATURE:
+
+    The temperature in Kelvin above which dust grains are automatically killed. 
+    Meaningless if SUBLIMATION == False.
    
+
 Hydro Code Units
 ------------
 
@@ -174,6 +199,20 @@ Stellar SEDs Info
 :pagb:
 
    Weight given to post AGB stars.  1 is the default.
+
+
+Nebular Emission Info
+------------
+
+:add_neb_emission:
+
+    Boolean. If set to True, nebular line emission from Cloudy lookup tables 
+    (dev. by Nell Byler) will be added.
+
+:add_agb_dust_model:
+
+
+
 
 :CF_on:
 
