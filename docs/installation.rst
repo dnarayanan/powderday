@@ -108,7 +108,7 @@ yt
 
 `yt <http://yt-project.org>`_ 3.x comes bundled with 
 `Hyperion <http://www.hyperion-rt.org>`_, so it is not necessary to install it 
-on its own. However, as of Summer 2019, development has begun to make
+on its own. However, as of Summer 2019, development has begun on making
 `powderday <https://bitbucket.org/desika/powderday>`_ use
 `yt <http://yt-project.org>`_ 4.x, the 'demeshed' 
 version of `yt <http://yt-project.org>`_. The 
