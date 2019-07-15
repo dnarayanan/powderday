@@ -117,7 +117,7 @@ version of `yt <http://yt-project.org>`_. The
 expected to function properly just yet. That being said, development is taking
 place on the ``pd-4.x`` branch of 
 `powderday <https://bitbucket.org/desika/powderday>`_, and instructions for
-setting up  to run with
+setting it up to run with
 `yt <http://yt-project.org>`_ 4.x are at the bottom of this section.
 
 
