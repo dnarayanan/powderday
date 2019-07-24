@@ -15,20 +15,23 @@ hard linked directories that specify where (e.g.) dust files are and
 output should go.  To run, type (in the `powderday
 <https://bitbucket.org/desika/powderday>`_) source directory::
 
-  >python pd_front_end.py <example directory> <parameters_master_file>
-  <parameters_model_file>
+  >python pd_front_end.py example directory parameters_master_file
+  parameters_model_file
 
 Note - the .py extensions on the parameter files need to be left off.
 
+SEDs
+=======
 
-
-Gadget/Gizmo
-============
-The example simulation is a cosmological zoom simulation of a Milky Way mass galaxy that can be downloaded here (6 GB download):
+For example, we have run a gizmo cosmological zoom simulation of a
+`Milky Way mass galaxy
+<https://ui.adsabs.harvard.edu/abs/2018ApJ...869...70N/abstract>`_
+that can be downloaded here (6 GB download):
 
  <https://www.dropbox.com/s/g6d47z3pm8l18p7/snapshot_134.hdf5?dl=0>
 
-To run the code, you would type::
+To run `powderday <https://bitbucket.org/desika/powderday>`_ on the simulation,
+you would type::
 
   >python pd_front_end.py examples/gadget/mw_zoom parameters_master_401 parameters_model_401
 
@@ -41,17 +44,25 @@ and an example plotting code can be found in the convenience
 subdirectory of the `powderday
 <https://bitbucket.org/desika/powderday>`_ root directory.
 
-Gasoline/Changa
-============
+The individual parameter files that control this simulation are the
+parameters_master file and the parameters_model file.  The
+descriptions of these are detailed `here <https://powderday.readthedocs.io/en/latest/parameters_description.html>`_ but in short, the parameters_master file is meant to control paramters
+that one might like to remain constant typically for every single
+galaxy in a given snapshot, or every snapshot in a model simulation.
+In contrast, the parameters_model file has variables such as the
+snapshot name, or output file name - variables that one might expect
+to change for different galaxies in a snapshot or different snapshots
+in a simulation.
 
 
 Imaging
 =======
-Monochromatic images can be produced from `powderday
-<https://bitbucket.org/desika/powderday>`_ image output files, which are 
-produced when ``IMAGING`` is set to true in the parameters master file.
-The procedure to plot an image is demonstrated in the convenience script 
-``make_image_single_wavelength.py``, found in the convenience subdirectory.
+
+We can create monochromatic images by running the code in the exact
+same manner as above, though setting the flag "IMAGING" to true in the
+parameters_master file.  A procedure to plot an image is demonstrated
+in the convenience script ``make_image_single_wavelength.py``, found
+in the convenience subdirectory.
 
 If filters other than the default filter (arbitrary.filter) are used,
 `powderday <https://bitbucket.org/desika/powderday>`_ will convolve the
