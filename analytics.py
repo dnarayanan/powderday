@@ -158,7 +158,6 @@ def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
     gpos_y = ad["gascoordinates"][:,1].in_units('pc').value
     gpos_z = ad["gascoordinates"][:,2].in_units('pc').value
     gmass = ad["gasmasses"].in_units('Msun').value
-
     ghsml = np.repeat(hsml_in_pc,len(gpos_x))
     gmetallicity = ad["gasmetals"].value
 
