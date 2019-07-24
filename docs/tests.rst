@@ -31,34 +31,42 @@ SKIRT tests
 
 :Simulation Codes:
 
-  The tests done here have only been done for Gadget/Gizmo simulations.
+  The tests done here have been done for Gizmo simulations, and
+  Gasoline/Changa simulations with a tipsy output format. 
 
 :Downloads:
 
- Currently, the `SKIRT <http://www.skirt.ugent.be/root/index.html>`_
- and `powderday <https://bitbucket.org/desika/powderday>`_ model
- outputs from our tests are available on the `BitBucket downloads page
- <https://bitbucket.org/desika/powderday/downloads/>`_.  The relevant
+ The relevant
  parameter files (the ``.ski`` input file for `SKIRT
  <http://www.skirt.ugent.be/root/index.html>`_ and the
  ``parameters*.py`` files for `powderday
  <https://bitbucket.org/desika/powderday>`_ are packaged with the
  repository.
+ 
 
+ The hydrodynamic simulations for the test runs that ship with
+ `powderday <https://bitbucket.org/desika/powderday>`_ aren't included
+ in the repository due to their size.  The gizmo simulation is the
+ same mufasa zoom simulation as in the `Gadget/Gizmo quickstart
+ <https://powderday.readthedocs.io/en/latest/quickstart.html#gadget-gizmo>`_
+ section, and is available `here
+ <https://www.dropbox.com/s/g6d47z3pm8l18p7/snapshot_134.hdf5?dl=0>`_.
+ The Changa/Gasoline/Tipsy output is galaxy_00300 from the public `yt datasets page <https://yt-project.org/data/>`_
  
 Actually Running the Tests: Powderday:
 --------------
 
-To run the `powderday <https://bitbucket.org/desika/powderday>`_ test
-code, run::
-  python pd_front_end.py tests/SKIRT/mw_zoom parameters_master_401 parameters_model_401
+In what follows, we lead the user through the tests for a Gizmo type
+simulation, though the process for testing the tipsy outputs is
+similar.
+
+To run the `powderday
+<https://bitbucket.org/desika/powderday>`_ test code, run::
+
+  python pd_front_end.py tests/SKIRT/gizmo_mw_zoom parameters_master_401 parameters_model_401
 
 After having edited the ``parameters_master`` and ``parameters_model``
-file for your specific paths.  The model snapshot is the same as in
-the `Gadget/Gizmo quickstart
-<https://powderday.readthedocs.io/en/latest/quickstart.html#gadget-gizmo>`_ section.
-
-The tests run here were done with hash `16f281e <https://bitbucket.org/desika/powderday/commits/16f281e9fa156d7ef0d412a8acbc253bd1aa1389>`_
+file for your specific paths.  
 
 Actually Running the Tests: SKIRT:
 --------------
@@ -67,7 +75,7 @@ Actually Running the Tests: SKIRT:
 the stellar and gas particle information from the hydrodynamic
 simulation.  In ```analytics.py``, there's a function
 ``SKIRT_data_dump()`` that dumps these files to your  `powderday <https://bitbucket.org/desika/powderday>`_ output directory.  Here, it should have dumped files with a path like::
-  tests/SKIRT/mw_zoom/SKIRT.134.gas.particles.txt
+  tests/SKIRT/gizmo_mw_zoom/SKIRT.134.gas.particles.txt
 
 `SKIRT <http://www.skirt.ugent.be/root/index.html>`_ also requires an
 input parameter file which can be created via a terminal input
@@ -97,8 +105,21 @@ and it should produce an image like
 .. image :: images/powderday_skirt_comparison.png 
     :align: center
 
-This image is also found in the repo in the tests/SKIRT directory.
-	   
+
+Persistent Differences in the Models
+--------------
+
+While we have attempted to ensure as much of an apples-to-apples
+comparison between codes, some differences are persistent that
+manifest themselves in the emergent SEDs.
+
+The input SEDs are different, as is evident in the UV portion of the comparisons. The former employ interpolated
+BC03 stellar models at a lower resolution than the input MILES
+spectral libraries for the `fsps
+<https://code.google.com/p/fsps/source/checkout>`_ models that
+`powderday <https://bitbucket.org/desika/powderday>`_ employs.
+
+
 
   
 
