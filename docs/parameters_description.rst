@@ -20,7 +20,9 @@ gadget snapshot naming conventions, it can be useful to have a snippet along the
   snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
 
-That puts the correct number of 0's in front of the snapshot name.
+That ensures a 3 digit snapshot number, common to many gadget-style
+simulations.
+
 
 parameters_master
 ============
@@ -30,14 +32,17 @@ Resolution Keywords
 
 :oref:
 
-   Over Refinement of the Octree - 1 means each data holding cell (a
-   False) gets split into 8 one more time.  Very heavy on the memory.
+   Over Refinement of the Octree.  For particle-based codes, 1 means
+   each data holding cell (a False) gets refined one additional time,
+   even after the octree refinement criteria has stopped.  Very heavy
+   on the memory but can enable higher pixel resolution for images.
    Default is 0.
 
 :n_ref:
    
-   Threshold number of particles to refine over.  When nparticles >
-   n_ref the octree refines further.  Default is 64.
+   Refinement criteria for octree refinement for particle-based codes.
+   This is the threshold number of particles to refine over.  When
+   nparticles > n_ref the octree refines further.  Default is 64.
 
 :zoom_box_len:
 
@@ -48,11 +53,11 @@ Resolution Keywords
 
 :bbox_lim:
 
-   Initial bounding box of grid for SPH simulations (+/- bbox_lim).
-   Units are kpc.  This must encompass all of the particles in a
-   simulation currently.  This just has to be a big number, but you
-   want to be careful of making *too* large as precision limitations
-   only allow for up to 20 levels of refinement.
+   Initial bounding box of grid for particle simulations
+   (+/- bbox_lim).  Units are kpc.  This must encompass all of the
+   particles in a simulation currently.  This just has to be a big
+   number, but you want to be careful of making *too* large as
+   precision limitations only allow for up to 20 levels of refinement.
 
 
 

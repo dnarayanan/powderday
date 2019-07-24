@@ -12,8 +12,7 @@ Welcome to Powderday's documentation!
 `powderday <https://bitbucket.org/desika/powderday>`_ is a dust
 radiative transfer package designed to interface with galaxy formation
 simulations in order to produce realistic spectral energy
-distributions and images. The code utilizes`fsps
-<https://code.google.com/p/fsps/source/checkout>`_ (and its python
+distributions and images. The code utilizes `fsps <https://code.google.com/p/fsps/source/checkout>`_ (and its python
 hooks, `python-fsps
 <http://dan.iel.fm/python-fsps/current/installation/>`_) for stellar
 SEDs, and `Hyperion <http://www.hyperion-rt.org>`_ for dust radiative
@@ -23,15 +22,16 @@ The code has two principle aims - to be flexible (and extremely
 modular), and to be easy to use.  The package is written in python,
 though makes use of fortran, C and cython.  
 
-As of now, the code works principally for Gadget, Gizmo and other
-variants.  Support for Gasoline, RAMSES, ART and Enzo are planned
-however.  The current timeline is for TIPSY front ends to be built
-over Spring 2015, with AMR support to follow
+As of now, the code works Gadget (HDF5), Gizmo (HDF5), Gasoline
+(tipsy) and Changa (tipsy).  Support for RAMSES, ART and Enzo are
+in progress.  The current timeline is for TIPSY front ends to be
+built over Spring 2015, with AMR support to follow
 
 Finally, this code benefits from the contributions, either directly to
 this software, or indirectly by contributions to dependency software,
-by many astrophysicists, including Matt Turk, Tom Robitaille, Robert
-Thompson, Charlie Conroy, Dan Forman-Mackey and Phil Hopkins.
+by many astrophysicists, including Matt Turk, Tom Robitaille, Connor
+McClellan, Ray Sharma, Robert Thompson, Charlie Conroy, Prerak Garg, Ben Johnson, Dan
+Forman-Mackey and Phil Hopkins.
 
 .. important:: **Disclaimer**:
 
