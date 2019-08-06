@@ -24,8 +24,7 @@ though makes use of fortran, C and cython.
 
 As of now, the code works Gadget (HDF5), Gizmo (HDF5), Gasoline
 (tipsy) and Changa (tipsy).  Support for RAMSES, ART and Enzo are
-in progress.  The current timeline is for TIPSY front ends to be
-built over Spring 2015, with AMR support to follow
+in progress.  The current timeline for a code paper is Fall 2019 (fingers crossed).
 
 Finally, this code benefits from the contributions, either directly to
 this software, or indirectly by contributions to dependency software,
