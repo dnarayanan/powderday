@@ -540,26 +540,27 @@ def newstars_gen(stars_list):
 
         #sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=2,sfh=0,zmet=stars_list[i].fsps_zmet)
         spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
-	f = spec[1]
+        f = spec[1]
         
-	#Only including particles below the maximum age limit for calulating nebular emission
-	if cfg.par.add_neb_emission and stars_list[i].age <= cfg.par.HII_max_age:
-	    num = int(np.floor((stars_list[i].mass/constants.M_sun.cgs.value)/(cfg.par.stellar_cluster_mass)))
-	    f = np.zeros(nlam)
-	    neb_file_output = cfg.par.neb_file_output
-	    for num1 in range(num):
-		sp.params["add_neb_emission"] = False
-		spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
-		
-	        if cfg.par.FORCE_gas_logu:
+        #Only including particles below the maximum age limit for calulating nebular emission
+        if cfg.par.add_neb_emission and stars_list[i].age <= cfg.par.HII_max_age:
+            num = int(np.floor((stars_list[i].mass/constants.M_sun.cgs.value)/(cfg.par.stellar_cluster_mass)))
+            f = np.zeros(nlam)
+            neb_file_output = cfg.par.neb_file_output
+            for num1 in range(num):
+                sp.params["add_neb_emission"] = False
+                spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+                
+                if cfg.par.FORCE_gas_logu:
                     LogU = cfg.par.gas_logu
                 else:
                     LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.HII_T, mstar=cfg.par.stellar_cluster_mass,file_output=neb_file_output)
-		neb_file_output = False
-		sp.params['gas_logu'] = LogU
+                
+                neb_file_output = False
+                sp.params['gas_logu'] = LogU
                 sp.params["add_neb_emission"] = True
                 spec = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
-		f = f + spec[1]
+                f = f + spec[1]
             
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f
