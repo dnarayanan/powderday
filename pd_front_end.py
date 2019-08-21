@@ -4,38 +4,22 @@
 # IMPORT STATEMENTS
 # =========================================================
 from __future__ import print_function
-from source_creation import add_newstars, add_binned_seds, BH_source_add
-from grid_construction import yt_octree_generate, grid_coordinate_boost, grid_center
-from analytics import stellar_sed_write, dump_data, SKIRT_data_dump
+from powderday.source_creation import add_newstars, add_binned_seds, BH_source_add
+from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump
 from astropy import constants
 import fsps
-from image_processing import add_transmission_filters, convolve
-from m_control_tools import *
-import backwards_compatibility as bc
-import error_handling as eh
-import hyperion_octree_stats as hos
-import powderday_test_octree as pto
-from find_order import *
-import SED_gen as sg
-from front_ends.front_end_controller import stream
+from powderday.image_processing import add_transmission_filters, convolve
+from powderday.m_control_tools import m_control_sph, m_control_enzo
+import powderday.backwards_compatibility as bc
+import powderday.error_handling as eh
+import powderday.SED_gen as sg
+from powderday.front_ends.front_end_controller import stream
 from astropy import units as u
-from astropy.io import ascii
-from astropy.table import Table
-import config as cfg
-from yt.units.yt_array import YTQuantity
-import yt
+import powderday.config as cfg
 import h5py
-from hyperion.model import ModelOutput
-import matplotlib.pyplot as plt
 import matplotlib as mpl
-from hyperion.model import Model
 import copy
-import os.path
-import scipy.ndimage
-import scipy.interpolate
 import numpy as np
-import pdb
-import ipdb
 import sys
 script, pardir, parfile, modelfile = sys.argv
 

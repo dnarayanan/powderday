@@ -4,14 +4,12 @@ Getting Started
 Overview of Requirements
 ============
 
-	* **python2.x**
+	* **python>=2.7,>=3.5**
 
 	  * numpy (any version except 1.10.*)
 	  * scipy
 	  * astropy
-	  * Atpy
 	  * h5py
-	  * ipdb
 
 	* **compilers**
 
@@ -48,14 +46,8 @@ linked below in each subsection).
 python
 --------------
 
-`powderday <https://bitbucket.org/desika/powderday>`_ currently only
-works with python 2.x with provisional support for python 3.x (i.e. it
-*should* work though there may be issues yet outstanding -- please do
-file an issue in on the BitBucket site if you find a 3.x issue)).  The
-code was developed on, and principally tested with python 2.7.
-
-This said, the code will be robust with python 3.x starting in Summer
-of 2019.
+`powderday <https://bitbucket.org/desika/powderday>`_ should work with python >=2.7 or >=3.5, but has not been heavily used under >=3.5.
+Please file an issue if you encounter one.
 
 As you will see, `powderday <https://bitbucket.org/desika/powderday>`_
 currently requires a particular branch of `yt
@@ -63,7 +55,7 @@ currently requires a particular branch of `yt
 well for users is to set up a different python environment for the
 `powderday <https://bitbucket.org/desika/powderday>`_ installation.   This could look something like (assuming a ``conda`` installation of python)::
 
-  >conda create --name pd_environment python=2.7
+  >conda create --name pd_environment
   >source activate pd_environment
 
 (And then when you want to exit the environment, you can type)::
@@ -99,7 +91,7 @@ Simply clone the latest and greatest from the repo::
 
   >hg clone https://desika@bitbucket.org/desika/powderday
 
-And that's it!  Once it's cloned, there's no subsidiary installation commands.
+To install, `cd` into the cloned repository and run the usual `python setup.py install`.
 
 .. _yt:
 
@@ -171,16 +163,8 @@ Finally, the SPS_HOME variable must be set in your environment to point to the F
 python-fsps
 --------------
 
-`powderday <https://bitbucket.org/desika/powderday>`_ depends on
-python hooks for `fsps
-<https://code.google.com/p/fsps/source/checkout>`_ written by Daniel
-Foreman-Mackey and others called `python-fsps
-<http://dan.iel.fm/python-fsps/current/installation/>`_.  You can install from the GitHub page::
+`python-fsps <https://github.com/dfm/python-fsps>`_  will be installed automatically by the `powderday` setup.py script.
   
-  >git clone https://github.com/dfm/python-fsps.git
-  >cd python-fsps
-  >python setup.py install
-
 You can test the installation by opening python and typing::
 
 >import fsps
@@ -315,7 +299,7 @@ yt-4.x configuration [WIP]
 First, it is recommended to make a new python environment in which to run the 
 4.x development branch::
 
-    > conda create -n pd4env python=2.7
+    > conda create -n pd4env
     > conda activate pd4env
 
 Since `Hyperion <http://www.hyperion-rt.org>`_ comes with 
