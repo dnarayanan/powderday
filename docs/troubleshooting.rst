@@ -19,6 +19,23 @@ Error::
 Try re-compiling with the flag::
 
   -fPIC
+  
+2. Python-fsps compilation can't find 'f95'
+--------------
+Error (see `here <https://github.com/dfm/python-fsps/issues/56>`_)::
+
+     Could not locate executable f95
+     ...
+     error: Command "f95 -fPIC -fPIC -O3 ..." failed with exit status 127
+
+Try setting an alias to gfortran in your :code:`.bashrc`::
+
+    alias f95='gfortran'
+ 
+If this doesn't work, create a soft link to the gfortran executable in your path, e.g.::
+    
+    ln -s /apps/compilers/gcc/6.3.0/bin/gfortran ~/bin/f95
+
 
 3. When running pd via a SLURM scheduler, you get the error when importing fsps
 --------------
