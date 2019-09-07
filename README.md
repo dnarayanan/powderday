@@ -11,7 +11,7 @@ For documentation, please see the docs at:
 The manual contains full installation instructions.  You can also try
 out the shell script all-in-one installer:
 
-[installer](https://bitbucket.org/desika/powderday/downloads)
+[installer](https://github.com/dnarayanan/powderday.git)
 
 This code benefits from the contributions, either directly to this
 software, or indirectly by contributions to dependency software, by
