@@ -1,0 +1,11 @@
+h5py>=2.9
+yt
+fsps
+
+[:python_version == "2.7"]
+scipy==1.2
+astropy==2.0
+
+[:python_version >= "3.5"]
+scipy
+astropy

@@ -65,7 +65,7 @@ in the convenience script ``make_image_single_wavelength.py``, found
 in the convenience subdirectory.
 
 If filters other than the default filter (arbitrary.filter) are used,
-`powderday <https://bitbucket.org/desika/powderday>`_ will convolve the
+`powderday <https://github.com/dnarayanan/powderday.git>`_ will convolve the
 monochromatic image outputs with each filter's transmission function and save
 the result in the output directory as ``convolved.XXX.hdf5``.
 
@@ -80,7 +80,7 @@ Say we've set the following in the parameters master file:
         'galex1500.filter',
     ]
 
-`powderday <https://bitbucket.org/desika/powderday>`_ will run at each 
+`powderday <https://github.com/dnarayanan/powderday.git>`_ will run at each 
 wavelength in all of the specified filter files, and produce convolved image
 data for each filter.
 
