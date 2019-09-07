@@ -13,7 +13,7 @@ For each example file there should be two parameter files that will be
 reasonable for the associated snapshot, though you'll need to edit the
 hard linked directories that specify where (e.g.) dust files are and
 output should go. To run `powderday
-<https://github.com/dnarayanan/powderday.git>`_) in any directory::
+<https://github.com/dnarayanan/powderday.git>`_ in any directory::
 
   >pd_front_end.py example directory parameters_master_file
   parameters_model_file
