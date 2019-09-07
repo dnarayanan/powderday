@@ -3,7 +3,7 @@ Convenience Scripts
 
 The convenience scripts tend to live (where else) in the convenience
 subdirectory of the `powderday
-<https://bitbucket.org/desika/powderday>`_ root directory.  There's a
+<https://github.com/dnarayanan/powderday.git>`_ root directory.  There's a
 brief description of them here.
 
 :sed_plot:
