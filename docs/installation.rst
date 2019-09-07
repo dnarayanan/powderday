@@ -19,9 +19,8 @@ Overview of Requirements
 
 	* **Additional Packages (with Instructions Below)**
 
-	  * mercurial  <http://mercurial.selenic.com/>
 	  * git  <http://git-scm.com/>
-	  * powderday <http://bitbucket.org/desika/powderday>
+	  * powderday <https://github.com/dnarayanan/powderday.git>
 	  * yt <http://yt-project.org>
 	  * FSPS <https://code.google.com/p/fsps/source/checkout>
 	  * python-fsps <http://dan.iel.fm/python-fsps/current/>
@@ -46,14 +45,14 @@ linked below in each subsection).
 python
 --------------
 
-`powderday <https://bitbucket.org/desika/powderday>`_ should work with python >=2.7 or >=3.5, but has not been heavily used under >=3.5.
+`powderday <https://github.com/dnarayanan/powderday.git>`_ should work with python >=2.7 or >=3.5, but has not been heavily used under >=3.5.
 Please file an issue if you encounter one.
 
-As you will see, `powderday <https://bitbucket.org/desika/powderday>`_
+As you will see, `powderday <https://github.com/dnarayanan/powderday.git>`_
 currently requires a particular branch of `yt
 <http://yt-project.org>`_. As a result, one path that we have seen work
 well for users is to set up a different python environment for the
-`powderday <https://bitbucket.org/desika/powderday>`_ installation.   This could look something like (assuming a ``conda`` installation of python)::
+`powderday <https://github.com/dnarayanan/powderday.git>`_ installation.   This could look something like (assuming a ``conda`` installation of python)::
 
   >conda create --name pd_environment
   >source activate pd_environment
@@ -66,21 +65,6 @@ Then, whenever you're in the ``pd_environment``, everything you
 install will remain contained to that particular installation of
 python, and not conflict with any of your other installed packages.
 
-.. _mercurial:
-
-
-mercurial
---------------
-
-You'll need this to clone `powderday
-<https://bitbucket.org/desika/powderday>`_ using mercurial (hg).  If
-you don't have mercurial, you can install it in your
-``pd_environment`` via::
-
-  >source activate pd_environment
-  >conda install mercurial
-
-
 .. _powderday:
 
 
@@ -89,7 +73,7 @@ powderday
 
 Simply clone the latest and greatest from the repo::
 
-  >hg clone https://desika@bitbucket.org/desika/powderday
+  >git clone https://github.com/dnarayanan/powderday.git
 
 To install, `cd` into the cloned repository and run the usual `python setup.py install`.
 
@@ -101,14 +85,14 @@ yt
 `yt <http://yt-project.org>`_ 3.x comes bundled with 
 `Hyperion <http://www.hyperion-rt.org>`_, so it is not necessary to install it 
 on its own. However, as of Summer 2019, development has begun on making
-`powderday <https://bitbucket.org/desika/powderday>`_ use
+`powderday <https://github.com/dnarayanan/powderday.git>`_ use
 `yt <http://yt-project.org>`_ 4.x, the 'demeshed' 
 version of `yt <http://yt-project.org>`_. The 
-`powderday <https://bitbucket.org/desika/powderday>`_ -
+`powderday <https://github.com/dnarayanan/powderday.git>`_ -
 `yt <http://yt-project.org>`_ 4.x update is in its early stages and is not 
 expected to function properly just yet. That being said, development is taking
 place on the ``pd-4.x`` branch of 
-`powderday <https://bitbucket.org/desika/powderday>`_, and instructions for
+`powderday <https://github.com/dnarayanan/powderday.git>`_, and instructions for
 setting it up to run with
 `yt <http://yt-project.org>`_ 4.x are at the bottom of this section.
 
@@ -135,7 +119,7 @@ if your ``gcc`` version is lower than 4.3.0, or::
 
 if ``gcc`` is version 4.3.0 or higher. This can be checked with 
 ``gcc --version``. Additionally, at this time 
-`powderday <https://bitbucket.org/desika/powderday>`_  doesn't work with the 
+`powderday <https://github.com/dnarayanan/powderday.git>`_  doesn't work with the 
 default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in 
 `fsps <https://code.google.com/p/fsps/source/checkout>`_  to look like::
   
@@ -175,7 +159,7 @@ Hyperion
 --------------
 
 `Hyperion <http://www.hyperion-rt.org>`_ is the main work horse of
-`powderday <https://bitbucket.org/desika/powderday>`_.  The full
+`powderday <https://github.com/dnarayanan/powderday.git>`_.  The full
 directions for installation are well-described on the main
 `Installation page for Hyperion
 <http://docs.hyperion-rt.org/en/stable/installation/installation.html>`_.
@@ -187,7 +171,7 @@ There are two ways to install `Hyperion <http://www.hyperion-rt.org>`_.  The fir
   >conda install -c conda-forge hyperion
 
 Note, this will eventually become deprecated for `powderday
-<https://bitbucket.org/desika/powderday>`_ (or at least modified as
+<https://github.com/dnarayanan/powderday.git>`_ (or at least modified as
 the `Hyperion <http://www.hyperion-rt.org>`_ ``conda`` install ships
 with `yt 3.x <http://yt-project.org>`_, and eventual upgrade to `yt
 4.x <http://yt-project.org>`_ is coming in Summer 2019.
@@ -278,7 +262,7 @@ install::
   >python setup.py build_dust
 
 If you want to use the PAH model in `powderday
-<https://bitbucket.org/desika/powderday>`_, you'll additionally need
+<https://github.com/dnarayanan/powderday.git>`_, you'll additionally need
 these files in the same dust directory.  To download, click on the link,
 then click 'raw' on the right side of each page.
 
@@ -332,7 +316,7 @@ commands look something like this::
     In [2]: yt.__version__
     Out[2]: '4.0.dev0'
 
-As long as the rest of `powderday <https://bitbucket.org/desika/powderday>`_'s
+As long as the rest of `powderday <https://github.com/dnarayanan/powderday.git>`_'s
 dependencies have been installed, at this point you should be good to go.
 
 
