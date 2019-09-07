@@ -2,7 +2,7 @@ Getting Help
 **********
 
 
-`powderday <https://bitbucket.org/desika/powderday>`_ has an email
+`powderday <https://github.com/dnarayanan/powderday.git>`_ has an email
 list serve on google groups.  We encourage you to visit the group at
 `http://groups.google.com/group/powderday
 <http://groups.google.com/group/powderday>`_ and post any questions

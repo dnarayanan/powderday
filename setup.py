@@ -25,6 +25,6 @@ setup(
     ],
     scripts=["pd_front_end.py"],
     project_urls={
-        'Source': 'https://bitbucket.org/desika/powderday',
+        'Source': 'https://github.com/dnarayanan/powderday.git',
     },
 )
