@@ -157,7 +157,7 @@ Hydro Code Units
 ------------
 
 Currently these are actually not used in `powderday
-<https://bitbucket.org/desika/powderday>`_).  They remain in the
+<https://github.com/dnarayanan/powderday.git>`_).  They remain in the
 parameters file as a placeholder though as we may need them as an
 over-ride if we find some HDF5 files don't contain this information.
 
@@ -279,7 +279,7 @@ Nebular Emission Info
 
    String.  Location of the metallicity maps in FSPS for the stellar
    libraries you use.  Currently Padova2007 is the default (hard coded
-   into `powderday <https://bitbucket.org/desika/powderday>`_), so
+   into `powderday <https://github.com/dnarayanan/powderday.git>`_), so
    this should point to something like:
    "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat"
    
@@ -289,7 +289,7 @@ Black Holes
 
 :BH_SED:
 
-    If true, `powderday <https://bitbucket.org/desika/powderday>`_ will 
+    If true, `powderday <https://github.com/dnarayanan/powderday.git>`_ will 
     attempt to load black hole information from the snapshot.
 
 :BH_eta:
@@ -323,7 +323,7 @@ Images and SED Parameters
 :IMAGING:
 
    Must be set to ``True`` for 
-   `powderday <https://bitbucket.org/desika/powderday>`_ to produce an image
+   `powderday <https://github.com/dnarayanan/powderday.git>`_ to produce an image
    output file.
 
 :filterdir:
@@ -334,7 +334,7 @@ Images and SED Parameters
 :filterfiles:
 
    A list of the names of all filters to be used. 
-   `powderday <https://bitbucket.org/desika/powderday>`_ will run at each 
+   `powderday <https://github.com/dnarayanan/powderday.git>`_ will run at each 
    wavelength in all specified filter files, and will produce a ``.hdf5`` file
    containing images convolved with each filter transmission function. Note 
    that this can be quite computationally intensive and scales with the number
@@ -351,7 +351,7 @@ Images and SED Parameters
 
    If enabled, filter convolution will be performed through 
    `Hyperion <http://www.hyperion-rt.org>`_ instead of through `powderday 
-   <https://bitbucket.org/desika/powderday>`_. This is much faster, but is 
+   <https://github.com/dnarayanan/powderday.git>`_. This is much faster, but is 
    still an experimental feature and does not seem to produce accurate 
    convolved images.
 
@@ -377,7 +377,7 @@ parameters_model
 :PD_output_dir:
 
    String - location of where `powderday
-   <https://bitbucket.org/desika/powderday>`_ output files should go.
+   <https://github.com/dnarayanan/powderday.git>`_ output files should go.
 
 :Auto_TF_file:
 
@@ -392,7 +392,7 @@ parameters_model
 :inputfile:
 
    String - name of the input HDF5 (rtin) file for `powderday
-   <https://bitbucket.org/desika/powderday>`_ to write before
+   <https://github.com/dnarayanan/powderday.git>`_ to write before
    radiative transfer begins.
 
 :outputfile:
@@ -403,7 +403,7 @@ parameters_model
 
    Location in grid coordinates of the x-coordinate of the center of
    your galaxy.  Only pertinenet if MANUAL_CENTERING==True.  Otherwise
-   ignored by `powderday <https://bitbucket.org/desika/powderday>`_.
+   ignored by `powderday <https://github.com/dnarayanan/powderday.git>`_.
 
 :y_cent:
 

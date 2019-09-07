@@ -95,7 +95,7 @@ In the ``run`` directory, this should create a file like:
 ``/home/desika.narayanan/SKIRT/run/test_i90_sed.dat``.  This has
 chosen one particular viewing angle (which, in fact may not be the
 same viewing angle as the `powderday
-<https://bitbucket.org/desika/powderday>`_ simulation - in fact it was
+<https://github.com/dnarayanan/powderday.git>`_ simulation - in fact it was
 arbitrarily chosen).  Then you can run::
   cd <path_to_powderday>
   python tests/SKIRT/skirt_sed_plot.py
@@ -117,7 +117,7 @@ The input SEDs are different, as is evident in the UV portion of the comparisons
 BC03 stellar models at a lower resolution than the input MILES
 spectral libraries for the `fsps
 <https://code.google.com/p/fsps/source/checkout>`_ models that
-`powderday <https://bitbucket.org/desika/powderday>`_ employs.
+`powderday <https://github.com/dnarayanan/powderday.git>`_ employs.
 
 
 
