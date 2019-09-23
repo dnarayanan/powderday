@@ -34,7 +34,7 @@ dustdir = '/home/desika/pd/hyperion-dust-0.1.0/dust_files/' #location of your du
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 
-dust_grid_type = 'manual' #needs to be in ['dtm','rr','manual']
+dust_grid_type = 'manual' #needs to be in ['dtm','rr','manual','li_bestfit']
 dusttometals_ratio = 0.4
 enforce_energy_range = False #False is the default;  ensures energy conservation
 

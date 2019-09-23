@@ -73,3 +73,31 @@ def remy_ruyer(pf,refined):
     dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
     
     return dust_smoothed
+
+
+def li_bestfit(pf,refined):
+    #li, narayanan & dave, 2019, arXiv/1906.09277.  here, we take the
+    #results of their equation 12 which relates the dust to gas ratio
+    #as a function of metallicity from the simba cosmological
+    #simulations that include an on-the-fly prescription for dust
+    #formation, growth, and destruction.  has a slightly steeper DGR
+    #vs Z slope than the remy-ruyer relation.  note, this best fit
+    #does not include passive galaxies which lie significantly off of
+    #this (and the remy-ruyer) relation.
+
+    
+    wTrue = np.where(np.array(refined) == True)[0]
+    wFalse = np.where(np.array(refined) == False)[0]
+    metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
+
+    #anywhere the smoothing finds a cell with zero metallicity, set
+    #this to some very low value
+    metallicity_smoothed[metallicity_smoothed == 0] = 1.e-10
+
+    log_dust_to_gas_ratio = (2.445*np.log10(metallicity_smoothed/cfg.par.solar))-(2.029)
+    dust_to_gas_ratio = 10.**(log_dust_to_gas_ratio)
+
+    dust_smoothed = np.zeros(len(refined))
+    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
+
+    return dust_smoothed

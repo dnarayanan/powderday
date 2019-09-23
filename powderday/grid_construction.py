@@ -6,7 +6,7 @@ import powderday.config as cfg
 from powderday.gridstats import gridstats
 from powderday.octree_zoom import octree_zoom_bbox_filter
 from yt.geometry.selection_routines import AlwaysSelector
-from powderday.dust_grid_gen import dtm_grid, remy_ruyer, manual
+from powderday.dust_grid_gen import dtm_grid, remy_ruyer, manual,li_bestfit
 
 
 random.seed('octree-demo')
@@ -86,12 +86,11 @@ def yt_octree_generate(fname, field_add):
 
         # crash the code if the parameter choice for dust grid type isn't in 
         # the hard coded valid list below
-        dust_grid_type_list = ['dtm', 'rr', 'manual']
+        dust_grid_type_list = ['dtm', 'rr', 'manual','li_bestfit']
         try:
             dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
         except ValueError as e:
-            print('You chose a dust_choice that isnt a valid selection within the list: ' +
-                  dust_grid_type_list+'....crashing now!')
+            print('You chose a dust_choice that isnt a valid selection within the list: dust_grid_type_list....crashing now!')
             sys.exit()
 
         if cfg.par.dust_grid_type == 'dtm':
@@ -105,6 +104,12 @@ def yt_octree_generate(fname, field_add):
         if cfg.par.dust_grid_type == 'manual':
             dust_smoothed_manual = manual(pf, refined)
             dust_smoothed = dust_smoothed_manual
+        
+        if cfg.par.dust_grid_type == 'li_bestfit':
+            dust_smoothed_li_bestfit = li_bestfit(pf,refined)
+            dust_smoothed=dust_smoothed_li_bestfit
+
+
 
     else:
         print('cfg.par.CONSTANT_DUST_GRID=True')
