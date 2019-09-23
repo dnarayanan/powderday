@@ -129,6 +129,31 @@ Dust Information
 
    Boolean - True means use model for PAHs, False means don't.
 
+
+:dust_grid_type:
+
+   String that is of one of the following values:
+   ['dtm','rr','manual','li_bestfit'] that designates how we will
+   determine the dust density in each octree grid cell.  The choices are:
+
+   :dtm:
+      A constant dust to metals ratio set by the keyword dusttometals_ratio
+   :rr: Follows the best fit relation from Remy Ruyer
+      2014A&A...563A..31R powerlaw relation between the the gas to
+      dust ratio and metallicity (in which Xco is allowed to vary with
+      the metallicity as well).
+   :manual: Looks for a dust mass associated with the hydrodynamic
+            simulation (i.e. if the hydrodynamic simulation carries
+            dust information with it, as some flavors of gizmo and
+            arepo do).  For gizmo and arepo currently assumes this
+            information is stored in PartType0.
+   :li_bestfit: Takes the best fit relation from the cosmological
+                simulations of Li, Narayanan & Dave arXiv/1906.09277
+                that relates the dust to gas ratio to the metallicity
+                for main sequence galaxies.
+
+
+
 :dusttometals_ratio:
 
    Dust mass to metals mass ratio
