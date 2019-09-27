@@ -26,7 +26,7 @@ class Nenkova2008:
         try:
             h = h5py.File(cfg.par.BH_modelfile, 'r')
         except:
-            raise FileNotFoundError('Unable to find Nenkova BH model file. '
+            raise IOError('Unable to find Nenkova BH model file. '
                                     'Check the path in parameters master, or '
                                     'download the file here: https://www.clump'
                                     'y.org/downloads/clumpy_models_201410_tvav'
