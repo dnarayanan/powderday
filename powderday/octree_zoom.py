@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
-from yt.mods import load
 import powderday.config as cfg
+import yt
 from yt.frontends.sph.data_structures import ParticleDataset
 
 
@@ -58,9 +58,9 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
     
 
     try: #particle
-        ds1 = load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+        ds1 = yt.load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
     except: #amr
-        ds1 = load(fname,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+        ds1 = yt.load(fname,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
         bbox1 = None
 
     ds1.periodicity = (False,False,False)
