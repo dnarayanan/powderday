@@ -102,7 +102,7 @@ def sph_m_gen(fname,field_add):
         frac = cfg.par.PAH_frac
 
         # Normalize to 1
-        total = np.sum(frac.values())
+        total = np.sum(list(frac.values()))
         frac = {k: v / total for k, v in frac.items()}
 
         for size in frac.keys():
