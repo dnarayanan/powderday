@@ -3,12 +3,12 @@
 snapshot_num = 134
 snapnum_str = '{:03d}'.format(snapshot_num)
 
-hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_safe_packages/pd/examples/gadget/gizmo_mw_zoom/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/pd_git/tests/SKIRT/gizmo_mw_zoom/'
 
 snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
 #where the files should go
-PD_output_dir = '/ufrc/narayanan/desika.narayanan/pd/tests/SKIRT/gizmo_mw_zoom/'
+PD_output_dir = '/ufrc/narayanan/desika.narayanan/pd_git/tests/SKIRT/gizmo_mw_zoom/'
 Auto_TF_file = 'snap'+snapnum_str+'.logical'
 Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 
