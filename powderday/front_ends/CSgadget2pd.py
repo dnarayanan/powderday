@@ -155,7 +155,11 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         
         c = yt.utilities.physical_constants.speed_of_light_cgs
         bhluminosity = (cfg.par.BH_eta * mdot * c**2.).in_units("erg/s")
-        return bhluminosity
+        if cfg.par.BH_var:
+            from agn_models.hickox import vary_bhluminosity
+            return vary_bhluminosity(bhluminosity)
+        else:
+            return bhluminosity
         
     def _bhcoordinates(field,data):
         return data["PartType5","Coordinates"]

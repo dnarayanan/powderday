@@ -27,5 +27,4 @@ x_cent = 0
 y_cent = 0
 z_cent = 0
 
-
 TCMB = 2.73
