@@ -2,8 +2,8 @@
 #RESOLUTION KEYWORDS
 #===============================================
 oref = 0 #over refine factor - should typically be set to 0
-n_ref = 64 #when n_particles > n_ref, octree refines further
-zoom_box_len = 200 #kpc; so the box will be +/- zoom_box_len from the center
+n_ref = 32#64 #when n_particles > n_ref, octree refines further
+zoom_box_len = 50#200 #kpc; so the box will be +/- zoom_box_len from the center
 bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_lim)
                #This *must* encompass all of the particles in the
                #simulation. 
@@ -34,7 +34,7 @@ dustdir = '/home/desika/pd/hyperion-dust-0.1.0/dust_files/' #location of your du
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 
-dust_grid_type = 'manual' #needs to be in ['dtm','rr','manual','li_bestfit']
+dust_grid_type = 'dtm'#'manual' #needs to be in ['dtm','rr','manual','li_bestfit']
 dusttometals_ratio = 0.4
 enforce_energy_range = False #False is the default;  ensures energy conservation
 
@@ -109,12 +109,13 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.
 #BLACK HOLE STUFF
 #===============================================
 
-BH_SED = False
+BH_SED = True
 BH_eta = 0.1 #bhluminosity = BH_eta * mdot * c**2.
 BH_model = "Nenkova"
 BH_modelfile = "/home/desika.narayanan/powderday/agn_models/clumpy_models_201410_tvavg.hdf5"
 # The Nenkova BH_modelfile can be downloaded here:
 # https://www.clumpy.org/downloads/clumpy_models_201410_tvavg.hdf5
+BH_var = True #Include time variations on BH luminosity (default Hickox+ 2014)
 
 nenkova_params = [5,30,0,1.5,30,40] #Nenkova+ (2008) model parameters
 
