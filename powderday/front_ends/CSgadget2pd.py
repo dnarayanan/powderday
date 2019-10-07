@@ -156,7 +156,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         c = yt.utilities.physical_constants.speed_of_light_cgs
         bhluminosity = (cfg.par.BH_eta * mdot * c**2.).in_units("erg/s")
         if cfg.par.BH_var:
-            from agn_models.hickox import vary_bhluminosity
+            from powderday.agn_models.hickox import vary_bhluminosity
             return vary_bhluminosity(bhluminosity)
         else:
             return bhluminosity
@@ -269,14 +269,14 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         try:
             if len(ds.all_data()[('PartType5', 'BH_Mass')]) > 0:
                 if cfg.par.BH_model == 'Nenkova':
-                    from agn_models.nenkova import Nenkova2008
+                    from powderday.agn_models.nenkova import Nenkova2008
                     try:
                         model = Nenkova2008(cfg.par.nenkova_params)
                     except:
                         model = Nenkova2008
                     agn_spectrum = model.agn_spectrum
                 else:
-                    from agn_models.hopkins import agn_spectrum
+                    from powderday.agn_models.hopkins import agn_spectrum
 
                 ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
                 ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
