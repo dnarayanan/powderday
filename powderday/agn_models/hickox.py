@@ -13,6 +13,6 @@ def Hickox2014(L_cut=100, alpha=0.2):
 def vary_bhluminosity(L_avg):
     PDF, L_frac = Hickox2014()
     CDF = np.cumsum(PDF) / sum(PDF)
-    choice = np.random.random()
-    return L_avg * L_frac[np.argmin(abs(CDF - choice))]
-
+    choice = np.random.random(len(L_avg))
+    ix = [np.argmin(abs(CDF - x)) for x in choice]
+    return L_avg * L_frac[ix]
