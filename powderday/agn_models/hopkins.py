@@ -5,7 +5,7 @@
 #Please refer to the original agn_spectrum.c script on Phil's website
 #		for full documentation.  If you use this in a
 #		publication, please cite Hopkins, Richards, and
-#		Hernquist 2006, ApJ
+#		Hernquist 2007, ApJ
 
 #Author of Python adaptation: Desika Narayanan
 
