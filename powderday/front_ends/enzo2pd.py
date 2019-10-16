@@ -1,12 +1,11 @@
 from __future__ import print_function
 import numpy as np
 import yt
-#from powderday.front_ends.redshift_multithread import *
 
 from yt.data_objects.particle_filters import add_particle_filter
 
-def enzo_field_add(fname,ds = None, starages = False):
 
+def enzo_field_add(fname,ds = None, starages = False):
 
     def _starmetals(field,data):
         return data[('newstars','metallicity_fraction')]
@@ -20,7 +19,6 @@ def enzo_field_add(fname,ds = None, starages = False):
         coordinates = data.ds.arr(coordinates,"cm")
         return coordinates
 
-        
     def _stellarages(field,data):
         age = ds.current_time.in_units('Gyr')-data[('newstars', 'creation_time')].in_units('Gyr')
         age[np.where(age < 1.e-3)[0]] = 1.e-3
