@@ -471,7 +471,7 @@ def BH_source_add(m,pf,df_nu,boost):
 
         dump_AGN_SEDs(nu,master_bh_fnu,ad["bhluminosity"].value)
     except:
-        pass
+        print('BH source creation failed.')
     #savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
     #np.savez(savefile,nu = nu,fnu = master_bh_fnu,luminosity = ad["bhluminosity"].value)
     
