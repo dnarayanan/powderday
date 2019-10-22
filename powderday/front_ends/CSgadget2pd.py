@@ -4,10 +4,6 @@ import yt
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
 
-from astropy.cosmology import Planck13
-import astropy.units as u
-from powderday.front_ends.redshift_multithread import redshift_vectorized
-
 
 def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
     
@@ -120,23 +116,22 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
             print ('[SED_gen/star_list_gen: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ',simtime)
             print ('--------------\n')
         else:
-            simtime = Planck13.age(data.ds.current_redshift).to(u.Gyr).value #what is the age of the Universe right now?
-            
+            yt_cosmo = yt.utilities.cosmology.Cosmology(hubble_constant=data.ds.hubble_constant,
+                                                        omega_matter=data.ds.omega_matter,
+                                                        omega_lambda=data.ds.omega_lambda)
+            simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value  # Current age of the universe
             scalefactor = ad[("starformationtime")].value
-            formation_z = (1./scalefactor)-1.
-            
-            formation_time = redshift_vectorized(formation_z)
-            #drop the Gyr unit
-            formation_time = np.asarray([formation_time[i].value for i in range(len(formation_time))])
-           
+            formation_z = (1. / scalefactor) - 1.
+            formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
             age = simtime - formation_time
-            #make the minimum age 1 million years 
+            # Minimum age is set to 1 Myr (FSPS doesn't work properly for ages below 1 Myr)
             age[np.where(age < 1.e-3)[0]] = 1.e-3
 
-        
-            print ('\n--------------')
-            print ('[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime)
-            print ('--------------\n')
+            print('\n--------------')
+            print(
+                '[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Gyr): ',
+                simtime)
+            print('--------------\n')
                 
         age = data.ds.arr(age,'Gyr')
         return age
