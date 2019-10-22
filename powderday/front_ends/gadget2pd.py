@@ -141,8 +141,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
         c = yt.utilities.physical_constants.speed_of_light_cgs
         bhluminosity = (cfg.par.BH_eta * mdot * c**2.).in_units("erg/s")
         if cfg.par.BH_var:
-            global bhlfrac
-            return bhluminosity * bhlfrac
+            return bhluminosity * cfg.par.bhlfrac
         else:
             return bhluminosity
 
@@ -263,7 +262,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
 
                 if cfg.par.BH_var:
                     from powderday.agn_models.hickox import vary_bhluminosity
-                    bhlfrac = vary_bhluminosity(nholes)
+                    cfg.par.bhlfrac = vary_bhluminosity(nholes)
 
                 ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
                 ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
