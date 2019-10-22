@@ -145,7 +145,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
             return data[('deposit','PartType4_mass')]
 
         
-    def _bhluminosity(field,data):
+    def _bhluminosity(field,data,bhlfrac):
         ad = data.ds.all_data()
         mdot = ad[("PartType5","BH_Mdot")]
         #give it a unit since usually these are dimensionless in yt
@@ -155,11 +155,7 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
         
         c = yt.utilities.physical_constants.speed_of_light_cgs
         bhluminosity = (cfg.par.BH_eta * mdot * c**2.).in_units("erg/s")
-        if cfg.par.BH_var:
-            from powderday.agn_models.hickox import vary_bhluminosity
-            return vary_bhluminosity(bhluminosity)
-        else:
-            return bhluminosity
+        return bhluminosity * bhlfrac
         
     def _bhcoordinates(field,data):
         return data["PartType5","Coordinates"]
@@ -267,7 +263,8 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
 
     if cfg.par.BH_SED == True:
         try:
-            if len(ds.all_data()[('PartType5', 'BH_Mass')]) > 0:
+            ad = ds.all_data()
+            if len(ad[('PartType5', 'BH_Mass')]) > 0:
                 if cfg.par.BH_model == 'Nenkova':
                     from powderday.agn_models.nenkova import Nenkova2008
                     try:
@@ -278,7 +275,13 @@ def gadget_field_add(fname,bounding_box = None,ds=None,starages=False):
                 else:
                     from powderday.agn_models.hopkins import agn_spectrum
 
-                ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
+                if cfg.par.BH_var:
+                    from powderday.agn_models.hickox import vary_bhluminosity
+                    bhlfrac = vary_bhluminosity(len(ad[('PartType5', 'BH_Mass')]))
+                else:
+                    bhlfrac = 1
+
+                ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True,bhlfrac=bhlfrac)
                 ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
                 ds.add_field(("bhnu"),function=_bhsed_nu,units='Hz',particle_type=True)
                 ds.add_field(("bhsed"),function=_bhsed_sed,units="erg/s",particle_type=True)
