@@ -137,21 +137,12 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
 
         mdot = data.ds.arr(mdot, "code_mass/code_time")
 
-        '''
-        if len(mdot == 1):
-            mdot = data.ds.quan(mdot,"code_mass/code_time")
-        else:
-            ipdb.set_trace()
-            for i in range(len(mdot)):
-
-                mdot[i] = data.ds.quan(mdot[i],"code_mass/code_time")
-        '''
 
         c = yt.utilities.physical_constants.speed_of_light_cgs
         bhluminosity = (cfg.par.BH_eta * mdot * c**2.).in_units("erg/s")
         if cfg.par.BH_var:
-            from powderday.agn_models.hickox import vary_bhluminosity
-            return vary_bhluminosity(bhluminosity)
+            global bhlfrac
+            return bhluminosity * bhlfrac
         else:
             return bhluminosity
 
@@ -258,7 +249,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
 
     if cfg.par.BH_SED == True:
         try:
-            if len(ds.all_data()[('PartType5', 'BH_Mass')]) > 0:
+            nholes = len(ds.all_data()[('PartType5', 'BH_Mass')])
+            if nholes > 0:
                 if cfg.par.BH_model == 'Nenkova':
                     from powderday.agn_models.nenkova import Nenkova2008
                     try:
@@ -268,6 +260,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
                     agn_spectrum = model.agn_spectrum
                 else:
                     from powderday.agn_models.hopkins import agn_spectrum
+
+                if cfg.par.BH_var:
+                    from powderday.agn_models.hickox import vary_bhluminosity
+                    bhlfrac = vary_bhluminosity(nholes)
 
                 ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
                 ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)

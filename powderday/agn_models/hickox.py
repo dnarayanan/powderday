@@ -11,9 +11,9 @@ def Hickox2014(L_cut=100, alpha=0.2):
     return t0 * p0, L
 
 def vary_bhluminosity(size):
-'''
-    Returns a list of fractions by which to vary the luminosity.
-'''
+    '''
+        Returns a list of fractions by which to vary the luminosity.
+    '''
     PDF, L_frac = Hickox2014()
     CDF = np.cumsum(PDF) / sum(PDF)
     choice = np.random.random(size)
