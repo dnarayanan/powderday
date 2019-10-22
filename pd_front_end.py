@@ -87,7 +87,7 @@ df.close()
 
 # add sources to hyperion
 ad = pf.all_data()
-stars_list, diskstars_list, bulgestars_list = sg.star_list_gen(boost, xcent, ycent, zcent, dx, dy, dz, pf, ad)
+stars_list, diskstars_list, bulgestars_list = sg.star_list_gen(boost, dx, dy, dz, pf, ad)
 nstars = len(stars_list)
 
 

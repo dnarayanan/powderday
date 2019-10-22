@@ -64,59 +64,12 @@ def calc_LogU(nuin0, specin0, age, zmet, T, mstar=1.0, file_output=True):
 
 
 
-def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
+def star_list_gen(boost,dx,dy,dz,pf,ad):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
-
-    fname = cfg.model.hydro_dir+cfg.model.snapshot_name
-    
-    bbox = [[-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
-            [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
-            [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim]]
- 
-   
 
     metals = ad["starmetals"].value
     mass = ad["starmasses"].value
     positions = ad["starcoordinates"].value
-
-    
-    '''
-    if ad.ds.cosmological_simulation == False:
-    
-        #this commented code needs to be switched with the next two line block if the yt fix isn't in place yet
-        simtime = pf.current_time.in_units('Gyr')
-        simtime = simtime.value
-
-        age = simtime-ad[("starformationtime")].value * cfg.par.unit_age #gyr
-        #make the minimum age 1 million years 
-        age[np.where(age < 1.e-3)[0]] = 1.e-3
-
-
-        print '\n--------------'
-        print '[SED_gen/star_list_gen: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ',simtime
-        print '--------------\n'
-    else:
-        simtime = cosmo.Planck13.age(pf.current_redshift).value #what is the age of the Universe right now?
-
-        scalefactor = ad[("starformationtime")].value
-        formation_z = (1./scalefactor)-1.
-
-        formation_time = redshift_multithread(formation_z)
-        
-        age = simtime - formation_time
-        #make the minimum age 1 million years 
-        age[np.where(age < 1.e-3)[0]] = 1.e-3
-
-        
-        print '\n--------------'
-        print '[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Assuming Planck13 Cosmology) is (Gyr): ',simtime
-        print '--------------\n'
-  
-    '''
-       
-
-    median_metallicity = np.median(metals)
-  
     age = ad["stellarages"].value
     nstars = len(age)
     print ('number of new stars =',nstars)
@@ -221,11 +174,6 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
             print ('boosting bulge stars to coordinate center')
             bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
 
-           
-            orig_bulge_stars_list_len = nstars_bulge
-            
-
-
 
     #EXPERIMENTAL FEATURES
     if cfg.par.SOURCES_IN_CENTER == True:
@@ -258,7 +206,7 @@ def star_list_gen(boost,xcent,ycent,zcent,dx,dy,dz,pf,ad):
 
 
 
-def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,cosmoflag,sp):
+def allstars_sed_gen(stars_list,cosmoflag,sp):
 
 
     #NOTE this part is just for the gadget simulations - this will
@@ -267,8 +215,6 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,cosmoflag,sp):
     #types of simulation results.
 
     nstars = len(stars_list)
-    nstars_disk = len(diskstars_list)
-    nstars_bulge = len(bulgestars_list)
     
     #get just the wavelength array
     sp.params["tage"] = stars_list[0].age
@@ -423,49 +369,6 @@ def allstars_sed_gen(stars_list,diskstars_list,bulgestars_list,cosmoflag,sp):
 
     #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
     return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
-
-
-def redshift_multithread(formation_z):
-
-    formation_z_list = formation_z
-    #initialize the process pool and build the chunks
-    p = Pool(processes = cfg.par.n_processes)
-    nchunks = cfg.par.n_processes
-    chunk_start_indices = []
-    chunk_start_indices.append(0) #the start index is obviously 0
-    delta_chunk_indices = int(len(formation_z_list) / nchunks)
-    print ('delta_chunk_indices = ',delta_chunk_indices)
-    for n in range(1,nchunks):
-        chunk_start_indices.append(chunk_start_indices[n-1]+delta_chunk_indices)
-    list_of_chunks = []
-    for n in range(nchunks):
-        formation_z_chunk = formation_z_list[chunk_start_indices[n]:chunk_start_indices[n]+delta_chunk_indices]
-        if n == nchunks-1: 
-            formation_z_chunk = formation_z_list[chunk_start_indices[n]::]
-        list_of_chunks.append(formation_z_chunk)
-    print ('Entering Pool.map multiprocessing for Stellar Age calculations')
-    t1=datetime.now()
-    chunk_sol = p.map(redshift_gen, [arg for arg in list_of_chunks])
-    
-
-    formation_time = []
-    for i in range(len(chunk_sol)):
-        sub_chunk_sol = chunk_sol[i].value
-        for j in range(len(sub_chunk_sol)):
-            formation_time.append(sub_chunk_sol[j])
-
-    t2=datetime.now()
-    print ('Execution time for Stellar Age calculations in Pool.map multiprocessing = '+str(t2-t1))
-    
-  
-    
-    return np.array(formation_time)
-        
-
-def redshift_gen(formation_z):
-    age = cosmo.Planck13.age(formation_z)
-    return age
-
 
 
 def newstars_gen(stars_list):
