@@ -39,7 +39,7 @@ SPHGR_COORDINATE_REWRITE = True
 
 #===============================================
 
-data = np.load(npzfile)
+data = np.load(npzfile,allow_pickle=True)
 pos = data['pos'][()] #positions dictionary
 
 #ngalaxies is the dict that says how many galaxies each snapshot has, in case it's less than NGALAXIES_MAX
