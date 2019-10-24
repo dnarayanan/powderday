@@ -164,15 +164,20 @@ def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
     np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
     
 # Saves logU, Q and other related parameters in a file (seperate file is created for each galaxy)
-def logu_diagnostic(logU, Q, mstar, age, zmet):
-    try:outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
-    except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
-    f = open(outfile, 'a+')
-    f.write(str(logU) + "\t" + str(Q) + "\t" + str(mstar) + "\t"+ str(age) + "\t" + str(zmet) + "\n")
-    f.close()
-    
+def logu_diagnostic(logU, Q, mstar, age, zmet,append = True):
+    if append == False:
+        try: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
+        except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
+        f = open(outfile, 'w+')
+        f.close()
+    else:
+        try:outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
+        except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
+        f = open(outfile, 'a+')
+        f.write(str(logU) + "\t" + str(Q) + "\t" + str(mstar) + "\t"+ str(age) + "\t" + str(zmet) + "\n")
+        f.close()
 
-# Dumps AGN SEDs
+    # Dumps AGN SEDs
 def dump_AGN_SEDs(nu,fnu,luminosity):
     savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
     np.savez(savefile,nu = nu,fnu = fnu, luminosity = luminosity)
