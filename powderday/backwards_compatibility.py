@@ -164,7 +164,7 @@ def variable_set():
     try:
         cfg.par.HII_max_age
     except: 
-        cfg.par.HII_max_age = 2.e-3
+        cfg.par.HII_max_age = 50.e-3
         
     try:
         cfg.par.neb_file_output
