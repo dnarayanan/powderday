@@ -59,7 +59,7 @@ def calc_LogU(nuin0, specin0, age, zmet, T, mstar=1.0, file_output=True):
     Q = simps(integrand, x=nu)*mstar
     U = (np.log10((Q*nh*(alpha**2))/(4*np.pi*(c**3))))*(1./3.)
     if file_output:
-        logu_diagnostic(U, Q, mstar, age, zmet)   #Saves important parameters in an output file.
+        logu_diagnostic(U, Q, mstar, age, zmet,append=True)   #Saves important parameters in an output file.
     return U
 
 
