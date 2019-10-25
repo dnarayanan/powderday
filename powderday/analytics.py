@@ -7,7 +7,7 @@ import powderday.config as cfg
 from astropy import constants
 import astropy.units as u
 from hyperion.model import ModelOutput
-
+import os,pdb
 
 def proj_plots(pf):
     print ('\n[analytics/proj_plots] Saving Diagnostic Projection Plots \n')
@@ -182,3 +182,24 @@ def dump_AGN_SEDs(nu,fnu,luminosity):
     savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
     np.savez(savefile,nu = nu,fnu = fnu, luminosity = luminosity)
                       
+
+
+#def dump_emline(emline_wavelengths,emline_luminosity,append=True):
+def dump_emline(emline_wave,emline_lum,append=True):
+
+    if hasattr(cfg.model, 'galaxy_num_str'):
+        outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy" + cfg.model.galaxy_num_str + ".txt"
+    else:
+        outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy.txt"
+
+    if append == False:
+        f = open(outfile_lines,'w')
+        #np.expand_dims sets up a dummy dimension so it saves as a row
+        np.savetxt(f,np.expand_dims(emline_wave,axis=0))
+        f.close()
+    else:
+        f = open(outfile_lines,'a+')
+        np.savetxt(f,emline_lum)#,fmt='%.18g', delimiter=' ', newline=os.linesep)
+        f.close()
+
+
