@@ -1,6 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import powderday.config as cfg
+import pdb
 
 import astropy.constants as constants
 from astropy import cosmology as cosmo
@@ -12,7 +13,7 @@ from powderday.grid_construction import stars_coordinate_boost
 from multiprocessing import Pool
 from functools import partial
 from scipy.integrate import simps
-from powderday.analytics import logu_diagnostic
+from powderday.analytics import logu_diagnostic,dump_emline
 
 # Lazily initialize FSPS
 sp = None
@@ -240,6 +241,13 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
 
     nprocesses = np.min([cfg.par.n_processes,len(stars_list)]) #the pool.map will barf if there are less star bins than process threads
 
+
+    #initializing the logU file newly
+    logu_diagnostic(None,None,None,None,None,append=False)
+    #save the emission lines from the newstars#
+    if cfg.par.add_neb_emission: calc_emline(stars_list)
+
+
     #initialize the process pool and build the chunks
     p = Pool(processes = nprocesses)
     nchunks = nprocesses
@@ -271,11 +279,6 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
 
         list_of_chunks.append(stars_list_chunk)
     
-    
-
-
-    #initializing the logU file newly
-    logu_diagnostic(None,None,None,None,None,append=False)
 
     t1=datetime.now()
     chunk_sol = p.map(newstars_gen, [arg for arg in list_of_chunks])
@@ -465,7 +468,7 @@ def newstars_gen(stars_list):
             sp.params["add_neb_emission"] = True
             spec = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
             f = spec[1]*num_HII_clusters
-            
+
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f
         
@@ -494,3 +497,98 @@ def find_nearest_zmet(array,value):
     idx = (np.abs(array-value)).argmin()
     
     return idx+1
+
+
+def calc_emline(stars_list):
+    print ('[SED_gen/calc_emline]: Calculating Emission Line Fluxes')
+    #this function is awful and redundant.  itloops over just the new
+    #stars in the box and calculates the SEDs for the ones smaller
+    #than cfg.par.HII_max_age.  its a bit wasteful since we already
+    #calculate these SEDs, but its difficult to get the file to save
+    #in a nice format without incl
+    global sp
+    if sp is None:
+        sp = fsps.StellarPopulation()
+
+
+
+    #set up arrays 
+    #first how many young stars are there?
+    
+    newstars_idx = []
+    for counter,star in enumerate(stars_list):
+        if star.age <= cfg.par.HII_max_age:
+            newstars_idx.append(counter)
+    num_newstars = len(newstars_idx)
+ 
+    #set up a dummy sps model just to get number of wavelengths
+    sp.params["tage"] = stars_list[0].age
+    sp.params["zmet"] = stars_list[0].fsps_zmet
+    sp.params["add_neb_emission"] = True
+    wav,spec = sp.get_spectrum()
+    n_emlines = len(sp.emline_wavelengths)
+    
+    #now set up the actual arrays
+    master_emline_wavelength = np.zeros([n_emlines])
+    master_emline_lum = np.zeros([num_newstars,n_emlines])
+
+    #loop through the newstars now and save the emlines
+    for counter,i in enumerate(newstars_idx):
+        
+
+        
+        #first we calculate the spectrum without lines on to get logU
+        sp.params["tage"] = stars_list[i].age
+        sp.params["imf_type"] = cfg.par.imf_type
+        sp.params["pagb"] = cfg.par.pagb
+        sp.params["sfh"] = 0
+        sp.params["zmet"] = stars_list[i].fsps_zmet
+        sp.params["add_neb_emission"] = False
+        sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+        sp.params['gas_logu'] = cfg.par.gas_logu
+        if cfg.par.FORCE_gas_logz == False:
+            sp.params['gas_logz'] =np.log10(stars_list[i].metals/cfg.par.solar)
+        else:
+            sp.params['gas_logz'] = cfg.par.gas_logz
+
+        if cfg.par.CF_on == True:
+            sp.params["dust_type"] = 0
+            sp.params["dust1"] = 1
+            sp.params["dust2"] = 0
+            sp.params["dust_tesc"] = tesc_age
+                
+
+        #sp = fsps.StellarPopulation(tage=stars_list[i].age,imf_type=2,sfh=0,zmet=stars_list[i].fsps_zmet)
+        spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+        num_HII_clusters = int(np.floor((stars_list[i].mass/constants.M_sun.cgs.value)/(cfg.par.stellar_cluster_mass)))
+        neb_file_output = False
+        
+        sp.params["add_neb_emission"] = False
+        spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+        
+        #now we know logU, so recalculate the lines
+        if cfg.par.FORCE_gas_logu:
+            LogU = cfg.par.gas_logu
+        else:
+            LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.HII_T, mstar=cfg.par.stellar_cluster_mass,file_output=neb_file_output)
+
+        sp.params['gas_logu'] = LogU
+        sp.params["add_neb_emission"] = True
+        spec = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+        f = spec[1]*num_HII_clusters
+        
+        emline_luminosity = sp.emline_luminosity * num_HII_clusters
+        emline_wavelength = sp.emline_wavelengths
+        #dump_emline(emline_wavelength,emline_luminosity,append=True)
+        
+        
+        master_emline_lum[counter,:] = emline_luminosity
+        if counter == 0: 
+            master_emline_wavelength = emline_wavelength
+            #set up the emline output file as new, and insert the wavelengths
+            dump_emline(master_emline_wavelength,None,append=False)
+    
+    #write the remainder of the emline file
+    dump_emline(master_emline_wavelength,master_emline_lum,append=True)
+
+                    
