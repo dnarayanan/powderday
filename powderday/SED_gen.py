@@ -3,6 +3,7 @@ import numpy as np
 import powderday.config as cfg
 import pdb
 
+import astropy.units as u
 import astropy.constants as constants
 from astropy import cosmology as cosmo
 
@@ -532,10 +533,11 @@ def calc_emline(stars_list):
     master_emline_wavelength = np.zeros([n_emlines])
     master_emline_lum = np.zeros([num_newstars,n_emlines])
 
+
     #loop through the newstars now and save the emlines
     for counter,i in enumerate(newstars_idx):
+        num_HII_clusters = int(np.floor((stars_list[i].mass/constants.M_sun.cgs.value)/(cfg.par.stellar_cluster_mass)))
         
-
         
         #first we calculate the spectrum without lines on to get logU
         sp.params["tage"] = stars_list[i].age
@@ -571,7 +573,7 @@ def calc_emline(stars_list):
             LogU = cfg.par.gas_logu
         else:
             LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.HII_T, mstar=cfg.par.stellar_cluster_mass,file_output=neb_file_output)
-
+        
         sp.params['gas_logu'] = LogU
         sp.params["add_neb_emission"] = True
         spec = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
@@ -579,10 +581,9 @@ def calc_emline(stars_list):
         
         emline_luminosity = sp.emline_luminosity * num_HII_clusters
         emline_wavelength = sp.emline_wavelengths
-        #dump_emline(emline_wavelength,emline_luminosity,append=True)
-        
-        
-        master_emline_lum[counter,:] = emline_luminosity
+
+        #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
+        master_emline_lum[counter,:] = emline_luminosity*((stars_list[i].mass*u.g).to(u.Msun).value)
         if counter == 0: 
             master_emline_wavelength = emline_wavelength
             #set up the emline output file as new, and insert the wavelengths
