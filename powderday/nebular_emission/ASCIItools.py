@@ -6,7 +6,7 @@ import os
 import numpy as np
 import subprocess
 from powderday.nebular_emission.cloudy_tools import grouper
-#from cloudy_tools import grouper
+
 """
 --------------------------------------------------------------------------------------
 Based on cloudyfsps written by Nell Byler.

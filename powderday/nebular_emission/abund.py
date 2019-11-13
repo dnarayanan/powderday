@@ -4,7 +4,6 @@ from __future__ import (division, print_function, absolute_import,
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline as InterpUS
 from powderday.nebular_emission.cloudy_tools import sym_to_name
-#from cloudy_tools import sym_to_name
 
 """
 ------------------------------------------------------------------------------------------
@@ -201,44 +200,6 @@ class UVbyler(abundSet):
         return
 
 
-class varyCO(abundSet):
-    solar = 'GASS10'
-
-    def __init__(self, logZ, dust=True, re_z=0.0):
-        """
-        arbitrarily vary C/O at fixed O.
-        """
-        if dust:
-            self.grains = 'no grains\ngrains ISM'
-        else:
-            self.grains = 'no grains'
-        self.re_z = re_z
-        abundSet.__init__(self, 'UVbyler', logZ)
-
-    def calcSpecial(self):
-        def calc_He(logZ):
-            return np.log10(0.0737 + (0.024 * (10.0 ** logZ)))
-
-        def calc_CNO(logZ):
-            O = self.abund_0['O'] + logZ
-            C = np.log10((10. ** O) * (10. ** -0.7 + 10. ** (4.8 + 1.45 * O)))
-            N = np.log10((1.0 * 10. ** O) * (10. ** -1.55 + 10. ** (2.3 + 1.1 * O)))
-            # N  = -4.81 + logZ if logZ <= -0.3 else -4.51 + 2.0*logZ
-            return C, N, O
-
-        self.__setattr__('He', calc_He(self.logZ))
-        C, N, O = calc_CNO(self.logZ)
-        self.__setattr__('C', C + self.depl['C'] + self.re_z)
-        self.__setattr__('N', N + self.depl['N'])
-        self.__setattr__('O', O + self.depl['O'])
-        return
-
-    def calcFinal(self):
-        [self.__setattr__(key, val + self.re_z + self.depl[key])
-         for key, val in self.abund_0.items() if not hasattr(self, key)]
-        return
-
-
 class gutkin(abundSet):
     solar = 'GASS10'
 
@@ -266,48 +227,6 @@ class gutkin(abundSet):
             O = self.abund_0['O'] + logZ
             N = np.log10((0.41 * 10. ** O) * (10. ** -1.6 + 10. ** (2.33 + O)))
             C = self.abund_0['C'] + logZ
-            return C, N, O
-
-        self.__setattr__('He', calc_He(self.logZ))
-        C, N, O = calc_CNO(self.logZ)
-        [self.__setattr__(key, val)
-         for key, val in zip(['C', 'N', 'O'], [C, N, O])]
-        return
-
-    def calcFinal(self):
-        [self.__setattr__(key, val)
-         for key, val in self.abund_0.items() if not hasattr(self, key)]
-        return
-
-
-class varyNO(abundSet):
-    solar = 'GASS10'
-
-    def __init__(self, logZ, dust=True, re_z=False):
-        """
-        varying N at fixed O.
-        """
-        if dust:
-            self.grains = 'no grains\ngrains ISM'
-        else:
-            self.grains = 'no grains'
-        self.re_z = re_z
-        abundSet.__init__(self, 'dopita', logZ)
-
-    def calcSpecial(self):
-        def calc_He(logZ):
-            return -1.01
-
-        def calc_CNO(logZ):
-            oxy = np.array([7.39, 7.50, 7.69, 7.99, 8.17,
-                            8.39, 8.69, 8.80, 8.99, 9.17, 9.39])
-            nit = np.array([-6.61, -6.47, -6.23, -5.79, -5.51,
-                            -5.14, -4.60, -4.40, -4.04, -3.67, -3.17])
-            car = np.array([-5.58, -5.44, -5.20, -4.76, -4.48,
-                            -4.11, -3.57, -3.37, -3.01, -2.64, -2.14])
-            O = self.abund_0['O']
-            C = float(InterpUS(oxy, car, k=1)(O + 12.0))
-            N = float(InterpUS(oxy, nit, k=1)(O + logZ + 12.0))
             return C, N, O
 
         self.__setattr__('He', calc_He(self.logZ))

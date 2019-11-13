@@ -1,10 +1,7 @@
 from powderday.nebular_emission.abund import getNebAbunds
 from powderday.nebular_emission.ASCIItools import *
-#from abund import getNebAbunds
-#from ASCIItools import *
 from astropy import constants
 from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogU
-#from cloudy_tools import air_to_vac, calc_LogU
 import logging
 import numpy as np
 import os
