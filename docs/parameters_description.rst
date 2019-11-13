@@ -296,12 +296,17 @@ Nebular Emission Info
     This sets the HII region elemental abundances for generating CLOUDY models. 
     Available abundaces are.
     
-    dopita:    Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
-    newdopita: Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
-               includes smooth polynomial for N/O, C/O relationship functional form for He(z),
-               new depletion and factors in ISM grains.
-    gutkin:    Abundabces from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on Grevesse+Sauvel (1998) 
-               and Caffau+2011 
+    :dopita:    
+      Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
+    
+    :newdopita: 
+      Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
+      includes smooth polynomial for N/O, C/O relationship functional form for He(z),
+      new depletion and factors in ISM grains.
+    
+    :gutkin:    
+      Abundabces from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on 
+      Grevesse+Sauvel (1998) and Caffau+2011 
     
    This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
 
