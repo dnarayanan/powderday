@@ -4,7 +4,7 @@ Detailed Description of Parameters
 There are two parameters files - parameters_master and
 parameters_model.  The distinction between where a parameter goes is
 somewhat arbitrary, but is based on the following.  Parameters_master
-tends to contain parmaeters that will likely be shared amongst all
+tends to contain parameters that will likely be shared amongst all
 snapshots in a given galaxy run, while parameters_model are parameters
 that might change from run to run (like the snapshot name or the
 galaxy center).
@@ -262,7 +262,7 @@ Nebular Emission Info
 :FORCE_gas_logz:
    
     If set, then we force the metallicity (gas_logz) of HII regions to be gas_logz (next parameter)
-    else, it is taken to be the star particles metallicity. (Default: False)
+    else, it is taken to be the star particle's metallicity. (Default: False)
 
 :gas_logz:
    
@@ -277,7 +277,7 @@ Nebular Emission Info
 
 :source_logq:
 
-    Number of ionizing photons emitted by the source in units of s^-1.
+    The number of ionizing photons emitted by the source in units of s^-1.
     Only relevant if add_neb_emission = True, use_cloudy_tables = True and 
     FORCE_gas_logq = True (Default: 1.e47)
  
@@ -294,7 +294,7 @@ Nebular Emission Info
 :neb_abund:
 
     This sets the HII region elemental abundances for generating CLOUDY models. 
-    Available abundaces are.
+    Available abundances are:
     
     :dopita:    
       Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
@@ -305,14 +305,14 @@ Nebular Emission Info
       new depletion and factors in ISM grains.
     
     :gutkin:    
-      Abundabces from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on 
+      Abundances from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on 
       Grevesse+Sauvel (1998) and Caffau+2011 
     
    This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
 
 :use_Q:
 
-    If True, we run CLOUDY by specifying number of ionizing photons which are calculated 
+    If True, we run CLOUDY by specifying the number of ionizing photons that are calculated 
     based on the input sed and the inner radius which is set to the Strömgren radius. 
     else, CLOUDY is run by specifying just the ionization parameter.Only relevant if 
     add_neb_emission = True and use_cloudy_tables = True (Default: True)
