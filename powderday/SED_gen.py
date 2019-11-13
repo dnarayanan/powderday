@@ -215,7 +215,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     #initializing the logU file newly
     logu_diagnostic(None,None,None,None,None,None,append=False)
     #save the emission lines from the newstars#
-    #if cfg.par.add_neb_emission: calc_emline(stars_list)
+    if cfg.par.add_neb_emission: calc_emline(stars_list)
 
 
     #initialize the process pool and build the chunks
@@ -456,7 +456,7 @@ def newstars_gen(stars_list):
             else:
                 try:
                     spec_neb = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, abund=cfg.par.neb_abund,
-                                           useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleaup)
+                                           useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleanup)
                 except ValueError as err:
                     lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
 
@@ -564,8 +564,9 @@ def calc_emline(stars_list):
         if cfg.par.FORCE_gas_logu:
             LogU = cfg.par.gas_logu
         else:
-            LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.HII_T, mstar=cfg.par.stellar_cluster_mass,file_output=neb_file_output)
-        
+            LogQ, Rin, LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value,
+                                        stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.HII_nh, cfg.par.HII_T,
+                                        mstar=cfg.par.stellar_cluster_mass)
         sp.params['gas_logu'] = LogU
         sp.params["add_neb_emission"] = True
         spec = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)

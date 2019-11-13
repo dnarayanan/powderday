@@ -1,20 +1,20 @@
 #===============================================
 #RESOLUTION KEYWORDS
 #===============================================
-oref = 0 #over refine factor - should typically be set to 0
-n_ref = 32#64 #when n_particles > n_ref, octree refines further
-zoom_box_len = 50#200 #kpc; so the box will be +/- zoom_box_len from the center
-bbox_lim = 1.e5 #kpc - this is the initial bounding box of the grid (+/- bbox_lim)
-               #This *must* encompass all of the particles in the
-               #simulation. 
+oref = 0 # over refine factor - should typically be set to 0
+n_ref = 32 # when n_particles > n_ref, octree refines further
+zoom_box_len = 50 # kpc; so the box will be +/- zoom_box_len from the center
+bbox_lim = 1.e5 # kpc - this is the initial bounding box of the grid (+/- bbox_lim)
+                # This *must* encompass all of the particles in the
+                # simulation. 
 
 #===============================================
 #PARALLELIZATION
 #===============================================
 
-n_processes = 64 #number of pool processes to run for stellar SED generation
-n_MPI_processes = 32 #number of MPI tasks to run. for TORQUE this is
-                    #best set as the same as n_processes, while for SLURM this may not be the case.
+n_processes = 64 # number of pool processes to run for stellar SED generation
+n_MPI_processes = 32 # number of MPI tasks to run. for TORQUE this is
+                     # best set as the same as n_processes, while for SLURM this may not be the case.
 
 #===============================================
 #RT INFORMATION
@@ -25,7 +25,7 @@ n_photons_raytracing_sources = 1.e8
 n_photons_raytracing_dust = 1.e8
 
 FORCE_RANDOM_SEED = False
-seed = -12345 #has to be an int, and negative.
+seed = -12345 # has to be an int, and negative.
 
 #===============================================
 #DUST INFORMATION 
@@ -34,13 +34,13 @@ dustdir = '/home/desika/pd/hyperion-dust-0.1.0/dust_files/' #location of your du
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 
-dust_grid_type = 'dtm'#'manual' #needs to be in ['dtm','rr','manual','li_bestfit']
+dust_grid_type = 'dtm' # needs to be in ['dtm','rr','manual','li_bestfit']
 dusttometals_ratio = 0.4
-enforce_energy_range = False #False is the default;  ensures energy conservation
+enforce_energy_range = False # False is the default;  ensures energy conservation
 
-SUBLIMATION = False #do we automatically kill dust grains above the
-                    #sublimation temperature; right now is set to fast
-                    #mode 
+SUBLIMATION = False # do we automatically kill dust grains above the
+                    # sublimation temperature; right now is set to fast
+                    # mode 
 SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 
 #===============================================
@@ -48,15 +48,15 @@ SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 #===============================================
 FORCE_BINNING = True #force SED binning
 
-imf_type = 2 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
-pagb = 1 #weight given to post agb stars# 1 is the default
+imf_type = 2 # FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
+pagb = 1 # weight given to post agb stars# 1 is the default
 
 #===============================================
 #NEBULAR EMISSION INFO
 #===============================================
 add_neb_emission = False    # add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
 
-add_agb_dust_model=False    # add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
+add_agb_dust_model = False    # add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 
 use_cloudy_tables = True    # If True, CLOUDY look up tables will be used to calculate nebular emission.
                             # Otherwise CLOUDY models are generated individually 
