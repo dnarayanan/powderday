@@ -234,6 +234,7 @@ Stellar SEDs Info
 Nebular Emission Info
 ------------
 
+
 :add_neb_emission:
 
     Boolean. If set to True, nebular line emission from Cloudy lookup tables 
@@ -241,7 +242,103 @@ Nebular Emission Info
 
 :add_agb_dust_model:
 
+:use_cloudy_tables:
+    
+    If True, CLOUDY look up tables will be used to calculate nebular emission.
+    Otherwise CLOUDY models are generated individually 
+    for each young star particle (under active development)
 
+:FORCE_gas_logu:
+    
+    If set, then we force the ionization parameter (gas_logu) of HII regions to be 
+    gas_logu (next parameter) else, it is taken to be variable and dependent on ionizing 
+    radiation from star particles. (Default: False)
+
+:gas_logu:
+   
+    Gas ionization parameter for HII regions. This is only relevant 
+    if add_neb_emission is set to True and FORCE_gas_logu is set to True (Default: -2.0)
+
+:FORCE_gas_logz:
+   
+    If set, then we force the metallicity (gas_logz) of HII regions to be gas_logz (next parameter)
+    else, it is taken to be the star particles metallicity. (Default: False)
+
+:gas_logz:
+   
+    Metallicity of the HII region in units of log(Z/Z_sun)
+    only relevant if add_neb_emission = True and FORCE_gas_logz = True (Default: 0.0)
+
+:FORCE_logq:
+    
+    If set, then we force the number of ionizing photons to be source_logq (next parameter) 
+    else, it is taken to be variable and dependent on ionizing radiation 
+    from star particles. (Default: False)
+
+:source_logq:
+
+    Number of ionizing photons emitted by the source in units of s^-1.
+    Only relevant if add_neb_emission = True, use_cloudy_tables = True and 
+    FORCE_gas_logq = True (Default: 1.e47)
+ 
+:FORCE_inner_radius:
+    
+    If set, then we force the inner radius of the cloud to be inner_radius (next parameter) 
+    else, it is taken to be the Stromgren sphere radius. (Default: False)
+
+:inner_radius:
+
+    This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
+    use_cloudy_tables = True and FORCE_inner_radius = True (Default: 1.e19)
+
+:neb_abund:
+
+    This sets the HII region elemental abundances for generating CLOUDY models. 
+    Available abundaces are.
+    
+    dopita:    Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
+    newdopita: Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
+               includes smooth polynomial for N/O, C/O relationship functional form for He(z),
+               new depletion and factors in ISM grains.
+    gutkin:    Abundabces from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on Grevesse+Sauvel (1998) 
+               and Caffau+2011 
+    
+   This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
+
+:use_Q:
+
+    If True, we run CLOUDY by specifying number of ionizing photons which are calculated 
+    based on the input sed and the inner radius which is set to the Strömgren radius. 
+    else, CLOUDY is run by specifying just the ionization parameter.Only relevant if 
+    add_neb_emission = True and use_cloudy_tables = True (Default: True)
+   
+:HII_T:
+    
+    Ionized gas temperature in K for calculating nebular emission. (Default = 1.e4)
+
+:HII_nh: 
+   
+    Gas hydrogen density for calcualting nebular emission in units if cm^-3. (Default = 1.e2)
+
+:HII_max_age:
+   
+    Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 2.e-3)
+
+
+:neb_file_output:
+   
+    If set to True creates an output file with ionization parameter (LogU), 
+    number of ionizing photons (LogQ), inner radius, stellar mass, age and 
+    metallicity(zmet) for each particle. (Default: True)
+
+:stellar_cluster_mass:
+   
+    Mass of star clusters in Msun (Default = 1.e4)
+
+:cloudy_cleanup:
+   
+   If set to True, all the CLOUDY files will be deleted after the source addition is complete.
+   
 
 
 :CF_on:
