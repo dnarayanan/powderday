@@ -132,7 +132,7 @@ def write_cloudy_input(**kwargs):
     f.close()
 
 
-def get_output(model_name, dir_):
+def get_output(model_name, dir_, qq):
     lsun = 3.839e33
     c = constants.c.cgs.value * 1.e8
 
@@ -148,7 +148,7 @@ def get_output(model_name, dir_):
     sinds = np.argsort(wl)
     wl = wl[sinds]
 
-    datflu = datflu[sinds] / lsun
+    datflu = datflu[sinds] / lsun / qq
     datflu = [float("{0:1.4e}".format(dat)) for dat in datflu]
     cont_data = np.genfromtxt(outcontfl, skip_header=1)
     fsps_lam = np.genfromtxt(fsps_lam_file)
@@ -156,7 +156,7 @@ def get_output(model_name, dir_):
     ang_0, diffuse_0 = cont_data[:, 0], cont_data[:, 2]
     ang_v, diffuse_in = air_to_vac(ang_0[::-1]), diffuse_0[::-1]
     diffuse_y = interp1d(ang_v, diffuse_in, fill_value=0.0, bounds_error=False)(fsps_lam)
-    diffuse_out = diffuse_y / nu / lsun
+    diffuse_out = diffuse_y / nu / lsun / qq
     return wl, datflu, fsps_lam, diffuse_out
 
 
@@ -179,7 +179,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, abund="dopita",
     nspec = len(spec_lambda)
     frac_obrun = 0.0
     clight = constants.c.cgs.value*1.e8
-    nebular_smooth_init = 100
+    nebular_smooth_init = 0
 
     logging.info("Writing the input SED file")
     filename = write_input_sed(spec_lambda, sspi)
@@ -188,7 +188,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, abund="dopita",
     logging.info("Writing CLOUDY input file")
     dir_= os.getcwd() + "/powderday/nebular_emission"
     dir_base = os.getcwd()
-    #dir_ = os.getcwd()
+
     write_cloudy_input(dir_=dir_,
                        model_name=model_name,
                        r_inner=radius,
@@ -219,7 +219,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, abund="dopita",
 
     logging.info("Getting output spectrum")
 
-    nebem_line_pos, nebem_line, readlambneb, readcontneb = get_output(model_name, dir_)
+    nebem_line_pos, nebem_line, readlambneb, readcontneb = get_output(model_name, dir_, 10**logq)
     nebem_cont = interp1d(readlambneb, np.log10(readcontneb + 10 ** (-95.0)),
                           fill_value=0, bounds_error=False)(spec_lambda)
 
@@ -232,6 +232,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, abund="dopita",
         j = min(max_id, nspec - 1)
         neb_res_min[i] = spec_lambda[j + 1] - spec_lambda[j]
 
+    logq_1, radius_1, logu_1 = calc_LogU(1.e8 * constants.c.cgs.value / spec_lambda, sspi * constants.L_sun.cgs.value)
     gaussnebarr = []
     for i in range(nemline):
         dlam = nebem_line_pos[i] * nebular_smooth_init / clight * 1e13
@@ -244,9 +245,9 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, abund="dopita",
     whlylim = np.max(np.where(spec_lambda <= 912.))
 
     sspo[: whlylim] = sspi[: whlylim] * max(min(frac_obrun, 1.0), 0.0)
-    sspo = sspo + 10 ** nebem_cont
+    sspo = sspo + 10 ** nebem_cont * (10**logq_1)
     for i in range(nemline):
-        sspo = sspo + nebem_line[i] * gaussnebarr[i]
+        sspo = sspo + nebem_line[i] * gaussnebarr[i] * (10**logq_1)
 
     if clean_up:
         clean_files(dir_, model_name,  error=False)
