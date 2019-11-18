@@ -53,6 +53,7 @@ Contents:
    quickstart.rst
    parameters_description.rst
    algorithm_description.rst
+   nebular_emission.rst
    convenience.rst
    tests.rst
    referencing.rst 
