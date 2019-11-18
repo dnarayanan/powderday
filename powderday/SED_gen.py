@@ -435,8 +435,7 @@ def newstars_gen(stars_list):
                 Rin = ((3*(10 ** LogQ))/(4*np.pi*(cfg.par.HII_nh**2)*alpha))**(1./3.)
             else:
                 LogQ, Rin, LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value,
-                                            stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.HII_nh, cfg.par.HII_T,
-                                            mstar=cfg.par.stellar_cluster_mass)
+                                            cfg.par.HII_nh, cfg.par.HII_T,mstar=cfg.par.stellar_cluster_mass)
 
             if cfg.par.FORCE_logq:
                 LogQ = cfg.par.source_logq
@@ -455,8 +454,12 @@ def newstars_gen(stars_list):
                 lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
             else:
                 try:
-                    spec_neb = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, abund=cfg.par.neb_abund,
-                                           useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleanup)
+                    # Calculating ionizing photons again but for 1 Msun in order to scale the output for FSPS
+                    LogQ_1, Rin_1, LogU_1 = calc_LogU(1.e8 * constants.c.cgs.value / spec[0],
+                                                      spec[1] * constants.L_sun.cgs.value, cfg.par.HII_nh,
+                                                      cfg.par.HII_T)
+                    spec_neb = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, LogQ_1,
+                                           abund=cfg.par.neb_abund, useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleanup)
                 except ValueError as err:
                     lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
 
@@ -564,8 +567,7 @@ def calc_emline(stars_list):
         if cfg.par.FORCE_gas_logu:
             LogU = cfg.par.gas_logu
         else:
-            LogQ, Rin, LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value,
-                                        stars_list[i].age, stars_list[i].fsps_zmet, cfg.par.HII_nh, cfg.par.HII_T,
+            LogQ, Rin, LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, cfg.par.HII_nh, cfg.par.HII_T,
                                         mstar=cfg.par.stellar_cluster_mass)
         sp.params['gas_logu'] = LogU
         sp.params["add_neb_emission"] = True

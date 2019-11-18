@@ -342,7 +342,11 @@ Nebular Emission Info
 
 :cloudy_cleanup:
    
-   If set to True, all the CLOUDY files will be deleted after the source addition is complete.
+   If set to True, all the CLOUDY files will be deleted after the source addition is complete. 
+   This is used only when add_neb_emission = True and use_cloudy_tables = True.
+   Note that in case an error occurs, the files are not deleted even if this value is set to True.
+   (Default: True)  
+   
    
 
 

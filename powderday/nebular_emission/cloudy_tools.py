@@ -12,7 +12,7 @@ From cloudyfsps written by Nell Byler.
 """
 
 
-def calc_LogU(nuin0, specin0, age, zmet, nh, T, mstar=1.0):
+def calc_LogU(nuin0, specin0, nh, T, mstar=1.0):
     '''
     Claculates the number of lyman ionizing photons for given a spectrum
     Input spectrum must be in ergs/s/Hz!!
