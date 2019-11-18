@@ -175,7 +175,7 @@ def clean_files(dir_, model_name, error=False):
     os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".out"))
 
 
-def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, abund="dopita", useq=True, clean_up=True):
+def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, abund="dopita", useq=True, clean_up=True):
     nspec = len(spec_lambda)
     frac_obrun = 0.0
     clight = constants.c.cgs.value*1.e8
@@ -232,7 +232,6 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, abund="dopita",
         j = min(max_id, nspec - 1)
         neb_res_min[i] = spec_lambda[j + 1] - spec_lambda[j]
 
-    logq_1, radius_1, logu_1 = calc_LogU(1.e8 * constants.c.cgs.value / spec_lambda, sspi * constants.L_sun.cgs.value)
     gaussnebarr = []
     for i in range(nemline):
         dlam = nebem_line_pos[i] * nebular_smooth_init / clight * 1e13
