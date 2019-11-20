@@ -1,3 +1,5 @@
+# coding=utf-8
+
 #===============================================
 #RESOLUTION KEYWORDS
 #===============================================
@@ -54,7 +56,7 @@ add_agb_dust_model=False #add circumstellar AGB dust model (100%); Villaume, Con
 #===============================================
 #NEBULAR EMISSION INFO
 #===============================================
-add_neb_emission = True #add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
+add_neb_emission = False #add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
 
 use_cloudy_tables = True    # If True, CLOUDY look up tables will be used to calculate nebular emission.
                             # Otherwise CLOUDY models are generated individually
