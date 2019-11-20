@@ -115,3 +115,31 @@ determined. One potential fix could be using
 not been confirmed to be the source of the problem. If something went wrong at 
 any point in the installation process, starting from scratch and doing a fresh 
 installation may also fix the issue.
+
+
+6. Can't find "builtins"
+--------------
+
+During run, we get an error that looks like::
+
+    
+  (pd4env) [desika.narayanan@login2 pd_git]$ pd_front_end.py  tests/SKIRT/gizmo_mw_zoom/ parameters_master_401 parameters_model_401
+  Traceback (most recent call last):
+  File "/home/desika.narayanan/miniconda3/envs/pd4env/bin/pd_front_end.py", line 4, in <module>
+    __import__('pkg_resources').run_script('powderday==0.1.0', 'pd_front_end.py')
+  File "/home/desika.narayanan/miniconda3/envs/pd4env/lib/python2.7/site-packages/pkg_resources/__init__.py", line 666, in run_script
+    self.require(requires)[0].run_script(script_name, ns)
+  File "/home/desika.narayanan/miniconda3/envs/pd4env/lib/python2.7/site-packages/pkg_resources/__init__.py", line 1469, in run_script
+    exec(script_code, namespace, namespace)
+  File "/home/desika.narayanan/miniconda3/envs/pd4env/lib/python2.7/site-packages/powderday-0.1.0-py2.7.egg/EGG-INFO/scripts/pd_front_end.py", line 7, in <module>
+
+  File "build/bdist.linux-x86_64/egg/powderday/__init__.py", line 4, in <module>
+  File "build/bdist.linux-x86_64/egg/powderday/SED_gen.py", line 19, in <module>
+  File "build/bdist.linux-x86_64/egg/powderday/nebular_emission/cloudy_model.py", line 2, in <module>
+  File "build/bdist.linux-x86_64/egg/powderd
+
+    ...
+
+Try the following::
+  pip install future
+
