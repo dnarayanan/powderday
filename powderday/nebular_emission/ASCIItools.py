@@ -17,7 +17,7 @@ retrieved in October 2019)
 try:
     CLOUDY_EXE = os.environ['CLOUDY_EXE']
 except KeyError:
-    print('Must have set system environment CLOUDY_EXE')
+    raise KeyError("[powderday/nebular_emission/ASCII_TOOLS:] You must have set a system environment CLOUDY_EXE")
 
 try:
     # taking the last in path, if more than one directory given
