@@ -297,6 +297,14 @@ needs, *except* `yt <http://yt-project.org>`_::
 
     > conda install -c conda-forge astropy atomicwrites attrs backports backports.functools_lru_cache backports.shutil_get_terminal_size backports_abc configparser contextlib2 cycler cython dbus decorator enum34 expat fastcache fontconfig freetype funcsigs functools32 futures gettext glib gmp gmpy2 gst-plugins-base gstreamer h5py hdf5 hyperion-fortran icu importlib_metadata ipython ipython_genutils jpeg kiwisolver libblas libcblas libgfortran-ng libiconv liblapack libpng libuuid libxcb libxml2 linecache2 matplotlib more-itertools mpc mpfr mpi mpich mpmath numpy openblas packaging pathlib2 pcre pexpect pickleshare pluggy prompt_toolkit pthread-stubs ptyprocess py pygments pyparsing pyqt pytest python-dateutil pytz qt scandir simplegeneric singledispatch sip six subprocess32 sympy tornado traceback2 traitlets unittest2 wcwidth xorg-libxau xorg-libxdmcp xz zipp
 
+At this point, test your `Hyperion <http://www.hyperion-rt.org>`_ installation by trying_::
+
+  import hyperion
+
+If this doesn't work, repeat:_::
+
+  > conda install --no-deps -c conda-forge hyperion
+
 Now, clone the 4.x development branch from the `yt <http://yt-project.org>`_
 source repository and build it::
 
