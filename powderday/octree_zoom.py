@@ -57,11 +57,24 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
     print ('[octree zoom] new zoomed bbox (comoving/h) in code units= ',bbox1)
     
 
-    try: #particle
+        #yt 3.x
+        #ds1 = yt.load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+
+        #yt 4.x
+    if  yt.__version__ == '4.0.dev0':
+        ds1 = yt.load(fname)
+        left = np.array([pos[0] for pos in bbox1])
+        right = np.array([pos[1] for pos in bbox1])
+        octree = ds1.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
+        ds1.parameters['octree'] = octree
+    else:
         ds1 = yt.load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
-    except: #amr
-        ds1 = yt.load(fname,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
-        bbox1 = None
+
+
+        #RIGHT NOW THIS IS COMMENTED OUT NOT SURE YET HOW TO DEAL WITH AMR
+       #except: #amr
+        #ds1 = yt.load(fname)#,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+        #bbox1 = None
 
     ds1.periodicity = (False,False,False)
 

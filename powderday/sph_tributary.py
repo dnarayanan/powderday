@@ -53,7 +53,8 @@ def sph_m_gen(fname,field_add):
     refined_reordered = []
     dustdens_reordered = np.zeros(len(order))
     
-    
+    import pdb
+    pdb.set_trace()
     
     for i in range(len(order)): 
         refined_reordered.append(refined[order[i]])

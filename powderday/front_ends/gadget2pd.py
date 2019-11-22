@@ -57,13 +57,22 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
         return data[('PartType0', 'StarFormationRate')]
 
     def _gassmootheddensity(field, data):
-        return data[("deposit", "PartType0_smoothed_density")]
+        if  yt.__version__ == '4.0.dev0':
+            return data.ds.parameters['octree'][('PartType0', 'density')]
+        else:
+            return data[("deposit","PartType0_smoothed_density")]
 
     def _gassmoothedmetals(field, data):
-        return data[("deposit", "PartType0_smoothed_metallicity")]
+        if  yt.__version__ == '4.0.dev0':
+            return data.ds.parameters['octree'][('PartType0', 'metallicity')]
+        else:
+            return data[("deposit","PartType0_smoothed_metallicity")]
 
     def _gassmoothedmasses(field, data):
-        return data[('deposit', 'PartType0_mass')]
+        if  yt.__version__ == '4.0.dev0':
+            return data.ds.parameters['octree'][('PartType0', 'Masses')]
+        else:
+            return data[('deposit', 'PartType0_mass')]
 
     def _metaldens_00(field, data):
         return (data["PartType0", "Density"]*data["PartType0", "Metallicity_00"])
@@ -78,8 +87,12 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
         return (data["PartType0", "Masses"]*(data["PartType0", "Metallicity"].value))
 
     def _metalsmoothedmasses(field, data):
-        return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
+        if  yt.__version__ == '4.0.dev0':
+            return (data.ds.parameters['octree'][('PartType0', 'Masses')]* data.ds.parameters['octree'][('PartType0','metallicity')])
+        else:
+            return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
 
+        
     def _dustmass(field, data):
         return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
 
@@ -181,9 +194,19 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
 
     # load the ds
     if fname != None:
-        ds = yt.load(fname, bounding_box=bounding_box, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref)
-        ds.index
-        ad = ds.all_data()
+        if  yt.__version__ == '4.0.dev0':
+            ds = yt.load(fname)
+            ds.index
+            ad = ds.all_data()
+            left = np.array([pos[0] for pos in bounding_box])
+            right = np.array([pos[1] for pos in bounding_box])
+            octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
+            ds.parameters['octree'] = octree
+        else:
+            ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
+            ds.index
+            ad = ds.all_data()
+
 
     # for the metal fields have a few options since gadget can have different nomenclatures
     if ('PartType4', 'Metallicity_00') in ds.derived_field_list:
