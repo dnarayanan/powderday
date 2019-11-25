@@ -12,8 +12,8 @@ def yt_smooth(pf):
     
     
     ad = pf.all_data()
-    #saved = pf.index.oct_handler.save_octree()
-    '''
+    saved = pf.index.oct_handler.save_octree()
+    
     saved["density"] = ad["gassmootheddensity"]
     saved["metallicity"] = ad["gassmoothedmetals"]
     saved["masses"] = ad["gassmoothedmasses"]
@@ -26,13 +26,13 @@ def yt_smooth(pf):
     #convert density to cgs
     saved["density"] = saved["density"].in_cgs()
 
-    '''
+    
  
 
-    
-    
-    #return saved["metallicity"],saved["density"],saved["masses"]
-    return ad["gassmoothedmetals"],ad["gassmootheddensity"],ad["gassmoothedmasses"]
+    #return saved["metallicity"],saved["density"],saved["masses"],ad[metal_fn]
+   
+    return saved["metallicity"],saved["density"],saved["masses"]
+   
     for i in sorted(saved):
         if not hasattr(saved[i], 'shape'): continue
         print ("% 20s => %s" % (i, saved[i].shape))
