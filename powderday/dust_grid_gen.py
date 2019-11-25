@@ -1,15 +1,18 @@
 from __future__ import print_function
 import numpy as np
 import powderday.config as cfg
-from powderday.particle_smooth_yt import yt_smooth
 
 
 
 def manual(pf,refined):
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
-    metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
+    
     ad = pf.all_data()
+    density_smoothed = ad["gassmootheddensity"]
+    metallicity_smoothed = ad["gassmoothedmetals"]
+    masses_smoothed = ad["gassmoothedmasses"]
+
     
     try:
         smoothed_dust_masses = ad[('dustsmoothedmasses')]
@@ -27,7 +30,12 @@ def manual(pf,refined):
 def dtm_grid(pf,refined):
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
-    metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
+
+
+    ad = pf.all_data()
+    density_smoothed = ad["gassmootheddensity"]
+    metallicity_smoothed = ad["gassmoothedmetals"]
+    masses_smoothed = ad["gassmoothedmasses"]
     
     dust_smoothed = np.zeros(len(refined))
     
@@ -56,7 +64,12 @@ def remy_ruyer(pf,refined):
 
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
-    metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
+
+
+    ad = pf.all_data()
+    density_smoothed = ad["gassmootheddensity"]
+    metallicity_smoothed = ad["gassmoothedmetals"]
+    masses_smoothed = ad["gassmoothedmasses"]
  
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
@@ -88,7 +101,11 @@ def li_bestfit(pf,refined):
     
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
-    metallicity_smoothed,density_smoothed,masses_smoothed = yt_smooth(pf)
+
+    ad = pf.all_data()
+    density_smoothed = ad["gassmootheddensity"]
+    metallicity_smoothed = ad["gassmoothedmetals"]
+    masses_smoothed = ad["gassmoothedmasses"]
 
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
