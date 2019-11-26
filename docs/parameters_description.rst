@@ -148,11 +148,23 @@ Dust Information
             arepo do).  For gizmo and arepo currently assumes this
             information is stored in PartType0.
    :li_bestfit: Takes the best fit relation from the cosmological
-                simulations of Li, Narayanan & Dave arXiv/1906.09277
-                that relates the dust to gas ratio to the metallicity
-                for main sequence galaxies.
+                simulations of Li, Narayanan & Dave 2019 (MNRAS,
+                490, 1425) that relates the dust to gas ratio to the
+                metallicity for main sequence galaxies.  note - this
+                applies galaxy integrated properties to individual cells for the radiative transfer simulations.
 
+   :li_ml: Uses a the Extreme Randomized Trees learning algorithm from
+           the aforementioned Li, Narayanan & Dave 2019 paper to
+           predict the dust content based on the physical properties
+           of the gas.  The algorithm here is modified from the
+           original LND2019 paper in that it is trained on particles,
+           as opposed to the aggregated properties of galaxies.
 
+	   Note, for this algorithm to work, one needs to download the
+	   training set datafile (a z=0 snapshot from the Simba
+	   cosmological simulation: Dave et al. 2019, MNRAS, 486, 282)
+	   and place it in the directory powderday/mlt.  This snapshot
+	   is located here: https://www.astro.ufl.edu/~desika.narayanan/powderday_files
 
 :dusttometals_ratio:
 
