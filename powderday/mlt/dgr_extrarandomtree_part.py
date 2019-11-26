@@ -2,7 +2,8 @@
 # input:(1) parameter_list determining which input parameters are active, for now please follow the template param.txt
 #       (2) table_input whose columns represent metallicity Z (optional but dangerous if not included, stellar mass Ms (optional), SFR (optional), gas mass Mgas (optional)
 # example: python dgr_extrarandomtree.py parameter_list table_input [DGR_output]
-# update needed: refactor heavily, OOP, even more intelligent input, out-of-main-sequence handler
+
+#written by Qi Li, University of Florida
 
 
 from __future__ import absolute_import
