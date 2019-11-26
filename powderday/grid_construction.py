@@ -6,7 +6,7 @@ import powderday.config as cfg
 from powderday.gridstats import gridstats
 from powderday.octree_zoom import octree_zoom_bbox_filter
 from yt.geometry.selection_routines import AlwaysSelector
-from powderday.dust_grid_gen import dtm_grid, remy_ruyer, manual,li_bestfit
+from powderday.dust_grid_gen import dtm_grid, remy_ruyer, manual,li_bestfit,li_ml
 
 
 random.seed('octree-demo')
@@ -86,7 +86,7 @@ def yt_octree_generate(fname, field_add):
 
         # crash the code if the parameter choice for dust grid type isn't in 
         # the hard coded valid list below
-        dust_grid_type_list = ['dtm', 'rr', 'manual','li_bestfit']
+        dust_grid_type_list = ['dtm', 'rr', 'manual','li_bestfit','li_ml']
         try:
             dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
         except ValueError as e:
@@ -109,12 +109,15 @@ def yt_octree_generate(fname, field_add):
             dust_smoothed_li_bestfit = li_bestfit(pf,refined)
             dust_smoothed=dust_smoothed_li_bestfit
 
-
+        if cfg.par.dust_grid_type == 'li_ml':
+            dust_smoothed_li_ml = li_ml(pf,refined)
+            dust_smoothed = dust_smoothed_li_ml
 
     else:
         print('cfg.par.CONSTANT_DUST_GRID=True')
         print('setting constant dust grid to 4.e-22')
         dust_smoothed = np.zeros(len(refined))+4.e-23
+
 
     # return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost
     return refined, dust_smoothed, fc1, fw1, pf, ad
