@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
+
 from __future__ import print_function
 import numpy as np
 import powderday.config as cfg
-
+from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
 
 def manual(pf,refined):
@@ -116,5 +119,26 @@ def li_bestfit(pf,refined):
 
     dust_smoothed = np.zeros(len(refined))
     dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
+
+    return dust_smoothed
+
+
+def li_ml(pf,refined):
+
+    wTrue = np.where(np.array(refined) == True)[0]
+    wFalse = np.where(np.array(refined) == False)[0]
+
+    ad = pf.all_data()
+    density_smoothed = ad["gassmootheddensity"]
+    metallicity_smoothed = ad["gassmoothedmetals"]
+    masses_smoothed = ad["gassmoothedmasses"]
+    star_masses_smoothed = ad["starsmoothedmasses"]
+
+
+    dgr = dgr_ert(metallicity_smoothed,star_masses_smoothed,masses_smoothed)
+    dust_to_gas_ratio = 10.**(dgr)
+
+    dust_smoothed = np.zeros(len(refined))
+    dust_smoothed[wFalse] = dust_to_gas_ratio * density_smoothed
 
     return dust_smoothed
