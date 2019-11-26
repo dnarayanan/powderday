@@ -246,11 +246,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
             if nholes > 0:
                 if cfg.par.BH_model == 'Nenkova':
                     from powderday.agn_models.nenkova import Nenkova2008
-                    try:
-                        model = Nenkova2008(cfg.par.nenkova_params)
-                    except:
-                        model = Nenkova2008
-                    agn_spectrum = model.agn_spectrum
+                    agn_spectrum = Nenkova2008(*cfg.par.nenkova_params).agn_spectrum
                 else:
                     from powderday.agn_models.hopkins import agn_spectrum
 
