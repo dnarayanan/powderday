@@ -86,7 +86,7 @@ def matrix_prepare(ipar,sim='part0_snap_m50n512_151.hdf5'): # load simulated dat
 	gal = h5py.File(sim,'r')
 	gal = gal['PartType0']
 
-	Z  = np.log10(gal['Metallicity'][:]/0.0134) # Zsolar # X0  #XC0
+	Z  = np.log10(gal['Metallicity'][:]/cfg.par.solar) # Zsolar # X0  #XC0
 	Md = gal['Dust_Masses'][:] # Msolar
 	Mg = gal['Masses'][:] - Md
 	sfr = gal['StarFormationRate'][:] # Msolar/yr                
