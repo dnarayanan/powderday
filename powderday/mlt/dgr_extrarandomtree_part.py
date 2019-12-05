@@ -86,7 +86,7 @@ def matrix_prepare(ipar,sim='part0_snap_m50n512_151.hdf5'): # load simulated dat
 	gal = h5py.File(sim,'r')
 	gal = gal['PartType0']
 
-	Z  = np.log10(gal['Metallicity'][:]/0.0134) # Zsolar # X0  #XC0
+	Z  = np.log10(gal['Metallicity'][:]/cfg.par.solar) # Zsolar # X0  #XC0
 	Md = gal['Dust_Masses'][:] # Msolar
 	Mg = gal['Masses'][:] - Md
 	sfr = gal['StarFormationRate'][:] # Msolar/yr                
@@ -180,22 +180,26 @@ def predict(regr,x):
 # question: how to propagate the uncertainty?
 	return regr.predict(x)
 
-def dgr_ert(metallicity,stellar_mass,gas_mass):
+def dgr_ert(metallicity,sfr,gas_mass):
 
         #groom the input arrays 
-        stellar_mass = stellar_mass.in_units('Msun').value
+        #stellar_mass = stellar_mass.in_units('Msun').value
         gas_mass = gas_mass.in_units('Msun').value
         metallicity = metallicity.value
-        
+        sfr = sfr.in_units('Msun/yr').value
+
         #set values to lowest nonzero value so that the ERT doesn't choke in empty cells
         metallicity[np.where(metallicity == 0)[0]] = np.min(metallicity[np.nonzero(metallicity)])
-        stellar_mass[np.where(stellar_mass == 0)[0]] = np.min(stellar_mass[np.nonzero(stellar_mass)])
+        #stellar_mass[np.where(stellar_mass == 0)[0]] = np.min(stellar_mass[np.nonzero(stellar_mass)])
+        sfr[np.where(sfr == 0)[0]] = np.min(sfr[np.nonzero(sfr)])
         gas_mass[np.where(gas_mass == 0)[0]] = np.min(gas_mass[np.nonzero(gas_mass)])
 
         param = cfg.par.pd_source_dir+'powderday/mlt/mlt_param.list'
         ipar = np.loadtxt(param)
-        tab  = np.array([metallicity,stellar_mass,gas_mass])
+        #tab  = np.array([metallicity,stellar_mass,gas_mass])
+        tab = np.array([metallicity,sfr,gas_mass])
         tab = tab.T
+
 
         X_in = input_prepare(ipar,tab)
         #X,Y,labels = matrix_prepare(ipar,sim='part0_m50n512_151.hdf5')
