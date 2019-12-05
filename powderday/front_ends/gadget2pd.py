@@ -3,7 +3,7 @@ import numpy as np
 import yt
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
-
+from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
 def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
 
@@ -83,8 +83,15 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
     def _dustmass(field, data):
         return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
 
+    def _li_ml_dustmass(field,data):
+        return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
+
     def _dustsmoothedmasses(field, data):
         return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+
+    def _li_ml_dustsmoothedmasses(field,data):
+        return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
+
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
@@ -215,6 +222,20 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
         ds.add_field(('dustmass'), function=_dustmass, units='code_mass', particle_type=True)
         ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
         ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
+
+    #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
+    #dust model in place, create a field for these so that
+    #dust_grid_gen can use these dust masses
+    if cfg.par.dust_grid_type == 'li_ml':
+        #get the dust to gas ratio
+        ad = ds.all_data()
+        li_ml_dgr = dgr_ert(ad["PartType0","Metallicity_00"],ad["PartType0","StarFormationRate"],ad["PartType0","Masses"])
+        li_ml_dustmass = ((10.**li_ml_dgr)*ad["PartType0","Masses"]).in_units('code_mass')
+        #this is an icky way to pass this to the function for ds.add_field in the next line. but such is life.
+        ds.parameters['li_ml_dustmass'] = li_ml_dustmass
+        ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
+        ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
+        ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
 
     ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
     ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)
