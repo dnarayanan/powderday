@@ -123,6 +123,7 @@ def li_bestfit(pf,refined):
     return dust_smoothed
 
 
+'''
 def li_ml(pf,refined):
 
     wTrue = np.where(np.array(refined) == True)[0]
@@ -133,7 +134,7 @@ def li_ml(pf,refined):
     metallicity_smoothed = ad["gassmoothedmetals"]
     masses_smoothed = ad["gassmoothedmasses"]
     star_masses_smoothed = ad["starsmoothedmasses"]
-
+    
 
     dgr = dgr_ert(metallicity_smoothed,star_masses_smoothed,masses_smoothed)
     dust_to_gas_ratio = 10.**(dgr)
@@ -141,4 +142,29 @@ def li_ml(pf,refined):
     dust_smoothed = np.zeros(len(refined))
     dust_smoothed[wFalse] = dust_to_gas_ratio * density_smoothed
 
+    return dust_smoothed
+'''
+
+def li_ml(pf,refined):
+    
+    wTrue = np.where(np.array(refined) == True)[0]
+    wFalse = np.where(np.array(refined) == False)[0]
+
+    ad = pf.all_data()
+    density_smoothed = ad["gassmootheddensity"]
+    metallicity_smoothed = ad["gassmoothedmetals"]
+    masses_smoothed = ad["gassmoothedmasses"]
+
+
+    try:
+        smoothed_dust_masses = ad[('li_ml_dustsmoothedmasses')]
+    except:
+        raise KeyError('Li, Narayanan & Dave mass information not present in this snapshot. Please set another dust grid type in the parameters.')
+    dust_to_gas_ratio = smoothed_dust_masses.in_units('g')/masses_smoothed
+    #masses_smoothed can be 0 at some places; this will make dtg nan
+    #out even though it would eventually get multiplied to 0 when we
+    #multiply by density smoothed.  So, to be stable we nan_to_num it.
+    dust_to_gas_ratio = np.nan_to_num(dust_to_gas_ratio)
+    dust_smoothed = np.zeros(len(refined))
+    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
     return dust_smoothed
