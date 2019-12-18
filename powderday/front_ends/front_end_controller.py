@@ -31,7 +31,7 @@ def stream(fname):
 
     
     def enzo():
-        from enzo2pd import enzo_field_add as field_add
+        from powderday.front_ends.enzo2pd import enzo_field_add as field_add
         print ('[front_end_controller:] enzo data set detected')
         return field_add
 

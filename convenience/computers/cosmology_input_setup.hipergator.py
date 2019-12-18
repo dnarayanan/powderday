@@ -14,12 +14,12 @@ import caesar
 #shell scripting
 nnodes=1
 
-startsnap = 25
-endsnap = 305
+startsnap = 305
+endsnap = 306
 npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/simba_m25n512.galaxies_pos_for_pd.npz'
 
-model_dir_base = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/manual/nebular_lines_off/'
-hydro_dir = '/orange/narayanan/desika.narayanan/gizmo_runs/simba/m25n512/output'
+model_dir_base = '/ufrc/narayanan/desika.narayanan/paper/powderday_paper/codes/sfr_lir/'
+hydro_dir = '/orange/narayanan/desika.narayanan/gizmo_runs/simba/m25n512_filtered/output/'
 
 hydro_outputfile = '/ufrc/narayanan/pg3552/gizmo/output_time/output_m25.txt'
 
@@ -30,14 +30,18 @@ hydro_outputfile = '/ufrc/narayanan/pg3552/gizmo/output_time/output_m25.txt'
 hydro_dir_remote = hydro_dir
 
 model_run_name='simba_m50'
-COSMOFLAG=0 #flag for setting if the gadget snapshots are broken up into multiples or not
-
+COSMOFLAG=0 #flag for setting if the gadget snapshots are broken up into multiples or not and follow a nomenclature snapshot_000.0.hdf5
+FILTERFLAG = 1 #flag for setting if the gadget snapshots are filtered or not, and follow a nomenclature snap305_galaxy1800_filtered.hdf5
 
 
 SPHGR_COORDINATE_REWRITE = True
 
 
 #===============================================
+
+if (COSMOFLAG == 1) and (FILTERFLAG == 1):
+    raise ValueError("COSMOFLAG AND FILTER FLAG CAN'T BOTH BE SET")
+
 
 data = np.load(npzfile,allow_pickle=True)
 pos = data['pos'][()] #positions dictionary
@@ -77,7 +81,7 @@ for snap in range(startsnap,endsnap):
 
         #figure out tcmb
 
-        cmd = "./cosmology_setup_all_cluster.hipergator.sh "+str(nnodes)+' '+model_dir+' '+hydro_dir+' '+model_run_name+' '+str(COSMOFLAG)+' '+model_dir_remote+' '+hydro_dir_remote+' '+str(xpos)+' '+str(ypos)+' '+str(zpos)+' '+str(nh)+' '+str(snap)+' '+str(tcmb)
+        cmd = "./cosmology_setup_all_cluster.hipergator.sh "+str(nnodes)+' '+model_dir+' '+hydro_dir+' '+model_run_name+' '+str(COSMOFLAG)+' '+str(FILTERFLAG)+' '+model_dir_remote+' '+hydro_dir_remote+' '+str(xpos)+' '+str(ypos)+' '+str(zpos)+' '+str(nh)+' '+str(snap)+' '+str(tcmb)
         #print cmd
         call(cmd,shell=True)
 
