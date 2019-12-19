@@ -1,5 +1,6 @@
 from __future__ import print_function
 import numpy as np
+import yt
 
 from hyperion.model import Model
 import matplotlib as mpl
@@ -21,13 +22,21 @@ from powderday.analytics import dump_cell_info
 def sph_m_gen(fname,field_add):
     
     refined,dustdens,fc1,fw1,pf,ad = yt_octree_generate(fname,field_add)
-    xmin = (fc1[:,0]-fw1[:,0]/2.).convert_to_units('cm') #in proper cm 
-    xmax = (fc1[:,0]+fw1[:,0]/2.).convert_to_units('cm')
-    ymin = (fc1[:,1]-fw1[:,1]/2.).convert_to_units('cm')
-    ymax = (fc1[:,1]+fw1[:,1]/2.).convert_to_units('cm')
-    zmin = (fc1[:,2]-fw1[:,2]/2.).convert_to_units('cm')
-    zmax = (fc1[:,2]+fw1[:,2]/2.).convert_to_units('cm')
     
+    if yt.__version__ == '4.0.dev0':
+        xmin = (fc1[:,0]-fw1[:,0]/2.).to('cm') #in proper cm 
+        xmax = (fc1[:,0]+fw1[:,0]/2.).to('cm')
+        ymin = (fc1[:,1]-fw1[:,1]/2.).to('cm')
+        ymax = (fc1[:,1]+fw1[:,1]/2.).to('cm')
+        zmin = (fc1[:,2]-fw1[:,2]/2.).to('cm')
+        zmax = (fc1[:,2]+fw1[:,2]/2.).to('cm')
+    else:
+        xmin = (fc1[:,0]-fw1[:,0]/2.).convert_to_units('cm') #in proper cm
+        xmax = (fc1[:,0]+fw1[:,0]/2.).convert_to_units('cm')
+        ymin = (fc1[:,1]-fw1[:,1]/2.).convert_to_units('cm')
+        ymax = (fc1[:,1]+fw1[:,1]/2.).convert_to_units('cm')
+        zmin = (fc1[:,2]-fw1[:,2]/2.).convert_to_units('cm')
+        zmax = (fc1[:,2]+fw1[:,2]/2.).convert_to_units('cm')
 
     #dx,dy,dz are the edges of the parent grid
     dx = (np.max(xmax)-np.min(xmin)).value
@@ -53,8 +62,8 @@ def sph_m_gen(fname,field_add):
     refined_reordered = []
     dustdens_reordered = np.zeros(len(order))
     
-    import pdb
-    pdb.set_trace()
+
+
     
     for i in range(len(order)): 
         refined_reordered.append(refined[order[i]])

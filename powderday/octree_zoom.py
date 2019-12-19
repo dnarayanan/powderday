@@ -3,7 +3,7 @@ import numpy as np
 import powderday.config as cfg
 import yt
 from yt.frontends.sph.data_structures import ParticleDataset
-
+import pdb
 
 
 ParticleDataset.filter_bbox = True
@@ -45,11 +45,15 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
     #input in parameters_master will be in proper units.  if a
     #simulation isn't cosmological, then the only difference here will
     #be a 1/h
-    
+    #yt 3.x
     box_len = ds0.quan(box_len,'kpc')
-    box_len = box_len.convert_to_units('code_length').value
-    bbox_lim = box_len
-
+    #yt 4.x
+    if yt.__version__ == '4.0.dev0':
+        box_len = float(box_len.to('code_length').value)
+        bbox_lim = box_len
+    else:
+        box_len = box_len.convert_to_units('code_length').value
+        bbox_lim = box_len
     
     bbox1 = [[center[0]-bbox_lim,center[0]+bbox_lim],
             [center[1]-bbox_lim,center[1]+bbox_lim],
@@ -61,11 +65,11 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
         #ds1 = yt.load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
 
         #yt 4.x
-    if  yt.__version__ == '4.0.dev0':
+    if yt.__version__ == '4.0.dev0':
         ds1 = yt.load(fname)
         left = np.array([pos[0] for pos in bbox1])
         right = np.array([pos[1] for pos in bbox1])
-        octree = ds1.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
+        octree = ds1.octree(left, right, n_ref=cfg.par.n_ref)#, force_build=True)
         ds1.parameters['octree'] = octree
     else:
         ds1 = yt.load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
