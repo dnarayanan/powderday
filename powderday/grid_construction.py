@@ -75,7 +75,7 @@ def yt_octree_generate(fname, field_add):
         max_level = find_max_level(refined)#'max_level not yet implemented in yt4.x'
         #note, we could figure this out from the max number of trues in a row
         nocts = len(refined)-np.sum(refined)
-        pdb.set_trace()
+        
     else:
         saved = pf.index.oct_handler.save_octree()
         always = AlwaysSelector(None)

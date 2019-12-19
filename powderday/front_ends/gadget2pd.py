@@ -207,7 +207,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
             ad = ds.all_data()
             left = np.array([pos[0] for pos in bounding_box])
             right = np.array([pos[1] for pos in bounding_box])
-            octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
+            #octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
+            octree = ds.octree(left,right,n_ref=cfg.par.n_ref)
             ds.parameters['octree'] = octree
         else:
             ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
