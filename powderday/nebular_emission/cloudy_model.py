@@ -9,8 +9,8 @@ from scipy.interpolate import interp1d
 import sys
 import uuid
 
-logging.getLogger().setLevel(logging.INFO)
-logging.basicConfig(format='Adding Nebular Emission : %(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+#logging.getLogger().setLevel(logging.INFO)
+#logging.basicConfig(format='Adding Nebular Emission : %(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 """
 ----------------------------------------------------------------------------------------------------------------
