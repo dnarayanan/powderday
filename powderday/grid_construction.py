@@ -57,22 +57,23 @@ def yt_octree_generate(fname, field_add):
 
     
     if  yt.__version__ == '4.0.dev0':
+        refined = pf.parameters['octree'][('index','refined')].astype('bool')
+
         #get central positions of cells as edges + width/2.
-        xpos = pf.parameters['octree'][('index', 'x')]+(pf.parameters['octree'][('index','dx')]/2.)
-        ypos = pf.parameters['octree'][('index', 'y')]+(pf.parameters['octree'][('index','dy')]/2.)
-        zpos = pf.parameters['octree'][('index', 'z')]+(pf.parameters['octree'][('index','dz')]/2.)
+        xpos = (pf.parameters['octree'][('index', 'x')]+(pf.parameters['octree'][('index','dx')]/2.))[~refined]
+        ypos = (pf.parameters['octree'][('index', 'y')]+(pf.parameters['octree'][('index','dy')]/2.))[~refined]
+        zpos = (pf.parameters['octree'][('index', 'z')]+(pf.parameters['octree'][('index','dz')]/2.))[~refined]
         #comebine these into the fc1 array with dimensions (nparticles,3)
         fc1 = np.array([xpos,ypos,zpos]).T
 
-        dx = pf.parameters['octree'][('index','dx')]
-        dy = pf.parameters['octree'][('index','dy')]
-        dz = pf.parameters['octree'][('index','dz')]
+        dx = pf.parameters['octree'][('index','dx')][~refined]
+        dy = pf.parameters['octree'][('index','dy')][~refined]
+        dz = pf.parameters['octree'][('index','dz')][~refined]
         fw1 = np.array([dx,dy,dz]).T
 
-        refined = pf.parameters['octree'][('index','refined')].astype('bool')
 
         n_ref = pf.parameters['octree'].n_ref
-        max_level = find_max_level(refined)#'max_level not yet implemented in yt4.x'
+        #max_level = find_max_level(refined)#'max_level not yet implemented in yt4.x'
         #note, we could figure this out from the max number of trues in a row
         nocts = len(refined)-np.sum(refined)
         
@@ -97,7 +98,7 @@ def yt_octree_generate(fname, field_add):
     print('yt Octree Construction Stats')
     print('----------------------------')
     print(' n_ref = ', n_ref)
-    print(' max_level = ', max_level)
+    #print(' max_level = ', max_level)
     print(' nocts = ', nocts)
     print('----------------------------')
 
