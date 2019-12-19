@@ -81,7 +81,7 @@ def input_prepare(ipar,tab):
 	return X
 	
 	
-def matrix_prepare(ipar,sim='part0_snap_m50n512_151.hdf5'): # load simulated dataset and prepare the matrix used for regression
+def matrix_prepare(ipar,sim='m12n256.hdf5'): # load simulated dataset and prepare the matrix used for regression
 	### load simulated dataset
 	gal = h5py.File(sim,'r')
 	gal = gal['PartType0']
@@ -198,12 +198,12 @@ def dgr_ert(metallicity,sfr,gas_mass):
         ipar = np.loadtxt(param)
         #tab  = np.array([metallicity,stellar_mass,gas_mass])
         tab = np.array([metallicity,sfr,gas_mass])
+        #tab = np.array([metallicity,sfr])
         tab = tab.T
 
 
         X_in = input_prepare(ipar,tab)
-        #X,Y,labels = matrix_prepare(ipar,sim='part0_m50n512_151.hdf5')
-        X,Y,labels = matrix_prepare(ipar,sim=cfg.par.pd_source_dir+'powderday/mlt/part0_m50n512_151.hdf5')
+        X,Y,labels = matrix_prepare(ipar,sim=cfg.par.pd_source_dir+'powderday/mlt/m12n256.hdf5')
         X,Y,X_cv,Y_cv = split_train_cv(X,Y)
         regr,mse_train,mse_cv = regression(X,Y,X_cv,Y_cv,n_estimators=400,criterion='mse',max_depth=20)
         print("mse_train, mse_c.v. = {} {}".format(mse_train,mse_cv))
