@@ -286,9 +286,33 @@ First, it is recommended to make a new python environment in which to run the
     > conda create -n pd4env
     > conda activate pd4env
 
-Since `Hyperion <http://www.hyperion-rt.org>`_ comes with 
-`yt <http://yt-project.org>`_ 3.x, it must be installed using the ``--no-deps``
-flag, since you will install the dependencies manually in the next step::
+Our entire goal here is to install `powderday <https://github.com/dnarayanan/powderday.git>`_  that is dependent on `yt <http://yt-project.org>`_ 4.x.  Since `Hyperion <http://www.hyperion-rt.org>`_ comes with 
+`yt <http://yt-project.org>`_ 3.x,  we a few options, neither of which are particularly elegant.
+
+The easiest way to handle this is to install `Hyperion <http://www.hyperion-rt.org>`_  as normal, via::
+
+    >conda install -c conda-forge hyperion
+
+And then install `yt <http://yt-project.org>`_ 4.x.  The latter is installed via first ensuring that you have all of the dependencies installed::
+
+  >pip install numpy jupyter sphinx gitpython h5py matplotlib cython nose scipy astropy sympy mpi4py
+followed by actually installing  `yt <http://yt-project.org>`_::
+  
+  >git clone https://github.com/yt-project/yt.git
+  >cd yt
+  >git checkout yt-4.0
+  >git pull
+  >pip install -e .
+
+If we do this, this will overwrite the `yt <http://yt-project.org>`_ 3.x installation that ships with `Hyperion <http://www.hyperion-rt.org>`_, and you should be good to go.  To check that everything worked, make sure the output of the following 
+commands look something like this::
+
+    > ipython
+    In [1]: import yt
+    In [2]: yt.__version__
+    Out[2]: '4.0.dev0'
+  
+The second way of handling this, which is no longer recommended as it can be a bit painful, is to install `Hyperion  <http://www.hyperion-rt.org>`_ with the ``--no-deps`` flag, since you  will install the dependencies manually in the next step::
 
     > conda install --no-deps -c conda-forge hyperion
 
@@ -305,24 +329,7 @@ If this doesn't work, repeat:_::
 
   > conda install --no-deps -c conda-forge hyperion
 
-Now, clone the 4.x development branch from the `yt <http://yt-project.org>`_
-source repository and build it::
-
-    > git clone https://github.com/yt-project/yt.git
-    > cd yt/
-    > git checkout yt-4.0
-    > python setup.py develop
-
-Now, to check that everything worked, make sure the output of the following 
-commands look something like this::
-
-    > which yt
-    ~/miniconda3/envs/myenv/bin/yt
-
-    > ipython
-    In [1]: import yt
-    In [2]: yt.__version__
-    Out[2]: '4.0.dev0'
+Now, install clone the 4.x development branch from the `yt <http://yt-project.org>`_4.x as above.
 
 As long as the rest of `powderday <https://github.com/dnarayanan/powderday.git>`_'s
 dependencies have been installed, at this point you should be good to go.
