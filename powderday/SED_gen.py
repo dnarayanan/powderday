@@ -74,10 +74,10 @@ def star_list_gen(boost,dx,dy,dz,pf,ad):
 
     #create the stars_list full of Stars objects
     stars_list = []
-
+    
     for i in range(nstars):
         stars_list.append(Stars(mass[i],metals[i],positions[i],age[i],fsps_zmet=zmet[i]))
-
+    
 
     #boost stellar positions to grid center
     print ('boosting new stars to coordinate center')
