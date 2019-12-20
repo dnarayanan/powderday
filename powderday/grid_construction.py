@@ -13,6 +13,20 @@ import pdb
 random.seed('octree-demo')
 
 
+def find_max_level(refined):
+    #loop through refined and figure out how many trues we can have in a row
+    master_max_level = 0
+    max_level = 0.
+    for i in range(len(refined)-1):
+        if refined[i+1] == True:
+            max_level+=1
+        else:
+            max_level = 0
+        if max_level > master_max_level: master_max_level = max_level
+        if max_level > 20: pdb.set_trace()
+    return master_max_level
+
+
 def yt_octree_generate(fname, field_add):
 
     print('[grid_construction]: bbox_lim = ', cfg.par.bbox_lim)
@@ -41,42 +55,80 @@ def yt_octree_generate(fname, field_add):
     from yt.data_objects.particle_unions import ParticleUnion
     pu = ParticleUnion("all", list(pf.particle_types_raw))
 
-    saved = pf.index.oct_handler.save_octree()
+    
+    if  yt.__version__ == '4.0.dev0':
+        refined = pf.parameters['octree'][('index','refined')].astype('bool')
 
-    always = AlwaysSelector(None)
-    ir1 = pf.index.oct_handler.ires(always)  # refinement levels
-    fc1 = pf.index.oct_handler.fcoords(always)  # coordinates in code_length
-    fw1 = pf.index.oct_handler.fwidth(always)  # width of cell in code_length
+        #get central positions of cells as edges + width/2.
+        #        xpos = (pf.parameters['octree'][('index', 'x')]+(pf.parameters['octree'][('index','dx')]/2.))[~refined]
+        #        ypos = (pf.parameters['octree'][('index', 'y')]+(pf.parameters['octree'][('index','dy')]/2.))[~refined]
+        #        zpos = (pf.parameters['octree'][('index', 'z')]+(pf.parameters['octree'][('index','dz')]/2.))[~refined]
 
+        xpos = (pf.parameters['octree'][('index','x')])[~refined]
+        ypos = (pf.parameters['octree'][('index','y')])[~refined]
+        zpos = (pf.parameters['octree'][('index','z')])[~refined]
+
+        #comebine these into the fc1 array with dimensions (nparticles,3)
+        fc1 = np.array([xpos,ypos,zpos]).T
+
+        dx = pf.parameters['octree'][('index','dx')][~refined]
+        dy = pf.parameters['octree'][('index','dy')][~refined]
+        dz = pf.parameters['octree'][('index','dz')][~refined]
+        fw1 = np.array([dx,dy,dz]).T
+
+
+        n_ref = pf.parameters['octree'].n_ref
+        #max_level = find_max_level(refined)#'max_level not yet implemented in yt4.x'
+        #note, we could figure this out from the max number of trues in a row
+        nocts = len(refined)-np.sum(refined)
+
+
+        
+    else:
+        saved = pf.index.oct_handler.save_octree()
+        always = AlwaysSelector(None)
+        #ir1 = pf.index.oct_handler.ires(always)  # refinement levels
+        fc1 = pf.index.oct_handler.fcoords(always)  # coordinates in code_length
+        fw1 = pf.index.oct_handler.fwidth(always)  # width of cell in code_length        
+        refined = saved['octree'].astype('bool')
+        
+        n_ref = pf.index.oct_handler.n_ref
+        max_level = pf.index.oct_handler.max_level
+        nocts = pf.index.oct_handler.nocts
     # convert fc1 and fw1 to YTArrays
     fc1 = pf.arr(fc1, 'code_length')
     fw1 = pf.arr(fw1, 'code_length')
 
+
+
     print('----------------------------')
     print('yt Octree Construction Stats')
     print('----------------------------')
-    print(' n_ref = ', pf.index.oct_handler.n_ref)
-    print(' max_level = ', pf.index.oct_handler.max_level)
-    print(' nocts = ', pf.index.oct_handler.nocts)
+    print(' n_ref = ', n_ref)
+    #print(' max_level = ', max_level)
+    print(' nocts = ', nocts)
     print('----------------------------')
 
-    gridstats(ir1, fc1, fw1)
+    gridstats(fc1, fw1)
 
     # ==================================
-
-    refined = saved['octree'].astype('bool')
     
-    try:
-        refined.reshape(len(ir1))
-    except:
-        refinements = 2**(3*cfg.par.oref)
-        refined2 = []
-        for r in refined:
-            if r == 1:
-                refined2.append(True)
-            if r == 0:
-                refined2.append(np.zeros(refinements).astype('bool'))
-        refined = np.hstack(refined2)
+    if  yt.__version__ == '4.0.dev0':
+        refined = pf.parameters['octree'][('index','refined')].astype('bool')
+    else:
+        refined = saved['octree'].astype('bool')
+
+    #try:
+    #    refined.reshape(len(ir1))
+    #except:
+    refinements = 2**(3*cfg.par.oref)
+    refined2 = []
+    for r in refined:
+        if r == 1:
+            refined2.append(True)
+        if r == 0:
+            refined2.append(np.zeros(refinements).astype('bool'))
+    refined = np.hstack(refined2)
 
 
     # smooth the data on to the octree
