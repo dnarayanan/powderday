@@ -99,8 +99,6 @@ def sph_m_gen(fname,field_add):
     #m.set_octree_grid(xcent,ycent,zcent,
     #                  dx,dy,dz,refined)
     m.set_octree_grid(0,0,0,dx/2,dy/2,dz/2,refined)    
-    import pdb
-    pdb.set_trace()
 
     #get CMB:
     

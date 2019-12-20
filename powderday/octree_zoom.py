@@ -66,11 +66,18 @@ def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
 
         #yt 4.x
     if yt.__version__ == '4.0.dev0':
-        ds1 = yt.load(fname,bounding_box=bbox1)
+        #ds1 = yt.load(fname,bounding_box=bbox1) in yt4.x the loading
+        #with a bounding box doesn't actually load a smaller cut-out
+        #ds, so we have to play a quick game with the region method
+        reg = ds0.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
+        ds1 = reg.ds
         left = np.array([pos[0] for pos in bbox1])
         right = np.array([pos[1] for pos in bbox1])
         octree = ds1.octree(left, right, n_ref=cfg.par.n_ref)#, force_build=True)
         ds1.parameters['octree'] = octree
+        import pdb
+        pdb.set_trace()
+
     else:
         ds1 = yt.load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
 
