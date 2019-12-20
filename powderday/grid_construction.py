@@ -60,9 +60,14 @@ def yt_octree_generate(fname, field_add):
         refined = pf.parameters['octree'][('index','refined')].astype('bool')
 
         #get central positions of cells as edges + width/2.
-        xpos = (pf.parameters['octree'][('index', 'x')]+(pf.parameters['octree'][('index','dx')]/2.))[~refined]
-        ypos = (pf.parameters['octree'][('index', 'y')]+(pf.parameters['octree'][('index','dy')]/2.))[~refined]
-        zpos = (pf.parameters['octree'][('index', 'z')]+(pf.parameters['octree'][('index','dz')]/2.))[~refined]
+        #        xpos = (pf.parameters['octree'][('index', 'x')]+(pf.parameters['octree'][('index','dx')]/2.))[~refined]
+        #        ypos = (pf.parameters['octree'][('index', 'y')]+(pf.parameters['octree'][('index','dy')]/2.))[~refined]
+        #        zpos = (pf.parameters['octree'][('index', 'z')]+(pf.parameters['octree'][('index','dz')]/2.))[~refined]
+
+        xpos = (pf.parameters['octree'][('index','x')])[~refined]
+        ypos = (pf.parameters['octree'][('index','y')])[~refined]
+        zpos = (pf.parameters['octree'][('index','z')])[~refined]
+
         #comebine these into the fc1 array with dimensions (nparticles,3)
         fc1 = np.array([xpos,ypos,zpos]).T
 
@@ -76,6 +81,8 @@ def yt_octree_generate(fname, field_add):
         #max_level = find_max_level(refined)#'max_level not yet implemented in yt4.x'
         #note, we could figure this out from the max number of trues in a row
         nocts = len(refined)-np.sum(refined)
+
+
         
     else:
         saved = pf.index.oct_handler.save_octree()
