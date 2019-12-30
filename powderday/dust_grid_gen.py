@@ -4,21 +4,21 @@
 from __future__ import print_function
 import numpy as np
 import powderday.config as cfg
-from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
+import pdb
 
-def manual(ds,refined):
+def manual(reg,refined):
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
     
-    ad = ds.all_data()
-    density_smoothed = ad["gassmootheddensity"]
-    metallicity_smoothed = ad["gassmoothedmetals"]
-    masses_smoothed = ad["gassmoothedmasses"]
+    
+    density_smoothed = reg["gassmootheddensity"]
+    metallicity_smoothed = reg["gassmoothedmetals"]
+    masses_smoothed = reg["gassmoothedmasses"]
 
     
     try:
-        smoothed_dust_masses = ad[('dustsmoothedmasses')]
+        smoothed_dust_masses = reg[('dustsmoothedmasses')]
     except:
         raise KeyError('Dust mass information not present in this snapshot. Please set another dust grid type in the parameters.')
     dust_to_gas_ratio = smoothed_dust_masses.in_units('g')/masses_smoothed
@@ -30,15 +30,15 @@ def manual(ds,refined):
     dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
     return dust_smoothed
 
-def dtm_grid(ds,refined):
+def dtm_grid(reg,refined):
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
 
+    
 
-    ad = ds.all_data()
-    density_smoothed = ad["gassmootheddensity"]
-    metallicity_smoothed = ad["gassmoothedmetals"]
-    masses_smoothed = ad["gassmoothedmasses"]
+    density_smoothed = reg["gassmootheddensity"]
+    metallicity_smoothed = reg["gassmoothedmetals"]
+    masses_smoothed = reg["gassmoothedmasses"]
     
     dust_smoothed = np.zeros(len(refined))
     
@@ -50,7 +50,7 @@ def dtm_grid(ds,refined):
 
 
 
-def remy_ruyer(ds,refined):
+def remy_ruyer(reg,refined):
     #remy ruyer 2014 A&A 563, A31 -- here, we take the Xco_Z
     #power-law, slope free parameterization to define the dust-to-gas
     #ratio, and hece the dust density
@@ -69,10 +69,10 @@ def remy_ruyer(ds,refined):
     wFalse = np.where(np.array(refined) == False)[0]
 
 
-    ad = ds.all_data()
-    density_smoothed = ad["gassmootheddensity"]
-    metallicity_smoothed = ad["gassmoothedmetals"]
-    masses_smoothed = ad["gassmoothedmasses"]
+
+    density_smoothed = reg["gassmootheddensity"]
+    metallicity_smoothed = reg["gassmoothedmetals"]
+    masses_smoothed = reg["gassmoothedmasses"]
  
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
@@ -91,7 +91,7 @@ def remy_ruyer(ds,refined):
     return dust_smoothed
 
 
-def li_bestfit(ds,refined):
+def li_bestfit(reg,refined):
     #li, narayanan & dave, 2019, arXiv/1906.09277.  here, we take the
     #results of their equation 12 which relates the dust to gas ratio
     #as a function of metallicity from the simba cosmological
@@ -105,10 +105,10 @@ def li_bestfit(ds,refined):
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
 
-    ad = ds.all_data()
-    density_smoothed = ad["gassmootheddensity"]
-    metallicity_smoothed = ad["gassmoothedmetals"]
-    masses_smoothed = ad["gassmoothedmasses"]
+
+    density_smoothed = reg["gassmootheddensity"]
+    metallicity_smoothed = reg["gassmoothedmetals"]
+    masses_smoothed = reg["gassmoothedmasses"]
 
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
@@ -145,19 +145,19 @@ def li_ml(ds,refined):
     return dust_smoothed
 '''
 
-def li_ml(ds,refined):
+def li_ml(reg,refined):
     
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
 
-    ad = ds.all_data()
-    density_smoothed = ad["gassmootheddensity"]
-    metallicity_smoothed = ad["gassmoothedmetals"]
-    masses_smoothed = ad["gassmoothedmasses"]
+    
+    density_smoothed = reg["gassmootheddensity"]
+    metallicity_smoothed = reg["gassmoothedmetals"]
+    masses_smoothed = reg["gassmoothedmasses"]
 
 
     try:
-        smoothed_dust_masses = ad[('li_ml_dustsmoothedmasses')]
+        smoothed_dust_masses = reg[('li_ml_dustsmoothedmasses')]
     except:
         raise KeyError('Li, Narayanan & Dave mass information not present in this snapshot. Please set another dust grid type in the parameters.')
     dust_to_gas_ratio = smoothed_dust_masses.in_units('g')/masses_smoothed

@@ -3,6 +3,7 @@ import numpy as np
 import powderday.config as cfg
 import yt
 from yt.frontends.sph.data_structures import ParticleDataset
+from yt.geometry.selection_routines import AlwaysSelector
 import pdb
 
 
@@ -12,10 +13,9 @@ ParticleDataset._skip_cache = True
 
 def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
 
-    ds0 = ds
     
-    ds0.index
-    ad = ds0.all_data()
+    ds.index
+    ad = ds.all_data()
 
     print ('\n\n')
     print ('----------------------------')
@@ -46,7 +46,7 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
     #simulation isn't cosmological, then the only difference here will
     #be a 1/h
     #yt 3.x
-    box_len = ds0.quan(box_len,'kpc')
+    box_len = ds.quan(box_len,'kpc')
     #yt 4.x
     if yt.__version__ == '4.0.dev0':
         box_len = float(box_len.to('code_length').value)
@@ -61,38 +61,62 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
     print ('[octree zoom] new zoomed bbox (comoving/h) in code units= ',bbox1)
     
 
-        #yt 3.x
-        #ds1 = yt.load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+    #yt 3.x
+    #ds1 = yt.load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+    
 
-        #yt 4.x
+
+    #What follows is tricky.  Broadly, the plan is to create a yt
+    #region to cut out the dataset to our desired box size.  In yt4.x,
+    #we will then pass around reg (which represents the cutout version
+    #of the ds), as well as ds (which is the original ds).  the
+    #original ds will contain all the original parameters of the
+    #dataset.  We pass around the octree itself in a newly created
+    #dictionary called reg.parameters
+
     if yt.__version__ == '4.0.dev0':
         #ds1 = yt.load(fname,bounding_box=bbox1) in yt4.x the loading
         #with a bounding box doesn't actually load a smaller cut-out
         #ds, so we have to play a quick game with the region method
-        reg = ds0.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
-        ds1 = reg.ds
+        reg = ds.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
+        #ds1 = reg.ds
         left = np.array([pos[0] for pos in bbox1])
         right = np.array([pos[1] for pos in bbox1])
-        octree = ds1.octree(left, right, n_ref=cfg.par.n_ref)#, force_build=True)
-        ds1.parameters['octree'] = octree
-        import pdb
-        pdb.set_trace()
+        octree = ds.octree(left, right, n_ref=cfg.par.n_ref)#, force_build=True)
+
+        reg.parameters={}
+        reg.parameters['octree'] = octree
+
+        
 
     else:
-        ds1 = yt.load(fname,bounding_box=bbox1,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
+        #load up a cutout ds1 with a bounding_box so we can generate the octree on this dataset
+        ds1 = yt.load(fname,bounding_box = bbox1,n_ref=cfg.par.n_ref,over_refine_factor=cfg.par.oref) 
+        ds1.periodicity = (False,False,False)
+        #now update the field names
+        ds1 = field_add(None,bounding_box = bbox1,ds=ds1,starages=True)
+
+        #now create the region so that we have the smoothed properties downstream correct
+        reg = ds1.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
+        reg.parameters={}
+
+        saved = ds1.index.oct_handler.save_octree()
+        always = AlwaysSelector(None)
+        #ir1 = ds.index.oct_handler.ires(always)  # refinement levels
+        reg.parameters["fc1"] = ds1.index.oct_handler.fcoords(always)  # coordinates in code_length
+        reg.parameters["fw1"] = ds1.index.oct_handler.fwidth(always)  # width of cell in code_length
+        reg.parameters["refined"] = saved['octree'].astype('bool')
+        
+        reg.parameters["n_ref"] = ds1.index.oct_handler.n_ref
+        reg.parameters["max_level"] = ds1.index.oct_handler.max_level
+        reg.parameters["nocts"] = ds1.index.oct_handler.nocts
 
 
-        #RIGHT NOW THIS IS COMMENTED OUT NOT SURE YET HOW TO DEAL WITH AMR
-       #except: #amr
-        #ds1 = yt.load(fname)#,n_ref = cfg.par.n_ref,over_refine_factor=cfg.par.oref)
-        #bbox1 = None
-
-    ds1.periodicity = (False,False,False)
 
     #re-add the new powderday convention fields; this time we need to
     #make sure to do the ages calculation since it hasn't been done
     #before.
-    ds1 = field_add(None,bounding_box = bbox1,ds=ds1,starages=True)
+    #ds1 = field_add(None,bounding_box = bbox1,ds=ds1,starages=True)
 
     
-    return ds1
+    return reg
