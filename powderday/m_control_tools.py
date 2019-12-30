@@ -16,7 +16,7 @@ def ad_selector(ds):
         return ds.all_data()
 
     def enzo_ad():
-        #we don't return all_data here because ds/pf in enzo has
+        #we don't return all_data here because ds in enzo has
         #turned into a region object
         return ds
     

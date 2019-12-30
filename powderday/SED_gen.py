@@ -35,7 +35,7 @@ class Stars:
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
 
 
-def star_list_gen(boost,dx,dy,dz,pf,ad):
+def star_list_gen(boost,dx,dy,dz,ds,ad):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
 
     metals = ad["starmetals"].value
@@ -112,7 +112,7 @@ def star_list_gen(boost,dx,dy,dz,pf,ad):
 
         #Disk Stars
 
-        if ("diskstarcoordinates") in pf.derived_field_list:
+        if ("diskstarcoordinates") in ds.derived_field_list:
             
             disk_positions = ad[("diskstarcoordinates")].value
             disk_masses =  ad[("diskstarmasses")].value
@@ -131,7 +131,7 @@ def star_list_gen(boost,dx,dy,dz,pf,ad):
         #Bulge Stars
 
 
-        if ("bulgestarcoordinates") in pf.derived_field_list:
+        if ("bulgestarcoordinates") in ds.derived_field_list:
             bulge_positions = ad[("bulgestarcoordinates")].value
             bulge_masses =  ad[("bulgestarmasses")].value
             nstars_bulge = len(bulge_masses)
@@ -150,7 +150,7 @@ def star_list_gen(boost,dx,dy,dz,pf,ad):
     if cfg.par.SOURCES_IN_CENTER == True:
         for i in range(nstars):
             stars_list[i].positions[:] =  np.array([0,0,0])
-        if ("bulgestarcoordinates") in pf.derived_field_list:
+        if ("bulgestarcoordinates") in ds.derived_field_list:
             for i in range(nstars_bulge):
                 bulgestars_list[i].positions[:] =  np.array([0,0,0])
             for i in range(nstars_disk):
@@ -164,7 +164,7 @@ def star_list_gen(boost,dx,dy,dz,pf,ad):
             xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
             stars_list[i].positions[:] = np.array([xpos,ypos,zpos])
 
-        if ("bulgestarcoordinates") in pf.derived_field_list:
+        if ("bulgestarcoordinates") in ds.derived_field_list:
             for i in range(nstars_bulge):
                 xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
                 bulgestars_list[i].positions[:] = np.array([xpos,ypos,zpos])
