@@ -409,13 +409,13 @@ def wavelength_compress(nu,fnu,df_nu):
 
 
 
-def BH_source_add(m,pf,df_nu,boost):
+def BH_source_add(m,ds,df_nu,boost):
 
     print("--------------------------------\n")
     print("Adding Black Holes to Source List in source_creation\n")
     print("--------------------------------\n")
  
-    ad = pf.all_data()
+    ad = ds.all_data()
 
     try:
         nholes = ad["bhsed"].shape[0]
@@ -446,17 +446,17 @@ def BH_source_add(m,pf,df_nu,boost):
                 #dataset.  so we need to filter out any holes that
                 #might not be in the simulation domain.
                 
-                if ((ad["bhcoordinates"][i,0].in_units('kpc') <  (pf.domain_center[0].in_units('kpc')+(0.5*pf.domain_width[0].in_units('kpc'))))
+                if ((ad["bhcoordinates"][i,0].in_units('kpc') <  (ds.domain_center[0].in_units('kpc')+(0.5*ds.domain_width[0].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,0].in_units('kpc') >  (pf.domain_center[0].in_units('kpc')-(0.5*pf.domain_width[0].in_units('kpc'))))
+                    (ad["bhcoordinates"][i,0].in_units('kpc') >  (ds.domain_center[0].in_units('kpc')-(0.5*ds.domain_width[0].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,1].in_units('kpc') <  (pf.domain_center[1].in_units('kpc')+(0.5*pf.domain_width[1].in_units('kpc'))))
+                    (ad["bhcoordinates"][i,1].in_units('kpc') <  (ds.domain_center[1].in_units('kpc')+(0.5*ds.domain_width[1].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,1].in_units('kpc') >  (pf.domain_center[1].in_units('kpc')-(0.5*pf.domain_width[1].in_units('kpc'))))
+                    (ad["bhcoordinates"][i,1].in_units('kpc') >  (ds.domain_center[1].in_units('kpc')-(0.5*ds.domain_width[1].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,2].in_units('kpc') <  (pf.domain_center[2].in_units('kpc')+(0.5*pf.domain_width[2].in_units('kpc'))))
+                    (ad["bhcoordinates"][i,2].in_units('kpc') <  (ds.domain_center[2].in_units('kpc')+(0.5*ds.domain_width[2].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,2].in_units('kpc') >  (pf.domain_center[2].in_units('kpc')-(0.5*pf.domain_width[2].in_units('kpc'))))
+                    (ad["bhcoordinates"][i,2].in_units('kpc') >  (ds.domain_center[2].in_units('kpc')-(0.5*ds.domain_width[2].in_units('kpc'))))
                 ):
 
                     print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
