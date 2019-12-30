@@ -10,9 +10,9 @@ ParticleDataset.filter_bbox = True
 ParticleDataset._skip_cache = True
 
 
-def octree_zoom_bbox_filter(fname,pf,bbox0,field_add):
+def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
 
-    ds0 = pf
+    ds0 = ds
     
     ds0.index
     ad = ds0.all_data()
