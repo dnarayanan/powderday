@@ -22,6 +22,9 @@ import matplotlib as mpl
 import copy
 import numpy as np
 import sys
+import gc
+gc.set_threshold(0)
+
 script, pardir, parfile, modelfile = sys.argv
 
 
@@ -67,7 +70,7 @@ options = {'gadget_hdf5': m_control_sph,
            'enzo_packed_3d': m_control_enzo}
 
 m_gen = options[ds_type]()
-m, xcent, ycent, zcent, dx, dy, dz, ds, boost = m_gen(fname, field_add)
+m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 
 sp = fsps.StellarPopulation()
@@ -86,13 +89,12 @@ df.close()
 
 
 # add sources to hyperion
-ad = ds.all_data()
-stars_list, diskstars_list, bulgestars_list = sg.star_list_gen(boost, dx, dy, dz, ds, ad)
+stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds)
 nstars = len(stars_list)
 
 
 if cfg.par.BH_SED == True:
-    BH_source_add(m, ds, df_nu, boost)
+    BH_source_add(m, reg, df_nu, boost)
 
 
 # figure out N_METAL_BINS:
@@ -118,8 +120,8 @@ else:
 if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
     stellar_sed_write(m)
 
-# provisional and not tested or implemented yet
-SKIRT_data_dump(ds, ad, m, stars_list, 10)
+
+SKIRT_data_dump(reg, ds, m, stars_list, 10)
 
 
 nstars = len(stars_list)
@@ -303,4 +305,4 @@ if cfg.par.IMAGING == True:
     print('++++++++++++++++++++++++++++++++++++')
 
 
-dump_data(ds, model)
+dump_data(reg, model)

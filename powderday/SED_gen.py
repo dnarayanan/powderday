@@ -18,6 +18,12 @@ from powderday.nebular_emission.cloudy_tools import calc_LogU
 from powderday.analytics import logu_diagnostic,dump_emline
 from powderday.nebular_emission.cloudy_model import get_nebular
 
+#this is required to keep the reg as a strong reference.  for some
+#reason in the star_list.append in star_list_gen, reg otherwise gets
+#garbage collected.
+import gc
+gc.set_threshold(0)
+
 # Lazily initialize FSPS
 sp = None
 
@@ -35,15 +41,17 @@ class Stars:
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
 
 
-def star_list_gen(boost,dx,dy,dz,ds,ad):
+def star_list_gen(boost,dx,dy,dz,reg,ds):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
 
-    metals = ad["starmetals"].value
-    mass = ad["starmasses"].value
-    positions = ad["starcoordinates"].value
-    age = ad["stellarages"].value
+    metals = reg["starmetals"].value
+    mass = reg["starmasses"].value
+    positions = reg["starcoordinates"].value
+    age = reg["stellarages"].value
     nstars = len(age)
     print ('number of new stars =',nstars)
+    
+
 
     #calculate the fsps interpolated metallicity
 
@@ -74,11 +82,14 @@ def star_list_gen(boost,dx,dy,dz,ds,ad):
 
     #create the stars_list full of Stars objects
     stars_list = []
+
+    #disable garbage collection as this is a spot where reg becomes
+    #weakly referenced for reasons i cannot understand
     
     for i in range(nstars):
         stars_list.append(Stars(mass[i],metals[i],positions[i],age[i],fsps_zmet=zmet[i]))
+        
     
-
     #boost stellar positions to grid center
     print ('boosting new stars to coordinate center')
     stars_list = stars_coordinate_boost(stars_list,boost)
@@ -108,14 +119,15 @@ def star_list_gen(boost,dx,dy,dz,ds,ad):
     #use PartType2 and 3 as 'filler' particle types, so they may exist
     #even if they don't correspond to disk/bulge stars.
 
-    if ad.ds.cosmological_simulation == False:
+
+    if ds.cosmological_simulation == False:
 
         #Disk Stars
 
         if ("diskstarcoordinates") in ds.derived_field_list:
             
-            disk_positions = ad[("diskstarcoordinates")].value
-            disk_masses =  ad[("diskstarmasses")].value
+            disk_positions = reg[("diskstarcoordinates")].value
+            disk_masses =  reg[("diskstarmasses")].value
             nstars_disk = len(disk_masses)
      
             #create the disk_list full of DiskStars objects
@@ -132,8 +144,8 @@ def star_list_gen(boost,dx,dy,dz,ds,ad):
 
 
         if ("bulgestarcoordinates") in ds.derived_field_list:
-            bulge_positions = ad[("bulgestarcoordinates")].value
-            bulge_masses =  ad[("bulgestarmasses")].value
+            bulge_positions = reg[("bulgestarcoordinates")].value
+            bulge_masses =  reg[("bulgestarmasses")].value
             nstars_bulge = len(bulge_masses)
             
             #create the bulge_list full of BulgeStars objects
@@ -173,7 +185,8 @@ def star_list_gen(boost,dx,dy,dz,ds,ad):
                 diskstars_list[i].positions[:] = np.array([xpos,ypos,zpos])
 
 
-    return stars_list,diskstars_list,bulgestars_list
+
+    return stars_list,diskstars_list,bulgestars_list,reg
 
 
 

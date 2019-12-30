@@ -35,49 +35,45 @@ def yt_octree_generate(fname, field_add):
             [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim]]
 
-    # load the DS and add pd fields; no need to put in stellar ages yet
-    # as this will happen downstream in zoom
-    ds = field_add(fname, bounding_box=bbox)
+    # load the DS and add pd fields.  this is the first field addition of the simulation.
+    ds = field_add(fname, bounding_box=bbox,starages=True)
 
-    # zoom if necessary
-    # if cfg.par.zoom == True:
-    ds = octree_zoom_bbox_filter(fname, ds, bbox, field_add)
+    #now zoom in.
+    reg = octree_zoom_bbox_filter(fname, ds, bbox, field_add)
 
-    ds.index
-    ad = ds.all_data()
-
+    
     # ---------------------------------------------------------------
     # PLOTTING DIAGNOSTIC PROJECTION PLOTS
     # ---------------------------------------------------------------
-
     # proj_plots(ds)
 
-    from yt.data_objects.particle_unions import ParticleUnion
-    pu = ParticleUnion("all", list(ds.particle_types_raw))
+
+    #from yt.data_objects.particle_unions import ParticleUnion
+    #pu = ParticleUnion("all", list(ds.particle_types_raw))
 
     
     if  yt.__version__ == '4.0.dev0':
-        refined = ds.parameters['octree'][('index','refined')].astype('bool')
+        refined = reg.parameters['octree'][('index','refined')].astype('bool')
 
         #get central positions of cells as edges + width/2.
         #        xpos = (ds.parameters['octree'][('index', 'x')]+(ds.parameters['octree'][('index','dx')]/2.))[~refined]
         #        ypos = (ds.parameters['octree'][('index', 'y')]+(ds.parameters['octree'][('index','dy')]/2.))[~refined]
         #        zpos = (ds.parameters['octree'][('index', 'z')]+(ds.parameters['octree'][('index','dz')]/2.))[~refined]
 
-        xpos = (ds.parameters['octree'][('index','x')])[~refined]
-        ypos = (ds.parameters['octree'][('index','y')])[~refined]
-        zpos = (ds.parameters['octree'][('index','z')])[~refined]
+        xpos = (reg.parameters['octree'][('index','x')])[~refined]
+        ypos = (reg.parameters['octree'][('index','y')])[~refined]
+        zpos = (reg.parameters['octree'][('index','z')])[~refined]
 
         #comebine these into the fc1 array with dimensions (nparticles,3)
         fc1 = np.array([xpos,ypos,zpos]).T
 
-        dx = ds.parameters['octree'][('index','dx')][~refined]
-        dy = ds.parameters['octree'][('index','dy')][~refined]
-        dz = ds.parameters['octree'][('index','dz')][~refined]
+        dx = reg.parameters['octree'][('index','dx')][~refined]
+        dy = reg.parameters['octree'][('index','dy')][~refined]
+        dz = reg.parameters['octree'][('index','dz')][~refined]
         fw1 = np.array([dx,dy,dz]).T
 
 
-        n_ref = ds.parameters['octree'].n_ref
+        n_ref = reg.parameters['octree'].n_ref
         #max_level = find_max_level(refined)#'max_level not yet implemented in yt4.x'
         #note, we could figure this out from the max number of trues in a row
         nocts = len(refined)-np.sum(refined)
@@ -85,16 +81,17 @@ def yt_octree_generate(fname, field_add):
 
         
     else:
-        saved = ds.index.oct_handler.save_octree()
-        always = AlwaysSelector(None)
+        #saved = ds.index.oct_handler.save_octree()
+        #always = AlwaysSelector(None)
+       
         #ir1 = ds.index.oct_handler.ires(always)  # refinement levels
-        fc1 = ds.index.oct_handler.fcoords(always)  # coordinates in code_length
-        fw1 = ds.index.oct_handler.fwidth(always)  # width of cell in code_length        
-        refined = saved['octree'].astype('bool')
+        fc1 = reg.parameters["fc1"] #coordinates in code_length
+        fw1 = reg.parameters["fw1"] #width of cell in code_length
+        refined = reg.parameters["refined"]
         
-        n_ref = ds.index.oct_handler.n_ref
-        max_level = ds.index.oct_handler.max_level
-        nocts = ds.index.oct_handler.nocts
+        n_ref = reg.parameters["n_ref"]
+        max_level = reg.parameters["max_level"]
+        nocts = reg.parameters["nocts"]
     # convert fc1 and fw1 to YTArrays
     fc1 = ds.arr(fc1, 'code_length')
     fw1 = ds.arr(fw1, 'code_length')
@@ -113,11 +110,6 @@ def yt_octree_generate(fname, field_add):
 
     # ==================================
     
-    if  yt.__version__ == '4.0.dev0':
-        refined = ds.parameters['octree'][('index','refined')].astype('bool')
-    else:
-        refined = saved['octree'].astype('bool')
-
     #try:
     #    refined.reshape(len(ir1))
     #except:
@@ -131,10 +123,6 @@ def yt_octree_generate(fname, field_add):
     refined = np.hstack(refined2)
 
 
-    # smooth the data on to the octree
-
-    volume = np.zeros(len(refined))
-
     if cfg.par.CONSTANT_DUST_GRID == False:
 
         # crash the code if the parameter choice for dust grid type isn't in 
@@ -147,23 +135,23 @@ def yt_octree_generate(fname, field_add):
             sys.exit()
 
         if cfg.par.dust_grid_type == 'dtm':
-            dust_smoothed_dtm = dtm_grid(ds, refined)
+            dust_smoothed_dtm = dtm_grid(reg, refined)
             dust_smoothed = dust_smoothed_dtm
 
         if cfg.par.dust_grid_type == 'rr':
-            dust_smoothed_remy_ruyer = remy_ruyer(ds, refined)
+            dust_smoothed_remy_ruyer = remy_ruyer(reg, refined)
             dust_smoothed = dust_smoothed_remy_ruyer
 
         if cfg.par.dust_grid_type == 'manual':
-            dust_smoothed_manual = manual(ds, refined)
+            dust_smoothed_manual = manual(reg, refined)
             dust_smoothed = dust_smoothed_manual
         
         if cfg.par.dust_grid_type == 'li_bestfit':
-            dust_smoothed_li_bestfit = li_bestfit(ds,refined)
+            dust_smoothed_li_bestfit = li_bestfit(reg,refined)
             dust_smoothed=dust_smoothed_li_bestfit
 
         if cfg.par.dust_grid_type == 'li_ml':
-            dust_smoothed_li_ml = li_ml(ds,refined)
+            dust_smoothed_li_ml = li_ml(reg,refined)
             dust_smoothed = dust_smoothed_li_ml
 
     else:
@@ -173,7 +161,7 @@ def yt_octree_generate(fname, field_add):
 
 
     # return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost
-    return refined, dust_smoothed, fc1, fw1, ds, ad
+    return refined, dust_smoothed, fc1, fw1, reg, ds
 
 
 def grid_coordinate_boost(xmin, xmax, ymin, ymax, zmin, zmax):
