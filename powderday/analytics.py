@@ -9,13 +9,13 @@ import astropy.units as u
 from hyperion.model import ModelOutput
 import os,pdb
 
-def proj_plots(pf):
+def proj_plots(ds):
     print ('\n[analytics/proj_plots] Saving Diagnostic Projection Plots \n')
-    p = yt.ProjectionPlot(pf,"x",("gas","density"),width=(cfg.par.zoom_box_len,'kpc'))
+    p = yt.ProjectionPlot(ds,"x",("gas","density"),width=(cfg.par.zoom_box_len,'kpc'))
     p.save(cfg.model.PD_output_dir+'/proj_plot_x.png')
-    p = yt.ProjectionPlot(pf,"y",("gas","density"),width=(cfg.par.zoom_box_len,'kpc'))
+    p = yt.ProjectionPlot(ds,"y",("gas","density"),width=(cfg.par.zoom_box_len,'kpc'))
     p.save(cfg.model.PD_output_dir+'/proj_plot_y.png')
-    p = yt.ProjectionPlot(pf,"z",("gas","density"),width=(cfg.par.zoom_box_len,'kpc'))
+    p = yt.ProjectionPlot(ds,"z",("gas","density"),width=(cfg.par.zoom_box_len,'kpc'))
     p.save(cfg.model.PD_output_dir+'/proj_plot_z.png')
     
  
@@ -70,8 +70,8 @@ def dump_cell_info(refined,fc1,fw1,xmin,xmax,ymin,ymax,zmin,zmax):
     outfile = cfg.model.PD_output_dir+"cell_info."+cfg.model.snapnum_str+".npz"
     np.savez(outfile,refined=refined,fc1=fc1,fw1=fw1,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,zmin=zmin,zmax=zmax)
 
-def dump_data(pf,model):
-    ad = pf.all_data()
+def dump_data(ds,model):
+    ad = ds.all_data()
     particle_fh2 = ad["gasfh2"]
     particle_fh1 = np.ones(len(particle_fh2))-particle_fh2
     particle_gas_mass = ad["gasmasses"]
@@ -91,8 +91,8 @@ def dump_data(pf,model):
     #get tdust
     m = ModelOutput(model.outputfile+'.sed')
     oct = m.get_quantities()
-    tdust_pf = oct.to_yt()
-    tdust_ad = tdust_pf.all_data()
+    tdust_ds = oct.to_yt()
+    tdust_ad = tdust_ds.all_data()
     tdust = tdust_ad[ ('gas', 'temperature')]
 
 
@@ -103,7 +103,7 @@ def dump_data(pf,model):
     np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,tdust = tdust)
 
 
-def SKIRT_data_dump(pf,ad,m,stars_list,hsml_in_pc):
+def SKIRT_data_dump(ds,ad,m,stars_list,hsml_in_pc):
 
     #create stars file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 

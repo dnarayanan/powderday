@@ -67,7 +67,7 @@ options = {'gadget_hdf5': m_control_sph,
            'enzo_packed_3d': m_control_enzo}
 
 m_gen = options[ds_type]()
-m, xcent, ycent, zcent, dx, dy, dz, pf, boost = m_gen(fname, field_add)
+m, xcent, ycent, zcent, dx, dy, dz, ds, boost = m_gen(fname, field_add)
 
 
 sp = fsps.StellarPopulation()
@@ -86,13 +86,13 @@ df.close()
 
 
 # add sources to hyperion
-ad = pf.all_data()
-stars_list, diskstars_list, bulgestars_list = sg.star_list_gen(boost, dx, dy, dz, pf, ad)
+ad = ds.all_data()
+stars_list, diskstars_list, bulgestars_list = sg.star_list_gen(boost, dx, dy, dz, ds, ad)
 nstars = len(stars_list)
 
 
 if cfg.par.BH_SED == True:
-    BH_source_add(m, pf, df_nu, boost)
+    BH_source_add(m, ds, df_nu, boost)
 
 
 # figure out N_METAL_BINS:
@@ -100,8 +100,8 @@ fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
 N_METAL_BINS = len(fsps_metals)
 
 if par.FORCE_BINNING == False:
-    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(stars_list, diskstars_list, bulgestars_list, pf.cosmological_simulation, sp)
-    m = add_newstars(df_nu, stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, stars_list, diskstars_list, bulgestars_list, pf.cosmological_simulation, m)
+    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, sp)
+    m = add_newstars(df_nu, stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, m)
 
 
 else:
@@ -110,7 +110,7 @@ else:
     # that sg.allstars_sed_gen() be called first.
 
     m = add_binned_seds(df_nu, stars_list, diskstars_list,
-                        bulgestars_list, pf.cosmological_simulation, m, sp)
+                        bulgestars_list, ds.cosmological_simulation, m, sp)
 
 
 # save SEDs
@@ -119,7 +119,7 @@ if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
     stellar_sed_write(m)
 
 # provisional and not tested or implemented yet
-SKIRT_data_dump(pf, ad, m, stars_list, 10)
+SKIRT_data_dump(ds, ad, m, stars_list, 10)
 
 
 nstars = len(stars_list)
@@ -303,4 +303,4 @@ if cfg.par.IMAGING == True:
     print('++++++++++++++++++++++++++++++++++++')
 
 
-dump_data(pf, model)
+dump_data(ds, model)
