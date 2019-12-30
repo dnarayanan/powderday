@@ -409,30 +409,29 @@ def wavelength_compress(nu,fnu,df_nu):
 
 
 
-def BH_source_add(m,ds,df_nu,boost):
+def BH_source_add(m,reg,df_nu,boost):
 
     print("--------------------------------\n")
     print("Adding Black Holes to Source List in source_creation\n")
     print("--------------------------------\n")
  
-    ad = ds.all_data()
 
     try:
-        nholes = ad["bhsed"].shape[0]
+        nholes = reg["bhsed"].shape[0]
 
         #temporary wavelength compress just to get the length of the
         #compressed nu for a master array
-        dumnu,dumfnu = wavelength_compress(ad["bhnu"].value,ad["bhsed"][0,:].value,df_nu)
+        dumnu,dumfnu = wavelength_compress(reg["bhnu"].value,reg["bhsed"][0,:].value,df_nu)
         master_bh_fnu = np.zeros([nholes,len(dumnu)])
         
         holecounter = 0
         for i in range(nholes):  
 
             #don't create a BH luminsoity source if there's no luminosity since the SED will be nans/infs
-            if ad["bhluminosity"][i].value > 0 :
+            if reg["bhluminosity"][i].value > 0 :
                 
-                nu = ad["bhnu"].value
-                fnu = ad["bhsed"][i,:].value#.tolist()
+                nu = reg["bhnu"].value
+                fnu = reg["bhsed"][i,:].value#.tolist()
                 nu,fnu = wavelength_compress(nu,fnu,df_nu)
 
                 master_bh_fnu[i,:] = fnu
@@ -446,30 +445,30 @@ def BH_source_add(m,ds,df_nu,boost):
                 #dataset.  so we need to filter out any holes that
                 #might not be in the simulation domain.
                 
-                if ((ad["bhcoordinates"][i,0].in_units('kpc') <  (ds.domain_center[0].in_units('kpc')+(0.5*ds.domain_width[0].in_units('kpc'))))
+                if ((reg["bhcoordinates"][i,0].in_units('kpc') <  (reg.domain_center[0].in_units('kpc')+(0.5*reg.domain_width[0].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,0].in_units('kpc') >  (ds.domain_center[0].in_units('kpc')-(0.5*ds.domain_width[0].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,0].in_units('kpc') >  (reg.domain_center[0].in_units('kpc')-(0.5*reg.domain_width[0].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,1].in_units('kpc') <  (ds.domain_center[1].in_units('kpc')+(0.5*ds.domain_width[1].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,1].in_units('kpc') <  (reg.domain_center[1].in_units('kpc')+(0.5*reg.domain_width[1].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,1].in_units('kpc') >  (ds.domain_center[1].in_units('kpc')-(0.5*ds.domain_width[1].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,1].in_units('kpc') >  (reg.domain_center[1].in_units('kpc')-(0.5*reg.domain_width[1].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,2].in_units('kpc') <  (ds.domain_center[2].in_units('kpc')+(0.5*ds.domain_width[2].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,2].in_units('kpc') <  (reg.domain_center[2].in_units('kpc')+(0.5*reg.domain_width[2].in_units('kpc'))))
                     and
-                    (ad["bhcoordinates"][i,2].in_units('kpc') >  (ds.domain_center[2].in_units('kpc')-(0.5*ds.domain_width[2].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,2].in_units('kpc') >  (reg.domain_center[2].in_units('kpc')-(0.5*reg.domain_width[2].in_units('kpc'))))
                 ):
 
                     print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
                 #the tolist gets rid of the array brackets
-                    bh = m.add_point_source(luminosity = ad["bhluminosity"][i].value.tolist(), 
+                    bh = m.add_point_source(luminosity = reg["bhluminosity"][i].value.tolist(), 
                                             spectrum = (nu,fnu),
-                                            position = (ad["bhcoordinates"][i,:].in_units('cm').value-boost).tolist())
+                                            position = (reg["bhcoordinates"][i,:].in_units('cm').value-boost).tolist())
                 else:
                     print('black hole #%d is not in the domain: rejecting adding it to the source list'%i)
 
                 holecounter += 1
 
-        dump_AGN_SEDs(nu,master_bh_fnu,ad["bhluminosity"].value)
+        dump_AGN_SEDs(nu,master_bh_fnu,reg["bhluminosity"].value)
     except:
         print('BH source creation failed.')
     #savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
