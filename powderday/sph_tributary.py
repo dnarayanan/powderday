@@ -21,7 +21,7 @@ from powderday.analytics import dump_cell_info
 
 def sph_m_gen(fname,field_add):
     
-    refined,dustdens,fc1,fw1,pf,ad = yt_octree_generate(fname,field_add)
+    refined,dustdens,fc1,fw1,reg,ds = yt_octree_generate(fname,field_add)
     
     if yt.__version__ == '4.0.dev0':
         xmin = (fc1[:,0]-fw1[:,0]/2.).to('cm') #in proper cm 
@@ -136,4 +136,4 @@ def sph_m_gen(fname,field_add):
 
 
 
-    return m,xcent,ycent,zcent,dx,dy,dz,pf,boost
+    return m,xcent,ycent,zcent,dx,dy,dz,reg,ds,boost
