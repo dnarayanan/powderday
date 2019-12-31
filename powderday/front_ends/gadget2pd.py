@@ -114,7 +114,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             simtime = simtime.value
 
             # Gyr (assumes that ad["starformationtime"] is in Gyr for Gadget)
-            age = simtime-ad[("starformationtime")].value
+            age = simtime-data[('PartType4', 'StellarFormationTime')].value
             # make the minimum age 1 million years
             age[np.where(age < 1.e-3)[0]] = 1.e-3
 
@@ -127,7 +127,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                                                         omega_matter=data.ds.omega_matter,
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
-            scalefactor = data[('PartType4', 'StellarFormationTime')].value #ad[("starformationtime")].value
+            scalefactor = data[('PartType4', 'StellarFormationTime')].value
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
             age = simtime - formation_time
