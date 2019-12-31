@@ -51,8 +51,6 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
     nstars = len(age)
     print ('number of new stars =',nstars)
     
-
-
     #calculate the fsps interpolated metallicity
 
     #if the metallicity has many fields, and not just global
@@ -83,8 +81,6 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
     #create the stars_list full of Stars objects
     stars_list = []
 
-    #disable garbage collection as this is a spot where reg becomes
-    #weakly referenced for reasons i cannot understand
     
     for i in range(nstars):
         stars_list.append(Stars(mass[i],metals[i],positions[i],age[i],fsps_zmet=zmet[i]))
