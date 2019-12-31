@@ -35,8 +35,12 @@ def yt_octree_generate(fname, field_add):
             [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim]]
 
-    # load the DS and add pd fields.  this is the first field addition of the simulation.
-    ds = field_add(fname, bounding_box=bbox,starages=True)
+    # load the DS and add pd fields.  this is the first field addition
+    # of the simulation, so we don't yet need to add the smoothed
+    # quantities (which can take some time in yt4.x).
+    ds = field_add(fname, bounding_box=bbox,add_smoothed_quantities=False)
+
+        
 
     #now zoom in.
     reg = octree_zoom_bbox_filter(fname, ds, bbox, field_add)

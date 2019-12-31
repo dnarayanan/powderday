@@ -75,10 +75,16 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
     #dictionary called reg.parameters
 
     if yt.__version__ == '4.0.dev0':
-        #ds1 = yt.load(fname,bounding_box=bbox1) in yt4.x the loading
-        #with a bounding box doesn't actually load a smaller cut-out
-        #ds, so we have to play a quick game with the region method
+        
+        #re load the field names, but now with the bounding box
+        #set. this will allow us to map the field names to those
+        #generated in the octree.  this represents a massive
+        #inefficiency as we have to load the entire dataset a *second*
+        #time.
+        ds = field_add(fname,bounding_box = bbox1,ds=ds,add_smoothed_quantities=True)
+        ds.periodicity = (False,False,False)
         reg = ds.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
+
         #ds1 = reg.ds
         left = np.array([pos[0] for pos in bbox1])
         right = np.array([pos[1] for pos in bbox1])
@@ -87,14 +93,14 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
         reg.parameters={}
         reg.parameters['octree'] = octree
 
-        
+ 
 
     else:
         #load up a cutout ds1 with a bounding_box so we can generate the octree on this dataset
         ds1 = yt.load(fname,bounding_box = bbox1,n_ref=cfg.par.n_ref,over_refine_factor=cfg.par.oref) 
         ds1.periodicity = (False,False,False)
         #now update the field names
-        ds1 = field_add(None,bounding_box = bbox1,ds=ds1,starages=True)
+        ds1 = field_add(None,bounding_box = bbox1,ds=ds1,add_smoothed_quantities=True)
 
         #now create the region so that we have the smoothed properties downstream correct
         reg = ds1.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
