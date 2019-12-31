@@ -5,7 +5,7 @@ from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
 from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
-def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
+def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=True):
 
     def _starmetals_00(field, data):
         return data[('PartType4', 'Metallicity_00')]
@@ -120,14 +120,14 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
 
             print('\n--------------')
             print(
-                '[SED_gen/star_list_gen: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ', simtime)
+                '[gadget2pd: ] Idealized Galaxy Simulation Assumed: Simulation time is (Gyr): ', simtime)
             print('--------------\n')
         else:
             yt_cosmo = yt.utilities.cosmology.Cosmology(hubble_constant=data.ds.hubble_constant,
                                                         omega_matter=data.ds.omega_matter,
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
-            scalefactor = ad[("starformationtime")].value
+            scalefactor = data[('PartType4', 'StellarFormationTime')].value #ad[("starformationtime")].value
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
             age = simtime - formation_time
@@ -135,12 +135,12 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
             age[np.where(age < 1.e-3)[0]] = 1.e-3
 
             print('\n--------------')
-            print('[SED_gen/star_list_gen: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Gyr): ', simtime)
+            print('[gadget2pd: ] Cosmological Galaxy Simulation Assumed: Current age of Universe is (Gyr): ', simtime)
             print('--------------\n')
 
         age = data.ds.arr(age, 'Gyr')
         return age
-
+        
     def _starsmoothedmasses(field, data):
         return data[('deposit', 'PartType4_mass')]
 
@@ -199,22 +199,25 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
         bh_sed = yt.YTArray(bh_sed, "erg/s")
         return bh_sed
 
-    # load the ds
+    # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         if  yt.__version__ == '4.0.dev0':
             ds = yt.load(fname)
             ds.index
             ad = ds.all_data()
-            left = np.array([pos[0] for pos in bounding_box])
-            right = np.array([pos[1] for pos in bounding_box])
-            #octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
-            octree = ds.octree(left,right,n_ref=cfg.par.n_ref)
-            ds.parameters['octree'] = octree
         else:
             ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
             ds.index
             ad = ds.all_data()
-
+    
+    #if we're in the 4.x branch of yt, load up the octree for smoothing
+    if  yt.__version__ == '4.0.dev0':
+        left = np.array([pos[0] for pos in bounding_box])
+        right = np.array([pos[1] for pos in bounding_box])
+        #octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
+        octree = ds.octree(left,right,n_ref=cfg.par.n_ref)
+        ds.parameters['octree'] = octree
+        
 
     # for the metal fields have a few options since gadget can have different nomenclatures
     if ('PartType4', 'Metallicity_00') in ds.derived_field_list:
@@ -238,14 +241,14 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
                                                  "SmoothingLength", "Density", "metalmass",
                                                  ds.field_info)
 
-    ds.add_field(('metalsmoothedmasses'), function=_metalsmoothedmasses, units='code_metallicity', particle_type=True)
+    if add_smoothed_quantities == True: ds.add_field(('metalsmoothedmasses'), function=_metalsmoothedmasses, units='code_metallicity', particle_type=True)
 
     # get the dust mass
 
     if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
         ds.add_field(('dustmass'), function=_dustmass, units='code_mass', particle_type=True)
         ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
-        ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
+        if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
     #dust model in place, create a field for these so that
@@ -259,12 +262,14 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
         ds.parameters['li_ml_dustmass'] = li_ml_dustmass
         ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
         ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
-        ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
+        if add_smoothed_quantities == True: ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
 
     ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
     ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)
     ds.add_field(('starformationtime'), function=_starformationtime, units='dimensionless', particle_type=True)
-
+    
+    ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
+   
     if ('PartType2', 'Masses') in ds.derived_field_list:
         ds.add_field(('diskstarmasses'), function=_diskstarmasses, units='g', particle_type=True)
         ds.add_field(('diskstarcoordinates'), function=_diskstarcoordinates, units='cm', particle_type=True)
@@ -273,14 +278,18 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
         ds.add_field(('bulgestarmasses'), function=_bulgestarmasses, units='g', particle_type=True)
         ds.add_field(('bulgestarcoordinates'), function=_bulgestarcoordinates, units='cm', particle_type=True)
 
-    ds.add_field(('starsmoothedmasses'), function=_starsmoothedmasses, units='g', particle_type=True)
+    if add_smoothed_quantities == True: ds.add_field(('starsmoothedmasses'), function=_starsmoothedmasses, units='g', particle_type=True)
 
     ds.add_field(('gasdensity'), function=_gasdensity, units='g/cm**3', particle_type=True)
     # Gas Coordinates need to be in Comoving/h as they'll get converted later.
     ds.add_field(('gascoordinates'), function=_gascoordinates, units='cm', particle_type=True)
-    ds.add_field(('gassmootheddensity'), function=_gassmootheddensity, units='g/cm**3', particle_type=True)
-    ds.add_field(('gassmoothedmetals'), function=_gassmoothedmetals, units='code_metallicity', particle_type=True)
-    ds.add_field(('gassmoothedmasses'), function=_gassmoothedmasses, units='g', particle_type=True)
+    if add_smoothed_quantities == True:
+        ds.add_field(('gassmootheddensity'), function=_gassmootheddensity, units='g/cm**3', particle_type=True)
+        ds.add_field(('gassmoothedmetals'), function=_gassmoothedmetals, units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmasses'), function=_gassmoothedmasses, units='g', particle_type=True)
+
+
+
     ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
     ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
     ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
@@ -308,8 +317,6 @@ def gadget_field_add(fname, bounding_box=None, ds=None, starages=False):
         except:
             print('Unable to find field "BH_Mass" in snapshot. Skipping.')
 
-    if starages == True:
-        ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
 
 
     return ds
