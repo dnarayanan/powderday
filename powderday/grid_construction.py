@@ -4,7 +4,7 @@ import random
 import numpy as np
 import powderday.config as cfg
 from powderday.gridstats import gridstats
-from powderday.octree_zoom import octree_zoom_bbox_filter
+from powderday.octree_zoom import octree_zoom_bbox_filter,arepo_zoom
 from yt.geometry.selection_routines import AlwaysSelector
 from powderday.dust_grid_gen import dtm_grid, remy_ruyer, manual,li_bestfit,li_ml
 import yt
@@ -166,6 +166,84 @@ def yt_octree_generate(fname, field_add):
 
     # return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost
     return refined, dust_smoothed, fc1, fw1, reg, ds
+
+
+
+def arepo_vornoi_grid_generate(fname, field_add):
+
+    print('[grid_construction/arepo_vornoi_grid_generate]: bbox_lim = ', cfg.par.bbox_lim)
+
+    bbox = [[-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim]]
+
+    # load the DS and add pd fields.  this is the first field addition
+    # of the simulation, so we don't yet need to add the smoothed
+    # quantities (which can take some time in yt4.x).
+    ds = field_add(fname, bounding_box=bbox)
+
+    #now zoom in.
+    reg = arepo_zoom(fname, ds, bbox, field_add)
+
+
+    # ---------------------------------------------------------------
+    # PLOTTING DIAGNOSTIC PROJECTION PLOTS
+    # ---------------------------------------------------------------
+    # proj_plots(ds)
+
+
+
+    '''
+    
+    if cfg.par.CONSTANT_DUST_GRID == False:
+
+        # crash the code if the parameter choice for dust grid type isn't in
+        # the hard coded valid list below
+        dust_grid_type_list = ['dtm', 'rr', 'manual','li_bestfit','li_ml']
+        try:
+            dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
+        except ValueError as e:
+            print('You chose a dust_choice that isnt a valid selection within the list: dust_grid_type_list....crashing now!')
+            sys.exit()
+
+        if cfg.par.dust_grid_type == 'dtm':
+            dust_smoothed_dtm = dtm_grid(reg, refined)
+            dust_smoothed = dust_smoothed_dtm
+
+        if cfg.par.dust_grid_type == 'rr':
+            dust_smoothed_remy_ruyer = remy_ruyer(reg, refined)
+            dust_smoothed = dust_smoothed_remy_ruyer
+
+        if cfg.par.dust_grid_type == 'manual':
+            dust_smoothed_manual = manual(reg, refined)
+            dust_smoothed = dust_smoothed_manual
+
+
+        if cfg.par.dust_grid_type == 'li_bestfit':
+            dust_smoothed_li_bestfit = li_bestfit(reg,refined)
+            dust_smoothed=dust_smoothed_li_bestfit
+
+        if cfg.par.dust_grid_type == 'li_ml':
+            dust_smoothed_li_ml = li_ml(reg,refined)
+            dust_smoothed = dust_smoothed_li_ml
+
+    else:
+        print('cfg.par.CONSTANT_DUST_GRID=True')
+        print('setting constant dust grid to 4.e-22')
+        dust_smoothed = np.zeros(len(refined))+4.e-23
+
+    '''
+
+    #DEBUG -- this will eventually go into a refactored dust_grid_gen
+    metaldens = reg["metaldens"]
+    dustdens = (metaldens*cfg.par.dusttometals_ratio).to('g/cm**3').value
+
+    return reg,ds,dustdens
+
+
+
+
+
 
 
 def grid_coordinate_boost(xmin, xmax, ymin, ymax, zmin, zmax):

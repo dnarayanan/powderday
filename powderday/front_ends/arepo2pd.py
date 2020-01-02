@@ -3,9 +3,9 @@ import numpy as np
 import yt
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
-from yt.data_objects.particle_filters import add_particle_filter
+#from yt.data_objects.particle_filters import add_particle_filter
 
-def arepo_field_add(fname, bounding_box=None, ds=None):#,add_smoothed_quantities=True):
+def arepo_field_add(fname, bounding_box=None, ds=None):
 
 
     def _starmetals(field, data):
@@ -51,35 +51,11 @@ def arepo_field_add(fname, bounding_box=None, ds=None):#,add_smoothed_quantities
     def _gassfr(field, data):
         return data[('PartType0', 'StarFormationRate')]
 
-#    def _gassmootheddensity(field, data):
-#        if  yt.__version__ == '4.0.dev0':
-#            return data.ds.parameters['octree'][('PartType0', 'density')]
-#        else:
-#            return data[("deposit","PartType0_smoothed_density")]
-
-#    def _gassmoothedmetals(field, data):
-#        if  yt.__version__ == '4.0.dev0':
-#            return data.ds.parameters['octree'][('PartType0', 'metallicity')]
-#        else:
-#            return data[("deposit","PartType0_smoothed_metallicity")]
-
-#    def _gassmoothedmasses(field, data):
-#        if  yt.__version__ == '4.0.dev0':
-#            return data.ds.parameters['octree'][('PartType0', 'Masses')]
-#        else:
-#            return data[('deposit', 'PartType0_mass')]
-
     def _metaldens(field, data):
         return (data["PartType0", "density"]*data["PartType0", "GFM_Metallicity"])
 
     def _metalmass(field, data):
         return (data["PartType0", "Masses"]*(data["PartType0", "GFM_Metallicity"].value))
-
-#    def _metalsmoothedmasses(field, data):
-#        if  yt.__version__ == '4.0.dev0':
-#            return (data.ds.parameters['octree'][('PartType0', 'Masses')]* data.ds.parameters['octree'][('PartType0','metallicity')])
-#        else:
-#            return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
 
         
     def _dustmass(field, data):
@@ -87,13 +63,6 @@ def arepo_field_add(fname, bounding_box=None, ds=None):#,add_smoothed_quantities
 
     def _li_ml_dustmass(field,data):
         return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
-
-#    def _dustsmoothedmasses(field, data):
-#        return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
-
-#    def _li_ml_dustsmoothedmasses(field,data):
-#        return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
-
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
@@ -130,11 +99,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):#,add_smoothed_quantities
         age = data.ds.arr(age, 'Gyr')
         return age
         
-    def _starsmoothedmasses(field, data):
-        return data[('deposit', 'PartType4_mass')]
-
-
-'''
+    '''
     def _bhluminosity(field, data):
         ad = data.ds.all_data()
         mdot = ad[("PartType5", "BH_Mdot")]
@@ -189,12 +154,12 @@ def arepo_field_add(fname, bounding_box=None, ds=None):#,add_smoothed_quantities
             bh_sed[i, :] = l_band_vec
         bh_sed = yt.YTArray(bh_sed, "erg/s")
         return bh_sed
-'''
+    '''
 
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         try:
-            yt.__version__ == '4.0.dev0':
+            yt.__version__ == '4.0.dev0'
             ds = yt.load(fname)
             ds.index
             ad = ds.all_data()
@@ -203,30 +168,14 @@ def arepo_field_add(fname, bounding_box=None, ds=None):#,add_smoothed_quantities
     
 
     #set up particle_filters to figure out which particles are stars.
-    #we'll call particles that have ages > 0 stars.
+    #we'll call particles that have ages > 0 newstars.
 
-    def newstars(pfilter,data):
-        age = data[pfilter.filtered_type,('PartType4', 'GFM_StellarFormationTime')]
-        filter = age.in_units('dimensionless') > 0
-        # "star" particles that have an age <0 are wind particles and
-        # are actually gas, so should be discarded.
+    def _newstars(pfilter,data):
+        filter = data[(pfilter.filtered_type, "GFM_StellarFormationTime")] > 0
         return filter
 
-    add_particle_filter("newstars",function=newstars,filtered_type='all',requires=[('PartType4', 'GFM_StellarFormationTime')])
+    yt.add_particle_filter("newstars",function=_newstars,filtered_type='PartType4')
     ds.add_particle_filter("newstars")
-
-
-
-
-
-    #    #if we're in the 4.x branch of yt, load up the octree for smoothing
-    #    if  yt.__version__ == '4.0.dev0':
-    #        left = np.array([pos[0] for pos in bounding_box])
-    #        right = np.array([pos[1] for pos in bounding_box])
-    #        #octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
-    #        octree = ds.octree(left,right,n_ref=cfg.par.n_ref)
-    #        ds.parameters['octree'] = octree
-    
     
     ds.add_field(('starmetals'), function=_starmetals, units="code_metallicity", particle_type=True)
 
@@ -234,18 +183,12 @@ def arepo_field_add(fname, bounding_box=None, ds=None):#,add_smoothed_quantities
     ds.add_field(('metaldens'), function=_metaldens, units="g/cm**3", particle_type=True)
     ds.add_field(('PartType0', 'metalmass'), function=_metalmass, units="g", particle_type=True)
 
-    #metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
-    #                                             "SmoothingLength", "Density", "metalmass",
-    #                                             ds.field_info)
-
-    #if add_smoothed_quantities == True: ds.add_field(('metalsmoothedmasses'), function=_metalsmoothedmasses, units='code_metallicity', particle_type=True)
-
     # get the dust mass
 
     if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
         ds.add_field(('dustmass'), function=_dustmass, units='code_mass', particle_type=True)
         ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
-        if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
+
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
     #dust model in place, create a field for these so that
@@ -258,8 +201,6 @@ def arepo_field_add(fname, bounding_box=None, ds=None):#,add_smoothed_quantities
         #this is an icky way to pass this to the function for ds.add_field in the next line. but such is life.
         ds.parameters['li_ml_dustmass'] = li_ml_dustmass
         ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
-        #ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
-        #if add_smoothed_quantities == True: ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
 
     ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
     ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)
@@ -275,17 +216,10 @@ def arepo_field_add(fname, bounding_box=None, ds=None):#,add_smoothed_quantities
 #        ds.add_field(('bulgestarmasses'), function=_bulgestarmasses, units='g', particle_type=True)
 #        ds.add_field(('bulgestarcoordinates'), function=_bulgestarcoordinates, units='cm', particle_type=True)
 
-#    if add_smoothed_quantities == True: ds.add_field(('starsmoothedmasses'), function=_starsmoothedmasses, units='g', particle_type=True)
 
     ds.add_field(('gasdensity'), function=_gasdensity, units='g/cm**3', particle_type=True)
     # Gas Coordinates need to be in Comoving/h as they'll get converted later.
     ds.add_field(('gascoordinates'), function=_gascoordinates, units='cm', particle_type=True)
-#    if add_smoothed_quantities == True:
-#        ds.add_field(('gassmootheddensity'), function=_gassmootheddensity, units='g/cm**3', particle_type=True)
-#        ds.add_field(('gassmoothedmetals'), function=_gassmoothedmetals, units='code_metallicity', particle_type=True)
-#        ds.add_field(('gassmoothedmasses'), function=_gassmoothedmasses, units='g', particle_type=True)
-
-
 
     ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
     ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)

@@ -18,21 +18,7 @@ from powderday.helpers import energy_density_absorbed_by_CMB
 
 def arepo_m_gen(fname,field_add):
     
-    ds = field_add(fname)
-    ad = ds.all_data()
-
-    print('[arepo_tributary]: bbox_lim = ', cfg.par.bbox_lim)
-
-    bbox = [[-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim],
-            [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim],
-            [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim]]
-
-    # load the DS and add pd fields.  this is the first field addition
-    # of the simulation, so we don't yet need to add the smoothed
-    # quantities (which can take some time in yt4.x).
-    ds = field_add(fname, bounding_box=bbox)
-
-    reg,dustdens = arepo_vornoi_grid_generate(fname,field_add)
+    reg,ds,dustdens = arepo_vornoi_grid_generate(fname,field_add)
 
     xcent = ds.quan(cfg.model.x_cent,'code_length').to('cm') #proper cm
     ycent = ds.quan(cfg.model.y_cent,'code_length').to('cm')
@@ -61,9 +47,6 @@ def arepo_m_gen(fname,field_add):
     z_pos_boost = (particle_z-zcent).to('cm')
     
     m.set_voronoi_grid(x_pos_boost.value, y_pos_boost.value, z_pos_boost.value)
-
-    import pdb
-    pdb.set_trace()
 
     #get CMB:
     
@@ -96,9 +79,13 @@ def arepo_m_gen(fname,field_add):
 
 
 
+    #just for the sake of symmetry, pass on a dx,dy,dz since it can be
+    #used optionally downstream in other functions.
+    dx = 2.* ds.quan(cfg.par.zoom_box_len,'kpc').to('cm').value
+    dy = 2.* ds.quan(cfg.par.zoom_box_len,'kpc').to('cm').value
+    dz = 2.* ds.quan(cfg.par.zoom_box_len,'kpc').to('cm').value
 
 
 
-
-
-    return m,xcent,ycent,zcent,reg,ds,boost
+    
+    return m,xcent,ycent,zcent,dx,dy,dz,reg,ds,boost
