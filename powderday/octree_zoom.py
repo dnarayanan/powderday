@@ -126,3 +126,50 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
 
     
     return reg
+
+
+
+def arepo_zoom(fname,ds,bbox0,field_add):
+
+
+    ds.index
+    ad = ds.all_data()
+
+    center = [cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent]
+    print ('[zoom/arepo_zoom:] using center: ',center)
+
+
+    box_len = cfg.par.zoom_box_len
+
+    #now begin the process of converting box_len to physical units in
+    #case we're in a cosmological simulation.  We'll first give it
+    #units of proper kpc, then convert to code length (which for
+    #gadget is kpcm/h) for the bbox calculation (dropping the units of
+    #course).  then when we re-convert to proper units, the box_len as
+    #input in parameters_master will be in proper units.  if a
+    #simulation isn't cosmological, then the only difference here will
+    #be a 1/h
+
+    #note: we dispense with the yt3.x options that are written in
+    #octree_zoom_bbox_filter since you can't read in an arepo sim as
+    #an arepo model without yt4.x (if it's yt3.x, it'll be read in via the sph_tributary
+
+    box_len = ds.quan(box_len,'kpc')
+    box_len = float(box_len.to('code_length').value)
+    bbox_lim = box_len
+   
+    bbox1 = [[center[0]-bbox_lim,center[0]+bbox_lim],
+            [center[1]-bbox_lim,center[1]+bbox_lim],
+            [center[2]-bbox_lim,center[2]+bbox_lim]]
+    print ('[zoom/arepo_zoom] new zoomed bbox (comoving/h) in code units= ',bbox1)
+
+    #re load the field names, but now with the bounding box
+    #set. this will allow us to map the field names to those
+    #generated in the octree.  this represents a massive
+    #inefficiency as we have to load the entire dataset a *second*
+    #time.
+    ds = field_add(fname,bounding_box = bbox1,ds=ds)
+    ds.periodicity = (False,False,False)
+    reg = ds.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
+
+    return reg
