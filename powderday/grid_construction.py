@@ -4,7 +4,7 @@ import random
 import numpy as np
 import powderday.config as cfg
 from powderday.gridstats import gridstats
-from powderday.octree_zoom import octree_zoom_bbox_filter,arepo_zoom
+from powderday.zoom import octree_zoom_bbox_filter,arepo_zoom
 from yt.geometry.selection_routines import AlwaysSelector
 from powderday.dust_grid_gen import dtm_grid, remy_ruyer, manual,li_bestfit,li_ml
 import yt
