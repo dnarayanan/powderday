@@ -100,10 +100,18 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
 
     def _dustsmoothedmasses(field, data):
-        return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+        if yt.__version__ == '4.0.dev0':
+            return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
+        else:
+            return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
 
     def _li_ml_dustsmoothedmasses(field,data):
-        return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
+        if yt.__version__ == '4.0.dev0':
+            return (data.ds.parameters['octree'][('PartType0', 'li_ml_dustmass')])
+        else:
+            return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
+        
+
 
 
     def _stellarages(field, data):
@@ -262,7 +270,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.parameters['li_ml_dustmass'] = li_ml_dustmass
         ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
         ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
-        if add_smoothed_quantities == True: ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
+        if add_smoothed_quantities == True: 
+            ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
 
     ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
     ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)

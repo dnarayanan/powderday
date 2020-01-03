@@ -6,7 +6,12 @@ import powderday.config as cfg
 from powderday.gridstats import gridstats
 from powderday.zoom import octree_zoom_bbox_filter,arepo_zoom
 from yt.geometry.selection_routines import AlwaysSelector
-from powderday.dust_grid_gen import dtm_grid, remy_ruyer, manual,li_bestfit,li_ml
+#octree quantities for dust
+from powderday.dust_grid_gen import dtm_grid_oct, remy_ruyer_oct, manual_oct,li_bestfit_oct,li_ml_oct
+
+#particle and/or mesh quantities for dust
+from powderday.dust_grid_gen import dtm_particle_mesh,remy_ruyer_particle_mesh,li_bestfit_particle_mesh,li_ml_particle_mesh
+
 import yt
 import pdb
 
@@ -139,29 +144,29 @@ def yt_octree_generate(fname, field_add):
             sys.exit()
 
         if cfg.par.dust_grid_type == 'dtm':
-            dust_smoothed_dtm = dtm_grid(reg, refined)
+            dust_smoothed_dtm = dtm_grid_oct(reg, refined)
             dust_smoothed = dust_smoothed_dtm
 
         if cfg.par.dust_grid_type == 'rr':
-            dust_smoothed_remy_ruyer = remy_ruyer(reg, refined)
+            dust_smoothed_remy_ruyer = remy_ruyer_oct(reg, refined)
             dust_smoothed = dust_smoothed_remy_ruyer
 
         if cfg.par.dust_grid_type == 'manual':
-            dust_smoothed_manual = manual(reg, refined)
+            dust_smoothed_manual = manual_oct(reg, refined)
             dust_smoothed = dust_smoothed_manual
         
         if cfg.par.dust_grid_type == 'li_bestfit':
-            dust_smoothed_li_bestfit = li_bestfit(reg,refined)
+            dust_smoothed_li_bestfit = li_bestfit_oct(reg,refined)
             dust_smoothed=dust_smoothed_li_bestfit
 
         if cfg.par.dust_grid_type == 'li_ml':
-            dust_smoothed_li_ml = li_ml(reg,refined)
+            dust_smoothed_li_ml = li_ml_oct(reg,refined)
             dust_smoothed = dust_smoothed_li_ml
 
     else:
         print('cfg.par.CONSTANT_DUST_GRID=True')
         print('setting constant dust grid to 4.e-22')
-        dust_smoothed = np.zeros(len(refined))+4.e-23
+        dust_smoothed = np.zeros(len(refined))+4.e-22
 
 
     # return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost
@@ -193,7 +198,7 @@ def arepo_vornoi_grid_generate(fname, field_add):
 
 
 
-    '''
+
     
     if cfg.par.CONSTANT_DUST_GRID == False:
 
@@ -207,36 +212,37 @@ def arepo_vornoi_grid_generate(fname, field_add):
             sys.exit()
 
         if cfg.par.dust_grid_type == 'dtm':
-            dust_smoothed_dtm = dtm_grid(reg, refined)
-            dust_smoothed = dust_smoothed_dtm
+            dustdens = dtm_particle_mesh(reg)
+
 
         if cfg.par.dust_grid_type == 'rr':
-            dust_smoothed_remy_ruyer = remy_ruyer(reg, refined)
-            dust_smoothed = dust_smoothed_remy_ruyer
+            dustdens = remy_ruyer_particle_mesh(reg)
+
 
         if cfg.par.dust_grid_type == 'manual':
-            dust_smoothed_manual = manual(reg, refined)
-            dust_smoothed = dust_smoothed_manual
+            raise ValueError(' "manual" dust grids not currently supported with Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml]')
+        #if cfg.par.dust_grid_type == 'manual':
+        #    dust_smoothed_manual = manual(reg, refined)
+        #    dust_smoothed = dust_smoothed_manual
 
 
         if cfg.par.dust_grid_type == 'li_bestfit':
-            dust_smoothed_li_bestfit = li_bestfit(reg,refined)
-            dust_smoothed=dust_smoothed_li_bestfit
+            dustdens = li_bestfit_particle_mesh(reg)
 
         if cfg.par.dust_grid_type == 'li_ml':
-            dust_smoothed_li_ml = li_ml(reg,refined)
-            dust_smoothed = dust_smoothed_li_ml
+            dustdens = li_ml_particle_mesh(reg)
+
 
     else:
         print('cfg.par.CONSTANT_DUST_GRID=True')
         print('setting constant dust grid to 4.e-22')
-        dust_smoothed = np.zeros(len(refined))+4.e-23
+        dustdens = np.zeros(len(reg["gasmasses"]))+4.e-22
 
-    '''
+
 
     #DEBUG -- this will eventually go into a refactored dust_grid_gen
-    metaldens = reg["metaldens"]
-    dustdens = (metaldens*cfg.par.dusttometals_ratio).to('g/cm**3').value
+#    metaldens = reg["metaldens"]
+#    dustdens = (metaldens*cfg.par.dusttometals_ratio).to('g/cm**3').value
 
     return reg,ds,dustdens
 

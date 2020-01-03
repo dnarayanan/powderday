@@ -20,9 +20,9 @@ def arepo_m_gen(fname,field_add):
     
     reg,ds,dustdens = arepo_vornoi_grid_generate(fname,field_add)
 
-    xcent = float(ds.quan(cfg.model.x_cent,'code_length').to('cm').value) #proper cm
-    ycent = float(ds.quan(cfg.model.y_cent,'code_length').to('cm').value)
-    zcent = float(ds.quan(cfg.model.y_cent,'code_length').to('cm').value)
+    xcent = ds.quan(cfg.model.x_cent,'code_length').to('cm') #proper cm
+    ycent = ds.quan(cfg.model.y_cent,'code_length').to('cm')
+    zcent = ds.quan(cfg.model.y_cent,'code_length').to('cm')
     
     boost = np.array([xcent,ycent,zcent])
     print ('[arepo_tributary/vornoi_m_gen]:  boost = ',boost)
@@ -41,7 +41,7 @@ def arepo_m_gen(fname,field_add):
     particle_x = reg["gascoordinates"][:,0].to('cm')
     particle_y = reg["gascoordinates"][:,1].to('cm')
     particle_z = reg["gascoordinates"][:,2].to('cm')
-    
+
     x_pos_boost = (particle_x-xcent).to('cm')
     y_pos_boost = (particle_y-ycent).to('cm')
     z_pos_boost = (particle_z-zcent).to('cm')
