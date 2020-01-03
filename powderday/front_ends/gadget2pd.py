@@ -51,7 +51,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     def _gasfh2(field, data):
         try: return data[('PartType0', 'FractionH2')]
-        except: return data[('PartType0', 'Masses')]*0.
+        except: return data[('PartType0', 'metallicity')]*0.
 
     def _gassfr(field, data):
         return data[('PartType0', 'StarFormationRate')]
