@@ -36,6 +36,12 @@ def stream(fname):
         return field_add
 
 
+    def arepo():
+        from powderday.front_ends.arepo2pd import arepo_field_add as field_add
+        print('[front_end_controller:] arepo data set detected')
+        return field_add
+
+
     bbox = [[-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim,2.*cfg.par.bbox_lim]]
@@ -56,7 +62,8 @@ def stream(fname):
     options = {'gadget_hdf5':gadget,
                'tipsy':tipsy,
                'ramses':ramses,
-               'enzo_packed_3d':enzo}
+               'enzo_packed_3d':enzo,
+               'arepo_hdf5':arepo}
 
 
     #grab the field from the right front end
