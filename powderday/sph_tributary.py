@@ -44,10 +44,10 @@ def sph_m_gen(fname,field_add):
     dz = (np.max(zmax)-np.min(zmin)).value
 
 
-    xcent = np.mean([np.min(xmin),np.max(xmax)]) #kpc
-    ycent = np.mean([np.min(ymin),np.max(ymax)])
-    zcent = np.mean([np.min(zmin),np.max(zmax)])
-    
+    xcent = float(ds.quan(cfg.model.x_cent,"code_length").to('cm').value)
+    ycent = float(ds.quan(cfg.model.y_cent,"code_length").to('cm').value)
+    zcent = float(ds.quan(cfg.model.z_cent,"code_length").to('cm').value)
+
     boost = np.array([xcent,ycent,zcent])
     print ('[pd_front end] boost = ',boost)
 
