@@ -3,6 +3,7 @@ import numpy as np
 import yt
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
+from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 #from yt.data_objects.particle_filters import add_particle_filter
 
 def arepo_field_add(fname, bounding_box=None, ds=None):
@@ -62,7 +63,12 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
 
     def _li_ml_dustmass(field,data):
-        return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
+        li_ml_dgr = dgr_ert(data["gasmetals"],data["PartType0","StarFormationRate"],data["PartType0","Masses"])
+        li_ml_dustmass = ((10.**li_ml_dgr)*data["PartType0","Masses"]).in_units('code_mass')
+        
+        #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
+        ##return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
+        return li_ml_dustmass
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
@@ -195,12 +201,12 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     #dust_grid_gen can use these dust masses
     if cfg.par.dust_grid_type == 'li_ml':
         #get the dust to gas ratio
-        ad = ds.all_data()
-        li_ml_dgr = dgr_ert(ad["PartType0","Metallicity_00"],ad["PartType0","StarFormationRate"],ad["PartType0","Masses"])
-        li_ml_dustmass = ((10.**li_ml_dgr)*ad["PartType0","Masses"]).in_units('code_mass')
+        #ad = ds.all_data()
+        #li_ml_dgr = dgr_ert(ad["gasmetals"],ad["PartType0","StarFormationRate"],ad["PartType0","Masses"])
+        #li_ml_dustmass = ((10.**li_ml_dgr)*ad["PartType0","Masses"]).in_units('code_mass')
         #this is an icky way to pass this to the function for ds.add_field in the next line. but such is life.
-        ds.parameters['li_ml_dustmass'] = li_ml_dustmass
-        ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
+        #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
+        ds.add_field(('li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
 
     ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
     ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)
