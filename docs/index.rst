@@ -23,8 +23,8 @@ modular), and to be easy to use.  The package is written in python,
 though makes use of fortran, C and cython.  
 
 As of now, the code works Gadget (HDF5), Gizmo (HDF5), Gasoline
-(tipsy) and Changa (tipsy).  Support for RAMSES, ART and Enzo are
-in progress.  The current timeline for a code paper is Fall 2019 (fingers crossed).
+(tipsy), Changa (tipsy) and Arepo (HDF5).  Support for RAMSES, ART and Enzo are
+in progress, as well as NCHILADA-formatted outputs.  The current timeline for a code paper is Fall 2019 (fingers crossed).
 
 Finally, this code benefits from the contributions, either directly to
 this software, or indirectly by contributions to dependency software,
