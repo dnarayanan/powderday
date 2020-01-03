@@ -280,6 +280,26 @@ especially section 3.4.2.
 yt-4.x configuration [WIP]
 --------------------
 
+In the future, `yt <http://yt-project.org>`_ will eventually
+transition from 3.x to 4.x. The latter offers a number of advantages
+including a demeshed handling of particle datasets, as well as an
+`arepo <https://www.h-its.org/2014/10/28/arepo/>`_ front end.  We are
+happy to announce that as of December 31st, 2019 via hash
+`59315f311535b5f2309c705f5a71519148aa4f29
+<https://github.com/dnarayanan/powderday/commit/59315f311535b5f2309c705f5a71519148aa4f29>`_,
+`powderday <https://github.com/dnarayanan/powderday.git>`_ is now `yt
+<http://yt-project.org>`_ 4.x compliant.
+
+The following offer documentation for installing `yt
+<http://yt-project.org>`_ 4.x, as well as a slightly different order
+of operations for `powderday
+<https://github.com/dnarayanan/powderday.git>`_ code dependency
+installation.  Please note, `yt <http://yt-project.org>`_ 4.x is still
+in development mode, and should be treated as such.  The following
+documentation utilizes not-yet-merged in branches of `yt
+<http://yt-project.organological>`_ for example, and all 4.x features
+should be considered experimental currently.
+
 First, it is recommended to make a new python environment in which to run the 
 4.x development branch::
 
@@ -298,9 +318,9 @@ And then install `yt <http://yt-project.org>`_ 4.x.  The latter is installed via
   >pip install numpy jupyter sphinx gitpython h5py matplotlib cython nose scipy astropy sympy mpi4py
 followed by actually installing  `yt <http://yt-project.org>`_::
   
-  >git clone https://github.com/yt-project/yt.git
+  >git clone https://github.com/AshKelly/yt.git
   >cd yt
-  >git checkout yt-4.0
+  >git checkout yt-4.0-new-octree
   >git pull
   >pip install -e .
 
@@ -312,7 +332,16 @@ commands look something like this::
     In [2]: yt.__version__
     Out[2]: '4.0.dev0'
   
-The second way of handling this, which is no longer recommended as it can be a bit painful, is to install `Hyperion  <http://www.hyperion-rt.org>`_ with the ``--no-deps`` flag, since you  will install the dependencies manually in the next step::
+Note, in the above we are actually not yet installing the master
+branch of `yt <http://yt-project.org>`_ 4.x, but rather Ashley Kelly's
+branch which is still experimental.  As Ash's branch gets merged into
+the master `yt <http://yt-project.org>`_ 4.x branch, we will update
+these docs.
+
+The second way of handling this, which is no longer recommended as it
+can be a bit painful and with varying success rates, is to install `Hyperion
+<http://www.hyperion-rt.org>`_ with the ``--no-deps`` flag, since you
+will install the dependencies manually in the next step::
 
     > conda install --no-deps -c conda-forge hyperion
 
@@ -329,9 +358,9 @@ If this doesn't work, repeat:_::
 
   > conda install --no-deps -c conda-forge hyperion
 
-Now, install clone the 4.x development branch from the `yt <http://yt-project.org>`_4.x as above.
+Now, install clone the 4.x development branch from the `yt <http://yt-project.org>`_ 4.x as above.
 
-As long as the rest of `powderday <https://github.com/dnarayanan/powderday.git>`_'s
+As long as the rest of `powderday <https://github.com/dnarayanan/powderday.git>`_ 's
 dependencies have been installed, at this point you should be good to go.
 
 
