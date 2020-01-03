@@ -20,9 +20,9 @@ def arepo_m_gen(fname,field_add):
     
     reg,ds,dustdens = arepo_vornoi_grid_generate(fname,field_add)
 
-    xcent = ds.quan(cfg.model.x_cent,'code_length').to('cm') #proper cm
-    ycent = ds.quan(cfg.model.y_cent,'code_length').to('cm')
-    zcent = ds.quan(cfg.model.y_cent,'code_length').to('cm')
+    xcent = float(ds.quan(cfg.model.x_cent,'code_length').to('cm').value) #proper cm
+    ycent = float(ds.quan(cfg.model.y_cent,'code_length').to('cm').value)
+    zcent = float(ds.quan(cfg.model.y_cent,'code_length').to('cm').value)
     
     boost = np.array([xcent,ycent,zcent])
     print ('[arepo_tributary/vornoi_m_gen]:  boost = ',boost)
