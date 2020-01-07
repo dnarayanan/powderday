@@ -49,9 +49,13 @@ def sph_m_gen(fname,field_add):
     zcent = float(ds.quan(cfg.model.z_cent,"code_length").to('cm').value)
 
     boost = np.array([xcent,ycent,zcent])
-    print ('[pd_front end] boost = ',boost)
-
-    
+    print ('[sph_tributary] boost = ',boost)
+    print ('[sph_tributary] xmin (pc)= ',np.min(xmin.to('pc')))
+    print ('[sph_tributary] xmax (pc)= ',np.max(xmax.to('pc')))
+    print ('[sph_tributary] ymin (pc)= ',np.min(ymin.to('pc')))
+    print ('[sph_tributary] ymax (pc)= ',np.max(ymax.to('pc')))
+    print ('[sph_tributary] zmin (pc)= ',np.min(zmin.to('pc')))
+    print ('[sph_tributary] zmax (pc)= ',np.max(zmax.to('pc')))
     #Tom Robitaille's conversion from z-first ordering (yt's default) to
     #x-first ordering (the script should work both ways)
 

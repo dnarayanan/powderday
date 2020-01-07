@@ -122,7 +122,7 @@ if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
     stellar_sed_write(m)
 
 
-SKIRT_data_dump(reg, ds, m, stars_list, 10)
+SKIRT_data_dump(reg, ds, m, stars_list, ds_type, 10)
 
 
 nstars = len(stars_list)

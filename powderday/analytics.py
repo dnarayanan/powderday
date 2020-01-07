@@ -103,8 +103,14 @@ def dump_data(reg,model):
     np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr)#,tdust = tdust)
 
 
-def SKIRT_data_dump(reg,ds,m,stars_list,hsml_in_pc):
+def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
     
+    #the work flow for this function is: for all dataset types, we
+    #dump stars in the same manner (since we don't allow for mappings
+    #in our skirt dumps, all stars are "old stars").  #for gas,
+    #however, we separate based on SPH type outputs or arepo-types
+    #since they require different formats.
+
     #create stars file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 
     spos_x = reg["starcoordinates"][:,0].in_units('pc').value
@@ -151,18 +157,25 @@ def SKIRT_data_dump(reg,ds,m,stars_list,hsml_in_pc):
     except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".stars.particles.txt"
     np.savetxt(outfile, np.column_stack((spos_x,spos_y,spos_z,shsml,smasses,smetallicity,sage)))
     
-    #create the gas file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
+    #create the gas file for SPH-oids.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
+
+
     gpos_x = reg["gascoordinates"][:,0].in_units('pc').value
     gpos_y = reg["gascoordinates"][:,1].in_units('pc').value
     gpos_z = reg["gascoordinates"][:,2].in_units('pc').value
     gmass = reg["gasmasses"].in_units('Msun').value
     ghsml = np.repeat(hsml_in_pc,len(gpos_x))
     gmetallicity = reg["gasmetals"].value
-
+    grho = (reg["gasdensity"]*reg["gasmetals"].value*cfg.par.dusttometals_ratio).in_units('Msun/cm**3').value
     try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".gas.particles.txt"
     except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".gas.particles.txt"
-    np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+
     
+    if ds_type in ['gadget_hdf5','tipsy']:
+        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+    else:
+        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,grho)))
+
 # Saves logU, Q and other related parameters in a file (seperate file is created for each galaxy)
 def logu_diagnostic(logQ, Rin, LogU, mstar, age, zmet, append = True):
     if append == False:
