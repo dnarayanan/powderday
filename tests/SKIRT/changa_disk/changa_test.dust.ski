@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- A SKIRT parameter file © Astronomical Observatory, Ghent University -->
 <skirt-simulation-hierarchy type="MonteCarloSimulation" format="6.1" producer="SKIRT v8.0 (git 96e8be9-dirty built on 19/06/2018 at 09:57:17)" time="2019-04-30T10:01:46.672">
-    <PanMonteCarloSimulation numPackages="1e4" minWeightReduction="1e4" minScattEvents="0" scattBias="0.5" continuousScattering="false">
+    <PanMonteCarloSimulation numPackages="1e6" minWeightReduction="1e4" minScattEvents="0" scattBias="0.5" continuousScattering="false">
         <random type="Random">
             <Random seed="4357"/>
         </random>
