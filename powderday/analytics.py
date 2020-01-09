@@ -174,8 +174,12 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
     if ds_type in ['gadget_hdf5','tipsy']:
         np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
     else:
-        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,grho)))
-
+    #if we ever get the arepo SKIRT ski files working, this is
+        #actually the line we need. but since we are currently running
+        #SKIRT for arepo in SPH/octree mode, we have to
+        # save as though it's an octree..
+        #np.savetxt(outfile,np.column_stack((gpos_x,gpos_y,gpos_z,grho)))
+        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
 # Saves logU, Q and other related parameters in a file (seperate file is created for each galaxy)
 def logu_diagnostic(logQ, Rin, LogU, mstar, age, zmet, append = True):
     if append == False:
