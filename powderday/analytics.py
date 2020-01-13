@@ -196,8 +196,13 @@ def logu_diagnostic(logQ, Rin, LogU, mstar, age, zmet, append = True):
 
     # Dumps AGN SEDs
 def dump_AGN_SEDs(nu,fnu,luminosity):
-    savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
-    np.savez(savefile,nu = nu,fnu = fnu, luminosity = luminosity)
+    
+    if hasattr(cfg.model,'galaxy_num_str'):
+        outfile_bh = cfg.model.PD_output_dir + "bh_sed." + cfg.model.galaxy_num_str+".npz"
+    else:
+        outfile_bh = cfg.model.PD_output_dir+"/bh_sed.npz"
+
+    np.savez(outfile_bh,nu = nu,fnu = fnu, luminosity = luminosity)
                       
 
 
