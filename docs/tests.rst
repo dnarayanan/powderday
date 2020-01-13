@@ -108,12 +108,15 @@ arbitrarily chosen).  Then you can run::
   cd <path_to_powderday>
   python tests/SKIRT/skirt_sed_plot.py
 
-and it should produce an image like
+and it should produce an image like the top left one in:
 
 .. image :: images/powderday_skirt_comparison.png 
     :align: center
 
-
+Note, there are analagous tests for the arepo and gasoline/changa
+front ends that ship with `powderday
+<https://github.com/dnarayanan/powderday.git>`_ as well that will produce the other panels in the aforementioned code comparison figure.
+	  
 Persistent Differences in the Models
 --------------
 
