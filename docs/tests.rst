@@ -22,8 +22,7 @@ SKIRT tests
 :Relevant Hash:
    
    The `powderday <https://github.com/dnarayanan/powderday.git>`_ hash for
-   the most recent set of tests is `21204f2
-   <https://bitbucket.org/desika/powderday/commits/21204f296c2765322751c3631bb825d46d40ad14>`_
+   the most recent set of tests is `2fdf5e49074289382648a3be6a9478fcb9a0e84c<https://github.com/dnarayanan/powderday/commit/2fdf5e49074289382648a3be6a9478fcb9a0e84c>`_
    and the relevant `SKIRT
    <http://www.skirt.ugent.be/root/index.html>`_ hash is
    96e8be9761c3021498b847854bf84c3da3129555.
@@ -31,8 +30,16 @@ SKIRT tests
 
 :Simulation Codes:
 
-  The tests done here have been done for Gizmo simulations, and
-  Gasoline/Changa simulations with a tipsy output format. 
+  The tests done here have been done for Gizmo simulations,
+  Gasoline/Changa simulations with a tipsy output format, and Arepo.
+  Note, that the Arepo test that ship with the code are currently
+  configured to be run with the radiative transfer on the Voronoi mesh
+  in `powderday <https://github.com/dnarayanan/powderday.git>`_, but
+  on an octree grid in `SKIRT
+  <http://www.skirt.ugent.be/root/index.html>`_.  Pull requests very
+  welcome from community experts on setting up the appropriate ski
+  file for `SKIRT <http://www.skirt.ugent.be/root/index.html>`_ with
+  Voronoi mesh simulations.
 
 :Downloads:
 
@@ -100,12 +107,15 @@ arbitrarily chosen).  Then you can run::
   cd <path_to_powderday>
   python tests/SKIRT/skirt_sed_plot.py
 
-and it should produce an image like
+and it should produce an image like the top left one in:
 
 .. image :: images/powderday_skirt_comparison.png 
     :align: center
 
-
+Note, there are analagous tests for the arepo and gasoline/changa
+front ends that ship with `powderday
+<https://github.com/dnarayanan/powderday.git>`_ as well that will produce the other panels in the aforementioned code comparison figure.
+	  
 Persistent Differences in the Models
 --------------
 

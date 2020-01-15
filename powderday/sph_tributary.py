@@ -1,5 +1,6 @@
 from __future__ import print_function
 import numpy as np
+import yt
 
 from hyperion.model import Model
 import matplotlib as mpl
@@ -20,14 +21,22 @@ from powderday.analytics import dump_cell_info
 
 def sph_m_gen(fname,field_add):
     
-    refined,dustdens,fc1,fw1,pf,ad = yt_octree_generate(fname,field_add)
-    xmin = (fc1[:,0]-fw1[:,0]/2.).convert_to_units('cm') #in proper cm 
-    xmax = (fc1[:,0]+fw1[:,0]/2.).convert_to_units('cm')
-    ymin = (fc1[:,1]-fw1[:,1]/2.).convert_to_units('cm')
-    ymax = (fc1[:,1]+fw1[:,1]/2.).convert_to_units('cm')
-    zmin = (fc1[:,2]-fw1[:,2]/2.).convert_to_units('cm')
-    zmax = (fc1[:,2]+fw1[:,2]/2.).convert_to_units('cm')
+    refined,dustdens,fc1,fw1,reg,ds = yt_octree_generate(fname,field_add)
     
+    if yt.__version__ == '4.0.dev0':
+        xmin = (fc1[:,0]-fw1[:,0]/2.).to('cm') #in proper cm 
+        xmax = (fc1[:,0]+fw1[:,0]/2.).to('cm')
+        ymin = (fc1[:,1]-fw1[:,1]/2.).to('cm')
+        ymax = (fc1[:,1]+fw1[:,1]/2.).to('cm')
+        zmin = (fc1[:,2]-fw1[:,2]/2.).to('cm')
+        zmax = (fc1[:,2]+fw1[:,2]/2.).to('cm')
+    else:
+        xmin = (fc1[:,0]-fw1[:,0]/2.).convert_to_units('cm') #in proper cm
+        xmax = (fc1[:,0]+fw1[:,0]/2.).convert_to_units('cm')
+        ymin = (fc1[:,1]-fw1[:,1]/2.).convert_to_units('cm')
+        ymax = (fc1[:,1]+fw1[:,1]/2.).convert_to_units('cm')
+        zmin = (fc1[:,2]-fw1[:,2]/2.).convert_to_units('cm')
+        zmax = (fc1[:,2]+fw1[:,2]/2.).convert_to_units('cm')
 
     #dx,dy,dz are the edges of the parent grid
     dx = (np.max(xmax)-np.min(xmin)).value
@@ -35,14 +44,18 @@ def sph_m_gen(fname,field_add):
     dz = (np.max(zmax)-np.min(zmin)).value
 
 
-    xcent = np.mean([np.min(xmin),np.max(xmax)]) #kpc
-    ycent = np.mean([np.min(ymin),np.max(ymax)])
-    zcent = np.mean([np.min(zmin),np.max(zmax)])
-    
-    boost = np.array([xcent,ycent,zcent])
-    print ('[pd_front end] boost = ',boost)
+    xcent = float(ds.quan(cfg.model.x_cent,"code_length").to('cm').value)
+    ycent = float(ds.quan(cfg.model.y_cent,"code_length").to('cm').value)
+    zcent = float(ds.quan(cfg.model.z_cent,"code_length").to('cm').value)
 
-    
+    boost = np.array([xcent,ycent,zcent])
+    print ('[sph_tributary] boost = ',boost)
+    print ('[sph_tributary] xmin (pc)= ',np.min(xmin.to('pc')))
+    print ('[sph_tributary] xmax (pc)= ',np.max(xmax.to('pc')))
+    print ('[sph_tributary] ymin (pc)= ',np.min(ymin.to('pc')))
+    print ('[sph_tributary] ymax (pc)= ',np.max(ymax.to('pc')))
+    print ('[sph_tributary] zmin (pc)= ',np.min(zmin.to('pc')))
+    print ('[sph_tributary] zmax (pc)= ',np.max(zmax.to('pc')))
     #Tom Robitaille's conversion from z-first ordering (yt's default) to
     #x-first ordering (the script should work both ways)
 
@@ -53,7 +66,8 @@ def sph_m_gen(fname,field_add):
     refined_reordered = []
     dustdens_reordered = np.zeros(len(order))
     
-    
+
+
     
     for i in range(len(order)): 
         refined_reordered.append(refined[order[i]])
@@ -89,7 +103,6 @@ def sph_m_gen(fname,field_add):
     #m.set_octree_grid(xcent,ycent,zcent,
     #                  dx,dy,dz,refined)
     m.set_octree_grid(0,0,0,dx/2,dy/2,dz/2,refined)    
-
 
     #get CMB:
     
@@ -127,4 +140,4 @@ def sph_m_gen(fname,field_add):
 
 
 
-    return m,xcent,ycent,zcent,dx,dy,dz,pf,boost
+    return m,xcent,ycent,zcent,dx,dy,dz,reg,ds,boost
