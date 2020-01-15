@@ -10,7 +10,7 @@ from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump
 from astropy import constants
 import fsps
 from powderday.image_processing import add_transmission_filters, convolve
-from powderday.m_control_tools import m_control_sph, m_control_enzo
+from powderday.m_control_tools import m_control_sph, m_control_enzo, m_control_arepo
 import powderday.backwards_compatibility as bc
 import powderday.error_handling as eh
 import powderday.SED_gen as sg
@@ -22,6 +22,9 @@ import matplotlib as mpl
 import copy
 import numpy as np
 import sys
+import gc
+gc.set_threshold(0)
+
 script, pardir, parfile, modelfile = sys.argv
 
 
@@ -64,10 +67,11 @@ ds_type = ds.dataset_type
 # define the options dictionary
 options = {'gadget_hdf5': m_control_sph,
            'tipsy': m_control_sph,
-           'enzo_packed_3d': m_control_enzo}
+           'enzo_packed_3d': m_control_enzo,
+           'arepo_hdf5': m_control_arepo}
 
 m_gen = options[ds_type]()
-m, xcent, ycent, zcent, dx, dy, dz, pf, boost = m_gen(fname, field_add)
+m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 
 sp = fsps.StellarPopulation()
@@ -86,13 +90,12 @@ df.close()
 
 
 # add sources to hyperion
-ad = pf.all_data()
-stars_list, diskstars_list, bulgestars_list = sg.star_list_gen(boost, dx, dy, dz, pf, ad)
+stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds)
 nstars = len(stars_list)
 
 
 if cfg.par.BH_SED == True:
-    BH_source_add(m, pf, df_nu, boost)
+    BH_source_add(m, reg, df_nu, boost)
 
 
 # figure out N_METAL_BINS:
@@ -100,8 +103,8 @@ fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
 N_METAL_BINS = len(fsps_metals)
 
 if par.FORCE_BINNING == False:
-    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(stars_list, diskstars_list, bulgestars_list, pf.cosmological_simulation, sp)
-    m = add_newstars(df_nu, stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, stars_list, diskstars_list, bulgestars_list, pf.cosmological_simulation, m)
+    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, sp)
+    m = add_newstars(df_nu, stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, m)
 
 
 else:
@@ -110,7 +113,7 @@ else:
     # that sg.allstars_sed_gen() be called first.
 
     m = add_binned_seds(df_nu, stars_list, diskstars_list,
-                        bulgestars_list, pf.cosmological_simulation, m, sp)
+                        bulgestars_list, ds.cosmological_simulation, m, sp)
 
 
 # save SEDs
@@ -118,8 +121,8 @@ else:
 if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
     stellar_sed_write(m)
 
-# provisional and not tested or implemented yet
-SKIRT_data_dump(pf, ad, m, stars_list, 10)
+
+SKIRT_data_dump(reg, ds, m, stars_list, ds_type, 10)
 
 
 nstars = len(stars_list)
@@ -303,4 +306,4 @@ if cfg.par.IMAGING == True:
     print('++++++++++++++++++++++++++++++++++++')
 
 
-dump_data(pf, model)
+dump_data(reg, model)
