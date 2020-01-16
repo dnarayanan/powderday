@@ -8,8 +8,5 @@ For documentation, please see the docs at:
 
 [http://powderday.readthedocs.org](http://powderday.readthedocs.org)
 
-The manual contains full installation instructions.  You can also try
-out the shell script all-in-one installer:
-
-[installer](https://github.com/dnarayanan/powderday.git)
+The manual contains full installation instructions.  
 
