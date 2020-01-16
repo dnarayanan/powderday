@@ -6,15 +6,23 @@ import powderday.config as cfg
 from powderday.analytics import proj_plots
 from powderday.helpers import energy_density_absorbed_by_CMB
 from hyperion.dust import SphericalDust
-
+import yt
 
 
 def enzo_m_gen(fname,field_add):
     
 
-    
+    '''
     #add the fields in pd format
     ds = field_add(fname)
+    
+    #def. dust density
+    def _dust_density(field, data):
+        return data[('gas', 'metal_density')].in_units("g/cm**3")*cfg.par.dusttometals_ratio
+
+    ds.add_field(('gas', 'dust_density'), function=_dust_density, units = 'g/cm**3')
+
+
     ad = ds.all_data()
    
  
@@ -26,18 +34,56 @@ def enzo_m_gen(fname,field_add):
    
     min_region = [center[0]-box_len,center[1]-box_len,center[2]-box_len]
     max_region = [center[0]+box_len,center[1]+box_len,center[2]+box_len]
-    region = ds.region(center,min_region,max_region)
+    reg = ds.region(center,min_region,max_region)
     
-    ds = region.ds
-  
-    proj_plots(ds)
+    reg.save_as_dataset('temp_enzo.h5')
+    ds1 = yt.load('temp_enzo.h5')
+    ad1 = ds1.all_data()
+    
+    print(ad1[('all', 'creation_time')])
+    '''
+
+    ds = yt.load(fname)
+    ds = field_add(fname)
+
+    #DEBUG DEBUG DEBUG DEBUG ALL THIS NEEDS TO BE MERGED IN WITH WHATS ABOVE AS ITS SUPER HACKY AND PRETENDS E.G. LIKE WE KNOW WHAT THE BOX LENGTH IS ETC. ACK!!!!
+
     #def. dust density
     def _dust_density(field, data):
         return data[('gas', 'metal_density')].in_units("g/cm**3")*cfg.par.dusttometals_ratio
-    
+
     ds.add_field(('gas', 'dust_density'), function=_dust_density, units = 'g/cm**3')
-       
-    amr = AMRGrid.from_yt(ds, quantity_mapping={'density':('gas','dust_density')})
+
+
+    ad = ds.all_data()
+    print(ad[('all', 'creation_time')])
+    
+    #set up a region
+    box_len = ds.quan(0.1,'code_length')
+    center = ds.domain_center
+    min_region = [center[0]-box_len,center[1]-box_len,center[2]-box_len]
+    max_region = [center[0]+box_len,center[1]+box_len,center[2]+box_len]
+    
+    reg = ds.region(center,min_region,max_region)
+    
+    import pdb
+    pdb.set_trace()
+    
+    #now save the region to disk as a ds force the addition of some
+    #fields that don't otherwise get saved in the save_as_dataset
+    #method, because they are derived fields
+    reg.save_as_dataset('temp_enzo.h5',fields=[('all','creation_time'),('gas','metal_density')])
+    
+    #load the region back up
+    ds1 = yt.load('temp_enzo.h5')
+    ad1 = ds1.all_data()
+    print(ad1[('all', 'creation_time')])
+
+    import pdb
+    pdb.set_trace()
+
+    ds1 = field_add('temp_enzo.h5',ds=ds1,starages=True)
+    amr = AMRGrid.from_yt(ds1, quantity_mapping={'density':('gas','dust_density')})
     
 
 
