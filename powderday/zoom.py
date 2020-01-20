@@ -5,7 +5,7 @@ import yt
 from yt.frontends.sph.data_structures import ParticleDataset
 from yt.geometry.selection_routines import AlwaysSelector
 import pdb
-
+import os
 
 ParticleDataset.filter_bbox = True
 ParticleDataset._skip_cache = True
@@ -174,3 +174,45 @@ def arepo_zoom(fname,ds,bbox0,field_add):
 
 
     return reg
+
+
+
+def enzo_zoom(fname,ds,field_add):
+    #set up the cut out region from the main dataset.  here, we create
+    #a yt region out of the parent ds, and then re-save this as a cutout dataset named ds1
+    center = ds.arr([cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent],'code_length')
+    box_len = ds.quan(cfg.par.zoom_box_len,'kpc').in_units('code_length')
+    min_region = [center[0]-box_len,center[1]-box_len,center[2]-box_len]
+    max_region = [center[0]+box_len,center[1]+box_len,center[2]+box_len]
+    reg = ds.region(center,min_region,max_region)
+
+    #now play a game where we save the region as a dataset and then
+    #reload this as a new ds.  we need to do this because the
+    #convenience function within hyperion, AMRGrid.from_yt requires a
+    #datasaet print("[enzo_tributary/enzo_m_gen]: saving the dataset
+    #as temp_enzo.h5")
+    reg.save_as_dataset('temp_enzo.h5',fields=[('all','creation_time'),('gas','metal_density'),('gas','density'),('newstars','metallicity_fracti\
+on'),('newstars','particle_mass'),('all', 'particle_index'),('index', 'grid_level'),('gas','dust_density')])
+    ds1 = yt.load('temp_enzo.h5')
+    ad1 = ds1.all_data()
+    print("[zoom/enzo_zoom]: temporarily saving and removing temp_enzo.h5")
+    os.remove('temp_enzo.h5')
+
+    #now copy over all of the ds.index grid construction items that are in the region to the new dataset
+    ds1.index.get_levels = reg.index.get_levels
+    ds1.index.get_smallest_ds = reg.index.get_smallest_dx
+    ds1.index.grid = reg.index.grid
+    ds1.index.grid_corners = reg.index.grid_corners
+    ds1.index.grid_dimensions = reg.index.grid_dimensions
+    ds1.index.grid_levels = reg.index.grid_levels
+    ds1.index.grid_left_edge = reg.index.grid_left_edge
+    ds1.index.grid_right_edge = reg.index.grid_right_edge
+    ds1.index.grid_particle_count = reg.index.grid_particle_count
+    ds1.index.grids = reg.index.grids
+    ds1.index.index_filename = reg.index.index_filename
+    ds1.index.max_level = reg.index.max_level
+    ds1.index_num_grids = reg.index.num_grids
+    ds1.index.num_stars = reg.index.num_stars
+    ds1.index.parameters = reg.index.parameters
+    
+    return reg,ds1
