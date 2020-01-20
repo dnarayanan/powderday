@@ -20,9 +20,8 @@ model_dir=$4
 hydro_dir=$5
 model_run_name=$6
 COSMOFLAG=$7
-FILTERFLAG=$8
-model_dir_remote=$9
-hydro_dir_remote=$10
+model_dir_remote=$8
+hydro_dir_remote=$9
 
 for (( i=$startsnap; i<=$endsnap; i++ ))
 
@@ -58,10 +57,6 @@ do
     then
 	echo "hydro_dir = '$hydro_dir_remote/snapdir_'+snapnum_str+'/'">>$filem
 	echo "snapshot_name = 'snapshot_'+snapnum_str+'.0.hdf5'" >>$filem
-    elif [ $FILTERFLAG -eq 1]
-    then 
-        echo "hydro_dir = '$hydro_dir_remote/snapdir_'+snapnum_str+'/'">>$filem
-	echo "snapshot_name = 'snap_'+snapnum_str+'_galaxy'+galaxy_num_str+'.filtered.hdf5'">>$filem
     else
 	echo "hydro_dir = '$hydro_dir_remote/'">>$filem
 	echo "snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'" >>$filem

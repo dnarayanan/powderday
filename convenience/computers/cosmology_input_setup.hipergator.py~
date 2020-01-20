@@ -14,8 +14,8 @@ import caesar
 #shell scripting
 nnodes=1
 
-startsnap = 305
-endsnap = 306
+startsnap = 160
+endsnap = 161
 npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/simba_m25n512.galaxies_pos_for_pd.npz'
 
 model_dir_base = '/ufrc/narayanan/desika.narayanan/paper/powderday_paper/codes/sfr_lir/'

@@ -95,7 +95,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
    
 
 
-    orig_stars_list_len = len(stars_list)
+    #orig_stars_list_len = len(stars_list)
     
 
  
@@ -133,7 +133,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
             print ('boosting disk stars to coordinate center')    
             diskstars_list = stars_coordinate_boost(diskstars_list,boost)
 
-        orig_disk_stars_list_len = nstars_disk
+        #orig_disk_stars_list_len = nstars_disk
             
        
         #Bulge Stars
