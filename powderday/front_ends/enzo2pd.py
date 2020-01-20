@@ -33,7 +33,11 @@ def enzo_field_add(fname,ds = None, starages = False):
         
     def _gasmetals(field,data):
         return data[ ('gas', 'metallicity')]
-   
+
+    def _gasfh2(field, data):
+        try: return data[('gas', 'FractionH2')]
+        except: return data[('gas', 'metallicity')]*0. #just some dimensionless array
+        
 
     #load the ds
     if fname != None:
@@ -67,7 +71,7 @@ def enzo_field_add(fname,ds = None, starages = False):
     ds.add_field(('starmasses'),function=_starmasses,units='g',particle_type=True)
     ds.add_field(('gasdensity'),function=_gasdensity,units='g/cm**3')
     ds.add_field(('gasmetals'),function=_gasmetals,units="code_metallicity")
-
+    ds.add_field(('gasfh2'),function=_gasfh2,units='dimensionless')
     ad = ds.all_data()
 
     return ds
