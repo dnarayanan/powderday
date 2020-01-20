@@ -306,5 +306,5 @@ if cfg.par.IMAGING == True:
     print('WARNING: SKIP RT is set in the parameters_master file - this is why your code didnt run')
     print('++++++++++++++++++++++++++++++++++++')
 
-
-dump_data(reg, model)
+if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
+    dump_data(reg, model)
