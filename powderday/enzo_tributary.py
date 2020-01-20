@@ -40,17 +40,27 @@ def enzo_m_gen(fname,field_add):
     reg = ds.region(center,min_region,max_region)
 
 
-    reg.save_as_dataset('temp_enzo.h5',fields=[('all','creation_time'),('gas','metal_density'),('gas','density'),('newstars','metallicity_fraction'),('newstars','particle_mass'),('all', 'particle_index'),('index', 'grid_level')])
+    reg.save_as_dataset('temp_enzo.h5',fields=[('all','creation_time'),('gas','metal_density'),('gas','density'),('newstars','metallicity_fraction'),('newstars','particle_mass'),('all', 'particle_index'),('index', 'grid_level'),('gas','dust_density')])
     ds1 = yt.load('temp_enzo.h5')
     ad1 = ds1.all_data()
     
-    print(ad1[('all', 'creation_time')])
-
-    import pdb
-    pdb.set_trace()
+    
+    ds1.index.get_levels = reg.index.get_levels
+    ds1.index.get_smallest_ds = reg.index.get_smallest_dx
+    ds1.index.grid = reg.index.grid
+    ds1.index.grid_corners = reg.index.grid_corners
+    ds1.index.grid_dimensions = reg.index.grid_dimensions
     ds1.index.grid_levels = reg.index.grid_levels
     ds1.index.grid_left_edge = reg.index.grid_left_edge
     ds1.index.grid_right_edge = reg.index.grid_right_edge
+    ds1.index.grid_particle_count = reg.index.grid_particle_count
+    ds1.index.grids = reg.index.grids
+    ds1.index.index_filename = reg.index.index_filename
+    ds1.index.max_level = reg.index.max_level
+    ds1.index_num_grds = reg.index.num_grids
+    ds1.index.num_stars = reg.index.num_stars
+    ds1.index.parameters = reg.index.parameters
+    
     #ds1 = field_add('temp_enzo.h5',ds=ds1,starages=True)
 
     amr = AMRGrid.from_yt(ds1, quantity_mapping={'density':('gas','dust_density')})
@@ -78,29 +88,30 @@ def enzo_m_gen(fname,field_add):
     m = Model()
 
     m.set_amr_grid(amr)
-
-    energy_density_absorbed=energy_density_absorbed_by_CMB()
-    energy_density_absorbed = np.repeat(energy_density_absorbed.value,amr['density'].shape)
+    
+    #DEBUG CMB DISABLED -- UNCOMMENT THIS TO FIX THIS
+    #energy_density_absorbed=energy_density_absorbed_by_CMB()
+    #energy_density_absorbed = np.repeat(energy_density_absorbed.value,amr['density'].shape)
 
 
     d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
     if cfg.par.SUBLIMATION == True:
         d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
-    m.add_density_grid(amr['density'],d,specific_energy=energy_density_absorbed)
-    m.set_specific_energy_type('additional')
- #m.add_density_grid(amr['density'], cfg.par.dustdir+cfg.par.dustfile)
+    m.add_density_grid(amr['density'],d)#DEBUG CMB DISABLED UNCOMMENT TO FIX THIS,specific_energy=energy_density_absorbed)
+    #DEBUG CMB DISABLED UNCOMMENT TO FIX THIS m.set_specific_energy_type('additional')
+#m.add_density_grid(amr['density'], cfg.par.dustdir+cfg.par.dustfile)
     
 
     #define the random things needed for parsing out the output args
     #center = ds.domain_center
-    [xcent,ycent,zcent] = center
+    [xcent,ycent,zcent] = center.in_units('cm') #boost needs to be in cm since that's what the 
    
     boost = np.array([xcent,ycent,zcent])
+
     dx = ds.domain_width.in_units('cm')
     dy = ds.domain_width.in_units('cm')
     dz = ds.domain_width.in_units('cm')
     
-    
-    return m,xcent,ycent,zcent,dx,dy,dz,ds,boost
+    return m,xcent,ycent,zcent,dx,dy,dz,reg,ds,boost
 
        

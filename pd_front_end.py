@@ -122,7 +122,8 @@ if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
     stellar_sed_write(m)
 
 
-SKIRT_data_dump(reg, ds, m, stars_list, ds_type, 10)
+if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
+    SKIRT_data_dump(reg, ds, m, stars_list, ds_type, 10)
 
 
 nstars = len(stars_list)
