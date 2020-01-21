@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import powderday.config as cfg
 
-import pdb
+import pdb,sys
 
 def manual_oct(reg,refined):
     wTrue = np.where(np.array(refined) == True)[0]
@@ -272,11 +272,76 @@ def li_ml_particle_mesh(reg):
 #(i.e. dust to metals; Li ML etc.).  then this field is what gets
 #added to the AMRGrid via the .from_yt method in the enzo_tributary
 
-def dtm_amr(reg,ds1):
+def dtm_amr(ds):
 
     
-    def _dust_density(field, data):
+    def _dust_density_dtm_amr(field, data):
         return data[('gas', 'metal_density')].in_units("g/cm**3")*cfg.par.dusttometals_ratio
-    ds1.add_field(('gas', 'dust_density'), function=_dust_density, units = 'g/cm**3')
+    ds.add_field(('gas', 'dust_density'), function=_dust_density_dtm_amr, units = 'g/cm**3')
 
+
+def remy_ruyer_amr(ds):
+
+    #remy ruyer 2014 A&A 563, A31 -- here, we take the Xco_Z
+    #power-law, slope free parameterization to define the dust-to-gas
+    #ratio, and hece the dust density
+
+    #y = log10(G/D) = a+alpha(x_solar - x)
+
+    #x_solar = 12 + log10(O/H) = 8.69
+
+    def _dust_density_rr_amr(field,data):
+
+        #hard coded values from remy-ruyer table 1
+        a = 2.21
+        alpha = 2.02
+        x_sun = 8.69
+
+
+        density = data["gasdensity"]
+        metallicity = data["gasmetals"]
+        masses = data["gasmasses"]
+
+        #anywhere the smoothing finds a cell with zero metallicity, set
+        #this to some very low value
+        metallicity[metallicity==0] = 1.e-10
+
+        x = 12.+np.log10(metallicity/cfg.par.solar * 10.**(x_sun-12.) )
+        
+        y = a + alpha*(x_sun-np.asarray(x))
+        
+        gas_to_dust_ratio = 10.**(y)
+        dust_to_gas_ratio = 1./gas_to_dust_ratio
+        
+        dust_density = (dust_to_gas_ratio*density).in_units('g/cm**3')
+
+        return dust_density
+
+    ds.add_field(('gas', 'dust_density'), function=_dust_density_rr_amr, units = 'g/cm**3')
     
+    
+
+def li_bestfit_amr(ds):
+    
+    def _dust_density_li_bestfit_amr(field,data):
+        
+        density = data["gasdensity"]
+        metallicity=data["gasmetals"]
+        masses = data["gasmasses"]
+
+        metallicity[metallicity == 0] = 1.e-10
+
+        log_dust_to_gas_ratio = (2.445*np.log10(metallicity/cfg.par.solar))-(2.029)
+        dust_to_gas_ratio = 10.**(log_dust_to_gas_ratio)
+
+        dust_density = (dust_to_gas_ratio*density).in_units('g/cm**3')
+    
+        return dust_density
+
+    ds.add_field(('gas', 'dust_density'), function=_dust_density_li_bestfit_amr, units = 'g/cm**3')
+
+def li_ml_amr(ds):
+
+    raise KeyError('The Li, Narayanan & Dave 2019 Dust model is not currently implemented for Enzo simulations.  Please email desika.narayanan@gmail.com and bug him to put this in.')
+
+

@@ -5,7 +5,7 @@ import yt
 from yt.frontends.sph.data_structures import ParticleDataset
 from yt.geometry.selection_routines import AlwaysSelector
 import pdb
-import os
+
 
 ParticleDataset.filter_bbox = True
 ParticleDataset._skip_cache = True
@@ -191,12 +191,11 @@ def enzo_zoom(fname,ds,field_add):
     #convenience function within hyperion, AMRGrid.from_yt requires a
     #datasaet print("[enzo_tributary/enzo_m_gen]: saving the dataset
     #as temp_enzo.h5")
-    reg.save_as_dataset('temp_enzo.h5',fields=[('all','creation_time'),('gas','metal_density'),('gas','density'),('newstars','metallicity_fracti\
-on'),('newstars','particle_mass'),('all', 'particle_index'),('index', 'grid_level'),('gas','dust_density')])
+    reg.save_as_dataset('temp_enzo.h5',fields=[('all','creation_time'),('gas','metal_density'),('gas','density'),('newstars','metallicity_fraction'),('newstars','particle_mass'),('all', 'particle_index'),('index', 'grid_level'),('gas','dust_density')])
     ds1 = yt.load('temp_enzo.h5')
     ad1 = ds1.all_data()
-    print("[zoom/enzo_zoom]: temporarily saving and removing temp_enzo.h5")
-    os.remove('temp_enzo.h5')
+    print("[zoom/enzo_zoom]: temporarily savingtemp_enzo.h5")
+
 
     #now copy over all of the ds.index grid construction items that are in the region to the new dataset
     ds1.index.get_levels = reg.index.get_levels

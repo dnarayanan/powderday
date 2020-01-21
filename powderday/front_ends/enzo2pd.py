@@ -34,6 +34,9 @@ def enzo_field_add(fname,ds = None, starages = False):
     def _gasmetals(field,data):
         return data[ ('gas', 'metallicity')]
 
+    def _gasmasses(field,data):
+        return data[('gas','cell_mass')]
+
     def _gasfh2(field, data):
         try: return data[('gas', 'FractionH2')]
         except: return data[('gas', 'metallicity')]*0. #just some dimensionless array
@@ -54,15 +57,11 @@ def enzo_field_add(fname,ds = None, starages = False):
 
 
         
-    def _dust_density(field, data):
-        return data[('gas', 'metal_density')]*cfg.par.dusttometals_ratio
-
-
     add_particle_filter("newstars",function=newstars,filtered_type='all',requires=["creation_time"])
     ds.add_particle_filter("newstars")
     ad = ds.all_data()
 
-    ds.add_field(('gas', 'dust_density'), function=_dust_density, units = 'g/cm**3')
+
 
 
     ds.add_field(('starmetals'),function=_starmetals,units="code_metallicity",particle_type=True)
@@ -72,6 +71,8 @@ def enzo_field_add(fname,ds = None, starages = False):
     ds.add_field(('gasdensity'),function=_gasdensity,units='g/cm**3')
     ds.add_field(('gasmetals'),function=_gasmetals,units="code_metallicity")
     ds.add_field(('gasfh2'),function=_gasfh2,units='dimensionless')
+    ds.add_field(('gasmasses'),function=_gasmasses,units='g')
+    
     ad = ds.all_data()
 
     return ds
