@@ -415,10 +415,14 @@ def BH_source_add(m,reg,df_nu,boost):
     print("Adding Black Holes to Source List in source_creation\n")
     print("--------------------------------\n")
  
-
     try:
         nholes = reg["bhsed"].shape[0]
 
+    except: 
+        print('BH source creation failed.')
+        nholes = 0
+
+    if nholes > 0:
         #temporary wavelength compress just to get the length of the
         #compressed nu for a master array
         dumnu,dumfnu = wavelength_compress(reg["bhnu"].value,reg["bhsed"][0,:].value,df_nu)
@@ -444,18 +448,19 @@ def BH_source_add(m,reg,df_nu,boost):
                 #if the hole is in the actual cut out region of the yt
                 #dataset.  so we need to filter out any holes that
                 #might not be in the simulation domain.
-                
-                if ((reg["bhcoordinates"][i,0].in_units('kpc') <  (reg.domain_center[0].in_units('kpc')+(0.5*reg.domain_width[0].in_units('kpc'))))
+                width = reg.right_edge-reg.left_edge
+
+                if ((reg["bhcoordinates"][i,0].in_units('kpc') <  (reg.center[0].in_units('kpc')+(0.5*width[0].in_units('kpc'))))
                     and
-                    (reg["bhcoordinates"][i,0].in_units('kpc') >  (reg.domain_center[0].in_units('kpc')-(0.5*reg.domain_width[0].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,0].in_units('kpc') >  (reg.center[0].in_units('kpc')-(0.5*width[0].in_units('kpc'))))
                     and
-                    (reg["bhcoordinates"][i,1].in_units('kpc') <  (reg.domain_center[1].in_units('kpc')+(0.5*reg.domain_width[1].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,1].in_units('kpc') <  (reg.center[1].in_units('kpc')+(0.5*width[1].in_units('kpc'))))
                     and
-                    (reg["bhcoordinates"][i,1].in_units('kpc') >  (reg.domain_center[1].in_units('kpc')-(0.5*reg.domain_width[1].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,1].in_units('kpc') >  (reg.center[1].in_units('kpc')-(0.5*width[1].in_units('kpc'))))
                     and
-                    (reg["bhcoordinates"][i,2].in_units('kpc') <  (reg.domain_center[2].in_units('kpc')+(0.5*reg.domain_width[2].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,2].in_units('kpc') <  (reg.center[2].in_units('kpc')+(0.5*width[2].in_units('kpc'))))
                     and
-                    (reg["bhcoordinates"][i,2].in_units('kpc') >  (reg.domain_center[2].in_units('kpc')-(0.5*reg.domain_width[2].in_units('kpc'))))
+                    (reg["bhcoordinates"][i,2].in_units('kpc') >  (reg.center[2].in_units('kpc')-(0.5*width[2].in_units('kpc'))))
                 ):
 
                     print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
@@ -467,10 +472,9 @@ def BH_source_add(m,reg,df_nu,boost):
                     print('black hole #%d is not in the domain: rejecting adding it to the source list'%i)
 
                 holecounter += 1
-
         dump_AGN_SEDs(nu,master_bh_fnu,reg["bhluminosity"].value)
-    except:
-        print('BH source creation failed.')
+
+
     #savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
     #np.savez(savefile,nu = nu,fnu = master_bh_fnu,luminosity = ad["bhluminosity"].value)
     

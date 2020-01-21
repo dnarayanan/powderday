@@ -4,10 +4,10 @@ import random
 import numpy as np
 import powderday.config as cfg
 from powderday.gridstats import gridstats
-from powderday.zoom import octree_zoom_bbox_filter,arepo_zoom
+from powderday.zoom import octree_zoom_bbox_filter,arepo_zoom,enzo_zoom
 from yt.geometry.selection_routines import AlwaysSelector
 #octree quantities for dust
-from powderday.dust_grid_gen import dtm_grid_oct, remy_ruyer_oct, manual_oct,li_bestfit_oct,li_ml_oct
+from powderday.dust_grid_gen import dtm_grid_oct, remy_ruyer_oct, manual_oct,li_bestfit_oct,li_ml_oct,dtm_amr
 
 #particle and/or mesh quantities for dust
 from powderday.dust_grid_gen import dtm_particle_mesh,remy_ruyer_particle_mesh,li_bestfit_particle_mesh,li_ml_particle_mesh
@@ -173,6 +173,17 @@ def yt_octree_generate(fname, field_add):
     return refined, dust_smoothed, fc1, fw1, reg, ds
 
 
+def enzo_grid_generate(fname,field_add):
+    #call the front end (frontends/enzo2pd) to add the fields in powderday format
+    ds = field_add(fname)
+
+    #now zoom in 
+    reg,ds1 = enzo_zoom(fname,ds,field_add)
+
+    #now set up the dust model
+    dtm_amr(reg,ds1)
+
+    return reg,ds1
 
 def arepo_vornoi_grid_generate(fname, field_add):
 

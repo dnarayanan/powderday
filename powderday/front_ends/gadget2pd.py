@@ -162,6 +162,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
         c = yt.utilities.physical_constants.speed_of_light_cgs
         bhluminosity = (cfg.par.BH_eta * mdot * c**2.).in_units("erg/s")
+
+        print("[front_ends/gadget2pd:] Generating the black hole luminosity")
         if cfg.par.BH_var:
             return bhluminosity * cfg.par.bhlfrac
         else:
@@ -304,8 +306,9 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
 
     if cfg.par.BH_SED == True:
-        try:
+        if ('PartType5','BH_Mass') in ds.derived_field_list:
             nholes = len(ds.all_data()[('PartType5', 'BH_Mass')])
+            print("The number of black holes is:",nholes)
             if nholes > 0:
                 if cfg.par.BH_model == 'Nenkova':
                     from powderday.agn_models.nenkova import Nenkova2008
@@ -321,11 +324,11 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                 ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
                 ds.add_field(("bhnu"),function=_bhsed_nu,units='Hz',particle_type=True)
                 ds.add_field(("bhsed"),function=_bhsed_sed,units="erg/s",particle_type=True)
+                
+
+
             else:
                 print('No black holes found (length of BH_Mass field is 0)')
-        except:
-            print('Unable to find field "BH_Mass" in snapshot. Skipping.')
-
 
 
     return ds

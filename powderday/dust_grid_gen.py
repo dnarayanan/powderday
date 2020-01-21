@@ -263,3 +263,20 @@ def li_ml_particle_mesh(reg):
     dustdens = dust_to_gas_ratio * density
 
     return dustdens
+
+
+
+#For all the AMR dust definitions, we call functions slightly
+#differently.  We set up a new field for ds1 (the zoomed dataset) in
+#which we define the dust via whatever physics we are aassuming
+#(i.e. dust to metals; Li ML etc.).  then this field is what gets
+#added to the AMRGrid via the .from_yt method in the enzo_tributary
+
+def dtm_amr(reg,ds1):
+
+    
+    def _dust_density(field, data):
+        return data[('gas', 'metal_density')].in_units("g/cm**3")*cfg.par.dusttometals_ratio
+    ds1.add_field(('gas', 'dust_density'), function=_dust_density, units = 'g/cm**3')
+
+    
