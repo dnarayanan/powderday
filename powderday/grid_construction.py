@@ -7,13 +7,16 @@ from powderday.gridstats import gridstats
 from powderday.zoom import octree_zoom_bbox_filter,arepo_zoom,enzo_zoom
 from yt.geometry.selection_routines import AlwaysSelector
 #octree quantities for dust
-from powderday.dust_grid_gen import dtm_grid_oct, remy_ruyer_oct, manual_oct,li_bestfit_oct,li_ml_oct,dtm_amr
+from powderday.dust_grid_gen import dtm_grid_oct, remy_ruyer_oct, manual_oct,li_bestfit_oct,li_ml_oct
 
 #particle and/or mesh quantities for dust
 from powderday.dust_grid_gen import dtm_particle_mesh,remy_ruyer_particle_mesh,li_bestfit_particle_mesh,li_ml_particle_mesh
 
+from powderday.dust_grid_gen import dtm_amr,remy_ruyer_amr,li_bestfit_amr,li_ml_amr
+
 import yt
 import pdb
+import os
 
 random.seed('octree-demo')
 
@@ -175,13 +178,38 @@ def yt_octree_generate(fname, field_add):
 
 def enzo_grid_generate(fname,field_add):
     #call the front end (frontends/enzo2pd) to add the fields in powderday format
+
     ds = field_add(fname)
+
+    #set up the dust model
+    # crash the code if the parameter choice for dust grid type isn't in
+    # the hard coded valid list below
+    dust_grid_type_list = ['dtm', 'rr', 'manual','li_bestfit','li_ml']
+    try:
+        dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
+    except ValueError as e:
+        print('You chose a dust_choice that isnt a valid selection within the list: dust_grid_type_list....crashing now!')
+        sys.exit()
+
+    if cfg.par.dust_grid_type == 'dtm':
+        dtm_amr(ds)
+
+    if cfg.par.dust_grid_type == 'rr':
+        remy_ruyer_amr(ds)
+    
+    if cfg.par.dust_grid_type == 'li_bestfit':
+        li_bestfit_amr(ds)
+
+    if cfg.par.dust_grid_type == 'li_ml':
+        li_ml_amr(ds)
 
     #now zoom in 
     reg,ds1 = enzo_zoom(fname,ds,field_add)
 
-    #now set up the dust model
-    dtm_amr(reg,ds1)
+    #we need access to this h5 file while adding dust grids
+    #(potentially), so only remove after these have been added.
+    print("[grid_construction/enzo_grid_generate:] removing temp_enzo.h5")
+    os.remove('temp_enzo.h5')
 
     return reg,ds1
 
