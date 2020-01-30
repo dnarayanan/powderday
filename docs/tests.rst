@@ -22,7 +22,7 @@ SKIRT tests
 :Relevant Hash:
    
    The `powderday <https://github.com/dnarayanan/powderday.git>`_ hash for
-   the most recent set of tests is `2fdf5e49074289382648a3be6a9478fcb9a0e84c<https://github.com/dnarayanan/powderday/commit/2fdf5e49074289382648a3be6a9478fcb9a0e84c>`_
+   the most recent set of tests is `2fdf5e49074289382648a3be6a9478fcb9a0e84c <https://github.com/dnarayanan/powderday/commit/2fdf5e49074289382648a3be6a9478fcb9a0e84c>`_
    and the relevant `SKIRT
    <http://www.skirt.ugent.be/root/index.html>`_ hash is
    96e8be9761c3021498b847854bf84c3da3129555.
