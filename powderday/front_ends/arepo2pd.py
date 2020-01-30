@@ -76,8 +76,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
 
             simtime = data.ds.current_time.in_units('Gyr')
             simtime = simtime.value
-
-            age = simtime-data.ds.arr(ad[("PartType4","GFM_StellarFormationTime")],'Gyr').value
+            age = simtime-(data.ds.arr(ad[("PartType4","GFM_StellarFormationTime")],'s*kpc/km').in_units('Gyr')).value
             # make the minimum age 1 million years
             age[np.where(age < 1.e-3)[0]] = 1.e-3
 
