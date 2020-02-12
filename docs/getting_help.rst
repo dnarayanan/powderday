@@ -16,7 +16,7 @@ If a run crashes, it can oftentimes be very useful to post your
 parameters files as well as include which hash you're working off of.
 You can recover the hash by typing::
 
-  >git log --pretty=format:'%h' -n 1
+  >git rev-parse HEAD
 
 And similarly, if you want a neat way to create a link out of your
 parameters files, you can type::
