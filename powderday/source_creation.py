@@ -435,7 +435,7 @@ def BH_source_add(m,reg,df_nu,boost):
             if reg["bhluminosity"][i].value > 0 :
                 
                 nu = reg["bhnu"].value
-                fnu = reg["bhsed"][i,:].value#.tolist()
+                fnu = reg["bhsed"][i,:].value/nu#.tolist()
                 nu,fnu = wavelength_compress(nu,fnu,df_nu)
 
                 master_bh_fnu[i,:] = fnu
