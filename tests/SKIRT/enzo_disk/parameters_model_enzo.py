@@ -8,7 +8,7 @@ hydro_dir = '/ufrc/narayanan/desika.narayanan/yt_datasets/enzo_iso_galaxy/galaxy
 snapshot_name = 'galaxy0030'
 
 #where the files should go
-PD_output_dir = '/ufrc/narayanan/desika.narayanan/pd_git/tests/SKIRT/enzo_disk/'
+PD_output_dir = '/home/desika.narayanan/pd_git/tests/SKIRT/enzo_disk/'
 Auto_TF_file = 'snap'+snapnum_str+'.logical'
 Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 
