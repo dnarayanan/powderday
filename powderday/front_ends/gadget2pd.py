@@ -117,12 +117,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     def _stellarages(field, data):
         ad = data.ds.all_data()
         if data.ds.cosmological_simulation == False:
-
             simtime = data.ds.current_time.in_units('Gyr')
             simtime = simtime.value
 
-
-            age = simtime-data[('PartType4', 'StellarFormationTime')].in_units('Gyr').value
+            age = simtime-data.ds.arr(ad[('PartType4', 'StellarFormationTime')],'Gyr').value
             # make the minimum age 1 million years
             age[np.where(age < 1.e-3)[0]] = 1.e-3
 
