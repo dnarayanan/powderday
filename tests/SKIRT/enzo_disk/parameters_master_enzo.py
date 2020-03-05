@@ -3,7 +3,7 @@
 #===============================================
 #HOME INFORMATION
 #===============================================
-pd_source_dir ='/ufrc/narayanan/desika.narayanan/pd_git/'
+pd_source_dir ='/home/desika.narayanan/pd_git/'
 
 #===============================================
 #RESOLUTION KEYWORDS
