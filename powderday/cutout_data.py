@@ -2,7 +2,7 @@ import yt
 
 #function takes a ds region as the input
 def yt_field_map(obj):
-    ds = obj.pf
+    ds = obj.ds
     # First we figure out all the fields we want to cut out.
     field_list = ds.field_info.field_aliases.items()
     

@@ -7,6 +7,16 @@ import numpy as np
 import subprocess
 from powderday.nebular_emission.cloudy_tools import grouper
 
+#getting cfg.par accessible outside the definitions (ala pd_front_end.py)
+import powderday.config as cfg
+import sys
+script, pardir, parfile, modelfile = sys.argv
+sys.path.insert(0, pardir)
+par = __import__(parfile)
+model = __import__(modelfile)
+cfg.par = par  # re-write cfg.par for all modules that read this in now
+cfg.model = model
+
 """
 --------------------------------------------------------------------------------------
 Based on cloudyfsps written by Nell Byler.
@@ -14,17 +24,19 @@ Based on cloudyfsps written by Nell Byler.
 retrieved in October 2019)
 --------------------------------------------------------------------------------------
 """
-try:
-    CLOUDY_EXE = os.environ['CLOUDY_EXE']
-except KeyError:
-    print('Must have set system environment CLOUDY_EXE')
 
-try:
-    # taking the last in path, if more than one directory given
-    CLOUDY_DATA_PATH = os.environ['CLOUDY_DATA_PATH'].split(':')[-1]
-except KeyError:
-    print('Cloudy data path not set. Assuming standard cloudy structure')
-    CLOUDY_DATA_PATH = '/'.join(CLOUDY_EXE.split('/')[:-2])+'/data'
+if (cfg.par.add_neb_emission) and (cfg.par.use_cloudy_tables):
+    try:
+        CLOUDY_EXE = os.environ['CLOUDY_EXE']
+    except KeyError:
+        raise KeyError("[powderday/nebular_emission/ASCII_TOOLS:] You must have set a system environment CLOUDY_EXE")
+
+    try:
+        # taking the last in path, if more than one directory given
+        CLOUDY_DATA_PATH = os.environ['CLOUDY_DATA_PATH'].split(':')[-1]
+    except KeyError:
+        print('Cloudy data path not set. Assuming standard cloudy structure')
+        CLOUDY_DATA_PATH = '/'.join(CLOUDY_EXE.split('/')[:-2])+'/data'
 
 
 class WriteASCII(object):

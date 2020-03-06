@@ -4,12 +4,35 @@ import random
 import numpy as np
 import powderday.config as cfg
 from powderday.gridstats import gridstats
-from powderday.octree_zoom import octree_zoom_bbox_filter
+from powderday.zoom import octree_zoom_bbox_filter,arepo_zoom,enzo_zoom
 from yt.geometry.selection_routines import AlwaysSelector
-from powderday.dust_grid_gen import dtm_grid, remy_ruyer, manual,li_bestfit
+#octree quantities for dust
+from powderday.dust_grid_gen import dtm_grid_oct, remy_ruyer_oct, manual_oct,li_bestfit_oct,li_ml_oct
 
+#particle and/or mesh quantities for dust
+from powderday.dust_grid_gen import dtm_particle_mesh,remy_ruyer_particle_mesh,li_bestfit_particle_mesh,li_ml_particle_mesh
+
+from powderday.dust_grid_gen import dtm_amr,remy_ruyer_amr,li_bestfit_amr,li_ml_amr
+
+import yt
+import pdb
+import os
 
 random.seed('octree-demo')
+
+
+def find_max_level(refined):
+    #loop through refined and figure out how many trues we can have in a row
+    master_max_level = 0
+    max_level = 0.
+    for i in range(len(refined)-1):
+        if refined[i+1] == True:
+            max_level+=1
+        else:
+            max_level = 0
+        if max_level > master_max_level: master_max_level = max_level
+        if max_level > 20: pdb.set_trace()
+    return master_max_level
 
 
 def yt_octree_generate(fname, field_add):
@@ -20,73 +43,103 @@ def yt_octree_generate(fname, field_add):
             [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim],
             [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim]]
 
-    # load the DS and add pd fields; no need to put in stellar ages yet
-    # as this will happen downstream in zoom
-    pf = field_add(fname, bounding_box=bbox)
+    # load the DS and add pd fields.  this is the first field addition
+    # of the simulation, so we don't yet need to add the smoothed
+    # quantities (which can take some time in yt4.x).
+    ds = field_add(fname, bounding_box=bbox,add_smoothed_quantities=False)
 
-    # zoom if necessary
-    # if cfg.par.zoom == True:
-    pf = octree_zoom_bbox_filter(fname, pf, bbox, field_add)
+        
 
-    pf.index
-    ad = pf.all_data()
+    #now zoom in.
+    reg = octree_zoom_bbox_filter(fname, ds, bbox, field_add)
 
+    
     # ---------------------------------------------------------------
     # PLOTTING DIAGNOSTIC PROJECTION PLOTS
     # ---------------------------------------------------------------
+    # proj_plots(ds)
 
-    # proj_plots(pf)
 
-    from yt.data_objects.particle_unions import ParticleUnion
-    pu = ParticleUnion("all", list(pf.particle_types_raw))
+    #from yt.data_objects.particle_unions import ParticleUnion
+    #pu = ParticleUnion("all", list(ds.particle_types_raw))
 
-    saved = pf.index.oct_handler.save_octree()
+    
+    if  yt.__version__ == '4.0.dev0':
+        refined = reg.parameters['octree'][('index','refined')].astype('bool')
 
-    always = AlwaysSelector(None)
-    ir1 = pf.index.oct_handler.ires(always)  # refinement levels
-    fc1 = pf.index.oct_handler.fcoords(always)  # coordinates in code_length
-    fw1 = pf.index.oct_handler.fwidth(always)  # width of cell in code_length
+        #get central positions of cells as edges + width/2.
+        #        xpos = (ds.parameters['octree'][('index', 'x')]+(ds.parameters['octree'][('index','dx')]/2.))[~refined]
+        #        ypos = (ds.parameters['octree'][('index', 'y')]+(ds.parameters['octree'][('index','dy')]/2.))[~refined]
+        #        zpos = (ds.parameters['octree'][('index', 'z')]+(ds.parameters['octree'][('index','dz')]/2.))[~refined]
 
+        xpos = (reg.parameters['octree'][('index','x')])[~refined]
+        ypos = (reg.parameters['octree'][('index','y')])[~refined]
+        zpos = (reg.parameters['octree'][('index','z')])[~refined]
+
+        #comebine these into the fc1 array with dimensions (nparticles,3)
+        fc1 = np.array([xpos,ypos,zpos]).T
+
+        dx = reg.parameters['octree'][('index','dx')][~refined]
+        dy = reg.parameters['octree'][('index','dy')][~refined]
+        dz = reg.parameters['octree'][('index','dz')][~refined]
+        fw1 = np.array([dx,dy,dz]).T
+
+
+        n_ref = reg.parameters['octree'].n_ref
+        #max_level = find_max_level(refined)#'max_level not yet implemented in yt4.x'
+        #note, we could figure this out from the max number of trues in a row
+        nocts = len(refined)-np.sum(refined)
+
+
+        
+    else:
+        #saved = ds.index.oct_handler.save_octree()
+        #always = AlwaysSelector(None)
+       
+        #ir1 = ds.index.oct_handler.ires(always)  # refinement levels
+        fc1 = reg.parameters["fc1"] #coordinates in code_length
+        fw1 = reg.parameters["fw1"] #width of cell in code_length
+        refined = reg.parameters["refined"]
+        
+        n_ref = reg.parameters["n_ref"]
+        max_level = reg.parameters["max_level"]
+        nocts = reg.parameters["nocts"]
     # convert fc1 and fw1 to YTArrays
-    fc1 = pf.arr(fc1, 'code_length')
-    fw1 = pf.arr(fw1, 'code_length')
+    fc1 = ds.arr(fc1, 'code_length')
+    fw1 = ds.arr(fw1, 'code_length')
+
+
 
     print('----------------------------')
     print('yt Octree Construction Stats')
     print('----------------------------')
-    print(' n_ref = ', pf.index.oct_handler.n_ref)
-    print(' max_level = ', pf.index.oct_handler.max_level)
-    print(' nocts = ', pf.index.oct_handler.nocts)
+    print(' n_ref = ', n_ref)
+    #print(' max_level = ', max_level)
+    print(' nocts = ', nocts)
     print('----------------------------')
 
-    gridstats(ir1, fc1, fw1)
+    gridstats(fc1, fw1)
 
     # ==================================
-
-    refined = saved['octree'].astype('bool')
     
-    try:
-        refined.reshape(len(ir1))
-    except:
-        refinements = 2**(3*cfg.par.oref)
-        refined2 = []
-        for r in refined:
-            if r == 1:
-                refined2.append(True)
-            if r == 0:
-                refined2.append(np.zeros(refinements).astype('bool'))
-        refined = np.hstack(refined2)
+    #try:
+    #    refined.reshape(len(ir1))
+    #except:
+    refinements = 2**(3*cfg.par.oref)
+    refined2 = []
+    for r in refined:
+        if r == 1:
+            refined2.append(True)
+        if r == 0:
+            refined2.append(np.zeros(refinements).astype('bool'))
+    refined = np.hstack(refined2)
 
-
-    # smooth the data on to the octree
-
-    volume = np.zeros(len(refined))
 
     if cfg.par.CONSTANT_DUST_GRID == False:
 
         # crash the code if the parameter choice for dust grid type isn't in 
         # the hard coded valid list below
-        dust_grid_type_list = ['dtm', 'rr', 'manual','li_bestfit']
+        dust_grid_type_list = ['dtm', 'rr', 'manual','li_bestfit','li_ml']
         try:
             dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
         except ValueError as e:
@@ -94,30 +147,148 @@ def yt_octree_generate(fname, field_add):
             sys.exit()
 
         if cfg.par.dust_grid_type == 'dtm':
-            dust_smoothed_dtm = dtm_grid(pf, refined)
+            dust_smoothed_dtm = dtm_grid_oct(reg, refined)
             dust_smoothed = dust_smoothed_dtm
 
         if cfg.par.dust_grid_type == 'rr':
-            dust_smoothed_remy_ruyer = remy_ruyer(pf, refined)
+            dust_smoothed_remy_ruyer = remy_ruyer_oct(reg, refined)
             dust_smoothed = dust_smoothed_remy_ruyer
 
         if cfg.par.dust_grid_type == 'manual':
-            dust_smoothed_manual = manual(pf, refined)
+            dust_smoothed_manual = manual_oct(reg, refined)
             dust_smoothed = dust_smoothed_manual
         
         if cfg.par.dust_grid_type == 'li_bestfit':
-            dust_smoothed_li_bestfit = li_bestfit(pf,refined)
+            dust_smoothed_li_bestfit = li_bestfit_oct(reg,refined)
             dust_smoothed=dust_smoothed_li_bestfit
 
+        if cfg.par.dust_grid_type == 'li_ml':
+            dust_smoothed_li_ml = li_ml_oct(reg,refined)
+            dust_smoothed = dust_smoothed_li_ml
+
+    else:
+        print('cfg.par.CONSTANT_DUST_GRID=True')
+        print('setting constant dust grid to 4.e-22')
+        dust_smoothed = np.zeros(len(refined))+4.e-22
+
+
+    # return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost
+    return refined, dust_smoothed, fc1, fw1, reg, ds
+
+
+def enzo_grid_generate(fname,field_add):
+    #call the front end (frontends/enzo2pd) to add the fields in powderday format
+
+    ds = field_add(fname)
+
+    #set up the dust model
+    # crash the code if the parameter choice for dust grid type isn't in
+    # the hard coded valid list below
+    dust_grid_type_list = ['dtm', 'rr', 'manual','li_bestfit','li_ml']
+    try:
+        dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
+    except ValueError as e:
+        print('You chose a dust_choice that isnt a valid selection within the list: dust_grid_type_list....crashing now!')
+        sys.exit()
+
+    if cfg.par.dust_grid_type == 'dtm':
+        dtm_amr(ds)
+
+    if cfg.par.dust_grid_type == 'rr':
+        remy_ruyer_amr(ds)
+    
+    if cfg.par.dust_grid_type == 'li_bestfit':
+        li_bestfit_amr(ds)
+
+    if cfg.par.dust_grid_type == 'li_ml':
+        li_ml_amr(ds)
+
+    #now zoom in 
+    reg,ds1 = enzo_zoom(fname,ds,field_add)
+
+    #we need access to this h5 file while adding dust grids
+    #(potentially), so only remove after these have been added.
+    print("[grid_construction/enzo_grid_generate:] removing temp_enzo.h5")
+    os.remove('temp_enzo.h5')
+
+    return reg,ds1
+
+def arepo_vornoi_grid_generate(fname, field_add):
+
+    print('[grid_construction/arepo_vornoi_grid_generate]: bbox_lim = ', cfg.par.bbox_lim)
+
+    bbox = [[-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim],
+            [-2.*cfg.par.bbox_lim, 2.*cfg.par.bbox_lim]]
+
+    # load the DS and add pd fields.  this is the first field addition
+    # of the simulation, so we don't yet need to add the smoothed
+    # quantities (which can take some time in yt4.x).
+    ds = field_add(fname, bounding_box=bbox)
+
+    #now zoom in.
+    reg = arepo_zoom(fname, ds, bbox, field_add)
+
+
+    # ---------------------------------------------------------------
+    # PLOTTING DIAGNOSTIC PROJECTION PLOTS
+    # ---------------------------------------------------------------
+    # proj_plots(ds)
+
+
+
+
+    
+    if cfg.par.CONSTANT_DUST_GRID == False:
+
+        # crash the code if the parameter choice for dust grid type isn't in
+        # the hard coded valid list below
+        dust_grid_type_list = ['dtm', 'rr', 'manual','li_bestfit','li_ml']
+        try:
+            dust_choice = dust_grid_type_list.index(cfg.par.dust_grid_type)
+        except ValueError as e:
+            print('You chose a dust_choice that isnt a valid selection within the list: dust_grid_type_list....crashing now!')
+            sys.exit()
+
+        if cfg.par.dust_grid_type == 'dtm':
+            dustdens = dtm_particle_mesh(reg)
+
+
+        if cfg.par.dust_grid_type == 'rr':
+            dustdens = remy_ruyer_particle_mesh(reg)
+
+
+        if cfg.par.dust_grid_type == 'manual':
+            raise ValueError(' "manual" dust grids not currently supported with Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml]')
+        #if cfg.par.dust_grid_type == 'manual':
+        #    dust_smoothed_manual = manual(reg, refined)
+        #    dust_smoothed = dust_smoothed_manual
+
+
+        if cfg.par.dust_grid_type == 'li_bestfit':
+            dustdens = li_bestfit_particle_mesh(reg)
+
+        if cfg.par.dust_grid_type == 'li_ml':
+            dustdens = li_ml_particle_mesh(reg)
 
 
     else:
         print('cfg.par.CONSTANT_DUST_GRID=True')
         print('setting constant dust grid to 4.e-22')
-        dust_smoothed = np.zeros(len(refined))+4.e-23
+        dustdens = np.zeros(len(reg["gasmasses"]))+4.e-22
 
-    # return refined,dust_smoothed,xmin,xmax,ymin,ymax,zmin,zmax,boost
-    return refined, dust_smoothed, fc1, fw1, pf, ad
+
+
+    #DEBUG -- this will eventually go into a refactored dust_grid_gen
+#    metaldens = reg["metaldens"]
+#    dustdens = (metaldens*cfg.par.dusttometals_ratio).to('g/cm**3').value
+
+    return reg,ds,dustdens
+
+
+
+
+
 
 
 def grid_coordinate_boost(xmin, xmax, ymin, ymax, zmin, zmax):

@@ -1,0 +1,515 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Getting Started &#8212; Powderday 0.0 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Quickstart" href="quickstart.html" />
+    <link rel="prev" title="Welcome to Powderday’s documentation!" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="quickstart.html" title="Quickstart"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Powderday’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Powderday 0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview-of-requirements">
+<h2>Overview of Requirements<a class="headerlink" href="#overview-of-requirements" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>python&gt;=2.7,&gt;=3.5</strong></p>
+<ul>
+<li><p>numpy (any version except 1.10.*)</p></li>
+<li><p>scipy</p></li>
+<li><p>astropy</p></li>
+<li><p>h5py</p></li>
+</ul>
+</li>
+<li><p><strong>compilers</strong></p>
+<ul>
+<li><p>gcc</p></li>
+<li><p>gfortran</p></li>
+</ul>
+</li>
+<li><p><strong>Additional Packages (with Instructions Below)</strong></p>
+<ul>
+<li><p>git  &lt;<a class="reference external" href="http://git-scm.com/">http://git-scm.com/</a>&gt;</p></li>
+<li><p>powderday &lt;<a class="reference external" href="https://github.com/dnarayanan/powderday.git">https://github.com/dnarayanan/powderday.git</a>&gt;</p></li>
+<li><p>yt &lt;<a class="reference external" href="http://yt-project.org">http://yt-project.org</a>&gt;</p></li>
+<li><p>FSPS &lt;<a class="reference external" href="https://code.google.com/p/fsps/source/checkout">https://code.google.com/p/fsps/source/checkout</a>&gt;</p></li>
+<li><p>python-fsps &lt;<a class="reference external" href="http://dan.iel.fm/python-fsps/current/">http://dan.iel.fm/python-fsps/current/</a>&gt;</p></li>
+<li><p>Hyperion &lt;<a class="reference external" href="http://www.hyperion-rt.org/">http://www.hyperion-rt.org/</a>&gt;</p></li>
+<li><p>Hyperion Dust Files &lt;<a class="reference external" href="http://docs.hyperion-rt.org/en/stable/dust/dust.html">http://docs.hyperion-rt.org/en/stable/dust/dust.html</a>&gt;</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="manual-installation">
+<h3>Manual Installation<a class="headerlink" href="#manual-installation" title="Permalink to this headline">¶</a></h3>
+<p>What follows is a self-contained installation manual, though for
+problematic installs of any of the sub packages, it’s definitely best
+to visit the main docs on the main software site (which are always
+linked below in each subsection).</p>
+</div>
+<div class="section" id="python">
+<span id="id1"></span><h3>python<a class="headerlink" href="#python" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a> should work with python &gt;=2.7 or &gt;=3.5, but has not been heavily used under &gt;=3.5.
+Please file an issue if you encounter one.</p>
+<p>As you will see, <a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a>
+currently requires a particular branch of <a class="reference external" href="http://yt-project.org">yt</a>. As a result, one path that we have seen work
+well for users is to set up a different python environment for the
+<a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a> installation.   This could look something like (assuming a <code class="docutils literal notranslate"><span class="pre">conda</span></code> installation of python):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">conda</span> <span class="n">create</span> <span class="o">--</span><span class="n">name</span> <span class="n">pd_environment</span>
+<span class="o">&gt;</span><span class="n">source</span> <span class="n">activate</span> <span class="n">pd_environment</span>
+</pre></div>
+</div>
+<p>(And then when you want to exit the environment, you can type):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">source</span> <span class="n">deactivate</span> <span class="n">pd_environment</span>
+</pre></div>
+</div>
+<p>Then, whenever you’re in the <code class="docutils literal notranslate"><span class="pre">pd_environment</span></code>, everything you
+install will remain contained to that particular installation of
+python, and not conflict with any of your other installed packages.</p>
+</div>
+<div class="section" id="id4">
+<span id="id5"></span><h3>powderday<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>Simply clone the latest and greatest from the repo:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">dnarayanan</span><span class="o">/</span><span class="n">powderday</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>To install, <cite>cd</cite> into the cloned repository and run the usual <cite>python setup.py install</cite>.</p>
+</div>
+<div class="section" id="id6">
+<span id="id7"></span><h3>yt<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://yt-project.org">yt</a> 3.x comes bundled with
+<a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a>, so it is not necessary to install it
+on its own. However, as of Summer 2019, development has begun on making
+<a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a> use
+<a class="reference external" href="http://yt-project.org">yt</a> 4.x, the ‘demeshed’
+version of <a class="reference external" href="http://yt-project.org">yt</a>. The
+<a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a> -
+<a class="reference external" href="http://yt-project.org">yt</a> 4.x update is in its early stages and is not
+expected to function properly just yet. That being said, development is taking
+place on the <code class="docutils literal notranslate"><span class="pre">pd-4.x</span></code> branch of
+<a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a>, and instructions for
+setting it up to run with
+<a class="reference external" href="http://yt-project.org">yt</a> 4.x are at the bottom of this section.</p>
+</div>
+<div class="section" id="fsps">
+<span id="id16"></span><h3>fsps<a class="headerlink" href="#fsps" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://code.google.com/p/fsps/source/checkout">fsps</a> can be checked out with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">cconroy20</span><span class="o">/</span><span class="n">fsps</span>
+</pre></div>
+</div>
+<p>and directions to the installation are in the <a class="reference external" href="https://www.cfa.harvard.edu/~cconroy/FSPS_files/MANUAL.pdf">Manual</a>.</p>
+<p>It’s likely going to be necessary downstream when installing  <a class="reference external" href="http://dan.iel.fm/python-fsps/current/installation/">python-fsps</a> to have the -fPIC flags set in <a class="reference external" href="https://code.google.com/p/fsps/source/checkout">fsps</a> when making.  So, in the Makefile of <a class="reference external" href="https://code.google.com/p/fsps/source/checkout">fsps</a>, set:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">F90FLAGS</span> <span class="o">=</span> <span class="o">-</span><span class="n">O</span> <span class="o">-</span><span class="n">cpp</span> <span class="o">-</span><span class="n">fPIC</span>
+</pre></div>
+</div>
+<p>if your <code class="docutils literal notranslate"><span class="pre">gcc</span></code> version is lower than 4.3.0, or:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">F90FLAGS</span> <span class="o">=</span> <span class="o">-</span><span class="mi">03</span> <span class="o">-</span><span class="n">mtune</span><span class="o">=</span><span class="n">native</span> <span class="o">-</span><span class="n">cpp</span> <span class="o">-</span><span class="n">fPIC</span>
+</pre></div>
+</div>
+<p>if <code class="docutils literal notranslate"><span class="pre">gcc</span></code> is version 4.3.0 or higher. This can be checked with
+<code class="docutils literal notranslate"><span class="pre">gcc</span> <span class="pre">--version</span></code>. Additionally, at this time
+<a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a>  doesn’t work with the
+default MIST Isochrones.  To fix this, you’ll need to edit sps_vars.f90 in
+<a class="reference external" href="https://code.google.com/p/fsps/source/checkout">fsps</a>  to look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>!------set the isochrone library------!
+#define MIST 0
+!Padova models circa 2008
+#define PADOVA 1
+#define PARSEC 0
+#define BASTI 0
+#define GENEVA 0
+</pre></div>
+</div>
+<p>To explicitly compile:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">clean</span>
+<span class="n">make</span>
+</pre></div>
+</div>
+<p>Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">export</span> <span class="n">SPS_HOME</span><span class="o">=/</span><span class="n">Users</span><span class="o">/</span><span class="n">desika</span><span class="o">/</span><span class="n">fsps</span><span class="o">/</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id22">
+<span id="id23"></span><h3>python-fsps<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="https://github.com/dfm/python-fsps">python-fsps</a>  will be installed automatically by the <cite>powderday</cite> setup.py script.</p>
+<p>You can test the installation by opening python and typing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="kn">import</span> <span class="nn">fsps</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id25">
+<span id="id26"></span><h3>Hyperion<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a> is the main work horse of
+<a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a>.  The full
+directions for installation are well-described on the main
+<a class="reference external" href="http://docs.hyperion-rt.org/en/stable/installation/installation.html">Installation page for Hyperion</a>.
+Here, we summarize the installation which should get most users
+through without any real difficulty.</p>
+<p>There are two ways to install <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a>.  The first is via <code class="docutils literal notranslate"><span class="pre">conda</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">hyperion</span>
+</pre></div>
+</div>
+<p>Note, this will eventually become deprecated for <a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a> (or at least modified as
+the <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a> <code class="docutils literal notranslate"><span class="pre">conda</span></code> install ships
+with <a class="reference external" href="http://yt-project.org">yt 3.x</a>, and eventual upgrade to <a class="reference external" href="http://yt-project.org">yt
+4.x</a> is coming in Summer 2019.</p>
+<p>The second and manual way to install <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a> follows:
+1. First download the tarball and unpack it.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">tar</span> <span class="o">-</span><span class="n">xzvf</span> <span class="n">hyperion</span><span class="o">.</span><span class="n">xxx</span>
+<span class="o">&gt;</span><span class="n">cd</span> <span class="n">hyperion</span><span class="o">.</span><span class="n">xxx</span>
+</pre></div>
+</div>
+<ol class="arabic" start="2">
+<li><p>Install the fortran dependencies:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">cd</span> <span class="n">deps</span><span class="o">/</span><span class="n">fortran</span>
+<span class="o">&gt;</span><span class="n">python</span> <span class="n">install</span><span class="o">.</span><span class="n">py</span> <span class="o">&lt;</span><span class="n">prefix</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>where &lt;prefix&gt; is where you want the libraries to be installed.  To
+avoid conflicts with other packages, I usually install somewhere
+like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">install</span><span class="o">.</span><span class="n">py</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">hyperion</span>
+</pre></div>
+</div>
+<p>as suggested by the <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a> docs.  Ensure that the
+following commands return something sensible:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">which</span> <span class="n">mpif90</span>
+<span class="o">&gt;</span><span class="n">which</span> <span class="n">h5fc</span>
+</pre></div>
+</div>
+<p>if not, your path probably needs to include wherever the &lt;prefix&gt; directory pointed to.
+3. Install any remaining python dependencies. These are listed <a class="reference external" href="http://docs.hyperion-rt.org/en/stable/installation/python_dependencies.html">here</a>
+4. Install <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a>  itself.  To do this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">cd</span> <span class="n">hyperion</span><span class="o">.</span><span class="n">xxx</span>
+<span class="o">&gt;</span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">user</span>
+</pre></div>
+</div>
+<p>if you don’t have root access.  At this point:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="kn">import</span> <span class="nn">hyperion</span>
+</pre></div>
+</div>
+<p>from within python should work, and typing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">hyperion</span>
+</pre></div>
+</div>
+<p>at the command line should return something along the lines of:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">usage</span><span class="p">:</span> <span class="n">hyperion</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">f</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">m</span> <span class="n">n_cores</span><span class="p">]</span> <span class="nb">input</span> <span class="n">output</span>
+<span class="o">&gt;</span><span class="n">hyperion</span><span class="p">:</span> <span class="n">error</span><span class="p">:</span> <span class="n">too</span> <span class="n">few</span> <span class="n">arguments</span>
+</pre></div>
+</div>
+<p>if not, check the the path that is near one of the last lines of the
+setup.py installation (that is something associated with the
+number 755) and make sure it’s in your path.  Ir’s most likely to be a
+python binaries directory.</p>
+<p>You then have to install the Fortran Binaries:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;./</span><span class="n">configure</span>  <span class="o">--</span><span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span>
+<span class="o">&gt;</span><span class="n">make</span>
+<span class="o">&gt;</span><span class="n">make</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>where the prefix is wherever you installed the Fortran libraries
+before.  Make sure this works by typing at the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">hyperion_sph</span>
+</pre></div>
+</div>
+<p>which should return something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">Usage</span><span class="p">:</span> <span class="n">hyperion_sph</span> <span class="p">[</span><span class="o">-</span><span class="n">f</span><span class="p">]</span> <span class="n">input_file</span> <span class="n">output_file</span>
+
+
+<span class="o">..</span> <span class="n">_Hyperion_dust</span><span class="p">:</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="hyperion-dust-files">
+<h3>Hyperion Dust Files<a class="headerlink" href="#hyperion-dust-files" title="Permalink to this headline">¶</a></h3>
+<p>Unless you’ve written your own dust files, you will likely want to use
+the pre-compiled dust files developed by Tom Robitaille (though don’t
+ship with <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a> due to their size).
+To install these download them here:
+<a class="reference external" href="http://docs.hyperion-rt.org/en/stable/dust/dust.html">http://docs.hyperion-rt.org/en/stable/dust/dust.html</a>.  Then to
+install:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">tar</span> <span class="o">-</span><span class="n">xvzf</span> <span class="n">hyperion</span><span class="o">-</span><span class="n">dust</span><span class="o">-</span><span class="n">xxx</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="o">&gt;</span><span class="n">cd</span> <span class="n">hyperion</span><span class="o">-</span><span class="n">dust</span><span class="o">-</span><span class="mf">0.1</span><span class="o">.</span><span class="mi">0</span>
+<span class="o">&gt;</span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">build_dust</span>
+</pre></div>
+</div>
+<p>If you want to use the PAH model in <a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a>, you’ll additionally need
+these files in the same dust directory.  To download, click on the link,
+then click ‘raw’ on the right side of each page.</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/big.hdf5">https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/big.hdf5</a></p></li>
+<li><p><a class="reference external" href="https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/vsg.hdf5">https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/vsg.hdf5</a></p></li>
+<li><p><a class="reference external" href="https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/usg.hdf5">https://github.com/hyperion-rt/paper-galaxy-rt-model/blob/master/dust/usg.hdf5</a></p></li>
+</ol>
+<p>Please note the caveat that the PAH files are generated using some
+approxmations described in <a class="reference external" href="http://www.aanda.org/articles/aa/abs/2012/09/aa19073-12/aa19073-12.html">Robitaille et
+al.</a>,
+and we encourage the user of these PAH files to read this paper,
+especially section 3.4.2.</p>
+</div>
+<div class="section" id="yt-4-x-configuration-wip">
+<h3>yt-4.x configuration [WIP]<a class="headerlink" href="#yt-4-x-configuration-wip" title="Permalink to this headline">¶</a></h3>
+<p>In the future, <a class="reference external" href="http://yt-project.org">yt</a> will eventually
+transition from 3.x to 4.x. The latter offers a number of advantages
+including a demeshed handling of particle datasets, as well as an
+<a class="reference external" href="https://www.h-its.org/2014/10/28/arepo/">arepo</a> front end.  We are
+happy to announce that as of December 31st, 2019 via hash
+<a class="reference external" href="https://github.com/dnarayanan/powderday/commit/59315f311535b5f2309c705f5a71519148aa4f29">59315f311535b5f2309c705f5a71519148aa4f29</a>,
+<a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a> is now <a class="reference external" href="http://yt-project.org">yt</a> 4.x compliant.</p>
+<p>The following offer documentation for installing <a class="reference external" href="http://yt-project.org">yt</a> 4.x, as well as a slightly different order
+of operations for <a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a> code dependency
+installation.  Please note, <a class="reference external" href="http://yt-project.org">yt</a> 4.x is still
+in development mode, and should be treated as such.  The following
+documentation utilizes not-yet-merged in branches of <a class="reference external" href="http://yt-project.organological">yt</a> for example, and all 4.x features
+should be considered experimental currently.</p>
+<p>First, it is recommended to make a new python environment in which to run the
+4.x development branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">conda</span> <span class="n">create</span> <span class="o">-</span><span class="n">n</span> <span class="n">pd4env</span>
+<span class="o">&gt;</span> <span class="n">conda</span> <span class="n">activate</span> <span class="n">pd4env</span>
+</pre></div>
+</div>
+<p>Our entire goal here is to install <a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a>  that is dependent on <a class="reference external" href="http://yt-project.org">yt</a> 4.x.  Since <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a> comes with
+<a class="reference external" href="http://yt-project.org">yt</a> 3.x,  we a few options, neither of which are particularly elegant.</p>
+<p>The easiest way to handle this is to install <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a>  as normal, via:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">hyperion</span>
+</pre></div>
+</div>
+<p>And then install <a class="reference external" href="http://yt-project.org">yt</a> 4.x.  The latter is installed via first ensuring that you have all of the dependencies installed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">pip</span> <span class="n">install</span> <span class="n">numpy</span> <span class="n">jupyter</span> <span class="n">sphinx</span> <span class="n">gitpython</span> <span class="n">h5py</span> <span class="n">matplotlib</span> <span class="n">cython</span> <span class="n">nose</span> <span class="n">scipy</span> <span class="n">astropy</span> <span class="n">sympy</span> <span class="n">mpi4py</span>
+</pre></div>
+</div>
+<p>followed by actually installing  <a class="reference external" href="http://yt-project.org">yt</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">AshKelly</span><span class="o">/</span><span class="n">yt</span><span class="o">.</span><span class="n">git</span>
+<span class="o">&gt;</span><span class="n">cd</span> <span class="n">yt</span>
+<span class="o">&gt;</span><span class="n">git</span> <span class="n">checkout</span> <span class="n">yt</span><span class="o">-</span><span class="mf">4.0</span><span class="o">-</span><span class="n">new</span><span class="o">-</span><span class="n">octree</span>
+<span class="o">&gt;</span><span class="n">git</span> <span class="n">pull</span>
+<span class="o">&gt;</span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="o">.</span>
+</pre></div>
+</div>
+<p>If we do this, this will overwrite the <a class="reference external" href="http://yt-project.org">yt</a> 3.x installation that ships with <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a>, and you should be good to go.  To check that everything worked, make sure the output of the following
+commands look something like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">ipython</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="kn">import</span> <span class="nn">yt</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">yt</span><span class="o">.</span><span class="n">__version__</span>
+<span class="n">Out</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="s1">&#39;4.0.dev0&#39;</span>
+</pre></div>
+</div>
+<p>Note, in the above we are actually not yet installing the master
+branch of <a class="reference external" href="http://yt-project.org">yt</a> 4.x, but rather Ashley Kelly’s
+branch which is still experimental.  As Ash’s branch gets merged into
+the master <a class="reference external" href="http://yt-project.org">yt</a> 4.x branch, we will update
+these docs.</p>
+<p>The second way of handling this, which is no longer recommended as it
+can be a bit painful and with varying success rates, is to install <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a> with the <code class="docutils literal notranslate"><span class="pre">--no-deps</span></code> flag, since you
+will install the dependencies manually in the next step:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">conda</span> <span class="n">install</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">deps</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">hyperion</span>
+</pre></div>
+</div>
+<p>Now, install all of the dependencies <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a>
+needs, <em>except</em> <a class="reference external" href="http://yt-project.org">yt</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">astropy</span> <span class="n">atomicwrites</span> <span class="n">attrs</span> <span class="n">backports</span> <span class="n">backports</span><span class="o">.</span><span class="n">functools_lru_cache</span> <span class="n">backports</span><span class="o">.</span><span class="n">shutil_get_terminal_size</span> <span class="n">backports_abc</span> <span class="n">configparser</span> <span class="n">contextlib2</span> <span class="n">cycler</span> <span class="n">cython</span> <span class="n">dbus</span> <span class="n">decorator</span> <span class="n">enum34</span> <span class="n">expat</span> <span class="n">fastcache</span> <span class="n">fontconfig</span> <span class="n">freetype</span> <span class="n">funcsigs</span> <span class="n">functools32</span> <span class="n">futures</span> <span class="n">gettext</span> <span class="n">glib</span> <span class="n">gmp</span> <span class="n">gmpy2</span> <span class="n">gst</span><span class="o">-</span><span class="n">plugins</span><span class="o">-</span><span class="n">base</span> <span class="n">gstreamer</span> <span class="n">h5py</span> <span class="n">hdf5</span> <span class="n">hyperion</span><span class="o">-</span><span class="n">fortran</span> <span class="n">icu</span> <span class="n">importlib_metadata</span> <span class="n">ipython</span> <span class="n">ipython_genutils</span> <span class="n">jpeg</span> <span class="n">kiwisolver</span> <span class="n">libblas</span> <span class="n">libcblas</span> <span class="n">libgfortran</span><span class="o">-</span><span class="n">ng</span> <span class="n">libiconv</span> <span class="n">liblapack</span> <span class="n">libpng</span> <span class="n">libuuid</span> <span class="n">libxcb</span> <span class="n">libxml2</span> <span class="n">linecache2</span> <span class="n">matplotlib</span> <span class="n">more</span><span class="o">-</span><span class="n">itertools</span> <span class="n">mpc</span> <span class="n">mpfr</span> <span class="n">mpi</span> <span class="n">mpich</span> <span class="n">mpmath</span> <span class="n">numpy</span> <span class="n">openblas</span> <span class="n">packaging</span> <span class="n">pathlib2</span> <span class="n">pcre</span> <span class="n">pexpect</span> <span class="n">pickleshare</span> <span class="n">pluggy</span> <span class="n">prompt_toolkit</span> <span class="n">pthread</span><span class="o">-</span><span class="n">stubs</span> <span class="n">ptyprocess</span> <span class="n">py</span> <span class="n">pygments</span> <span class="n">pyparsing</span> <span class="n">pyqt</span> <span class="n">pytest</span> <span class="n">python</span><span class="o">-</span><span class="n">dateutil</span> <span class="n">pytz</span> <span class="n">qt</span> <span class="n">scandir</span> <span class="n">simplegeneric</span> <span class="n">singledispatch</span> <span class="n">sip</span> <span class="n">six</span> <span class="n">subprocess32</span> <span class="n">sympy</span> <span class="n">tornado</span> <span class="n">traceback2</span> <span class="n">traitlets</span> <span class="n">unittest2</span> <span class="n">wcwidth</span> <span class="n">xorg</span><span class="o">-</span><span class="n">libxau</span> <span class="n">xorg</span><span class="o">-</span><span class="n">libxdmcp</span> <span class="n">xz</span> <span class="n">zipp</span>
+</pre></div>
+</div>
+<p>At this point, test your <a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a> installation by <a href="#id71"><span class="problematic" id="id72">trying_</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hyperion</span>
+</pre></div>
+</div>
+<p>If this doesn’t work, repeat:_:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span> <span class="n">conda</span> <span class="n">install</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">deps</span> <span class="o">-</span><span class="n">c</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span> <span class="n">hyperion</span>
+</pre></div>
+</div>
+<p>Now, install clone the 4.x development branch from the <a class="reference external" href="http://yt-project.org">yt</a> 4.x as above.</p>
+<p>As long as the rest of <a class="reference external" href="https://github.com/dnarayanan/powderday.git">powderday</a> ‘s
+dependencies have been installed, at this point you should be good to go.</p>
+</div>
+</div>
+<div class="section" id="troubleshooting-your-installation">
+<h2>Troubleshooting your Installation<a class="headerlink" href="#troubleshooting-your-installation" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div></div></blockquote>
+<div class="section" id="python-fsps-installation-issues">
+<span id="id61"></span><h3>python-fsps installation issues<a class="headerlink" href="#python-fsps-installation-issues" title="Permalink to this headline">¶</a></h3>
+<p>1.  <a class="reference external" href="http://dan.iel.fm/python-fsps/current/installation/">python-fsps</a> can’t find f2py</p>
+<blockquote>
+<div><p>f2py is a numpy package that is sometimes named f2py2.7 by numpy.
+At the same time, <a class="reference external" href="http://dan.iel.fm/python-fsps/current/installation/">python-fsps</a> expects it
+to be called f2py (as it sometimes is; for example in Anaconda).
+So, you might need to locate f2py (it ships with <a class="reference external" href="http://yt-project.org">yt</a>, so if you for example use the <a class="reference external" href="http://yt-project.org">yt</a> python) you need to link the following
+files:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">cd</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">desika</span><span class="o">/</span><span class="n">yt</span><span class="o">-</span><span class="n">x86_64</span><span class="o">/</span><span class="nb">bin</span>
+<span class="o">&gt;</span><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="n">f2py2</span><span class="o">.</span><span class="mi">7</span> <span class="n">f2py</span>
+</pre></div>
+</div>
+<p>and:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;</span><span class="n">cd</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">desika</span><span class="o">/</span><span class="n">yt</span><span class="o">-</span><span class="n">x86_64</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python2</span><span class="o">.</span><span class="mi">7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span>
+<span class="o">&gt;</span><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="n">numpy</span><span class="o">/</span><span class="n">f2py</span><span class="o">/</span> <span class="n">f2py</span>
+</pre></div>
+</div>
+<p>This should hopefully fix it.</p>
+</div></blockquote>
+<ol class="arabic" start="2">
+<li><p>Issues with ‘f2py’ in the  <a class="reference external" href="http://dan.iel.fm/python-fsps/current/installation/">python-fsps</a> installation:</p>
+<p>Numpy has made some changes to f2py in the 1.10.x version of numpy.
+The easiest fix is to use a non 1.10.* version of numpy (thanks to
+Ben Johnson for finding this).</p>
+</li>
+</ol>
+<p>3.  <a class="reference external" href="http://dan.iel.fm/python-fsps/current/installation/">python-fsps</a> has mysterious
+installation failures.  Often this has to do with a bad <a class="reference external" href="https://github.com/cconroy20/fsps">FSPS</a> compilation. Even if it seems
+like <a class="reference external" href="https://github.com/cconroy20/fsps">FSPS</a> has compiled, it may
+not actually execute properly if the correct compilers aren’t set in
+the MakeFile.  Thanks to Ena Choi for pointing this one out.</p>
+</div>
+<div class="section" id="hyperion-installation-issues">
+<h3>Hyperion Installation Issues<a class="headerlink" href="#hyperion-installation-issues" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic">
+<li><p>Manual installations seem to not be fully updated from the
+<a class="reference external" href="http://www.hyperion-rt.org">Hyperion</a> website.  The following
+issues are known (uncovered by Katarina Kraljic)</p>
+<ol class="loweralpha">
+<li><p>Hyperion-0.9.10 does not contain the /deps/fortran directory. It
+will be necesary to take this from version 0.9.9</p></li>
+<li><p>/deps/fortran/install.py hardcodes some links that do not exist
+anymore.  The URLs should be updated as:</p>
+<p>ZLIB_URL = “<a class="reference external" href="http://zlib.net/zlib-1.2.11.tar.gz">http://zlib.net/zlib-1.2.11.tar.gz</a>”
+HDF5_URL = ‘<a class="reference external" href="http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.tar.gz">http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.tar.gz</a>’</p>
+</li>
+<li><p>Hyperions configure file doesn’t have an option for an MPI</p></li>
+</ol>
+<blockquote>
+<div><p>compiler that is mpif90.openmpi.  One option is to add this to the configure file around line 1940:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>if test &quot;$mpi_compiler&quot; == mpif90.openmpi
+   then
+      mpi_compiler=`basename $(mpif90 -show | awk {&#39;print $1&#39;})`
+fi
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting Started</a><ul>
+<li><a class="reference internal" href="#overview-of-requirements">Overview of Requirements</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#manual-installation">Manual Installation</a></li>
+<li><a class="reference internal" href="#python">python</a></li>
+<li><a class="reference internal" href="#id4">powderday</a></li>
+<li><a class="reference internal" href="#id6">yt</a></li>
+<li><a class="reference internal" href="#fsps">fsps</a></li>
+<li><a class="reference internal" href="#id22">python-fsps</a></li>
+<li><a class="reference internal" href="#id25">Hyperion</a></li>
+<li><a class="reference internal" href="#hyperion-dust-files">Hyperion Dust Files</a></li>
+<li><a class="reference internal" href="#yt-4-x-configuration-wip">yt-4.x configuration [WIP]</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#troubleshooting-your-installation">Troubleshooting your Installation</a><ul>
+<li><a class="reference internal" href="#python-fsps-installation-issues">python-fsps installation issues</a></li>
+<li><a class="reference internal" href="#hyperion-installation-issues">Hyperion Installation Issues</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Powderday’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="quickstart.html"
+                        title="next chapter">Quickstart</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/installation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="quickstart.html" title="Quickstart"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Powderday’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Powderday 0.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2015, Desika Narayanan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+#THIS SHOULD NEVER BE EDITED UNLESS POWDERDAY/MLT/DGR_EXTRARANDOMTREE_PART/DGR is updated
+
+# Determine which parameters are in tab.txt
+# Z_active stellar_mass_active sfr_active  gas_mass_active
+  1        0                   1           1

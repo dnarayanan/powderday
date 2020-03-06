@@ -10,9 +10,9 @@ def stream(fname):
     
     def gadget():
         if ('PartType0', 'CS Temperature') in ds.derived_field_list:
-            from CSgadget2pd import gadget_field_add as field_add
+            from powderday.front_ends.CSgadget2pd import gadget_field_add as field_add
         elif ('PartType4', 'TemperatureMax') in ds.derived_field_list:
-            from benopp_gadget2pd import gadget_field_add as field_add
+            from powderday.front_ends.benopp_gadget2pd import gadget_field_add as field_add
         else:
             from powderday.front_ends.gadget2pd import gadget_field_add as field_add
         
@@ -20,19 +20,25 @@ def stream(fname):
         return field_add
 
     def tipsy():
-        from tipsy2pd import tipsy_field_add as field_add
+        from powderday.front_ends.tipsy2pd import tipsy_field_add as field_add
         print ('[front_end_controller:] tipsy data set detected')
         return field_add
 
     def ramses():
-        from ramses2pd import ramses_field_add as field_add
+        from powderday.front_ends.ramses2pd import ramses_field_add as field_add
         print ('[front_end_controller:] ramses data set detected')
         return field_add
 
     
     def enzo():
-        from enzo2pd import enzo_field_add as field_add
+        from powderday.front_ends.enzo2pd import enzo_field_add as field_add
         print ('[front_end_controller:] enzo data set detected')
+        return field_add
+
+
+    def arepo():
+        from powderday.front_ends.arepo2pd import arepo_field_add as field_add
+        print('[front_end_controller:] arepo data set detected')
         return field_add
 
 
@@ -56,7 +62,8 @@ def stream(fname):
     options = {'gadget_hdf5':gadget,
                'tipsy':tipsy,
                'ramses':ramses,
-               'enzo_packed_3d':enzo}
+               'enzo_packed_3d':enzo,
+               'arepo_hdf5':arepo}
 
 
     #grab the field from the right front end
