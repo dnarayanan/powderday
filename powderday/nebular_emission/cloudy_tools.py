@@ -104,3 +104,19 @@ def grouper(n, iterable):
         if not chunk:
             return
         yield chunk
+
+def cmdf(stellar_mass,nbins,min_mass,max_mass):
+    """
+    Calculates the number of clusters per mass interval assuming a cluster
+    mass distribution function of the form dN/dM goes as M^(-2.0)
+    """
+    interval = (max_mass-min_mass)/nbins
+    q = np.log10(stellar_mass/nbins)
+    num = []
+    mass = []
+    for i in range(nbins):
+        m = min_mass + (i*interval)
+        mass.append(m)
+        num.append(round(10**(q - m)))
+
+    return mass, num
