@@ -1,4 +1,9 @@
 #===============================================
+#HOME INFORMATION
+#===============================================
+pd_source_dir ='/ufrc/narayanan/desika.narayanan/pd_git/'
+
+#===============================================
 #RESOLUTION KEYWORDS
 #===============================================
 oref = 0 #over refine factor - should typically be set to 0
@@ -32,7 +37,7 @@ seed = -12345 #has to be an int, and negative.
 dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = False
-dust_grid_type = 'dtm' #needs to be in ['dtm','rr','manual']
+dust_grid_type = 'dtm' #needs to be in ['dtm','rr','manual','li_bestfit','li_ml']
 dusttometals_ratio = 0.25 #skirt assumes 0.25: see http://www.skirt.ugent.be/tutorials/_tutorial_hydro_s_p_h.html ("dust system"subheading) 
 enforce_energy_range = False #False is the default;  ensures energy conservation
 

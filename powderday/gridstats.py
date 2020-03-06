@@ -3,10 +3,9 @@ import numpy as np
 
 
 
-def gridstats(ir1,fc1,fw1):
+def gridstats(fc1,fw1):
 
     volume = (fw1**3)
-    
     xmin = fc1[:,0]-fw1[:,0]/2.
     xmax = fc1[:,0]+fw1[:,0]/2.
     ymin = fc1[:,1]-fw1[:,1]/2.
