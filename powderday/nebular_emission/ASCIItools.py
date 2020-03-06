@@ -25,7 +25,7 @@ retrieved in October 2019)
 --------------------------------------------------------------------------------------
 """
 
-if (cfg.par.add_neb_emission) and (cfg.par.use_cloudy_tables):
+if (cfg.par.add_neb_emission) and (not cfg.par.use_cloudy_tables):
     try:
         CLOUDY_EXE = os.environ['CLOUDY_EXE']
     except KeyError:
