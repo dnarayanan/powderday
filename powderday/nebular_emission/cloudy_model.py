@@ -66,7 +66,7 @@ def write_cloudy_input(**kwargs):
             "r_inner": 1.e19,  # inner radius of cloud
             "r_in_pc": False,
             "use_Q": True,
-            "dust": True,
+            "dust": False,
             "efrac": -1.0,
             "geometry": "sphere",
             "abundance": "dopita"
@@ -128,7 +128,7 @@ def write_cloudy_input(**kwargs):
     this_print('save last linelist ".lin" "{}" absolute column'.format(linefile))
     this_print('save last outward continuum ".outwcont" units Angstrom no title')
     this_print('save last incident continuum ".inicont" units Angstrom no title')
-    print("Input written in {0}".format(file_name))
+    logging.info("Input written in {0}".format(file_name))
     f.close()
 
 
@@ -175,7 +175,7 @@ def clean_files(dir_, model_name, error=False):
     os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".out"))
 
 
-def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, abund="dopita", useq=True, clean_up=True):
+def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Dust=False, abund="dopita", useq=True, clean_up=True):
     nspec = len(spec_lambda)
     frac_obrun = 0.0
     clight = constants.c.cgs.value*1.e8
@@ -198,7 +198,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, abund="
                        logU=logu,
                        logZ=logz,
                        abundance=abund,
-                       dust=False)
+                       dust=Dust)
 
     logging.info("Input SED file written")
     logging.info("Running CLOUDY")
@@ -221,7 +221,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, abund="
 
     nebem_line_pos, nebem_line, readlambneb, readcontneb = get_output(model_name, dir_, 10**logq)
     nebem_cont = interp1d(readlambneb, np.log10(readcontneb + 10 ** (-95.0)),
-                          fill_value=0, bounds_error=False)(spec_lambda)
+                          fill_value=-95.0, bounds_error=False)(spec_lambda)
 
     logging.info("Adding nebular emission to input spectrum")
     nemline = sum(1 for line in open(dir_ + '/temp_files/' + 'cloudyLines.dat'))

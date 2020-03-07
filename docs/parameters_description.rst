@@ -339,8 +339,26 @@ Nebular Emission Info
 
 :HII_max_age:
    
-    Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 2.e-3)
+    Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 1.e-2)
 
+:neb_dust:
+    
+    If True dust is included in HII regions when calculating nebular emission. (Default = False)
+
+:cmdf_min_mass:
+
+    While calulating nebular emission one star particle is broken down into smaller star cluster by
+    assuming a cluster mass distribution function of the form dN/dM goes as M^(-2.0). This parameter 
+    sets the minimum mass of the star clusters in units of log(Msun). Note this value should not be 
+    set lower than 3.5. (Default = 3.5)
+
+:cmdf_max_mass:
+    
+    Minimum mass of the star clusters in units of log(Msun). (Default = 5.0)
+
+:cmdf_bins:
+
+    The number of bins used for calulating the cluster mass distribution function (Default = 6.0)
 
 :neb_file_output:
    
