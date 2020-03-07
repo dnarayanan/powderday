@@ -15,6 +15,7 @@ from multiprocessing import Pool
 from functools import partial
 from scipy.integrate import simps
 from powderday.nebular_emission.cloudy_tools import calc_LogU
+from powderday.nebular_emission.cloudy_tools import cmdf
 from powderday.analytics import logu_diagnostic,dump_emline
 from powderday.nebular_emission.cloudy_model import get_nebular
 
@@ -429,50 +430,52 @@ def newstars_gen(stars_list):
         
         #Only including particles below the maximum age limit for calulating nebular emission
         if cfg.par.add_neb_emission and stars_list[i].age <= cfg.par.HII_max_age:
-
-            num_HII_clusters = int(np.floor((stars_list[i].mass/constants.M_sun.cgs.value)/(cfg.par.stellar_cluster_mass)))
+            cluster_mass, num_clusters = cmdf(stars_list[i].mass/constants.M_sun.cgs.value,int(cfg.par.cmdf_bins),cfg.par.cmdf_min_mass,
+                                              cfg.par.cmdf_max_mass)
             f = np.zeros(nlam)
-            neb_file_output = cfg.par.neb_file_output
+            for j in range(len(cluster_mass)):
+                num_HII_clusters = num_clusters[j]
+                neb_file_output = cfg.par.neb_file_output
             
-            sp.params["add_neb_emission"] = False
-            spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+                sp.params["add_neb_emission"] = False
+                spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
                 
-            if cfg.par.FORCE_gas_logu:
-                alpha = 2.5e-13*((cfg.par.HII_T/(10**4))**(-0.85))
-                LogU = cfg.par.gas_logu
-                LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*cfg.par.HII_nh))
-                Rin = ((3*(10 ** LogQ))/(4*np.pi*(cfg.par.HII_nh**2)*alpha))**(1./3.)
-            else:
-                LogQ, Rin, LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value,
-                                            cfg.par.HII_nh, cfg.par.HII_T,mstar=cfg.par.stellar_cluster_mass)
+                if cfg.par.FORCE_gas_logu:
+                    alpha = 2.5e-13*((cfg.par.HII_T/(10**4))**(-0.85))
+                    LogU = cfg.par.gas_logu
+                    LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*cfg.par.HII_nh))
+                    Rin = ((3*(10 ** LogQ))/(4*np.pi*(cfg.par.HII_nh**2)*alpha))**(1./3.)
+                else:
+                    LogQ, Rin, LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value,
+                                                cfg.par.HII_nh, cfg.par.HII_T,mstar=10**cluster_mass[j])
+                if cfg.par.FORCE_logq:
+                    LogQ = cfg.par.source_logq
 
-            if cfg.par.FORCE_logq:
-                LogQ = cfg.par.source_logq
-
-            if cfg.par.FORCE_inner_radius:
-                Rin = cfg.par.inner_radius
+                if cfg.par.FORCE_inner_radius:
+                    Rin = cfg.par.inner_radius
                 
-            if neb_file_output:
-                logu_diagnostic(LogQ, Rin, LogU, cfg.par.stellar_cluster_mass, stars_list[i].age, stars_list[i].fsps_zmet, append=True)
-                neb_file_output = False
+                if neb_file_output:
+                    logu_diagnostic(LogQ, Rin, LogU, cfg.par.stellar_cluster_mass, stars_list[i].age, stars_list[i].fsps_zmet, append=True)
+                    neb_file_output = False
 
-            sp.params['gas_logu'] = LogU
-            sp.params['gas_logz'] = LogZ
-            sp.params["add_neb_emission"] = True 
-            if cfg.par.use_cloudy_tables:
-                lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
-            else:
-                try:
-                    # Calculating ionizing photons again but for 1 Msun in order to scale the output for FSPS
-                    LogQ_1, Rin_1, LogU_1 = calc_LogU(1.e8 * constants.c.cgs.value / spec[0],
-                                                      spec[1] * constants.L_sun.cgs.value, cfg.par.HII_nh,
-                                                      cfg.par.HII_T)
-                    spec_neb = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, LogQ_1,
-                                           abund=cfg.par.neb_abund, useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleanup)
-                except ValueError as err:
+                sp.params['gas_logu'] = LogU
+                sp.params['gas_logz'] = LogZ
+                sp.params["add_neb_emission"] = True 
+                if cfg.par.use_cloudy_tables:
                     lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+                else:
+                    try:
+                        # Calculating ionizing photons again but for 1 Msun in order to scale the output for FSPS
+                        LogQ_1, Rin_1, LogU_1 = calc_LogU(1.e8 * constants.c.cgs.value / spec[0],
+                                                          spec[1] * constants.L_sun.cgs.value, cfg.par.HII_nh,
+                                                          cfg.par.HII_T)
+                        spec_neb = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, LogQ_1, Dust=cfg.par.neb_dust,
+                                               abund=cfg.par.neb_abund, useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleanup)
+                    except ValueError as err:
+                        lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
 
-            f = spec_neb*num_HII_clusters
+                weight = num_HII_clusters*(10**cluster_mass[j])/(stars_list[i].mass/constants.M_sun.cgs.value)
+                f = f + spec_neb*weight
 
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f

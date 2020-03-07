@@ -119,6 +119,19 @@ HII_nh = 1.e2               # Gas hydrogen density for calcualting nebular emiss
 HII_max_age = 2.e-3         # Sets the maximum age limit for calculating nebular emission in units of Gyr. 
                             # This is used only when add_neb_emission = True (Default = 2.e-3)
 
+
+neb_dust = False            # If True dust is included in HII regions when calculating nebular emission. (Default = False)
+
+cmdf_min_mass = 3.5         # While calulating nebular emission one star particle is broken down into smaller star cluster by
+			    # assuming a cluster mass distribution function of the form dN/dM goes as M^(-2.0). This parameter
+			    # sets the minimum mass of the star clusters in units of log(Msun). Note this value should not be
+			    # set lower than 3.5. (Default = 3.5)
+
+
+cmdf_max_mass = 5.0         # Minimum mass of the star clusters in units of log(Msun). (Default = 5.0)
+
+cmdf_bins = 6               # The number of bins used for calulating the cluster mass distribution function (Default = 6.0)
+
 neb_file_output = True      # If set to True creates an output file with ionization parameter (LogU), 
                             # number of ionizing photons (LogQ), inner radius, stellar mass, age and 
                             # metallicity(zmet) for each particle. (Default: True)
