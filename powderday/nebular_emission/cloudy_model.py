@@ -1,7 +1,7 @@
 from powderday.nebular_emission.abund import getNebAbunds
 from powderday.nebular_emission.ASCIItools import *
-from astropy import constants
 from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogU
+from astropy import constants
 import logging
 import numpy as np
 import os
@@ -132,14 +132,13 @@ def write_cloudy_input(**kwargs):
     f.close()
 
 
-def get_output(model_name, dir_, qq):
+def get_output(model_name, dir_, qq, fsps_lam):
     lsun = 3.839e33
     c = constants.c.cgs.value * 1.e8
 
     outcontfl = dir_ + "/temp_files/"+ model_name + ".outwcont"
     outlinefl = dir_ + "/temp_files/" + model_name + ".lin"
     refline_file = dir_ + "/data/refLines.dat"
-    fsps_lam_file = dir_ + "/data/FSPSlam.dat"
 
     dat = np.genfromtxt(outlinefl, delimiter="\t", skip_header=2, dtype="S20,f8")
     datflu = np.array([d[1] for d in dat])
@@ -151,7 +150,6 @@ def get_output(model_name, dir_, qq):
     datflu = datflu[sinds] / lsun / qq
     datflu = [float("{0:1.4e}".format(dat)) for dat in datflu]
     cont_data = np.genfromtxt(outcontfl, skip_header=1)
-    fsps_lam = np.genfromtxt(fsps_lam_file)
     nu = c / fsps_lam
     ang_0, diffuse_0 = cont_data[:, 0], cont_data[:, 2]
     ang_v, diffuse_in = air_to_vac(ang_0[::-1]), diffuse_0[::-1]
@@ -219,13 +217,12 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Dust=Fa
 
     logging.info("Getting output spectrum")
 
-    nebem_line_pos, nebem_line, readlambneb, readcontneb = get_output(model_name, dir_, 10**logq)
+    nebem_line_pos, nebem_line, readlambneb, readcontneb = get_output(model_name, dir_, 10**logq, spec_lambda)
     nebem_cont = interp1d(readlambneb, np.log10(readcontneb + 10 ** (-95.0)),
                           fill_value=-95.0, bounds_error=False)(spec_lambda)
 
     logging.info("Adding nebular emission to input spectrum")
-    nemline = sum(1 for line in open(dir_ + '/temp_files/' + 'cloudyLines.dat'))
-
+    nemline = len(np.where(nebem_line_pos < spec_lambda[-1])[0])
     neb_res_min = np.zeros(nemline)
     for i in range(nemline):
         max_id = max(np.max(np.where(spec_lambda <= nebem_line_pos[i])), 1)
