@@ -6,7 +6,6 @@ import os
 import numpy as np
 import subprocess
 from powderday.nebular_emission.cloudy_tools import grouper
-
 #getting cfg.par accessible outside the definitions (ala pd_front_end.py)
 import powderday.config as cfg
 import sys
