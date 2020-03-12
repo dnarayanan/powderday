@@ -6,16 +6,16 @@ hydro_dir = '/ufrc/narayanan/desika.narayanan/yt_datasets/TipsyGalaxy/'
 snapshot_name = 'galaxy.00300'
 
 #where the files should go
-PD_output_dir = '/ufrc/narayanan/desika.narayanan/pd_git/tests/SKIRT/changa_disk/'
-Auto_TF_file = 'changa_test.logical'
-Auto_dustdens_file = 'changa_test.dustdens'
+PD_output_dir = '/ufrc/narayanan/desika.narayanan/pd_git/tests/SKIRT/gasoline_disk/'
+Auto_TF_file = 'gasoline_test.logical'
+Auto_dustdens_file = 'gasoline_test.dustdens'
 
 
 #===============================================
 #FILE I/O
 #===============================================
-inputfile = PD_output_dir+'/pd_skirt_comparison.changa.rtin'
-outputfile = PD_output_dir+'/pd_skirt_comparison.changa.rtout'
+inputfile = PD_output_dir+'/pd_skirt_comparison.gasoline.rtin'
+outputfile = PD_output_dir+'/pd_skirt_comparison.gasoline.rtout'
 
 #===============================================
 #GRID POSITIONS
