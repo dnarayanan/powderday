@@ -1,6 +1,7 @@
 from powderday.nebular_emission.abund import getNebAbunds
 from powderday.nebular_emission.ASCIItools import *
 from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogU
+import powderday.config as cfg
 from astropy import constants
 import logging
 import numpy as np
@@ -184,7 +185,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Dust=Fa
     model_name = filename.split(".")[0]
 
     logging.info("Writing CLOUDY input file")
-    dir_= os.getcwd() + "/powderday/nebular_emission"
+    dir_= cfg.par.pd_source_dir + "/powderday/nebular_emission"
     dir_base = os.getcwd()
 
     write_cloudy_input(dir_=dir_,
