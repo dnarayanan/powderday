@@ -472,6 +472,7 @@ def newstars_gen(stars_list):
                         spec_neb = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, LogQ_1, Dust=cfg.par.neb_dust,
                                                abund=cfg.par.neb_abund, useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleanup)
                     except ValueError as err:
+                        print ("WARNING: CLOUDY run was unsucessful. Using lookup tables for nebular emission")
                         lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
 
                 weight = num_HII_clusters*(10**cluster_mass[j])/(stars_list[i].mass/constants.M_sun.cgs.value)
