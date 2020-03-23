@@ -1,6 +1,6 @@
 from powderday.nebular_emission.abund import getNebAbunds
 from powderday.nebular_emission.ASCIItools import *
-from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogU
+from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogU, convert_metals
 import powderday.config as cfg
 from astropy import constants
 import logging
@@ -70,7 +70,8 @@ def write_cloudy_input(**kwargs):
             "dust": False,
             "efrac": -1.0,
             "geometry": "sphere",
-            "abundance": "dopita"
+            "abundance": "dopita",
+            "metals": [-1., -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.]
             }
     for key, value in list(kwargs.items()):
         pars[key] = value
@@ -102,8 +103,8 @@ def write_cloudy_input(**kwargs):
         this_print('ionization parameter = {0:.3f} log'.format(pars['logU']))
 
     if pars['dust']:
-        this_print('grains {0:.2f} log'.format(pars['gas_logZ']))
-
+        #this_print('grains ism {0:.2f} log no qheat'.format(pars['gas_logZ']))
+        this_print('grains ism log no qheat')
     if pars['r_in_pc']:
         pc_to_cm = 3.08568e18
         r_out = np.log10(pars['r_inner'] * pc_to_cm)
@@ -111,14 +112,29 @@ def write_cloudy_input(**kwargs):
         r_out = np.log10(pars['r_inner'])
 
     linefile = "cloudyLines.dat"
-    abunds = getNebAbunds(pars["abundance"],
-                          pars["logZ"],
-                          dust=pars["dust"],
-                          re_z=False)
-    this_print(abunds.solarstr)
-    for line in abunds.elem_strs:
-        this_print(line)
 
+    if pars["abundance"] == "simba":
+        abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+        abund_metal = convert_metals(pars["metals"][1:])
+        print (pars["logZ"], pars["metals"][1:],abund_metal)
+        abund_str = "abundances "
+        for e in range(len(abund_el)):
+            el_str = str(abund_el[e]) + " " + str(abund_metal[e]) + " "
+            abund_str = abund_str + el_str
+
+        abund_extra = "init file=\"hii.ini\""
+        this_print(abund_extra)
+        this_print(abund_str)
+
+    else:
+        abunds = getNebAbunds(pars["abundance"],
+                            pars["logZ"],
+                            dust=pars["dust"],
+                            re_z=False)
+        this_print(abunds.solarstr)
+        for line in abunds.elem_strs:
+            this_print(line)
+    
     this_print('radius {0:.3f} log'.format(r_out))
     this_print('hden {0:.3f} log'.format(np.log10(pars['dens'])))
     this_print('{}'.format(pars['geometry']))
@@ -174,7 +190,7 @@ def clean_files(dir_, model_name, error=False):
     os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".out"))
 
 
-def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Dust=False, abund="dopita", useq=True, clean_up=True):
+def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals, Dust=False, abund="dopita", useq=True, clean_up=True):
     nspec = len(spec_lambda)
     frac_obrun = 0.0
     clight = constants.c.cgs.value*1.e8
@@ -197,7 +213,8 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Dust=Fa
                        logU=logu,
                        logZ=logz,
                        abundance=abund,
-                       dust=Dust)
+                       dust=Dust,
+                       metals=Metals)
 
     logging.info("Input SED file written")
     logging.info("Running CLOUDY")

@@ -12,54 +12,58 @@ from powderday.analytics import dump_AGN_SEDs
 
 
 class Sed_Bins:
-    def __init__(self,mass,metals,age,fsps_zmet):
+    def __init__(self,mass,metals,age,fsps_zmet,metals_arr=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
         self.mass = mass
         self.metals = metals
         self.age = age
-        self.fsps_zmet=fsps_zmet
+        self.fsps_zmet = fsps_zmet
+        self.metals_arr = metals_arr
 
 
-def add_newstars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m):
-    
-        
-    nstars = len(stars_list)
-    print ('adding new stars to the grid')
-    
+def add_unbinned_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmoflag, m, sp):
+
+    print("--------------------------------\n")
+    print("Adding unbinned stars to the grid\n")
+    print("--------------------------------\n")
+
     totallum_newstars = 0.
+    unbinned_stars_list = []
+
+    for star in stars_list:
+        if star.age <= cfg.par.max_age_unbinned_stars:
+            unbinned_stars_list.append(star)
+
+    nstars = len(unbinned_stars_list)
+    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(unbinned_stars_list, cosmoflag, sp)
 
     for i in range(nstars):
-        
         nu = stellar_nu[:]
-        fnu = stellar_fnu[i,:]
-    
-        
-        nu,fnu = wavelength_compress(nu,fnu,df_nu)
-        #reverse the arrays for hyperion
+        fnu = stellar_fnu[i, :]
+
+        nu, fnu = wavelength_compress(nu, fnu, df_nu)
+        # reverse the arrays for hyperion
         nu = nu[::-1]
         fnu = fnu[::-1]
-
         
-        
-        lum = np.absolute(np.trapz(fnu,x=nu))*stars_list[i].mass/constants.M_sun.cgs.value 
+        lum = np.absolute(np.trapz(fnu, x=nu))*stars_list[i].mass/constants.M_sun.cgs.value 
         lum *= constants.L_sun.cgs.value
 
-        #add new stars
+        pos = unbinned_stars_list[i].positions
+
+        # add new stars
         totallum_newstars += lum
         #m.add_spherical_source(luminosity = lum,radius = 10.*const.rsun,spectrum = (nu,fnu),
-        #position = stars_list[i].positions)
-        m.add_point_source(luminosity = lum,spectrum=(nu,fnu),position = stars_list[i].positions)
-        
-      
-                           
 
+        m.add_point_source(luminosity = lum,spectrum=(nu,fnu), position = pos)
 
-    print ('[source_creation/add_newstars:] totallum_newstars = ',totallum_newstars)
-        
-    if cosmoflag == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
-            
+    print('[source_creation/add_unbinned_newstars:] totallum_newstars = ', totallum_newstars)
+
+    if cosmoflag == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,unbinned_stars_list,diskstars_list,bulgestars_list,m)
+   
     m.set_sample_sources_evenly(True)
     
     return m
+
 
 def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m):
     print ('Non-Cosmological Simulation: Adding Disk and Bulge Stars:')
@@ -134,19 +138,15 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
 
 def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,sp):
     
-
-  
-
-    #calculate max and min ages
+    # calculate max and min ages
     minimum_age = 15 #Gyr - obviously too high of a number
     maximum_age = 0 #Gyr
 
-
-    #calculate the minimum and maximum luminosity
+    # calculate the minimum and maximum luminosity
     minimum_mass = 1e15*constants.M_sun.cgs.value #msun - some absurdly large value for a single stellar cluster
     maximum_mass = 0 #msun
 
-    #calculate the minimum and maximum stellar metallicity
+    # calculate the minimum and maximum stellar metallicity
     minimum_metallicity = 1.e5 #some absurdly large metallicity
     maximum_metallicity = 0
 
@@ -161,25 +161,25 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
         if stars_list[i].age < minimum_age: minimum_age = stars_list[i].age
         if stars_list[i].age > maximum_age: maximum_age = stars_list[i].age
 
-      
+    # If Flag is set we do not bin stars younger than 10 Myr
+    if not cfg.par.FORCE_ALL_BINNED:
+        if cfg.par.max_age_unbinned_stars > minimum_age:
+            minimum_age = cfg.par.max_age_unbinned_stars + 0.001
 
-
-    #define the metallicity bins: we do this by saying that they are the number of metallicity bins in FSPS
+    delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
+    
+    # define the metallicity bins: we do this by saying that they are the number of metallicity bins in FSPS
 
     fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
     N_METAL_BINS = len(fsps_metals)
 
-    #note the bins are NOT metallicity, but rather the zmet keys in
-    #fsps (i.e. the zmet column in Table 1 of the fsps manual)
+    # note the bins are NOT metallicity, but rather the zmet keys in
+    # fsps (i.e. the zmet column in Table 1 of the fsps manual)
     metal_bins = np.arange(N_METAL_BINS)+1
 
-
-
-    delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
-
+    # define the age bins in log space so that we maximise resolution around young stars
+    # Setting minimum age to be 10 Myr since we do not want to bins young stars if nebular emission is turned on
     
-    
-    #define the age bins in log space so that we maximise resolution around young stars
     age_bins = 10.**(np.linspace(np.log10(minimum_age),np.log10(maximum_age),cfg.par.N_STELLAR_AGE_BINS))
     #tack on the maximum age bin
     age_bins = np.append(age_bins,age_bins[-1]+delta_age)
@@ -197,11 +197,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
         mass_bins = np.append(mass_bins,mass_bins[-1]+delta_mass)
         mass_bins = 10.**mass_bins
         
-
     print ('mass_bins = ',mass_bins)
     print ('metal_bins = ',metal_bins)
     print ('age_bins = ',age_bins)
-
 
     #has_stellar_mass is a 3D boolean array that's [wz,wa,wm] big and
     #says whether or not that bin is being used downstream for
@@ -217,13 +215,11 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     #speed up adding sources.
     
     for i in range(nstars):
-        
         wz = find_nearest(metal_bins,stars_list[i].fsps_zmet)
         wa = find_nearest(age_bins,stars_list[i].age)
         wm = find_nearest(mass_bins,stars_list[i].mass)
         
         stars_list[i].sed_bin = [wz,wa,wm]
-
         has_stellar_mass[wz,wa,wm] = True
 
         if (wz,wa,wm) in stars_in_bin:
@@ -231,21 +227,11 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
         else:
             stars_in_bin[(wz,wa,wm)] = [i]
 
-   
 
-
-
-    
-
-
-   
-    
     print ('assigning stars to SED bins')
     sed_bins_list=[]
     sed_bins_list_has_stellar_mass = []
-
-
-   
+       
     #we loop through age bins +1 because the max values were tacked
     #onto those bin lists. but for metal bins, this isn't the case, so
     #we don't loop the extra +1
@@ -255,7 +241,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
                 sed_bins_list.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz]))
                 if has_stellar_mass[wz,wa,wm] == True:
                     sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz]))
-
    
 
     #sed_bins_list is a list of Sed_Bins objects that have the
@@ -266,13 +251,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
             
     print ('Running SPS for Binned SEDs')
     print ('calculating the SEDs for ',len(sed_bins_list_has_stellar_mass),' bins')
+    
     binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,cosmoflag,sp)
-
-
-
-   
-
-
+    
     #since the binned_stellar_fnu_has_stellar_mass is now
     #[len(sed_bins_list_has_stellar_mass),nlam)] big, we need to
     #transform it back to the a larger array.  this is an ugly loop
@@ -404,9 +385,7 @@ def wavelength_compress(nu,fnu,df_nu):
     nu = nu[wll]
     fnu = fnu[wll]
    
-   
-    return compressed_nu,compressed_fnu
-
+    return compressed_nu, compressed_fnu
 
 
 def BH_source_add(m,reg,df_nu,boost):

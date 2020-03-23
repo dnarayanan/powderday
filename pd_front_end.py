@@ -5,7 +5,7 @@
 # IMPORT STATEMENTS
 # =========================================================
 from __future__ import print_function
-from powderday.source_creation import add_newstars, add_binned_seds, BH_source_add
+from powderday.source_creation import add_unbinned_stars, add_binned_seds, BH_source_add
 from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump
 from astropy import constants
 import fsps
@@ -91,7 +91,6 @@ df.close()
 stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds)
 nstars = len(stars_list)
 
-
 if cfg.par.BH_SED == True:
     BH_source_add(m, reg, df_nu, boost)
 
@@ -100,16 +99,14 @@ if cfg.par.BH_SED == True:
 fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
 N_METAL_BINS = len(fsps_metals)
 
-if par.FORCE_BINNING == False:
-    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, sp)
-    m = add_newstars(df_nu, stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, m)
 
+if par.FORCE_ALL_BINNED == False:
+    m = add_unbinned_stars(df_nu, stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, m, sp)
 
-else:
-    # note - the generation of the SEDs is called within
-    # add_binned_seds itself, unlike add_newstars, which requires
-    # that sg.allstars_sed_gen() be called first.
-
+# note - the generation of the SEDs is called within
+# add_binned_seds itself, unlike add_newstars, which requires
+# that sg.allstars_sed_gen() be called first.
+if par.FORCE_ALL_UNBINNED == False:
     m = add_binned_seds(df_nu, stars_list, diskstars_list,
                         bulgestars_list, ds.cosmological_simulation, m, sp)
 

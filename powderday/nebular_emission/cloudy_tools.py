@@ -105,7 +105,8 @@ def grouper(n, iterable):
             return
         yield chunk
 
-def cmdf(stellar_mass,nbins,min_mass,max_mass):
+
+def cmdf(stellar_mass, nbins, min_mass, max_mass):
     """
     Calculates the number of clusters per mass interval assuming a cluster
     mass distribution function of the form dN/dM goes as M^(-2.0)
@@ -120,3 +121,22 @@ def cmdf(stellar_mass,nbins,min_mass,max_mass):
         num.append(round(10**(q - m)))
 
     return mass, num
+
+
+def convert_metals(metals):
+    """
+    Converts metalicity from units of percentage by mass (SIMBA) 
+    to atom per hydrogen atoms (CLOUDY)
+    """
+    # mass of elements in unified atomic mass units
+    # [He, C, N, O, Ne, Mg, Si, S, Ca, Fe]
+    per_H = 0.7314
+    mass_H = 1.008
+    mass = [4.002602, 12.001, 14.007, 15.999, 20.1797, 
+            24.305, 28.085, 32.06, 40.078, 55.845]
+    metals_conv = np.zeros(len(metals))
+    for i in range(len(metals)):
+        metals_conv[i] = np.log10((metals[i]/per_H)*(mass_H/mass[i]))
+
+    return metals_conv
+

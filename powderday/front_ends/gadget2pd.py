@@ -8,7 +8,23 @@ from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=True):
 
     def _starmetals_00(field, data):
-        return data[('PartType4', 'Metallicity_00')]
+        el_dict = {'He': '01',
+                   'C': '02',
+                   'N': '03',
+                   'O': '04',
+                   'Ne': '05',
+                   'Mg': '06',
+                   'Si': '07',
+                   'S': '08',
+                   'Ca': '09',
+                   'Fe': '10'}
+        el_str = field.name[1]
+        if '_' in el_str:
+            el_name = field.name[1][field.name[1].find('_')+1:]
+            el_num = el_dict[el_name]
+        else:
+            el_num = '00'
+        return data[('PartType4', 'Metallicity_'+el_num)]
 
     def _starmetals(field, data):
         return data[('PartType4', 'Metallicity')]
@@ -134,6 +150,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
             scalefactor = data[('PartType4', 'StellarFormationTime')].value
+            print ("****66********** ", scalefactor)
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
             age = simtime - formation_time
@@ -228,8 +245,23 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         
 
     # for the metal fields have a few options since gadget can have different nomenclatures
+    ad = ds.all_data()
+    print ("Printing ",ad[('PartType4', 'StellarFormationTime')].value)
     if ('PartType4', 'Metallicity_00') in ds.derived_field_list:
-        ds.add_field(('starmetals'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+        try:
+            ds.add_field(('starmetals'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_He'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_C'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_N'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_O'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Ne'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Mg'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Si'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_S'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Ca'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Fe'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+        except:
+            ds.add_field(('starmetals'), function=_starmetals_00, units="code_metallicity", particle_type=True)
     else:
         ds.add_field(('starmetals'), function=_starmetals, units="code_metallicity", particle_type=True)
 
