@@ -29,7 +29,7 @@ gc.set_threshold(0)
 sp = None
 
 class Stars:
-    def __init__(self,mass,metals,positions,age,sed_bin=[-1,-1,-1],lum=-1,fsps_zmet=20):
+    def __init__(self,mass,metals,positions,age,sed_bin=[-1,-1,-1],lum=-1,fsps_zmet=20,metals_arr=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
         self.mass = mass
         self.metals = metals
         self.positions = positions
@@ -37,6 +37,7 @@ class Stars:
         self.sed_bin = sed_bin
         self.lum = lum
         self.fsps_zmet = fsps_zmet
+        self.metals_arr = metals_arr
 
     def info(self):
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
@@ -44,12 +45,23 @@ class Stars:
 
 def star_list_gen(boost,dx,dy,dz,reg,ds):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
-
-    metals = reg["starmetals"].value
     mass = reg["starmasses"].value
     positions = reg["starcoordinates"].value
     age = reg["stellarages"].value
-    nstars = len(age)
+    nstars = len(reg["stellarages"].value) 
+    metals_arr = []
+    el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe' ]
+
+    try:                                                                                                                                                                
+        metals = np.zeros((nstars,11))-10.0
+        for i in range(11):
+            if i == 0:
+                el_str = ""
+            else:
+                el_str = "_"+el[i-1]
+            metals[:, i] = reg["starmetals"+el_str].value
+    except:
+        metals = reg["starmetals"].value
     print ('number of new stars =',nstars)
     
     #calculate the fsps interpolated metallicity
@@ -57,11 +69,12 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
     #if the metallicity has many fields, and not just global
     #metallicity then just extract the global metallicity
     if metals.ndim > 1:
-        metals = metals[:,0]
-
+        metals_tot = metals[:,0]
+    else:
+        metals_tot = metals
 
     print ('[SED_gen/star_list_gen:] Manually increasing the newstar metallicities by: ',cfg.par.Z_init)
-    metals += cfg.par.Z_init
+    metals_tot += cfg.par.Z_init
     
     #ADVANCED FEATURE - if force_stellar_metallcities or force_stellar_ages are set, then we set to those values
     if cfg.par.FORCE_STELLAR_AGES:
@@ -70,36 +83,31 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
 
     if cfg.par.FORCE_STELLAR_METALLICITIES:
         print ("[SED_GEN/stars_list_gen:]  FORCE_STELLAR_METALLICITIES is set to True: setting all stars to metallicity: %e "%cfg.par.FORCE_STELLAR_METALLICITIES_VALUE)
-        metals = np.repeat(cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,nstars)
+        metals_tot = np.repeat(cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,nstars)
 
 
 
-    zmet = fsps_metallicity_interpolate(metals)
+    zmet = fsps_metallicity_interpolate(metals_tot)
     #mwd(zmet,mass,'zmet_distribution.png')
 
     #print '[SED_gen/star_list_gen: ] fsps zmet codes:',zmet
 
     #create the stars_list full of Stars objects
     stars_list = []
-
     
-    for i in range(nstars):
-        stars_list.append(Stars(mass[i],metals[i],positions[i],age[i],fsps_zmet=zmet[i]))
-        
+    if metals.ndim > 1:
+        for i in range(nstars):
+            stars_list.append(Stars(mass[i],metals_tot[i],positions[i],age[i],fsps_zmet=zmet[i],metals_arr=metals[i]))
+    else:
+        for i in range(nstars):
+            stars_list.append(Stars(mass[i],metals_tot[i],positions[i],age[i],fsps_zmet=zmet[i]))
     
     #boost stellar positions to grid center
     print ('boosting new stars to coordinate center')
     stars_list = stars_coordinate_boost(stars_list,boost)
-    
-
-
-   
-
 
     #orig_stars_list_len = len(stars_list)
     
-
- 
     #ASSIGN DISK AND BULGE STARS - note, if these don't exist, it will
     #just make empty lists
 
@@ -180,8 +188,6 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
             for i in range(nstars_disk):
                 xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
                 diskstars_list[i].positions[:] = np.array([xpos,ypos,zpos])
-
-
 
     return stars_list,diskstars_list,bulgestars_list,reg
 
@@ -469,8 +475,8 @@ def newstars_gen(stars_list):
                         LogQ_1, Rin_1, LogU_1 = calc_LogU(1.e8 * constants.c.cgs.value / spec[0],
                                                           spec[1] * constants.L_sun.cgs.value, cfg.par.HII_nh,
                                                           cfg.par.HII_T)
-                        spec_neb = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, LogQ_1, Dust=cfg.par.neb_dust,
-                                               abund=cfg.par.neb_abund, useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleanup)
+                        spec_neb = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, LogQ_1, stars_list[i].metals_arr,
+                                               Dust=cfg.par.neb_dust, abund=cfg.par.neb_abund, useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleanup)
                     except ValueError as err:
                         print ("WARNING: CLOUDY run was unsucessful. Using lookup tables for nebular emission")
                         lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
