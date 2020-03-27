@@ -3,7 +3,7 @@
 snapshot_num = 134
 snapnum_str = '{:03d}'.format(snapshot_num)
 
-hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_files/gizmo/'
+hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_files/gizmo/mufasa/'
 
 snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
