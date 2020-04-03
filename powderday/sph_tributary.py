@@ -94,7 +94,7 @@ def sph_m_gen(fname,field_add):
 
     m = Model()
     
-    if cfg.par.FORCE_RANDOM_SEED == True: m.set_seed(cfg.par.seed)
+
 
     print ('Setting Octree Grid with Parameters: ')
 
