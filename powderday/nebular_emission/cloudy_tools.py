@@ -12,7 +12,7 @@ From cloudyfsps written by Nell Byler.
 """
 
 
-def calc_LogU(nuin0, specin0, nh, T, mstar=1.0):
+def calc_LogU(nuin0, specin0, nh, T, efrac, mstar=1.0):
     '''
     Claculates the number of lyman ionizing photons for given a spectrum
     Input spectrum must be in ergs/s/Hz!!
@@ -35,7 +35,7 @@ def calc_LogU(nuin0, specin0, nh, T, mstar=1.0):
     nu = hlam[::-1]
     f_nu = hflu[::-1]
     integrand = f_nu / (h * nu)
-    logQ = np.log10(integrate.simps(integrand, x=nu)*mstar) 
+    logQ = np.log10(integrate.simps(integrand, x=nu)*mstar*(1-efrac)) 
     Rin = (3 * (10 ** logQ) / (4 * np.pi * nh * nh * alpha)) ** (1. / 3.)
     logU = np.log10((10**logQ)/(4*np.pi*Rin*Rin*nh*c))
     return logQ, Rin, logU
@@ -106,20 +106,24 @@ def grouper(n, iterable):
         yield chunk
 
 
-def cmdf(stellar_mass, nbins, min_mass, max_mass):
+def cmdf(stellar_mass, nbins, min_mass, max_mass, beta):
     """
     Calculates the number of clusters per mass interval assuming a cluster
-    mass distribution function of the form dN/dM goes as M^(-2.0)
+    mass distribution function of the form dN/dM goes as M^(-beta)
     """
     interval = (max_mass-min_mass)/nbins
-    q = np.log10(stellar_mass/nbins)
     num = []
     mass = []
     for i in range(nbins):
         m = min_mass + (i*interval)
         mass.append(m)
-        num.append(round(10**(q - m)))
 
+    denom = sum((10**q)**(beta + 2) for q in mass)
+    A = (stellar_mass / denom)
+
+    for i in range(nbins):
+        N = A*((10**mass[i])**(1. + beta))
+        num.append(round(N))
     return mass, num
 
 

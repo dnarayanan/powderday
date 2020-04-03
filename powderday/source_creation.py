@@ -12,12 +12,12 @@ from powderday.analytics import dump_AGN_SEDs
 
 
 class Sed_Bins:
-    def __init__(self,mass,metals,age,fsps_zmet,metals_arr=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
+    def __init__(self,mass,metals,age,fsps_zmet,all_metals=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
         self.mass = mass
         self.metals = metals
         self.age = age
         self.fsps_zmet = fsps_zmet
-        self.metals_arr = metals_arr
+        self.all_metals = all_metals
 
 
 def add_unbinned_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmoflag, m, sp):

@@ -143,7 +143,7 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
 
     dmet = [fsps_metals[cfg.par.disk_stars_metals]]*len(diskmasses)
     dage = [(cfg.par.disk_stars_age*u.Gyr).to(u.yr).value]*len(diskmasses)
-
+    
     bmet = [fsps_metals[cfg.par.bulge_stars_metals]]*len(bulgemasses)
     bage = [(cfg.par.bulge_stars_age*u.Gyr).to(u.yr).value]*len(bulgemasses)
 
@@ -180,8 +180,9 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
         # save as though it's an octree..
         #np.savetxt(outfile,np.column_stack((gpos_x,gpos_y,gpos_z,grho)))
         np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+
 # Saves logU, Q and other related parameters in a file (seperate file is created for each galaxy)
-def logu_diagnostic(logQ, Rin, LogU, mstar, age, zmet, append = True):
+def logu_diagnostic(logQ, Rin, LogU, mstar, cluster_mass, num_cluster, age, zmet, append = True):
     if append == False:
         try: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
         except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
@@ -191,7 +192,7 @@ def logu_diagnostic(logQ, Rin, LogU, mstar, age, zmet, append = True):
         try:outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
         except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
         f = open(outfile, 'a+')
-        f.write(str(logQ) + "\t" + str(Rin) + "\t" + str(LogU) + "\t" + str(mstar) + "\t"+ str(age) + "\t" + str(zmet) + "\n")
+        f.write(str(logQ) + "\t" + str(Rin) + "\t" + str(LogU) + "\t" + str(mstar) + "\t"+ str(cluster_mass) + "\t" + str(num_cluster) + "\t" + str(age) + "\t" + str(zmet) + "\n")
         f.close()
 
     # Dumps AGN SEDs

@@ -218,13 +218,21 @@ over-ride if we find some HDF5 files don't contain this information.
 Stellar SEDs Info
 ------------
 
-:Force_Binning:
+:Force_ALL_BINNED:
 
-   Boolean.  True means force binning of the stellar SEDs (in bins of
-   age and metallicity).  False means don't.  False results in an
-   exact solution since the stellar SEDs are individually represented
+   Boolean. True means force binning of the stellar SEDs (in bins of
+   age and metallicity).  False means don't.
+
+:FORCE_ALL_UNBINNED:
+   
+   Boolean. True results in results in an exact solution since 
+   the stellar SEDs are individually represented
    (as opposed to broken up into bins).  This said, this can be very
    slow to run, and extremely hard on the memory.
+
+:max_age_unbinned_stars:
+   
+   Stars above this age are binned for getting stellar SEDs (works only if FORCE_ALL_BINNED and FORCE_ALL_UBINNED are set to False)
 
 :imf_type:
 
@@ -271,6 +279,10 @@ Nebular Emission Info
     Gas ionization parameter for HII regions. This is only relevant 
     if add_neb_emission is set to True and FORCE_gas_logu is set to True (Default: -2.0)
 
+:gas_logu_init = 0.0         
+
+    Force the ionization parameter to increase/decrease by this value (Scale: log). Useful if you want to run tests (Default: 0.0)
+    
 :FORCE_gas_logz:
    
     If set, then we force the metallicity (gas_logz) of HII regions to be gas_logz (next parameter)
@@ -345,6 +357,10 @@ Nebular Emission Info
     
     If True dust is included in HII regions when calculating nebular emission. (Default = False)
 
+:HII_escape_fraction
+    
+    HII region escape fraction (Default = 0.0)
+
 :cmdf_min_mass:
 
     While calulating nebular emission one star particle is broken down into smaller star cluster by
@@ -360,6 +376,10 @@ Nebular Emission Info
 
     The number of bins used for calulating the cluster mass distribution function (Default = 6.0)
 
+:cdmf_beta:
+    
+    The power law exponent (beta) for calculating CMDF (dN/dM goes as M^(beta))
+    
 :neb_file_output:
    
     If set to True creates an output file with ionization parameter (LogU), 
