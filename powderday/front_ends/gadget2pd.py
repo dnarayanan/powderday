@@ -150,7 +150,6 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
             scalefactor = data[('PartType4', 'StellarFormationTime')].value
-            print ("****66********** ", scalefactor)
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
             age = simtime - formation_time
@@ -246,7 +245,6 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     # for the metal fields have a few options since gadget can have different nomenclatures
     ad = ds.all_data()
-    print ("Printing ",ad[('PartType4', 'StellarFormationTime')].value)
     if ('PartType4', 'Metallicity_00') in ds.derived_field_list:
         try:
             ds.add_field(('starmetals'), function=_starmetals_00, units="code_metallicity", particle_type=True)

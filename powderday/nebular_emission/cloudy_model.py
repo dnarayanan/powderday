@@ -103,8 +103,8 @@ def write_cloudy_input(**kwargs):
         this_print('ionization parameter = {0:.3f} log'.format(pars['logU']))
 
     if pars['dust']:
-        #this_print('grains ism {0:.2f} log no qheat'.format(pars['gas_logZ']))
-        this_print('grains ism log no qheat')
+        this_print('grains ism {0:.2f} log no qheat'.format(pars['gas_logZ']))
+
     if pars['r_in_pc']:
         pc_to_cm = 3.08568e18
         r_out = np.log10(pars['r_inner'] * pc_to_cm)
@@ -116,7 +116,6 @@ def write_cloudy_input(**kwargs):
     if pars["abundance"] == "simba":
         abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
         abund_metal = convert_metals(pars["metals"][1:])
-        print (pars["logZ"], pars["metals"][1:],abund_metal)
         abund_str = "abundances "
         for e in range(len(abund_el)):
             el_str = str(abund_el[e]) + " " + str(abund_metal[e]) + " "

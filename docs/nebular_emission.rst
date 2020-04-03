@@ -26,4 +26,4 @@ Example: */home/desika.narayanan/c17.00/data*
 **Note:** If for any reason the CLOUDY run crashes the code reverts back to using lookup tables for that star particle.
 
 There are a whole host of parameters that you can change as per your need. A complete list of all the tunable parameters 
-is described in the parameters_description section. 
+is described in the parameters description section. 
