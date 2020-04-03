@@ -23,6 +23,8 @@ import copy
 import numpy as np
 import sys
 import gc
+import random
+
 gc.set_threshold(0)
 
 script, pardir, parfile, modelfile = sys.argv
@@ -113,6 +115,13 @@ if par.FORCE_ALL_UNBINNED == False:
     m = add_binned_seds(df_nu, stars_list, diskstars_list,
                         bulgestars_list, ds.cosmological_simulation, m, sp)
 
+
+
+#set the random seets
+if cfg.par.FORCE_RANDOM_SEED == False:
+    m.set_seed(random.randrange(0,10000)*-1)
+else:
+    m.set_seed(cfg.par.seed)
 
 # save SEDs
 # stars and black holes can't both be in the sim and write stellar SEDs to a file becuase they have different wavelength sizes
