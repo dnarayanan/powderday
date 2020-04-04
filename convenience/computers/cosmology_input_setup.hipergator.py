@@ -16,10 +16,10 @@ nnodes=1
 
 startsnap = 305
 endsnap = 306
-npzfile = '/ufrc/narayanan/desika.narayanan/pd_runs/simba/m25n512/simba_m25n512.galaxies_pos_for_pd.npz'
+npzfile = '/ufrc/narayanan/s.lower/simba_snap305_pos_test.npz'
 
 model_dir_base = '/ufrc/narayanan/desika.narayanan/paper/powderday_paper/codes/sfr_lir/'
-hydro_dir = '/orange/narayanan/desika.narayanan/gizmo_runs/simba/m25n512_filtered/output/'
+hydro_dir = '/orange/narayanan/s.lower/simba/filtered_snapshots/'
 
 hydro_outputfile = '/ufrc/narayanan/pg3552/gizmo/output_time/output_m25.txt'
 
