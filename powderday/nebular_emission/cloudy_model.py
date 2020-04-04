@@ -113,7 +113,12 @@ def write_cloudy_input(**kwargs):
 
     linefile = "cloudyLines.dat"
 
-    if pars["abundance"] == "simba":
+    # Check to see if there was an error in getting metallicities from the simulation
+    # If so code revert back to using "dopita" abundances in place of "direct"
+    if (any(q == -1.0 for q in pars["metals"][1:]) and pars["abundance"] == "direct"):
+        pars["abundance"] == "dopita"
+
+    if pars["abundance"] == "direct":
         abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
         abund_metal = convert_metals(pars["metals"][1:])
         abund_str = "abundances "
