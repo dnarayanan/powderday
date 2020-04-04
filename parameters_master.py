@@ -52,9 +52,9 @@ SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 #===============================================
 #STELLAR SEDS INFO
 #===============================================
-FORCE_ALL_BINNED = True           # force all star particles to be binned for calculating SED
-FORCE_ALL_UNBINNED = False        # force all star particles to be unbinned for calculating SED
-max_age_unbinned_stars = 1.e-2    # Age below which stars will be binned (works only if FORCE_ALL_BINNED and FORCE_ALL_UBINNED are set to False)
+FORCE_BINNED = True               # force all star particles to be binned for calculating SED
+FORCE_UNBINNED = False            # force all star particles to be unbinned for calculating SED
+max_age_unbinned_stars = 1.e-2    # Age (in Gyr) below which stars will be binned (works only if both FORCE_BINNED and FORCE_UBINNED are set to False)
 
 imf_type = 2 # FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 # weight given to post agb stars# 1 is the default
