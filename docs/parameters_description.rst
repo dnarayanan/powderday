@@ -218,12 +218,12 @@ over-ride if we find some HDF5 files don't contain this information.
 Stellar SEDs Info
 ------------
 
-:Force_ALL_BINNED:
+:Force_BINNED:
 
    Boolean. True means force binning of the stellar SEDs (in bins of
    age and metallicity).  False means don't.
 
-:FORCE_ALL_UNBINNED:
+:FORCE_UNBINNED:
    
    Boolean. True results in results in an exact solution since 
    the stellar SEDs are individually represented
@@ -232,7 +232,7 @@ Stellar SEDs Info
 
 :max_age_unbinned_stars:
    
-   Stars above this age are binned for getting stellar SEDs (works only if FORCE_ALL_BINNED and FORCE_ALL_UBINNED are set to False)
+   Stars above this age (in Gyr) are binned for getting stellar SEDs (works only if both FORCE_BINNED and FORCE_UBINNED are set to False)
 
 :imf_type:
 
@@ -332,6 +332,10 @@ Nebular Emission Info
       Abundances from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on 
       Grevesse+Sauvel (1998) and Caffau+2011 
     
+    :direct:
+      Abundances are taken directly from the simulation if possible. Defaults 
+      to using "dopita" if there is an error.
+
    This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
 
 :use_Q:
