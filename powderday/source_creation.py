@@ -20,7 +20,7 @@ class Sed_Bins:
         self.all_metals = all_metals
 
 
-def add_unbinned_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmoflag, m, sp):
+def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmoflag, m, sp):
 
     print("--------------------------------\n")
     print("Adding unbinned stars to the grid\n")
@@ -30,11 +30,8 @@ def add_unbinned_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmo
     unbinned_stars_list = []
 
     for star in stars_list:
-        if cfg.par.FORCE_UNBINNED:
+        if star.age <= cfg.par.max_age_direct:
             unbinned_stars_list.append(star)
-        else:
-            if star.age <= cfg.par.max_age_unbinned_stars:
-                unbinned_stars_list.append(star)
 
     nstars = len(unbinned_stars_list)
     stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(unbinned_stars_list, cosmoflag, sp)
@@ -165,9 +162,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
         if stars_list[i].age > maximum_age: maximum_age = stars_list[i].age
 
     # If Flag is set we do not bin stars younger than the age set by max_age_unbinned_stars
-    if not cfg.par.FORCE_BINNED:
-        if cfg.par.max_age_unbinned_stars > minimum_age:
-            minimum_age = cfg.par.max_age_unbinned_stars + 0.001
+    if cfg.par.direct_add_stars:
+        if cfg.par.max_age_direct > minimum_age:
+            minimum_age = cfg.par.max_age_direct + 0.001
 
     delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
     

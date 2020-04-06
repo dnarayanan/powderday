@@ -5,7 +5,7 @@
 # IMPORT STATEMENTS
 # =========================================================
 from __future__ import print_function
-from powderday.source_creation import add_unbinned_stars, add_binned_seds, BH_source_add
+from powderday.source_creation import direct_add_stars, add_binned_seds, BH_source_add
 from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump, logu_diagnostic
 from astropy import constants
 import fsps
@@ -52,7 +52,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 # =========================================================
 # Enforce Backwards Compatibility for Non-Critical Variables
 # =========================================================
-cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_UNBINNED, cfg.par.max_age_unbinned_stars, cfg.par.BH_SED, cfg.par.IMAGING, cfg.par.SED, cfg.par.IMAGING_TRANSMISSION_FILTER, cfg.par.SED_MONOCHROMATIC, cfg.par.SKIP_RT, cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS, cfg.par.n_MPI_processes, cfg.par.SOURCES_RANDOM_POSITIONS, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logu_init, cfg.par.gas_logz, cfg.par.FORCE_gas_logz, cfg.par.source_logq, cfg.par.FORCE_logq, cfg.par.FORCE_inner_radius, cfg.par.inner_radius, cfg.par.use_Q, cfg.par.neb_dust, cfg.par.cmdf_min_mass, cfg.par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.par.cmdf_beta, cfg.par.SUBLIMATION, cfg.par.SUBLIMATION_TEMPERATURE, cfg.model.TCMB, cfg.model.THETA, cfg.model.PHI, cfg.par.MANUAL_ORIENTATION, cfg.par.solar, cfg.par.dust_grid_type, cfg.par.BH_model, cfg.par.BH_modelfile, cfg.par.BH_var, cfg.par.FORCE_STELLAR_AGES, cfg.par.FORCE_STELLAR_AGES_VALUE, cfg.par.FORCE_STELLAR_METALLICITIES, cfg.par.FORCE_STELLAR_METALLICITIES_VALUE, cfg.par.HII_T, cfg.par.HII_nh, cfg.par.HII_max_age, cfg.par.HII_escape_fraction, cfg.par.neb_abund, cfg.par.use_cloudy_tables, cfg.par.cloudy_cleanup, cfg.par.neb_file_output, cfg.par.stellar_cluster_mass, cfg.par.filterdir, cfg.par.filterfiles, cfg.par.PAH_frac = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED, cfg.par.direct_add_stars, cfg.par.max_age_direct, cfg.par.BH_SED, cfg.par.IMAGING, cfg.par.SED, cfg.par.IMAGING_TRANSMISSION_FILTER, cfg.par.SED_MONOCHROMATIC, cfg.par.SKIP_RT, cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS, cfg.par.n_MPI_processes, cfg.par.SOURCES_RANDOM_POSITIONS, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logu_init, cfg.par.gas_logz, cfg.par.FORCE_gas_logz, cfg.par.source_logq, cfg.par.FORCE_logq, cfg.par.FORCE_inner_radius, cfg.par.inner_radius, cfg.par.use_Q, cfg.par.neb_dust, cfg.par.cmdf_min_mass, cfg.par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.par.cmdf_beta, cfg.par.SUBLIMATION, cfg.par.SUBLIMATION_TEMPERATURE, cfg.model.TCMB, cfg.model.THETA, cfg.model.PHI, cfg.par.MANUAL_ORIENTATION, cfg.par.solar, cfg.par.dust_grid_type, cfg.par.BH_model, cfg.par.BH_modelfile, cfg.par.BH_var, cfg.par.FORCE_STELLAR_AGES, cfg.par.FORCE_STELLAR_AGES_VALUE, cfg.par.FORCE_STELLAR_METALLICITIES, cfg.par.FORCE_STELLAR_METALLICITIES_VALUE, cfg.par.HII_T, cfg.par.HII_nh, cfg.par.HII_max_age, cfg.par.HII_escape_fraction, cfg.par.neb_abund, cfg.par.use_cloudy_tables, cfg.par.cloudy_cleanup, cfg.par.neb_file_output, cfg.par.stellar_cluster_mass, cfg.par.filterdir, cfg.par.filterfiles, cfg.par.PAH_frac = bc.variable_set()
 
 # =========================================================
 # GRIDDING
@@ -106,14 +106,12 @@ N_METAL_BINS = len(fsps_metals)
 if cfg.par.add_neb_emission: logu_diagnostic(None,None,None,None,None,None,None,None,append=False)
 
 if par.FORCE_BINNED == False:
-    m = add_unbinned_stars(df_nu, stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, m, sp)
+    m = direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, m, sp)
 
 # note - the generation of the SEDs is called within
 # add_binned_seds itself, unlike add_newstars, which requires
 # that sg.allstars_sed_gen() be called first.
-if par.FORCE_UNBINNED == False:
-    m = add_binned_seds(df_nu, stars_list, diskstars_list,
-                        bulgestars_list, ds.cosmological_simulation, m, sp)
+m = add_binned_seds(df_nu, stars_list, diskstars_list,bulgestars_list, ds.cosmological_simulation, m, sp)
 
 
 
