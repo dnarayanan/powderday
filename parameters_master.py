@@ -109,7 +109,7 @@ neb_abund = "dopita"        # This sets the HII region elemental abundances for 
                             #    gutkin:    Abundabces from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on Grevesse+Sauvel (1998) 
                             #               and Caffau+2011 
                             #    direct:    Abundances are taken directly from the simulation if possible. Defaults to using "dopita" if there is 
-                            #               an error.
+                            #               an error. (Note: Works only for unbinned star particles make sure to set the SED flags properly)
                             # This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
 
 use_Q = True                # If True, we run CLOUDY by specifying number of ionizing photons which are calculated 
