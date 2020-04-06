@@ -279,7 +279,7 @@ Nebular Emission Info
     Gas ionization parameter for HII regions. This is only relevant 
     if add_neb_emission is set to True and FORCE_gas_logu is set to True (Default: -2.0)
 
-:gas_logu_init = 0.0         
+:gas_logu_init:         
 
     Force the ionization parameter to increase/decrease by this value (Scale: log). Useful if you want to run tests (Default: 0.0)
     
@@ -362,7 +362,7 @@ Nebular Emission Info
     
     If True dust is included in HII regions when calculating nebular emission. (Default = False)
 
-:HII_escape_fraction
+:HII_escape_fraction:
     
     HII region escape fraction (Default = 0.0)
 
