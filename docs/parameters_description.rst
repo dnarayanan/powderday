@@ -334,7 +334,8 @@ Nebular Emission Info
     
     :direct:
       Abundances are taken directly from the simulation if possible. Defaults 
-      to using "dopita" if there is an error.
+      to using "dopita" if there is an error. (Note: Works only for unbinned star 
+      particles make sure to set the SED flags properly)
 
    This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
 
