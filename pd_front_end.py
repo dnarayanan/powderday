@@ -5,8 +5,8 @@
 # IMPORT STATEMENTS
 # =========================================================
 from __future__ import print_function
-from powderday.source_creation import add_newstars, add_binned_seds, BH_source_add
-from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump
+from powderday.source_creation import direct_add_stars, add_binned_seds, BH_source_add
+from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump, logu_diagnostic
 from astropy import constants
 import fsps
 from powderday.image_processing import add_transmission_filters, convolve
@@ -52,7 +52,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 # =========================================================
 # Enforce Backwards Compatibility for Non-Critical Variables
 # =========================================================
-cfg.par.FORCE_RANDOM_SEED, cfg.par.BH_SED, cfg.par.IMAGING, cfg.par.SED, cfg.par.IMAGING_TRANSMISSION_FILTER, cfg.par.SED_MONOCHROMATIC, cfg.par.SKIP_RT, cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS, cfg.par.n_MPI_processes, cfg.par.SOURCES_RANDOM_POSITIONS, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logz, cfg.par.FORCE_gas_logz, cfg.par.SUBLIMATION, cfg.par.SUBLIMATION_TEMPERATURE, cfg.model.TCMB, cfg.model.THETA, cfg.model.PHI, cfg.par.MANUAL_ORIENTATION, cfg.par.solar, cfg.par.dust_grid_type, cfg.par.BH_model, cfg.par.BH_modelfile, cfg.par.BH_var, cfg.par.FORCE_STELLAR_AGES, cfg.par.FORCE_STELLAR_AGES_VALUE, cfg.par.FORCE_STELLAR_METALLICITIES, cfg.par.FORCE_STELLAR_METALLICITIES_VALUE, cfg.par.HII_T, cfg.par.HII_nh, cfg.par.HII_max_age, cfg.par.neb_file_output, cfg.par.stellar_cluster_mass, cfg.par.filterdir, cfg.par.filterfiles, cfg.par.PAH_frac = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED, cfg.par.direct_add_stars, cfg.par.max_age_direct, cfg.par.BH_SED, cfg.par.IMAGING, cfg.par.SED, cfg.par.IMAGING_TRANSMISSION_FILTER, cfg.par.SED_MONOCHROMATIC, cfg.par.SKIP_RT, cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS, cfg.par.n_MPI_processes, cfg.par.SOURCES_RANDOM_POSITIONS, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logu_init, cfg.par.gas_logz, cfg.par.FORCE_gas_logz, cfg.par.source_logq, cfg.par.FORCE_logq, cfg.par.FORCE_inner_radius, cfg.par.inner_radius, cfg.par.use_Q, cfg.par.neb_dust, cfg.par.cmdf_min_mass, cfg.par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.par.cmdf_beta, cfg.par.SUBLIMATION, cfg.par.SUBLIMATION_TEMPERATURE, cfg.model.TCMB, cfg.model.THETA, cfg.model.PHI, cfg.par.MANUAL_ORIENTATION, cfg.par.solar, cfg.par.dust_grid_type, cfg.par.BH_model, cfg.par.BH_modelfile, cfg.par.BH_var, cfg.par.FORCE_STELLAR_AGES, cfg.par.FORCE_STELLAR_AGES_VALUE, cfg.par.FORCE_STELLAR_METALLICITIES, cfg.par.FORCE_STELLAR_METALLICITIES_VALUE, cfg.par.HII_T, cfg.par.HII_nh, cfg.par.HII_max_age, cfg.par.HII_escape_fraction, cfg.par.neb_abund, cfg.par.use_cloudy_tables, cfg.par.cloudy_cleanup, cfg.par.neb_file_output, cfg.par.stellar_cluster_mass, cfg.par.filterdir, cfg.par.filterfiles, cfg.par.PAH_frac = bc.variable_set()
 
 # =========================================================
 # GRIDDING
@@ -93,7 +93,6 @@ df.close()
 stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds)
 nstars = len(stars_list)
 
-
 if cfg.par.BH_SED == True:
     BH_source_add(m, reg, df_nu, boost)
 
@@ -102,18 +101,17 @@ if cfg.par.BH_SED == True:
 fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
 N_METAL_BINS = len(fsps_metals)
 
-if par.FORCE_BINNING == False:
-    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, sp)
-    m = add_newstars(df_nu, stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, m)
 
+#initializing the logU file newly
+if cfg.par.add_neb_emission: logu_diagnostic(None,None,None,None,None,None,None,None,append=False)
 
-else:
-    # note - the generation of the SEDs is called within
-    # add_binned_seds itself, unlike add_newstars, which requires
-    # that sg.allstars_sed_gen() be called first.
+if par.FORCE_BINNED == False:
+    m = direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, m, sp)
 
-    m = add_binned_seds(df_nu, stars_list, diskstars_list,
-                        bulgestars_list, ds.cosmological_simulation, m, sp)
+# note - the generation of the SEDs is called within
+# add_binned_seds itself, unlike add_newstars, which requires
+# that sg.allstars_sed_gen() be called first.
+m = add_binned_seds(df_nu, stars_list, diskstars_list,bulgestars_list, ds.cosmological_simulation, m, sp)
 
 
 
