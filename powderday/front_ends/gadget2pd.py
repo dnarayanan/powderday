@@ -109,8 +109,11 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
 
         
-    def _dustmass(field, data):
+    def _dustmass_manual(field, data):
         return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
+
+    def _dustmass_dtm(field,data):
+        return (data["metalmass"]*cfg.par.dusttometals_ratio)
 
     def _li_ml_dustmass(field,data):
         return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
@@ -118,8 +121,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     def _dustsmoothedmasses(field, data):
         if yt.__version__ == '4.0.dev0':
             return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
+
         else:
             return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+
 
     def _li_ml_dustsmoothedmasses(field,data):
         if yt.__version__ == '4.0.dev0':
@@ -283,8 +288,11 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     # get the dust mass
 
-    if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
-        ds.add_field(('dustmass'), function=_dustmass, units='code_mass', particle_type=True)
+    if cfg.par.dust_grid_type == 'dtm':
+        ds.add_field(('dustmass'), function=_dustmass_dtm,units='code_mass',particle_type=True)
+    if cfg.par.dust_grid_type == 'manual':
+        #if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
+        ds.add_field(('dustmass'), function=_dustmass_manual, units='code_mass', particle_type=True)
         ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
         if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
 
