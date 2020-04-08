@@ -52,8 +52,10 @@ SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 #===============================================
 #STELLAR SEDS INFO
 #===============================================
-FORCE_BINNING = True #force SED binning
-
+FORCE_BINNED = True               # force all star particles to be binned for calculating SED
+direct_add_stars = False          # If True, all star particles below max_age_direct (next parameter) are added
+                                  # directly without binning for calculating SED
+max_age_direct  = 1.e-2           # Age (in Gyr) below which stars will be not be binne
 imf_type = 1 #FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 0 #weight given to post agb stars# 1 is the default
 add_agb_dust_model=False #add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
