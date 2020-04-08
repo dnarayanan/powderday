@@ -63,7 +63,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
 
     def _dustmass_dtm(field,data):
-        return (data["metalmass"]*cfg.par.dusttometals_ratio)
+        return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
 
 
     def _li_ml_dustmass(field,data):
