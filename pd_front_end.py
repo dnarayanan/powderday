@@ -305,11 +305,11 @@ if cfg.par.IMAGING == True:
         m_imaging.run(model.outputfile+'.image', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
 
         convolve(model.outputfile+'.image', par.filterfiles, filter_data)
-
-    # Print a message in case that skip_rt debugging flag is set:
-    print('++++++++++++++++++++++++++++++++++++')
-    print('WARNING: SKIP RT is set in the parameters_master file - this is why your code didnt run')
-    print('++++++++++++++++++++++++++++++++++++')
+    else:
+        # Print a message in case that skip_rt debugging flag is set:
+        print('++++++++++++++++++++++++++++++++++++')
+        print('WARNING: SKIP RT is set in the parameters_master file - this is why your code didnt run')
+        print('++++++++++++++++++++++++++++++++++++')
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
     dump_data(reg, model)
