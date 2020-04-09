@@ -60,9 +60,9 @@ def enzo_m_gen(fname,field_add):
    
     boost = np.array([xcent,ycent,zcent])
 
-    dx = ds1.domain_width.in_units('cm')
-    dy = ds1.domain_width.in_units('cm')
-    dz = ds1.domain_width.in_units('cm')
+    dx = ds1.domain_width[0].in_units('cm')
+    dy = ds1.domain_width[1].in_units('cm')
+    dz = ds1.domain_width[2].in_units('cm')
     
     return m,xcent,ycent,zcent,dx,dy,dz,reg,ds1,boost
 
