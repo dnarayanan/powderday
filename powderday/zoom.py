@@ -181,11 +181,9 @@ def enzo_zoom(fname,ds,field_add):
     #set up the cut out region from the main dataset.  here, we create
     #a yt region out of the parent ds, and then re-save this as a cutout dataset named ds1
     center = ds.arr([cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent],'code_length')
-    box_len = ds.quan(cfg.par.zoom_box_len,'kpc').in_units('code_length')
-    min_region = [center[0]-box_len,center[1]-box_len,center[2]-box_len]
-    max_region = [center[0]+box_len,center[1]+box_len,center[2]+box_len]
-    reg = ds.region(center,min_region,max_region)
-
+    box_len = ds.quan(cfg.par.zoom_box_len,'kpc').to('code_length')
+    reg = ds.region(center, center-box_len, center+box_len)
+    
     #now play a game where we save the region as a dataset and then
     #reload this as a new ds.  we need to do this because the
     #convenience function within hyperion, AMRGrid.from_yt requires a
@@ -194,10 +192,13 @@ def enzo_zoom(fname,ds,field_add):
     reg.save_as_dataset('temp_enzo.h5',fields=[('all','creation_time'),('gas','metal_density'),('gas','density'),('newstars','metallicity_fraction'),('newstars','particle_mass'),('all', 'particle_index'),('index', 'grid_level'),('gas','dust_density')])
     ds1 = yt.load('temp_enzo.h5')
     ad1 = ds1.all_data()
-    print("[zoom/enzo_zoom]: temporarily savingtemp_enzo.h5")
+    print("[zoom/enzo_zoom]: temporarily saving temp_enzo.h5")
 
 
     #now copy over all of the ds.index grid construction items that are in the region to the new dataset
+    ds1.domain_width = reg.right_edge - reg.left_edge
+    ds1.domain_left_edge = reg.left_edge
+    ds1.domain_right_edge = reg.right_edge
     ds1.index.get_levels = reg.index.get_levels
     ds1.index.get_smallest_ds = reg.index.get_smallest_dx
     ds1.index.grid = reg.index.grid
