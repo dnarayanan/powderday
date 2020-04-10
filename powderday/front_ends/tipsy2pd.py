@@ -40,7 +40,7 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=T
     
     def _gasdensity(field,data):
         return data[('Gas', 'Density')]
-        
+
     def _gasmetals(field,data):
         return data[('Gas', 'Metals')]
         
@@ -58,6 +58,9 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=T
 
     def _gasmasses(field,data):
         return data[('Gas','Mass')]
+
+    def _dustmass_dtm(field,data):
+        return (data["gasmasses"]*cfg.par.dusttometals_ratio)
 
     def _metaldens(field,data):
         return (data["Gas","Density"]*data["Gas","Metals"])
@@ -124,7 +127,9 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=T
         ds.add_field(('diskstarmasses'),function=_diskstarmasses,units='g',particle_type=True)
         ds.add_field(('diskstarcoordinates'),function=_diskstarcoordinates,units='cm',particle_type=True)
 
-
+    #add the dust mass, but only if we're using the DTM dust mass
+    if cfg.par.dust_grid_type == 'dtm':
+        ds.add_field(('dustmass'), function=_dustmass_dtm,units='code_mass',particle_type=True)
 
     ad = ds.all_data()
     return ds
