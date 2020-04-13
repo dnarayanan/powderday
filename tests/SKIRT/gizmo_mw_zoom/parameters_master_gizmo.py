@@ -2,7 +2,7 @@
 #===============================================
 #HOME INFORMATION
 #===============================================
-pd_source_dir = '/ufrc/narayanan/desika.narayanan/pd_git/'
+pd_source_dir = '/home/desika.narayanan/pd_git/'
 
 #===============================================
 #RESOLUTION KEYWORDS
@@ -36,7 +36,7 @@ seed = -12345 # has to be an int, and negative.
 #===============================================
 #DUST INFORMATION 
 #===============================================
-dustdir = '/home/desika/pd/hyperion-dust-0.1.0/dust_files/' #location of your dust files
+dustdir = '/home/desika/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = False
 
@@ -179,7 +179,7 @@ bulge_stars_metals = 19 # in fsps metallicity units
 N_STELLAR_AGE_BINS = 100
 
 
-metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
+metallicity_legend= "/home/desika.narayanan/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
 
 #===============================================
 #BLACK HOLE STUFF
@@ -188,7 +188,7 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.
 BH_SED = False
 BH_eta = 0.1 #bhluminosity = BH_eta * mdot * c**2.
 BH_model = "Nenkova"
-BH_modelfile = "/home/desika.narayanan/powderday/agn_models/clumpy_models_201410_tvavg.hdf5"
+BH_modelfile = "/home/desika.narayanan/pd_git/powderday/agn_models/clumpy_models_201410_tvavg.hdf5"
 # The Nenkova BH_modelfile can be downloaded here:
 # https://www.clumpy.org/downloads/clumpy_models_201410_tvavg.hdf5
 BH_var = True # Include time variations on BH luminosity (default Hickox+ 2014)
@@ -199,7 +199,7 @@ nenkova_params = [5,30,0,1.5,30,40] #Nenkova+ (2008) model parameters
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 1
+NTHETA = 6
 NPHI = 1
 SED = True
 
