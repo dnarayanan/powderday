@@ -113,7 +113,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
 
     def _dustmass_dtm(field,data):
-        return (data["metalmass"]*cfg.par.dusttometals_ratio)
+        return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
 
     def _li_ml_dustmass(field,data):
         return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
