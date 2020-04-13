@@ -199,7 +199,7 @@ nenkova_params = [5,30,0,1.5,30,40] #Nenkova+ (2008) model parameters
 #IMAGES AND SED
 #===============================================
 
-NTHETA = 6
+NTHETA = 1
 NPHI = 1
 SED = True
 
