@@ -141,12 +141,18 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
     smasses = np.concatenate((smasses, diskmasses, bulgemasses))
 
     fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
-
-    dmet = [fsps_metals[cfg.par.disk_stars_metals]]*len(diskmasses)
-    dage = [(cfg.par.disk_stars_age*u.Gyr).to(u.yr).value]*len(diskmasses)
     
-    bmet = [fsps_metals[cfg.par.bulge_stars_metals]]*len(bulgemasses)
-    bage = [(cfg.par.bulge_stars_age*u.Gyr).to(u.yr).value]*len(bulgemasses)
+    if ds.cosmological_simulation:
+        dmet = [0.]*len(diskmasses)
+        dage = [0.]*len(diskmasses)
+        bmet = [0.]*len(bulgemasses)
+        bage = [0.]*len(bulgemasses)
+
+    else:
+        dmet = [fsps_metals[cfg.par.disk_stars_metals]]*len(diskmasses)
+        dage = [(cfg.par.disk_stars_age*u.Gyr).to(u.yr).value]*len(diskmasses)
+        bmet = [fsps_metals[cfg.par.bulge_stars_metals]]*len(bulgemasses)
+        bage = [(cfg.par.bulge_stars_age*u.Gyr).to(u.yr).value]*len(bulgemasses)
 
     #ages and metallicities need to come from the stars list in case
     #we do something in parameters master to change the values
