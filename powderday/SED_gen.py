@@ -455,7 +455,7 @@ def newstars_gen(stars_list):
                                                 cfg.par.HII_nh, cfg.par.HII_T, cfg.par.HII_escape_fraction, mstar=10**cluster_mass[j])
                 
                 alpha = 2.5e-13*((cfg.par.HII_T/(10**4))**(-0.85))
-                LogU = LogU - cfg.par.gas_logu_init
+                LogU = LogU + cfg.par.gas_logu_init
                 LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*cfg.par.HII_nh))
                 Rin = ((3*(10 ** LogQ))/(4*np.pi*(cfg.par.HII_nh**2)*alpha))**(1./3.)
                 
