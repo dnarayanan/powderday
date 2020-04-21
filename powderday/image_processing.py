@@ -92,6 +92,8 @@ def convolve(image_file, filterfilenames, filter_data):
 
     # Don't add the names of filters that were skipped
     trimmed_names = list(set(filterfilenames) - set(skip_conv))
+    # Encode in utf8 so hdf5 file can process and append names (doesn't accept strings)
+    names = [n.encode('utf8') for n in trimmed_names]
     f.create_dataset("filter_names", data=trimmed_names)
 
     for i in range(len(filterfilenames)):
