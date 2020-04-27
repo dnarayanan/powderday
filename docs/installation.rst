@@ -10,6 +10,7 @@ Overview of Requirements
 	  * scipy
 	  * astropy (3.2.3)
 	  * h5py
+	  * scikit-learn
 
 	* **compilers**
 
