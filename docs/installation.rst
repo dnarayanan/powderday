@@ -393,6 +393,17 @@ like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it may
 not actually execute properly if the correct compilers aren't set in
 the MakeFile.  Thanks to Ena Choi for pointing this one out.
 
+4. `Hyperion <http://www.hyperion-rt.org>`_ does not run with MPI
+   support.  Some users have found that when manually installing
+   `Hyperion <http://www.hyperion-rt.org>`_ (as opposed to using the
+   conda installation) that MPI will then work.
+
+5. On the HiPerGator supercomputing cluster, `Hyperion
+   <http://www.hyperion-rt.org>`_ will not install manually, complaining about mismatches with gcc and HDF5.  The solution to this is to use the intel compilers.  The following is a known pacakge combination that works::
+
+  >module load git/2.14.1  intel/2018.1.163  openmpi/3.1.0  libz/1.2.8 hdf5/1.10.1
+
+
 Hyperion Installation Issues
 ---------------
 
