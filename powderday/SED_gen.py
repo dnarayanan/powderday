@@ -422,6 +422,12 @@ def newstars_gen(stars_list):
         else:
             LogZ = cfg.par.gas_logz
         
+        if cfg.par.dust_screen == True:
+            sp.params["dust_type"]=0
+            sp.params["dust1"]=cfg.par.dust1
+            sp.params["dust2"]=cfg.par.dust2
+
+
         if cfg.par.CF_on == True:
             sp.params["dust_type"] = 0
             sp.params["dust1"] = 1
@@ -572,6 +578,12 @@ def calc_emline(stars_list):
             sp.params['gas_logz'] =np.log10(stars_list[i].metals/cfg.par.solar)
         else:
             sp.params['gas_logz'] = cfg.par.gas_logz
+
+        if cfg.par.dust_screen == True:
+            sp.params["dust_type"]=0
+            sp.params["dust1"]=cfg.par.dust1
+            sp.params["dust2"]=cfg.par.dust2
+
 
         if cfg.par.CF_on == True:
             sp.params["dust_type"] = 0
