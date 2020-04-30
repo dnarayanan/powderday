@@ -3,7 +3,7 @@
 snapnum_str = '143'
 hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_files/smuggle/low_res/'
 
-snapshot_name = 'snapshot_143.hdf5'
+snapshot_name = 'smuggle_snapshot_143.low_res.hdf5'
 
 #where the files should go
 PD_output_dir = '/home/desika.narayanan/pd_git/tests/SKIRT/arepo_smuggle_low_res/'
