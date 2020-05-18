@@ -8,11 +8,6 @@ def variable_set():
         cfg.par.FORCE_RANDOM_SEED  = None
 
     try:
-        cfg.par.direct_add_stars
-    except:
-        cfg.par.direct_add_stars = False
-
-    try:
         cfg.par.max_age_direct
     except:
         cfg.par.max_age_direct = 1.e-2
@@ -285,4 +280,4 @@ def variable_set():
     except:
         cfg.par.FORCE_BINNED = True
 
-    return cfg.par.FORCE_RANDOM_SEED,cfg.par.direct_add_stars,cfg.par.max_age_direct,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logu_init,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.source_logq,cfg.par.FORCE_logq,cfg.par.FORCE_inner_radius,cfg.par.inner_radius,cfg.par.use_Q,cfg.par.neb_dust,cfg.par.cmdf_min_mass,cfg.par.cmdf_max_mass,cfg.par.cmdf_bins,cfg.par.cmdf_beta,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.BH_model,cfg.par.BH_modelfile,cfg.par.BH_var,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,cfg.par.HII_T,cfg.par.HII_nh,cfg.par.HII_max_age,cfg.par.HII_escape_fraction,cfg.par.neb_abund,cfg.par.use_cloudy_tables,cfg.par.cloudy_cleanup,cfg.par.neb_file_output,cfg.par.stellar_cluster_mass, cfg.par.filterdir, cfg.par.filterfiles, cfg.par.PAH_frac, cfg.par.FORCE_BINNED
+    return cfg.par.FORCE_RANDOM_SEED,cfg.par.max_age_direct,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logu_init,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.source_logq,cfg.par.FORCE_logq,cfg.par.FORCE_inner_radius,cfg.par.inner_radius,cfg.par.use_Q,cfg.par.neb_dust,cfg.par.cmdf_min_mass,cfg.par.cmdf_max_mass,cfg.par.cmdf_bins,cfg.par.cmdf_beta,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.BH_model,cfg.par.BH_modelfile,cfg.par.BH_var,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,cfg.par.HII_T,cfg.par.HII_nh,cfg.par.HII_max_age,cfg.par.HII_escape_fraction,cfg.par.neb_abund,cfg.par.use_cloudy_tables,cfg.par.cloudy_cleanup,cfg.par.neb_file_output,cfg.par.stellar_cluster_mass, cfg.par.filterdir, cfg.par.filterfiles, cfg.par.PAH_frac, cfg.par.FORCE_BINNED
