@@ -22,6 +22,7 @@ setup(
         'h5py>=2.9',
         'yt',
         'fsps',
+        'sklearn'
     ],
     scripts=["pd_front_end.py"],
     project_urls={

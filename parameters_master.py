@@ -61,12 +61,12 @@ max_age_direct  = 1.e-2           # Age (in Gyr) below which stars will be not b
 imf_type = 2 # FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 # weight given to post agb stars# 1 is the default
 
+add_agb_dust_model = False    # add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
+
 #===============================================
 #NEBULAR EMISSION INFO
 #===============================================
 add_neb_emission = False    # add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
-
-add_agb_dust_model = False    # add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 
 use_cloudy_tables = True    # If True, CLOUDY look up tables will be used to calculate nebular emission.
                             # Otherwise CLOUDY models are generated individually 
@@ -155,6 +155,10 @@ cloudy_cleanup = True       # If set to True, all the CLOUDY files will be delet
                             # Only relevant if add_neb_emission = True and use_cloudy_tables = True (Default: True)
 
 
+#===============================================
+#BIRTH CLOUD INFORMATION
+#===============================================
+
 CF_on = False               # if set to true, then we enable the Charlot & Fall birthcloud models 
 
 birth_cloud_clearing_age = 0.01 # Gyr - stars with age <
@@ -162,6 +166,10 @@ birth_cloud_clearing_age = 0.01 # Gyr - stars with age <
                                 # charlot&fall birthclouds meaningless
                                 # of CF_on  == False
 
+
+#===============================================
+# Idealized Galaxy SED Parameters
+#===============================================
 Z_init = 0 # force a metallicity increase in the newstar particles.
            # This is useful for idealized galaxies.  The units for this
            # are absolute (so enter 0.02 for solar).  Setting to 0
@@ -169,13 +177,20 @@ Z_init = 0 # force a metallicity increase in the newstar particles.
            # the simulation (more likely appropriate for cosmological
            # runs)
 
-# Idealized Galaxy SED Parameters
-disk_stars_age = 8      # Gyr ;meaningless if this is a cosmological simulation; note, if this is <= 7, then these will live in birth clouds
-bulge_stars_age = 8     # Gyr ; meaningless if this is a cosmological simulation; note, if this is <= 7, then these will live in birth clouds
+           #NOTE - this is not exclusively used for idealized
+           #simulations (i.e. one could use this for a cosmological
+           #simulation), but the typical use case is for idealized simulations.
+
+disk_stars_age = 8      # Gyr ;meaningless if this is a cosmological simulation
+bulge_stars_age = 8     # Gyr ; meaningless if this is a cosmological simulation
 disk_stars_metals = 19  # in fsps metallicity units
 bulge_stars_metals = 19 # in fsps metallicity units
 
 
+
+#===============================================
+# Stellar Ages and Metallicities
+#===============================================
 
 # bins for binning the stellar ages and metallicities for SED
 # assignments in cases of many (where many ==
@@ -188,7 +203,7 @@ N_STELLAR_AGE_BINS = 100
 metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
 
 #===============================================
-#BLACK HOLE STUFF
+#BLACK HOLES
 #===============================================
 
 BH_SED = True
@@ -202,7 +217,7 @@ BH_var = True # Include time variations on BH luminosity (default Hickox+ 2014)
 nenkova_params = [5,30,0,1.5,30,40] #Nenkova+ (2008) model parameters
 
 #===============================================
-#IMAGES AND SED
+#IMAGES AND SED PARAMETERS
 #===============================================
 
 NTHETA = 3
@@ -260,7 +275,7 @@ solar = 0.013
 PAH_frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063} # values will be normalized to 1
 
 #===============================================
-#DEBUGGING
+#DEBUGGING -THE PERFORMANCE OF THE CODE USING THESE PARAMETERS IS NOT GUARANTEED
 #===============================================
 SOURCES_RANDOM_POSITIONS = False
 SOURCES_IN_CENTER = False

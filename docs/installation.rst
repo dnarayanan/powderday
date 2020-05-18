@@ -10,6 +10,7 @@ Overview of Requirements
 	  * scipy
 	  * astropy (3.2.3)
 	  * h5py
+	  * scikit-learn
 
 	* **compilers**
 
@@ -178,65 +179,47 @@ with `yt 3.x <http://yt-project.org>`_, and eventual upgrade to `yt
 
 The second and manual way to install `Hyperion
 <http://www.hyperion-rt.org>`_ follows:
-1. First download the tarball and unpack it.::
+1. First clone the main repository.::
 
-     >tar -xzvf hyperion.xxx
-     >cd hyperion.xxx
+     >git clone https://github.com/astrofrog/hyperion.git
      
-2. Install the fortran dependencies::
+2. Install the python module::
 
-   >cd deps/fortran
-   >python install.py <prefix>
+   >cd hyperion
+   >pip install .
 
-where <prefix> is where you want the libraries to be installed.  To
-avoid conflicts with other packages, I usually install somewhere
-like::
 
-  >python install.py /usr/local/hyperion
+3. Ensure that if you type::
+     >hyperion
 
-as suggested by the `Hyperion <http://www.hyperion-rt.org>`_ docs.  Ensure that the
-following commands return something sensible::
-
-  >which mpif90
-  >which h5fc
-
-if not, your path probably needs to include wherever the <prefix> directory pointed to.
-3. Install any remaining python dependencies. These are listed `here <http://docs.hyperion-rt.org/en/stable/installation/python_dependencies.html>`_  
-4. Install `Hyperion <http://www.hyperion-rt.org>`_  itself.  To do this::
-     
-     >cd hyperion.xxx
-     >python setup.py install
-
-or::
-
-  >python setup.py install --user
-
-if you don't have root access.  At this point::
-
-  >import hyperion
-
-from within python should work, and typing::
-
-  >hyperion
-
-at the command line should return something along the lines of::
+it returns a sensible output.  It should return something along the lines of::
 
   >usage: hyperion [-h] [-f] [-m n_cores] input output
   >hyperion: error: too few arguments
 
-if not, check the the path that is near one of the last lines of the
-setup.py installation (that is something associated with the
-number 755) and make sure it's in your path.  Ir's most likely to be a
-python binaries directory.
+If it can't find `Hyperion <http://www.hyperion-rt.org>`_, check the
+the path that is near one of the last lines of the setup.py
+installation (that is something associated with the number 755) and
+make sure it's in your path.  Ir's most likely to be a python binaries
+directory.
 
-You then have to install the Fortran Binaries::
+4. Install the Fortran binaries::
 
-  >./configure  --prefix=prefix
-  >make
-  >make install
+     > ./configure
+or::
 
-where the prefix is wherever you installed the Fortran libraries
-before.  Make sure this works by typing at the command line::
+  >./configure --prefix=$HOME/local
+
+or some such path if you aren't administrator on your computer.  Note
+for this step you'll need your compilers, MPI and HDF5 installations
+active (so, on a supercomputer you might need to load these modules
+such as [for example, on the University of Florida HiPerGator
+supercomputer])::
+
+  >module load git/2.14.1  intel/2018.1.163  openmpi/3.1.0  libz/1.2.8 hdf5/1.10.1
+
+
+Make sure this works by typing at the command line::
 
   >hyperion_sph
 
@@ -409,6 +392,17 @@ installation failures.  Often this has to do with a bad `FSPS
 like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it may
 not actually execute properly if the correct compilers aren't set in
 the MakeFile.  Thanks to Ena Choi for pointing this one out.
+
+4. `Hyperion <http://www.hyperion-rt.org>`_ does not run with MPI
+   support.  Some users have found that when manually installing
+   `Hyperion <http://www.hyperion-rt.org>`_ (as opposed to using the
+   conda installation) that MPI will then work.
+
+5. On the HiPerGator supercomputing cluster, `Hyperion
+   <http://www.hyperion-rt.org>`_ will not install manually, complaining about mismatches with gcc and HDF5.  The solution to this is to use the intel compilers.  The following is a known pacakge combination that works::
+
+  >module load git/2.14.1  intel/2018.1.163  openmpi/3.1.0  libz/1.2.8 hdf5/1.10.1
+
 
 Hyperion Installation Issues
 ---------------
