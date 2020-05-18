@@ -52,11 +52,10 @@ SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 #===============================================
 #STELLAR SEDS INFO
 #===============================================
-FORCE_BINNED = True               # force all star particles to be binned for calculating SED
-direct_add_stars = False          # If True, all star particles below max_age_direct (next parameter) are added 
+FORCE_BINNED = True               # If True, force all star particles to be binned for calculating SED. 
+                                  # If False, all star particles below max_age_direct (next parameter) are added 
                                   # directly without binning for calculating SED
-max_age_direct  = 1.e-2           # Age (in Gyr) below which stars will be not be binned (works only if FORCE_BINNED is False 
-                                  # and direct_add_stars is set to True)
+max_age_direct  = 1.e-2           # Age (in Gyr) below which stars will be directly added without binning (works only if FORCE_BINNED is False)
 
 imf_type = 2 # FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 # weight given to post agb stars# 1 is the default
@@ -112,7 +111,7 @@ neb_abund = "dopita"        # This sets the HII region elemental abundances for 
                             #               and Caffau+2011 
                             #    direct:    Abundances are taken directly from the simulation if possible. Defaults to using "dopita" if there is 
                             #               an error. (Note: Works only for star particles that are added directly without binning.
-                            #               Make sure to set direct_add_stars to True)
+                            #               Make sure to set FORCE_BINNED to False)
                             # This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
 
 use_Q = True                # If True, we run CLOUDY by specifying number of ionizing photons which are calculated 
