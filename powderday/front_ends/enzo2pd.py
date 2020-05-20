@@ -1,6 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import yt
+import powderday.config as cfg
 
 from yt.data_objects.particle_filters import add_particle_filter
 
@@ -32,8 +33,15 @@ def enzo_field_add(fname,ds = None, starages = False):
         
     def _gasmetals(field,data):
         return data[ ('gas', 'metallicity')]
-   
-    
+
+    def _gasmasses(field,data):
+        return data[('gas','cell_mass')]
+
+    def _gasfh2(field, data):
+        try: return data[('gas', 'FractionH2')]
+        except: return data[('gas', 'metallicity')]*0. #just some dimensionless array
+        
+
     #load the ds
     if fname != None:
         ds = yt.load(fname)
@@ -48,20 +56,23 @@ def enzo_field_add(fname,ds = None, starages = False):
         return filter
 
 
+        
     add_particle_filter("newstars",function=newstars,filtered_type='all',requires=["creation_time"])
     ds.add_particle_filter("newstars")
-        
     ad = ds.all_data()
+
+
+
+
     ds.add_field(('starmetals'),function=_starmetals,units="code_metallicity",particle_type=True)
     ds.add_field(('starcoordinates'),function=_starcoordinates,units="cm",particle_type=True)
     ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
     ds.add_field(('starmasses'),function=_starmasses,units='g',particle_type=True)
     ds.add_field(('gasdensity'),function=_gasdensity,units='g/cm**3')
     ds.add_field(('gasmetals'),function=_gasmetals,units="code_metallicity")
-  
-
-    ad = ds.all_data()
+    ds.add_field(('gasfh2'),function=_gasfh2,units='dimensionless')
+    ds.add_field(('gasmasses'),function=_gasmasses,units='g')
     
- 
+    ad = ds.all_data()
 
     return ds

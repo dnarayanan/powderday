@@ -218,13 +218,16 @@ over-ride if we find some HDF5 files don't contain this information.
 Stellar SEDs Info
 ------------
 
-:Force_Binning:
+:Force_BINNED:
 
-   Boolean.  True means force binning of the stellar SEDs (in bins of
-   age and metallicity).  False means don't.  False results in an
-   exact solution since the stellar SEDs are individually represented
-   (as opposed to broken up into bins).  This said, this can be very
-   slow to run, and extremely hard on the memory.
+   Boolean. True means force binning of the stellar SEDs (in bins of
+   age and metallicity).  If False star particles below max_age_direct (next parameter)
+   are individually represented in the stellar SED as opposed to broken up into bins.
+   Note: Setting this to False can be slow to run, and hard on the memory.
+
+:max_age_direct:
+   
+   Age (in Gyr) below which star particles will not be binned for getting stellar SEDs (works only if FORCE_BINNED is False) 
 
 :imf_type:
 
@@ -271,6 +274,10 @@ Nebular Emission Info
     Gas ionization parameter for HII regions. This is only relevant 
     if add_neb_emission is set to True and FORCE_gas_logu is set to True (Default: -2.0)
 
+:gas_logu_init:         
+
+    Force the ionization parameter to increase/decrease by this value (Scale: log). Useful if you want to run tests (Default: 0.0)
+    
 :FORCE_gas_logz:
    
     If set, then we force the metallicity (gas_logz) of HII regions to be gas_logz (next parameter)
@@ -320,6 +327,11 @@ Nebular Emission Info
       Abundances from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on 
       Grevesse+Sauvel (1998) and Caffau+2011 
     
+    :direct:
+      Abundances are taken directly from the simulation if possible. Defaults 
+      to using "dopita" if there is an error. (Note: Works only for star particles that are 
+      added directly without binning. Make sure to set FORCE_BINNED to False)
+
    This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
 
 :use_Q:
@@ -339,9 +351,35 @@ Nebular Emission Info
 
 :HII_max_age:
    
-    Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 2.e-3)
+    Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 1.e-2)
 
+:neb_dust:
+    
+    If True dust is included in HII regions when calculating nebular emission. (Default = False)
 
+:HII_escape_fraction:
+    
+    HII region escape fraction (Default = 0.0)
+
+:cmdf_min_mass:
+
+    While calulating nebular emission one star particle is broken down into smaller star cluster by
+    assuming a cluster mass distribution function of the form dN/dM goes as M^(-2.0). This parameter 
+    sets the minimum mass of the star clusters in units of log(Msun). Note this value should not be 
+    set lower than 3.5. (Default = 3.5)
+
+:cmdf_max_mass:
+    
+    Minimum mass of the star clusters in units of log(Msun). (Default = 5.0)
+
+:cmdf_bins:
+
+    The number of bins used for calulating the cluster mass distribution function (Default = 6.0)
+
+:cdmf_beta:
+    
+    The power law exponent (beta) for calculating CMDF (dN/dM goes as M^(beta))
+    
 :neb_file_output:
    
     If set to True creates an output file with ionization parameter (LogU), 

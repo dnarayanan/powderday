@@ -20,14 +20,15 @@ model_dir=$2
 hydro_dir=$3
 model_run_name=$4
 COSMOFLAG=$5
-model_dir_remote=$6
-hydro_dir_remote=$7
-xpos=$8
-ypos=$9
-zpos=${10}
-galaxy=${11}
-snap=${12}
-tcmb=${13}
+FILTERFLAG=$6
+model_dir_remote=$7
+hydro_dir_remote=$8
+xpos=$9
+ypos=${10}
+zpos=${11}
+galaxy=${12}
+snap=${13}
+tcmb=${14}
 
 echo "processing model file for galaxy,snapshot:  $galaxy,$snap"
 
@@ -52,13 +53,14 @@ echo "snapshot_num =  $snap" >> $filem
 echo "galaxy_num = $galaxy" >>$filem
 echo -e "\n" >> $filem
 
+echo -e "galaxy_num_str = str(galaxy_num)" >> $filem
 
-echo "if galaxy_num < 10:" >> $filem
-echo -e "\t galaxy_num_str = '00'+str(galaxy_num)" >> $filem
-echo -e "elif galaxy_num >= 10 and galaxy_num <100:" >> $filem
-echo -e "\t galaxy_num_str = '0'+str(galaxy_num)" >> $filem
-echo -e "else:" >> $filem
-echo -e "\t galaxy_num_str = str(galaxy_num)" >> $filem
+#echo "if galaxy_num < 10:" >> $filem
+#echo -e "\t galaxy_num_str = '00'+str(galaxy_num)" >> $filem
+#echo -e "elif galaxy_num >= 10 and galaxy_num <100:" >> $filem
+#echo -e "\t galaxy_num_str = '0'+str(galaxy_num)" >> $filem
+#echo -e "else:" >> $filem
+#echo -e "\t galaxy_num_str = str(galaxy_num)" >> $filem
 
 echo -e "\n" >>$filem
 
@@ -75,6 +77,12 @@ if [ $COSMOFLAG -eq 1 ]
 then
     echo "hydro_dir = '$hydro_dir_remote/snapdir_'+snapnum_str+'/'">>$filem
     echo "snapshot_name = 'snapshot_'+snapnum_str+'.0.hdf5'" >>$filem
+elif [ $FILTERFLAG -eq 1 ]
+then
+    echo "hydro_dir = '$hydro_dir_remote/snap'+snapnum_str+'/'">>$filem
+    #echo "snapshot_name = 'snap'+snapnum_str+'_galaxy'+galaxy_num_str+'_filtered.hdf5'">>$filem
+    echo "snapshot_name = 'galaxy_'+galaxy_num_str+'.hdf5'">>$filem
+
 else
     echo "hydro_dir = '$hydro_dir_remote/'">>$filem
     echo "snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'" >>$filem

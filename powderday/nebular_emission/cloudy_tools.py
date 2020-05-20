@@ -12,7 +12,7 @@ From cloudyfsps written by Nell Byler.
 """
 
 
-def calc_LogU(nuin0, specin0, nh, T, mstar=1.0):
+def calc_LogU(nuin0, specin0, nh, T, efrac, mstar=1.0):
     '''
     Claculates the number of lyman ionizing photons for given a spectrum
     Input spectrum must be in ergs/s/Hz!!
@@ -35,7 +35,7 @@ def calc_LogU(nuin0, specin0, nh, T, mstar=1.0):
     nu = hlam[::-1]
     f_nu = hflu[::-1]
     integrand = f_nu / (h * nu)
-    logQ = np.log10(integrate.simps(integrand, x=nu)*mstar) 
+    logQ = np.log10(integrate.simps(integrand, x=nu)*mstar*(1-efrac)) 
     Rin = (3 * (10 ** logQ) / (4 * np.pi * nh * nh * alpha)) ** (1. / 3.)
     logU = np.log10((10**logQ)/(4*np.pi*Rin*Rin*nh*c))
     return logQ, Rin, logU
@@ -104,3 +104,43 @@ def grouper(n, iterable):
         if not chunk:
             return
         yield chunk
+
+
+def cmdf(stellar_mass, nbins, min_mass, max_mass, beta):
+    """
+    Calculates the number of clusters per mass interval assuming a cluster
+    mass distribution function of the form dN/dM goes as M^(-beta)
+    """
+    interval = (max_mass-min_mass)/nbins
+    num = []
+    mass = []
+    for i in range(nbins):
+        m = min_mass + (i*interval)
+        mass.append(m)
+
+    denom = sum((10**q)**(beta + 2) for q in mass)
+    A = (stellar_mass / denom)
+
+    for i in range(nbins):
+        N = A*((10**mass[i])**(1. + beta))
+        num.append(round(N))
+    return mass, num
+
+
+def convert_metals(metals):
+    """
+    Converts metalicity from units of percentage by mass (SIMBA) 
+    to atom per hydrogen atoms (CLOUDY)
+    """
+    # mass of elements in unified atomic mass units
+    # [He, C, N, O, Ne, Mg, Si, S, Ca, Fe]
+    per_H = 0.7314
+    mass_H = 1.008
+    mass = [4.002602, 12.001, 14.007, 15.999, 20.1797, 
+            24.305, 28.085, 32.06, 40.078, 55.845]
+    metals_conv = np.zeros(len(metals))
+    for i in range(len(metals)):
+        metals_conv[i] = np.log10((metals[i]/per_H)*(mass_H/mass[i]))
+
+    return metals_conv
+

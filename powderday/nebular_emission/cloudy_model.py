@@ -1,7 +1,8 @@
 from powderday.nebular_emission.abund import getNebAbunds
 from powderday.nebular_emission.ASCIItools import *
+from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogU, convert_metals
+import powderday.config as cfg
 from astropy import constants
-from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogU
 import logging
 import numpy as np
 import os
@@ -66,10 +67,11 @@ def write_cloudy_input(**kwargs):
             "r_inner": 1.e19,  # inner radius of cloud
             "r_in_pc": False,
             "use_Q": True,
-            "dust": True,
+            "dust": False,
             "efrac": -1.0,
             "geometry": "sphere",
-            "abundance": "dopita"
+            "abundance": "dopita",
+            "metals": [-1., -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.]
             }
     for key, value in list(kwargs.items()):
         pars[key] = value
@@ -101,7 +103,7 @@ def write_cloudy_input(**kwargs):
         this_print('ionization parameter = {0:.3f} log'.format(pars['logU']))
 
     if pars['dust']:
-        this_print('grains {0:.2f} log'.format(pars['gas_logZ']))
+        this_print('grains ism {0:.2f} log no qheat'.format(pars['gas_logZ']))
 
     if pars['r_in_pc']:
         pc_to_cm = 3.08568e18
@@ -110,14 +112,34 @@ def write_cloudy_input(**kwargs):
         r_out = np.log10(pars['r_inner'])
 
     linefile = "cloudyLines.dat"
-    abunds = getNebAbunds(pars["abundance"],
-                          pars["logZ"],
-                          dust=pars["dust"],
-                          re_z=False)
-    this_print(abunds.solarstr)
-    for line in abunds.elem_strs:
-        this_print(line)
 
+    # Check to see if there was an error in getting metallicities from the simulation
+    # If so code revert back to using "dopita" abundances in place of "direct"
+    if (any(q <= -1.0 for q in pars["metals"][1:]) and pars["abundance"] == "direct"):
+        pars["abundance"] = "dopita"
+        print ("Warning: Unable to get metallicities from the simulation. Using \"dopita\" abundance instead")
+
+    if pars["abundance"] == "direct":
+        abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+        abund_metal = convert_metals(pars["metals"][1:])
+        abund_str = "abundances "
+        for e in range(len(abund_el)):
+            el_str = str(abund_el[e]) + " " + str(abund_metal[e]) + " "
+            abund_str = abund_str + el_str
+
+        abund_extra = "init file=\"hii.ini\""
+        this_print(abund_extra)
+        this_print(abund_str)
+
+    else:
+        abunds = getNebAbunds(pars["abundance"],
+                            pars["logZ"],
+                            dust=pars["dust"],
+                            re_z=False)
+        this_print(abunds.solarstr)
+        for line in abunds.elem_strs:
+            this_print(line)
+    
     this_print('radius {0:.3f} log'.format(r_out))
     this_print('hden {0:.3f} log'.format(np.log10(pars['dens'])))
     this_print('{}'.format(pars['geometry']))
@@ -128,18 +150,17 @@ def write_cloudy_input(**kwargs):
     this_print('save last linelist ".lin" "{}" absolute column'.format(linefile))
     this_print('save last outward continuum ".outwcont" units Angstrom no title')
     this_print('save last incident continuum ".inicont" units Angstrom no title')
-    print("Input written in {0}".format(file_name))
+    logging.info("Input written in {0}".format(file_name))
     f.close()
 
 
-def get_output(model_name, dir_, qq):
+def get_output(model_name, dir_, qq, fsps_lam):
     lsun = 3.839e33
     c = constants.c.cgs.value * 1.e8
 
     outcontfl = dir_ + "/temp_files/"+ model_name + ".outwcont"
     outlinefl = dir_ + "/temp_files/" + model_name + ".lin"
     refline_file = dir_ + "/data/refLines.dat"
-    fsps_lam_file = dir_ + "/data/FSPSlam.dat"
 
     dat = np.genfromtxt(outlinefl, delimiter="\t", skip_header=2, dtype="S20,f8")
     datflu = np.array([d[1] for d in dat])
@@ -151,7 +172,6 @@ def get_output(model_name, dir_, qq):
     datflu = datflu[sinds] / lsun / qq
     datflu = [float("{0:1.4e}".format(dat)) for dat in datflu]
     cont_data = np.genfromtxt(outcontfl, skip_header=1)
-    fsps_lam = np.genfromtxt(fsps_lam_file)
     nu = c / fsps_lam
     ang_0, diffuse_0 = cont_data[:, 0], cont_data[:, 2]
     ang_v, diffuse_in = air_to_vac(ang_0[::-1]), diffuse_0[::-1]
@@ -175,7 +195,7 @@ def clean_files(dir_, model_name, error=False):
     os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".out"))
 
 
-def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, abund="dopita", useq=True, clean_up=True):
+def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals, Dust=False, abund="dopita", useq=True, clean_up=True):
     nspec = len(spec_lambda)
     frac_obrun = 0.0
     clight = constants.c.cgs.value*1.e8
@@ -186,7 +206,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, abund="
     model_name = filename.split(".")[0]
 
     logging.info("Writing CLOUDY input file")
-    dir_= os.getcwd() + "/powderday/nebular_emission"
+    dir_= cfg.par.pd_source_dir + "/powderday/nebular_emission"
     dir_base = os.getcwd()
 
     write_cloudy_input(dir_=dir_,
@@ -198,7 +218,8 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, abund="
                        logU=logu,
                        logZ=logz,
                        abundance=abund,
-                       dust=False)
+                       dust=Dust,
+                       metals=Metals)
 
     logging.info("Input SED file written")
     logging.info("Running CLOUDY")
@@ -219,13 +240,12 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, abund="
 
     logging.info("Getting output spectrum")
 
-    nebem_line_pos, nebem_line, readlambneb, readcontneb = get_output(model_name, dir_, 10**logq)
+    nebem_line_pos, nebem_line, readlambneb, readcontneb = get_output(model_name, dir_, 10**logq, spec_lambda)
     nebem_cont = interp1d(readlambneb, np.log10(readcontneb + 10 ** (-95.0)),
-                          fill_value=0, bounds_error=False)(spec_lambda)
+                          fill_value=-95.0, bounds_error=False)(spec_lambda)
 
     logging.info("Adding nebular emission to input spectrum")
-    nemline = sum(1 for line in open(dir_ + '/temp_files/' + 'cloudyLines.dat'))
-
+    nemline = len(np.where(nebem_line_pos < spec_lambda[-1])[0])
     neb_res_min = np.zeros(nemline)
     for i in range(nemline):
         max_id = max(np.max(np.where(spec_lambda <= nebem_line_pos[i])), 1)
