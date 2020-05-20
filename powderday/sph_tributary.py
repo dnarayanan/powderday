@@ -44,14 +44,18 @@ def sph_m_gen(fname,field_add):
     dz = (np.max(zmax)-np.min(zmin)).value
 
 
-    xcent = np.mean([np.min(xmin),np.max(xmax)]) #kpc
-    ycent = np.mean([np.min(ymin),np.max(ymax)])
-    zcent = np.mean([np.min(zmin),np.max(zmax)])
-    
-    boost = np.array([xcent,ycent,zcent])
-    print ('[pd_front end] boost = ',boost)
+    xcent = float(ds.quan(cfg.model.x_cent,"code_length").to('cm').value)
+    ycent = float(ds.quan(cfg.model.y_cent,"code_length").to('cm').value)
+    zcent = float(ds.quan(cfg.model.z_cent,"code_length").to('cm').value)
 
-    
+    boost = np.array([xcent,ycent,zcent])
+    print ('[sph_tributary] boost = ',boost)
+    print ('[sph_tributary] xmin (pc)= ',np.min(xmin.to('pc')))
+    print ('[sph_tributary] xmax (pc)= ',np.max(xmax.to('pc')))
+    print ('[sph_tributary] ymin (pc)= ',np.min(ymin.to('pc')))
+    print ('[sph_tributary] ymax (pc)= ',np.max(ymax.to('pc')))
+    print ('[sph_tributary] zmin (pc)= ',np.min(zmin.to('pc')))
+    print ('[sph_tributary] zmax (pc)= ',np.max(zmax.to('pc')))
     #Tom Robitaille's conversion from z-first ordering (yt's default) to
     #x-first ordering (the script should work both ways)
 
@@ -90,7 +94,7 @@ def sph_m_gen(fname,field_add):
 
     m = Model()
     
-    if cfg.par.FORCE_RANDOM_SEED == True: m.set_seed(cfg.par.seed)
+
 
     print ('Setting Octree Grid with Parameters: ')
 

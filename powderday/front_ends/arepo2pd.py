@@ -3,6 +3,7 @@ import numpy as np
 import yt
 from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
+from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 #from yt.data_objects.particle_filters import add_particle_filter
 
 def arepo_field_add(fname, bounding_box=None, ds=None):
@@ -46,7 +47,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
 
     def _gasfh2(field, data):
         try: return data[('PartType0', 'FractionH2')]
-        except: return data[('PartType0', 'Masses')]*0.
+        except: return data[('PartType0', 'GFM_Metallicity')]*0. #just some dimensionless array
 
     def _gassfr(field, data):
         return data[('PartType0', 'StarFormationRate')]
@@ -58,11 +59,20 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         return (data["PartType0", "Masses"]*(data["PartType0", "GFM_Metallicity"].value))
 
         
-    def _dustmass(field, data):
+    def _dustmass_manual(field, data):
         return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
 
+    def _dustmass_dtm(field,data):
+        return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
+
+
     def _li_ml_dustmass(field,data):
-        return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
+        li_ml_dgr = dgr_ert(data["gasmetals"],data["PartType0","StarFormationRate"],data["PartType0","Masses"])
+        li_ml_dustmass = ((10.**li_ml_dgr)*data["PartType0","Masses"]).in_units('code_mass')
+        
+        #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
+        ##return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
+        return li_ml_dustmass
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
@@ -71,8 +81,14 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
             simtime = data.ds.current_time.in_units('Gyr')
             simtime = simtime.value
 
+            print(" ")
+            print("------------------------------------------------------------------")
+            print("WARNING WARNING WARNING:")
+            print("Assuming units in stellar ages are s*kpc/km")
+            print("if this is not true - please edit _stellarages in front_ends/arepo2pd.py right under this warning message")
+            print("------------------------------------------------------------------")
 
-            age = simtime-data[("PartType4","GFM_StellarFormationTime")].in_units('Gyr').value
+            age = simtime-(data.ds.arr(ad[("PartType4","GFM_StellarFormationTime")],'s*kpc/km').in_units('Gyr')).value
             # make the minimum age 1 million years
             age[np.where(age < 1.e-3)[0]] = 1.e-3
 
@@ -85,7 +101,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
                                                         omega_matter=data.ds.omega_matter,
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
-            scalefactor = data[("PartType4","GFM_StellarFormationTime")].value
+            scalefactor = ad[("PartType4","GFM_StellarFormationTime")].value
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
             age = simtime - formation_time
@@ -185,9 +201,13 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
 
     # get the dust mass
 
-    if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
-        ds.add_field(('dustmass'), function=_dustmass, units='code_mass', particle_type=True)
+    if cfg.par.dust_grid_type == 'dtm':
+        ds.add_field(('dustmass'), function=_dustmass_dtm,units='code_mass',particle_type=True)
+    if cfg.par.dust_grid_type == 'manual':
+        #if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
+        ds.add_field(('dustmass'), function=_dustmass_manual, units='code_mass', particle_type=True)
         ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+        if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
 
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
@@ -195,12 +215,12 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     #dust_grid_gen can use these dust masses
     if cfg.par.dust_grid_type == 'li_ml':
         #get the dust to gas ratio
-        ad = ds.all_data()
-        li_ml_dgr = dgr_ert(ad["PartType0","Metallicity_00"],ad["PartType0","StarFormationRate"],ad["PartType0","Masses"])
-        li_ml_dustmass = ((10.**li_ml_dgr)*ad["PartType0","Masses"]).in_units('code_mass')
+        #ad = ds.all_data()
+        #li_ml_dgr = dgr_ert(ad["gasmetals"],ad["PartType0","StarFormationRate"],ad["PartType0","Masses"])
+        #li_ml_dustmass = ((10.**li_ml_dgr)*ad["PartType0","Masses"]).in_units('code_mass')
         #this is an icky way to pass this to the function for ds.add_field in the next line. but such is life.
-        ds.parameters['li_ml_dustmass'] = li_ml_dustmass
-        ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
+        #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
+        ds.add_field(('li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
 
     ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
     ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)

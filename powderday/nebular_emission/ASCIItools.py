@@ -6,7 +6,6 @@ import os
 import numpy as np
 import subprocess
 from powderday.nebular_emission.cloudy_tools import grouper
-
 #getting cfg.par accessible outside the definitions (ala pd_front_end.py)
 import powderday.config as cfg
 import sys
@@ -25,7 +24,7 @@ retrieved in October 2019)
 --------------------------------------------------------------------------------------
 """
 
-if (cfg.par.add_neb_emission) and (cfg.par.use_cloudy_tables):
+if (cfg.par.add_neb_emission) and (not cfg.par.use_cloudy_tables):
     try:
         CLOUDY_EXE = os.environ['CLOUDY_EXE']
     except KeyError:

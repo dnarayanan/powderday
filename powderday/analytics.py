@@ -79,6 +79,7 @@ def dump_data(reg,model):
     particle_star_metallicity = reg["starmetals"]
     particle_stellar_formation_time = reg["starformationtime"]
     particle_sfr = reg['gassfr'].in_units('Msun/yr')
+    particle_dustmass = reg["dustmass"].in_units('Msun')
 
     #these are in try/excepts in case we're not dealing with gadget and yt 3.x
     try: grid_gas_mass = reg["gassmoothedmasses"]
@@ -96,15 +97,21 @@ def dump_data(reg,model):
     #tdust = tdust_ad[ ('gas', 'temperature')]
 
 
-    try: outfile = cfg.model.PD_output_dir+"grid_physical_properties."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".npz"
+    try: outfile = cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".npz"
     except:
-        outfile = cfg.model.PD_output_dir+"grid_physical_properties."+cfg.model.snapnum_str+".npz"
+        outfile = cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+".npz"
 
-    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr)#,tdust = tdust)
+    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass)#,tdust = tdust)
 
 
-def SKIRT_data_dump(reg,ds,m,stars_list,hsml_in_pc):
+def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
     
+    #the work flow for this function is: for all dataset types, we
+    #dump stars in the same manner (since we don't allow for mappings
+    #in our skirt dumps, all stars are "old stars").  #for gas,
+    #however, we separate based on SPH type outputs or arepo-types
+    #since they require different formats.
+
     #create stars file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 
     spos_x = reg["starcoordinates"][:,0].in_units('pc').value
@@ -134,12 +141,18 @@ def SKIRT_data_dump(reg,ds,m,stars_list,hsml_in_pc):
     smasses = np.concatenate((smasses, diskmasses, bulgemasses))
 
     fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+    
+    if ds.cosmological_simulation:
+        dmet = [0.]*len(diskmasses)
+        dage = [0.]*len(diskmasses)
+        bmet = [0.]*len(bulgemasses)
+        bage = [0.]*len(bulgemasses)
 
-    dmet = [fsps_metals[cfg.par.disk_stars_metals]]*len(diskmasses)
-    dage = [(cfg.par.disk_stars_age*u.Gyr).to(u.yr).value]*len(diskmasses)
-
-    bmet = [fsps_metals[cfg.par.bulge_stars_metals]]*len(bulgemasses)
-    bage = [(cfg.par.bulge_stars_age*u.Gyr).to(u.yr).value]*len(bulgemasses)
+    else:
+        dmet = [fsps_metals[cfg.par.disk_stars_metals]]*len(diskmasses)
+        dage = [(cfg.par.disk_stars_age*u.Gyr).to(u.yr).value]*len(diskmasses)
+        bmet = [fsps_metals[cfg.par.bulge_stars_metals]]*len(bulgemasses)
+        bage = [(cfg.par.bulge_stars_age*u.Gyr).to(u.yr).value]*len(bulgemasses)
 
     #ages and metallicities need to come from the stars list in case
     #we do something in parameters master to change the values
@@ -151,20 +164,32 @@ def SKIRT_data_dump(reg,ds,m,stars_list,hsml_in_pc):
     except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".stars.particles.txt"
     np.savetxt(outfile, np.column_stack((spos_x,spos_y,spos_z,shsml,smasses,smetallicity,sage)))
     
-    #create the gas file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
+    #create the gas file for SPH-oids.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
+
+
     gpos_x = reg["gascoordinates"][:,0].in_units('pc').value
     gpos_y = reg["gascoordinates"][:,1].in_units('pc').value
     gpos_z = reg["gascoordinates"][:,2].in_units('pc').value
     gmass = reg["gasmasses"].in_units('Msun').value
     ghsml = np.repeat(hsml_in_pc,len(gpos_x))
     gmetallicity = reg["gasmetals"].value
-
+    grho = (reg["gasdensity"]*reg["gasmetals"].value*cfg.par.dusttometals_ratio).in_units('Msun/cm**3').value
     try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".gas.particles.txt"
     except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".gas.particles.txt"
-    np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+
     
+    if ds_type in ['gadget_hdf5','tipsy']:
+        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+    else:
+    #if we ever get the arepo SKIRT ski files working, this is
+        #actually the line we need. but since we are currently running
+        #SKIRT for arepo in SPH/octree mode, we have to
+        # save as though it's an octree..
+        #np.savetxt(outfile,np.column_stack((gpos_x,gpos_y,gpos_z,grho)))
+        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+
 # Saves logU, Q and other related parameters in a file (seperate file is created for each galaxy)
-def logu_diagnostic(logQ, Rin, LogU, mstar, age, zmet, append = True):
+def logu_diagnostic(logQ, Rin, LogU, mstar, cluster_mass, num_cluster, age, zmet, append = True):
     if append == False:
         try: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
         except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
@@ -174,13 +199,18 @@ def logu_diagnostic(logQ, Rin, LogU, mstar, age, zmet, append = True):
         try:outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
         except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
         f = open(outfile, 'a+')
-        f.write(str(logQ) + "\t" + str(Rin) + "\t" + str(LogU) + "\t" + str(mstar) + "\t"+ str(age) + "\t" + str(zmet) + "\n")
+        f.write(str(logQ) + "\t" + str(Rin) + "\t" + str(LogU) + "\t" + str(mstar) + "\t"+ str(cluster_mass) + "\t" + str(num_cluster) + "\t" + str(age) + "\t" + str(zmet) + "\n")
         f.close()
 
     # Dumps AGN SEDs
 def dump_AGN_SEDs(nu,fnu,luminosity):
-    savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
-    np.savez(savefile,nu = nu,fnu = fnu, luminosity = luminosity)
+    
+    if hasattr(cfg.model,'galaxy_num_str'):
+        outfile_bh = cfg.model.PD_output_dir + "bh_sed." + cfg.model.galaxy_num_str+".npz"
+    else:
+        outfile_bh = cfg.model.PD_output_dir+"/bh_sed.npz"
+
+    np.savez(outfile_bh,nu = nu,fnu = fnu, luminosity = luminosity)
                       
 
 
