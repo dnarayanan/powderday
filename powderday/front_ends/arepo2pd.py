@@ -102,6 +102,13 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
             scalefactor = ad[("PartType4","GFM_StellarFormationTime")].value
+
+            #this is a catch to just get the yt_cosmo.t_from_z to run.
+            #it says that the "star" particles that have negative
+            #scale factors are set to the min positive scale factor.
+            #these particles are actually wind particles, but get
+            #thrown out by the newstars particle filter downstream, so
+            #it doesn't really matter what we do with them.
             scalefactor[np.where(scalefactor < 0)[0]] = np.min(scalefactor[np.where(scalefactor > 0)][0])
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
