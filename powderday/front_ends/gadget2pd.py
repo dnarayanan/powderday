@@ -8,7 +8,23 @@ from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=True):
 
     def _starmetals_00(field, data):
-        return data[('PartType4', 'Metallicity_00')]
+        el_dict = {'He': '01',
+                   'C': '02',
+                   'N': '03',
+                   'O': '04',
+                   'Ne': '05',
+                   'Mg': '06',
+                   'Si': '07',
+                   'S': '08',
+                   'Ca': '09',
+                   'Fe': '10'}
+        el_str = field.name[1]
+        if '_' in el_str:
+            el_name = field.name[1][field.name[1].find('_')+1:]
+            el_num = el_dict[el_name]
+        else:
+            el_num = '00'
+        return data[('PartType4', 'Metallicity_'+el_num)]
 
     def _starmetals(field, data):
         return data[('PartType4', 'Metallicity')]
@@ -51,7 +67,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     def _gasfh2(field, data):
         try: return data[('PartType0', 'FractionH2')]
-        except: return data[('PartType0', 'Masses')]*0.
+        except: return data[('PartType0', 'metallicity')]*0.
 
     def _gassfr(field, data):
         return data[('PartType0', 'StarFormationRate')]
@@ -93,28 +109,39 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
 
         
-    def _dustmass(field, data):
+    def _dustmass_manual(field, data):
         return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
+
+    def _dustmass_dtm(field,data):
+        return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
 
     def _li_ml_dustmass(field,data):
         return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
 
     def _dustsmoothedmasses(field, data):
-        return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+        if yt.__version__ == '4.0.dev0':
+            return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
+
+        else:
+            return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+
 
     def _li_ml_dustsmoothedmasses(field,data):
-        return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
+        if yt.__version__ == '4.0.dev0':
+            return (data.ds.parameters['octree'][('PartType0', 'li_ml_dustmass')])
+        else:
+            return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
+        
+
 
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
         if data.ds.cosmological_simulation == False:
-
             simtime = data.ds.current_time.in_units('Gyr')
             simtime = simtime.value
 
-            # Gyr (assumes that ad["starformationtime"] is in Gyr for Gadget)
-            age = simtime-ad[("starformationtime")].value
+            age = simtime-data.ds.arr(ad[('PartType4', 'StellarFormationTime')],'Gyr').value
             # make the minimum age 1 million years
             age[np.where(age < 1.e-3)[0]] = 1.e-3
 
@@ -127,7 +154,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                                                         omega_matter=data.ds.omega_matter,
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
-            scalefactor = data[('PartType4', 'StellarFormationTime')].value #ad[("starformationtime")].value
+            scalefactor = data[('PartType4', 'StellarFormationTime')].value
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
             age = simtime - formation_time
@@ -154,6 +181,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
         c = yt.utilities.physical_constants.speed_of_light_cgs
         bhluminosity = (cfg.par.BH_eta * mdot * c**2.).in_units("erg/s")
+
+        print("[front_ends/gadget2pd:] Generating the black hole luminosity")
         if cfg.par.BH_var:
             return bhluminosity * cfg.par.bhlfrac
         else:
@@ -220,8 +249,22 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         
 
     # for the metal fields have a few options since gadget can have different nomenclatures
+    ad = ds.all_data()
     if ('PartType4', 'Metallicity_00') in ds.derived_field_list:
-        ds.add_field(('starmetals'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+        try:
+            ds.add_field(('starmetals'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_He'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_C'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_N'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_O'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Ne'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Mg'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Si'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_S'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Ca'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Fe'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+        except:
+            ds.add_field(('starmetals'), function=_starmetals_00, units="code_metallicity", particle_type=True)
     else:
         ds.add_field(('starmetals'), function=_starmetals, units="code_metallicity", particle_type=True)
 
@@ -245,8 +288,11 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     # get the dust mass
 
-    if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
-        ds.add_field(('dustmass'), function=_dustmass, units='code_mass', particle_type=True)
+    if cfg.par.dust_grid_type == 'dtm':
+        ds.add_field(('dustmass'), function=_dustmass_dtm,units='code_mass',particle_type=True)
+    if cfg.par.dust_grid_type == 'manual':
+        #if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
+        ds.add_field(('dustmass'), function=_dustmass_manual, units='code_mass', particle_type=True)
         ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
         if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
 
@@ -262,7 +308,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.parameters['li_ml_dustmass'] = li_ml_dustmass
         ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
         ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
-        if add_smoothed_quantities == True: ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
+        if add_smoothed_quantities == True: 
+            ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
 
     ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
     ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)
@@ -295,8 +342,9 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
 
     if cfg.par.BH_SED == True:
-        try:
+        if ('PartType5','BH_Mass') in ds.derived_field_list:
             nholes = len(ds.all_data()[('PartType5', 'BH_Mass')])
+            print("The number of black holes is:",nholes)
             if nholes > 0:
                 if cfg.par.BH_model == 'Nenkova':
                     from powderday.agn_models.nenkova import Nenkova2008
@@ -312,11 +360,11 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                 ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
                 ds.add_field(("bhnu"),function=_bhsed_nu,units='Hz',particle_type=True)
                 ds.add_field(("bhsed"),function=_bhsed_sed,units="erg/s",particle_type=True)
+                
+
+
             else:
                 print('No black holes found (length of BH_Mass field is 0)')
-        except:
-            print('Unable to find field "BH_Mass" in snapshot. Skipping.')
-
 
 
     return ds

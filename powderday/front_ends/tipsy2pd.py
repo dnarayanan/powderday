@@ -7,7 +7,7 @@ from yt.data_objects.particle_filters import add_particle_filter
 ytcfg["yt","skip_dataset_cache"] = "True"
 
 
-def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
+def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=True):
 
     def _starmetals(field,data):
         return data[('newstars', 'Metals')]
@@ -40,7 +40,7 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
     
     def _gasdensity(field,data):
         return data[('Gas', 'Density')]
-        
+
     def _gasmetals(field,data):
         return data[('Gas', 'Metals')]
         
@@ -58,6 +58,9 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
 
     def _gasmasses(field,data):
         return data[('Gas','Mass')]
+
+    def _dustmass_dtm(field,data):
+        return (data["gasmasses"]*cfg.par.dusttometals_ratio)
 
     def _metaldens(field,data):
         return (data["Gas","Density"]*data["Gas","Metals"])
@@ -111,20 +114,22 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,starages=False):
     ds.add_field(('gasdensity'),function=_gasdensity,units='g/cm**3',particle_type=True)
     ds.add_field(('gasmetals'),function=_gasmetals,units="code_metallicity",particle_type=True)
     ds.add_field(('gascoordinates'),function=_gascoordinates,units='cm',particle_type=True)
-    ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='g/cm**3',particle_type=True)
-    ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
-    ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
-    ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
+    if add_smoothed_quantities == True:
+        ds.add_field(('gassmootheddensity'),function=_gassmootheddensity,units='g/cm**3',particle_type=True)
+        ds.add_field(('gassmoothedmetals'),function=_gassmoothedmetals,units='code_metallicity',particle_type=True)
+        ds.add_field(('gassmoothedmasses'),function=_gassmoothedmasses,units='g',particle_type=True)
     ds.add_field(('gasmasses'),function=_gasmasses,units='g',particle_type=True)
     ds.add_field(('gasfh2'),function=_gasfh2,units='dimensionless',particle_type=True)
     ds.add_field(('gassfr'),function=_gassfr,units='g/s',particle_type=True)
-
+    ds.add_field(('metaldens'),function=_metaldens,units="g/cm**3", particle_type=True)
     #only add the disk star fields if there are any disk stars
     if len(ad["diskstars","Mass"]) > 0 :
         ds.add_field(('diskstarmasses'),function=_diskstarmasses,units='g',particle_type=True)
         ds.add_field(('diskstarcoordinates'),function=_diskstarcoordinates,units='cm',particle_type=True)
 
-
+    #add the dust mass, but only if we're using the DTM dust mass
+    if cfg.par.dust_grid_type == 'dtm':
+        ds.add_field(('dustmass'), function=_dustmass_dtm,units='code_mass',particle_type=True)
 
     ad = ds.all_data()
     return ds

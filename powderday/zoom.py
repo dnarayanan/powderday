@@ -126,3 +126,93 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
 
     
     return reg
+
+
+
+def arepo_zoom(fname,ds,bbox0,field_add):
+
+
+    ds.index
+    ad = ds.all_data()
+
+    center = [cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent]
+    print ('[zoom/arepo_zoom:] using center: ',center)
+
+
+    box_len = cfg.par.zoom_box_len
+
+    #now begin the process of converting box_len to physical units in
+    #case we're in a cosmological simulation.  We'll first give it
+    #units of proper kpc, then convert to code length (which for
+    #gadget is kpcm/h) for the bbox calculation (dropping the units of
+    #course).  then when we re-convert to proper units, the box_len as
+    #input in parameters_master will be in proper units.  if a
+    #simulation isn't cosmological, then the only difference here will
+    #be a 1/h
+
+    #note: we dispense with the yt3.x options that are written in
+    #octree_zoom_bbox_filter since you can't read in an arepo sim as
+    #an arepo model without yt4.x (if it's yt3.x, it'll be read in via the sph_tributary
+
+    box_len = ds.quan(box_len,'kpc')
+    box_len = float(box_len.to('code_length').value)
+    bbox_lim = box_len
+   
+    bbox1 = [[center[0]-bbox_lim,center[0]+bbox_lim],
+            [center[1]-bbox_lim,center[1]+bbox_lim],
+            [center[2]-bbox_lim,center[2]+bbox_lim]]
+    print ('[zoom/arepo_zoom] new zoomed bbox (comoving/h) in code units= ',bbox1)
+
+    #re load the field names, but now with the bounding box
+    #set. this will allow us to map the field names to those
+    #generated in the octree.  this represents a massive
+    #inefficiency as we have to load the entire dataset a *second*
+    #time.
+    ds = field_add(fname,bounding_box = bbox1,ds=ds)
+    ds.periodicity = (False,False,False)
+    reg = ds.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
+
+
+    return reg
+
+
+
+def enzo_zoom(fname,ds,field_add):
+    #set up the cut out region from the main dataset.  here, we create
+    #a yt region out of the parent ds, and then re-save this as a cutout dataset named ds1
+    center = ds.arr([cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent],'code_length')
+    box_len = ds.quan(cfg.par.zoom_box_len,'kpc').to('code_length')
+    reg = ds.region(center, center-box_len, center+box_len)
+    
+    #now play a game where we save the region as a dataset and then
+    #reload this as a new ds.  we need to do this because the
+    #convenience function within hyperion, AMRGrid.from_yt requires a
+    #datasaet print("[enzo_tributary/enzo_m_gen]: saving the dataset
+    #as temp_enzo.h5")
+    reg.save_as_dataset('temp_enzo.h5',fields=[('all','creation_time'),('gas','metal_density'),('gas','density'),('newstars','metallicity_fraction'),('newstars','particle_mass'),('all', 'particle_index'),('index', 'grid_level'),('gas','dust_density')])
+    ds1 = yt.load('temp_enzo.h5')
+    ad1 = ds1.all_data()
+    print("[zoom/enzo_zoom]: temporarily saving temp_enzo.h5")
+
+
+    #now copy over all of the ds.index grid construction items that are in the region to the new dataset
+    ds1.domain_width = reg.right_edge - reg.left_edge
+    ds1.domain_left_edge = reg.left_edge
+    ds1.domain_right_edge = reg.right_edge
+    ds1.index.get_levels = reg.index.get_levels
+    ds1.index.get_smallest_ds = reg.index.get_smallest_dx
+    ds1.index.grid = reg.index.grid
+    ds1.index.grid_corners = reg.index.grid_corners
+    ds1.index.grid_dimensions = reg.index.grid_dimensions
+    ds1.index.grid_levels = reg.index.grid_levels
+    ds1.index.grid_left_edge = reg.index.grid_left_edge
+    ds1.index.grid_right_edge = reg.index.grid_right_edge
+    ds1.index.grid_particle_count = reg.index.grid_particle_count
+    ds1.index.grids = reg.index.grids
+    ds1.index.index_filename = reg.index.index_filename
+    ds1.index.max_level = reg.index.max_level
+    ds1.index_num_grids = reg.index.num_grids
+    ds1.index.num_stars = reg.index.num_stars
+    ds1.index.parameters = reg.index.parameters
+    
+    return reg,ds1
