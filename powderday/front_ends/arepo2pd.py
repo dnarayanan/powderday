@@ -101,7 +101,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
                                                         omega_matter=data.ds.omega_matter,
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
-            scalefactor = ad[("PartType4","GFM_StellarFormationTime")].value
+            scalefactor = data[("newstars","GFM_StellarFormationTime")].value
             scalefactor[np.where(scalefactor < 0)[0]] = np.min(scalefactor[np.where(scalefactor > 0)][0])
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
