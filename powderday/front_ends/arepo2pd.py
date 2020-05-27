@@ -88,7 +88,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
             print("if this is not true - please edit _stellarages in front_ends/arepo2pd.py right under this warning message")
             print("------------------------------------------------------------------")
 
-            age = simtime-(data.ds.arr(ad[("PartType4","GFM_StellarFormationTime")],'s*kpc/km').in_units('Gyr')).value
+            age = simtime-(data.ds.arr(ad[("newstars","GFM_StellarFormationTime")],'s*kpc/km').in_units('Gyr')).value
             # make the minimum age 1 million years
             age[np.where(age < 1.e-3)[0]] = 1.e-3
 
@@ -101,8 +101,11 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
                                                         omega_matter=data.ds.omega_matter,
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
-            scalefactor = data[("newstars","GFM_StellarFormationTime")].value
-            scalefactor[np.where(scalefactor < 0)[0]] = np.min(scalefactor[np.where(scalefactor > 0)][0])
+            
+
+            scalefactor = ad[("newstars","GFM_StellarFormationTime")].value
+
+
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
             age = simtime - formation_time
@@ -226,9 +229,8 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
     ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)
     ds.add_field(('starformationtime'), function=_starformationtime, units='dimensionless', particle_type=True)
-    
     ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
-   
+
 #    if ('PartType2', 'Masses') in ds.derived_field_list:
 #        ds.add_field(('diskstarmasses'), function=_diskstarmasses, units='g', particle_type=True)
 #        ds.add_field(('diskstarcoordinates'), function=_diskstarcoordinates, units='cm', particle_type=True)
