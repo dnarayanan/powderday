@@ -195,6 +195,12 @@ supercomputer])::
 
   >module load git/2.14.1  intel/2018.1.163  openmpi/3.1.0  libz/1.2.8 hdf5/1.10.1
 
+5. Compile the code::
+
+   > make
+   > make install
+   
+
 
 Make sure this works by typing at the command line::
 
