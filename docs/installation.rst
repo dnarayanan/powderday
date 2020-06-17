@@ -109,29 +109,6 @@ fsps
 
 and directions to the installation are in the `Manual <https://www.cfa.harvard.edu/~cconroy/ FSPS_files/MANUAL.pdf>`_.
 
-It's likely going to be necessary downstream when installing  `python-fsps
-<http://dan.iel.fm/python-fsps/current/installation/>`_ to have the -fPIC flags set in `fsps <https://code.google.com/p/fsps/source/checkout>`_ when making.  So, in the Makefile of `fsps <https://code.google.com/p/fsps/source/checkout>`_, set::
-  
-  >F90FLAGS = -O -cpp -fPIC
-
-if your ``gcc`` version is lower than 4.3.0, or::
-
-  >F90FLAGS = -O3 -mtune=native -cpp -fPIC
-
-if ``gcc`` is version 4.3.0 or higher. This can be checked with 
-``gcc --version``. Additionally, at this time 
-`powderday <https://github.com/dnarayanan/powderday.git>`_  doesn't work with the 
-default MIST Isochrones.  To fix this, you'll need to edit sps_vars.f90 in 
-`fsps <https://code.google.com/p/fsps/source/checkout>`_  to look like::
-  
-  !------set the isochrone library------!
-  #define MIST 0
-  !Padova models circa 2008
-  #define PADOVA 1
-  #define PARSEC 0
-  #define BASTI 0
-  #define GENEVA 0
-
 To explicitly compile::
 
   make clean
