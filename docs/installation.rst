@@ -180,7 +180,12 @@ installation (that is something associated with the number 755) and
 make sure it's in your path.  Ir's most likely to be a python binaries
 directory.
 
-4. Install the Fortran binaries::
+4. Install the submodules manually::
+
+   >git submodule init
+   >git submodule update
+
+5. Install the Fortran binaries::
 
      > ./configure
 or::
@@ -195,7 +200,7 @@ supercomputer])::
 
   >module load git/2.14.1  intel/2018.1.163  openmpi/3.1.0  libz/1.2.8 hdf5/1.10.1
 
-5. Compile the code::
+6. Compile the code::
 
    > make
    > make install
