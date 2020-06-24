@@ -80,56 +80,7 @@ To install, `cd` into the cloned repository and run the usual `python setup.py i
 
 .. _yt:
 
-yt
---------------
 
-`yt <http://yt-project.org>`_ 3.x comes bundled with 
-`Hyperion <http://www.hyperion-rt.org>`_, so it is not necessary to install it 
-on its own. However, as of Summer 2019, development has begun on making
-`powderday <https://github.com/dnarayanan/powderday.git>`_ use
-`yt <http://yt-project.org>`_ 4.x, the 'demeshed' 
-version of `yt <http://yt-project.org>`_. The 
-`powderday <https://github.com/dnarayanan/powderday.git>`_ -
-`yt <http://yt-project.org>`_ 4.x update is in its early stages and is not 
-expected to function properly just yet. That being said, development is taking
-place on the ``pd-4.x`` branch of 
-`powderday <https://github.com/dnarayanan/powderday.git>`_, and instructions for
-setting it up to run with
-`yt <http://yt-project.org>`_ 4.x are at the bottom of this section.
-
-
-.. _fsps:
-
-fsps
---------------
-
-`fsps <https://code.google.com/p/fsps/source/checkout>`_ can be checked out with::
-  
-  > git clone https://github.com/cconroy20/fsps
-
-and directions to the installation are in the `Manual <https://www.cfa.harvard.edu/~cconroy/ FSPS_files/MANUAL.pdf>`_.
-
-To explicitly compile::
-
-  make clean
-  make
-  
-Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
-   
-  >export SPS_HOME=/Users/desika/fsps/
-
-
-
-.. _python-fsps:
-
-python-fsps
---------------
-
-`python-fsps <https://github.com/dfm/python-fsps>`_  will be installed automatically by the `powderday` setup.py script.
-  
-You can test the installation by opening python and typing::
-
->import fsps
 
 .. _Hyperion:
 
@@ -248,11 +199,11 @@ and we encourage the user of these PAH files to read this paper,
 especially section 3.4.2.
 
 
-yt-4.x configuration [WIP]
+yt-4.x configuration 
 --------------------
 
-In the future, `yt <http://yt-project.org>`_ will eventually
-transition from 3.x to 4.x. The latter offers a number of advantages
+`yt <http://yt-project.org>`_ has recently (June 22nd, 2010)
+transitioned from 3.x to 4.x. The latter offers a number of advantages
 including a demeshed handling of particle datasets, as well as an
 `arepo <https://www.h-its.org/2014/10/28/arepo/>`_ front end.  We are
 happy to announce that as of December 31st, 2019 via hash
@@ -261,15 +212,14 @@ happy to announce that as of December 31st, 2019 via hash
 `powderday <https://github.com/dnarayanan/powderday.git>`_ is now `yt
 <http://yt-project.org>`_ 4.x compliant.
 
-The following offer documentation for installing `yt
-<http://yt-project.org>`_ 4.x, as well as a slightly different order
-of operations for `powderday
-<https://github.com/dnarayanan/powderday.git>`_ code dependency
-installation.  Please note, `yt <http://yt-project.org>`_ 4.x is still
-in development mode, and should be treated as such.  The following
-documentation utilizes not-yet-merged in branches of `yt
-<http://yt-project.organological>`_ for example, and all 4.x features
-should be considered experimental currently.
+Unfortunately, there are currently there are some bugs in the mainline
+`yt <http://yt-project.org>`_ 4.x branch that are impacting how the
+octree is built for particle-like simulations.  These, however, are
+fixed in Ashley Kelly's fork (and will be merged into the main `yt
+<http://yt-project.org>`_ branch soon enough).  In the mean time, if
+you are eager to use `yt <http://yt-project.org>`_ 4.x for particle
+simulations, please see below.  
+
 
 First, it is recommended to make a new python environment in which to run the 
 4.x development branch::
@@ -277,10 +227,7 @@ First, it is recommended to make a new python environment in which to run the
     > conda create -n pd4env
     > conda activate pd4env
 
-Our entire goal here is to install `powderday <https://github.com/dnarayanan/powderday.git>`_  that is dependent on `yt <http://yt-project.org>`_ 4.x.  Since `Hyperion <http://www.hyperion-rt.org>`_ comes with 
-`yt <http://yt-project.org>`_ 3.x,  we a few options, neither of which are particularly elegant.
-
-The easiest way to handle this is to install `Hyperion <http://www.hyperion-rt.org>`_  as normal, via::
+Next, install `Hyperion <http://www.hyperion-rt.org>`_  as normal, via::
 
     >conda install -c conda-forge hyperion
 
@@ -295,7 +242,7 @@ followed by actually installing  `yt <http://yt-project.org>`_::
   >git pull
   >pip install -e .
 
-If we do this, this will overwrite the `yt <http://yt-project.org>`_ 3.x installation that ships with `Hyperion <http://www.hyperion-rt.org>`_, and you should be good to go.  To check that everything worked, make sure the output of the following 
+If we do this, this will overwrite the `yt <http://yt-project.org>`_ installation that ships with `Hyperion <http://www.hyperion-rt.org>`_, and you should be good to go.  To check that everything worked, make sure the output of the following 
 commands look something like this::
 
     > ipython
@@ -305,34 +252,48 @@ commands look something like this::
   
 Note, in the above we are actually not yet installing the master
 branch of `yt <http://yt-project.org>`_ 4.x, but rather Ashley Kelly's
-branch which is still experimental.  As Ash's branch gets merged into
+fork, and the yt-4.0-new-octree branch of Ash's fork.  As this branch gets merged into
 the master `yt <http://yt-project.org>`_ 4.x branch, we will update
 these docs.
 
-The second way of handling this, which is no longer recommended as it
-can be a bit painful and with varying success rates, is to install `Hyperion
-<http://www.hyperion-rt.org>`_ with the ``--no-deps`` flag, since you
-will install the dependencies manually in the next step::
 
-    > conda install --no-deps -c conda-forge hyperion
+.. _fsps:
 
-Now, install all of the dependencies `Hyperion <http://www.hyperion-rt.org>`_
-needs, *except* `yt <http://yt-project.org>`_::
+fsps
+--------------
 
-    > conda install -c conda-forge astropy atomicwrites attrs backports backports.functools_lru_cache backports.shutil_get_terminal_size backports_abc configparser contextlib2 cycler cython dbus decorator enum34 expat fastcache fontconfig freetype funcsigs functools32 futures gettext glib gmp gmpy2 gst-plugins-base gstreamer h5py hdf5 hyperion-fortran icu importlib_metadata ipython ipython_genutils jpeg kiwisolver libblas libcblas libgfortran-ng libiconv liblapack libpng libuuid libxcb libxml2 linecache2 matplotlib more-itertools mpc mpfr mpi mpich mpmath numpy openblas packaging pathlib2 pcre pexpect pickleshare pluggy prompt_toolkit pthread-stubs ptyprocess py pygments pyparsing pyqt pytest python-dateutil pytz qt scandir simplegeneric singledispatch sip six subprocess32 sympy tornado traceback2 traitlets unittest2 wcwidth xorg-libxau xorg-libxdmcp xz zipp
+`fsps <https://code.google.com/p/fsps/source/checkout>`_ can be checked out with::
+  
+  > git clone https://github.com/cconroy20/fsps
 
-At this point, test your `Hyperion <http://www.hyperion-rt.org>`_ installation by trying_::
+and directions to the installation are in the `Manual <https://www.cfa.harvard.edu/~cconroy/ FSPS_files/MANUAL.pdf>`_.
 
-  import hyperion
+To explicitly compile::
 
-If this doesn't work, repeat:_::
+  make clean
+  make
+  
+Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
+   
+  >export SPS_HOME=/Users/desika/fsps/
 
-  > conda install --no-deps -c conda-forge hyperion
 
-Now, install clone the 4.x development branch from the `yt <http://yt-project.org>`_ 4.x as above.
 
-As long as the rest of `powderday <https://github.com/dnarayanan/powderday.git>`_ 's
-dependencies have been installed, at this point you should be good to go.
+.. _python-fsps:
+
+python-fsps
+--------------
+
+`python-fsps <https://github.com/dfm/python-fsps>`_  will be installed automatically by the `powderday` setup.py script.
+  
+You can test the installation by opening python and typing::
+
+>import fsps
+
+
+
+
+
 
 
 Troubleshooting your Installation
