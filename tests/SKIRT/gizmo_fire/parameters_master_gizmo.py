@@ -2,14 +2,14 @@
 #===============================================
 #HOME INFORMATION
 #===============================================
-pd_source_dir = '/ufrc/narayanan/desika.narayanan/pd_git/'
+pd_source_dir = '/home/desika.narayanan/pd_git/'
 
 #===============================================
 #RESOLUTION KEYWORDS
 #===============================================
 oref = 0 # over refine factor - should typically be set to 0
-n_ref = 32 # when n_particles > n_ref, octree refines further
-zoom_box_len = 50 # kpc; so the box will be +/- zoom_box_len from the center
+n_ref = 128 # when n_particles > n_ref, octree refines further
+zoom_box_len = 100 # kpc; so the box will be +/- zoom_box_len from the center
 bbox_lim = 1.e5 # kpc - this is the initial bounding box of the grid (+/- bbox_lim)
                 # This *must* encompass all of the particles in the
                 # simulation. 
@@ -18,17 +18,17 @@ bbox_lim = 1.e5 # kpc - this is the initial bounding box of the grid (+/- bbox_l
 #PARALLELIZATION
 #===============================================
 
-n_processes = 64 # number of pool processes to run for stellar SED generation
-n_MPI_processes = 32 # number of MPI tasks to run. for TORQUE this is
+n_processes = 16 # number of pool processes to run for stellar SED generation
+n_MPI_processes = 1 # number of MPI tasks to run. for TORQUE this is
                      # best set as the same as n_processes, while for SLURM this may not be the case.
 
 #===============================================
 #RT INFORMATION
 #===============================================
-n_photons_initial = 1.e8
-n_photons_imaging = 1.e8
-n_photons_raytracing_sources = 1.e8
-n_photons_raytracing_dust = 1.e8
+n_photons_initial = 1.e4
+n_photons_imaging = 1.e4
+n_photons_raytracing_sources = 1.e4
+n_photons_raytracing_dust = 1.e4
 
 FORCE_RANDOM_SEED = False
 seed = -12345 # has to be an int, and negative.
@@ -36,15 +36,15 @@ seed = -12345 # has to be an int, and negative.
 #===============================================
 #DUST INFORMATION 
 #===============================================
-dustdir = '/home/desika/pd/hyperion-dust-0.1.0/dust_files/' #location of your dust files
+dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
-PAH = True
+PAH = False
 
 dust_grid_type = 'dtm' # needs to be in ['dtm','rr','manual','li_bestfit','li_ml']
-dusttometals_ratio = 0.4
+dusttometals_ratio = 0.25 # skirt assumes 0.25: see http://www.skirt.ugent.be/tutorials/_tutorial_hydro_s_p_h.html ("dust system"subheading)
 enforce_energy_range = False # False is the default;  ensures energy conservation
 
-SUBLIMATION = False # do we automatically kill dust grains above the
+SUBLIMATION = True # do we automatically kill dust grains above the
                     # sublimation temperature; right now is set to fast
                     # mode 
 SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
@@ -52,14 +52,12 @@ SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 #===============================================
 #STELLAR SEDS INFO
 #===============================================
-FORCE_BINNED = True               # If True, force all star particles to be binned for calculating SED. 
-                                  # If False, all star particles below max_age_direct (next parameter) are added 
-                                  # directly without binning for calculating SED
-max_age_direct  = 1.e-2           # Age (in Gyr) below which stars will be directly added without binning (works only if FORCE_BINNED is False)
+FORCE_ALL_BINNED = True           # force all star particles to be binned for calculating SED
+FORCE_ALL_UNBINNED = False        # force all star particles to be unbinned for calculating SED
+max_age_unbinned_stars = 1.e-2    # Age below which stars will be binned (works only if FORCE_ALL_BINNED and FORCE_ALL_UBINNED are set to False)
 
-imf_type = 2 # FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
+imf_type = 1 # FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 pagb = 1 # weight given to post agb stars# 1 is the default
-
 add_agb_dust_model = False    # add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 
 #===============================================
@@ -77,9 +75,6 @@ FORCE_gas_logu = False      # If set, then we force the ionization parameter (ga
 
 gas_logu = -2.0             # Gas ionization parameter for HII regions. This is only relevant 
                             # if add_neb_emission is set to True and FORCE_gas_logu is set to True (Default: -2.0)
-
-gas_logu_init = 0.0         # Force the ionization parameter to increase/decrease by this value (Scale: log). 
-                            # Useful if you want to run tests (Default: 0.0)
 
 FORCE_gas_logz = False      # If set, then we force the metallicity (gas_logz) of HII regions to be gas_logz (next parameter)
                             # else, it is taken to be the star particles metallicity. (Default: False)
@@ -108,10 +103,9 @@ neb_abund = "dopita"        # This sets the HII region elemental abundances for 
                             #               includes smooth polynomial for N/O, C/O relationship functional form for He(z),
                             #               new depletion and factors in ISM grains.
                             #    gutkin:    Abundabces from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on Grevesse+Sauvel (1998) 
-                            #               and Caffau+2011 
+                            #               and Caffau+2011
                             #    direct:    Abundances are taken directly from the simulation if possible. Defaults to using "dopita" if there is 
-                            #               an error. (Note: Works only for star particles that are added directly without binning.
-                            #               Make sure to set FORCE_BINNED to False)
+                            #               an error.
                             # This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
 
 use_Q = True                # If True, we run CLOUDY by specifying number of ionizing photons which are calculated 
@@ -154,14 +148,6 @@ cloudy_cleanup = True       # If set to True, all the CLOUDY files will be delet
                             # Only relevant if add_neb_emission = True and use_cloudy_tables = True (Default: True)
 
 
-#===============================================
-#BIRTH CLOUD and Dust Screen INFORMATION
-#===============================================
-
-dust_screen = True 
-dust1 = 0.7 #fsps parameters in case we use a dust screen
-dust2 = 0.7
-
 CF_on = False               # if set to true, then we enable the Charlot & Fall birthcloud models 
 
 birth_cloud_clearing_age = 0.01 # Gyr - stars with age <
@@ -169,10 +155,6 @@ birth_cloud_clearing_age = 0.01 # Gyr - stars with age <
                                 # charlot&fall birthclouds meaningless
                                 # of CF_on  == False
 
-
-#===============================================
-# Idealized Galaxy SED Parameters
-#===============================================
 Z_init = 0 # force a metallicity increase in the newstar particles.
            # This is useful for idealized galaxies.  The units for this
            # are absolute (so enter 0.02 for solar).  Setting to 0
@@ -180,20 +162,13 @@ Z_init = 0 # force a metallicity increase in the newstar particles.
            # the simulation (more likely appropriate for cosmological
            # runs)
 
-           #NOTE - this is not exclusively used for idealized
-           #simulations (i.e. one could use this for a cosmological
-           #simulation), but the typical use case is for idealized simulations.
-
-disk_stars_age = 8      # Gyr ;meaningless if this is a cosmological simulation
-bulge_stars_age = 8     # Gyr ; meaningless if this is a cosmological simulation
+# Idealized Galaxy SED Parameters
+disk_stars_age = 8      # Gyr ;meaningless if this is a cosmological simulation; note, if this is <= 7, then these will live in birth clouds
+bulge_stars_age = 8     # Gyr ; meaningless if this is a cosmological simulation; note, if this is <= 7, then these will live in birth clouds
 disk_stars_metals = 19  # in fsps metallicity units
 bulge_stars_metals = 19 # in fsps metallicity units
 
 
-
-#===============================================
-# Stellar Ages and Metallicities
-#===============================================
 
 # bins for binning the stellar ages and metallicities for SED
 # assignments in cases of many (where many ==
@@ -203,16 +178,16 @@ bulge_stars_metals = 19 # in fsps metallicity units
 N_STELLAR_AGE_BINS = 100
 
 
-metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
+metallicity_legend= "/home/desika.narayanan/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
 
 #===============================================
-#BLACK HOLES
+#BLACK HOLE STUFF
 #===============================================
 
-BH_SED = True
+BH_SED = False
 BH_eta = 0.1 #bhluminosity = BH_eta * mdot * c**2.
 BH_model = "Nenkova"
-BH_modelfile = "/home/desika.narayanan/powderday/agn_models/clumpy_models_201410_tvavg.hdf5"
+BH_modelfile = "/home/desika.narayanan/pd_git/powderday/agn_models/clumpy_models_201410_tvavg.hdf5"
 # The Nenkova BH_modelfile can be downloaded here:
 # https://www.clumpy.org/downloads/clumpy_models_201410_tvavg.hdf5
 BH_var = True # Include time variations on BH luminosity (default Hickox+ 2014)
@@ -220,11 +195,11 @@ BH_var = True # Include time variations on BH luminosity (default Hickox+ 2014)
 nenkova_params = [5,30,0,1.5,30,40] #Nenkova+ (2008) model parameters
 
 #===============================================
-#IMAGES AND SED PARAMETERS
+#IMAGES AND SED
 #===============================================
 
-NTHETA = 3
-NPHI = 3
+NTHETA = 1
+NPHI = 1
 SED = True
 
 SED_MONOCHROMATIC = False
@@ -232,15 +207,15 @@ FIX_SED_MONOCHROMATIC_WAVELENGTHS = False # if set, then we only use
                                           # the wavelengths in the
                                           # range between min_lam and
                                           # max_lam
-SED_MONOCHROMATIC_min_lam = 0.1 # micron
-SED_MONOCHROMATIC_max_lam = 1   # micron
+SED_MONOCHROMATIC_min_lam = 0.3 # micron
+SED_MONOCHROMATIC_max_lam = 0.4 # micron
 
 
 
 
 
 IMAGING = False
-filterdir = '/home/desika.narayanan/powderday/filters/'
+filterdir = '/home/desika.narayanan/pd_git/filters/'
 filterfiles = [
     'arbitrary.filter',
 #    'ACS_F475W.filter',
@@ -278,7 +253,7 @@ solar = 0.013
 PAH_frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063} # values will be normalized to 1
 
 #===============================================
-#DEBUGGING -THE PERFORMANCE OF THE CODE USING THESE PARAMETERS IS NOT GUARANTEED
+#DEBUGGING
 #===============================================
 SOURCES_RANDOM_POSITIONS = False
 SOURCES_IN_CENTER = False
@@ -303,5 +278,5 @@ FORCE_STELLAR_AGES = False
 FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
 
 FORCE_STELLAR_METALLICITIES = False
-FORCE_STELLAR_METALLICITIES_VALUE = 0.013 # absolute values (so 0.013 ~ solar)
+FORCE_STELLAR_METALLICITIES_VALUE = 0.012 # absolute values (so 0.013 ~ solar)
 NEB_DEBUG = True # dumps parameters related to nebular line emission in a file for debugging 

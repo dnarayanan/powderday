@@ -221,18 +221,13 @@ Stellar SEDs Info
 :Force_BINNED:
 
    Boolean. True means force binning of the stellar SEDs (in bins of
-   age and metallicity).  False means don't.
-
-:direct_add_stars:
-   
-   Boolean. If True, since star particles below max_age_direct (next parameter)
-   are individually represented in the stellar SED as opposed to broken up into bins.  
-   Note: This can be slow to run, and hard on the memory.
+   age and metallicity).  If False star particles below max_age_direct (next parameter)
+   are individually represented in the stellar SED as opposed to broken up into bins.
+   Note: Setting this to False can be slow to run, and hard on the memory.
 
 :max_age_direct:
    
-   Age (in Gyr) below which star particles will not be binned for getting stellar SEDs (works only if both FORCE_BINNED 
-   and direct_add_stars is set to True) 
+   Age (in Gyr) below which star particles will not be binned for getting stellar SEDs (works only if FORCE_BINNED is False) 
 
 :imf_type:
 
@@ -335,7 +330,7 @@ Nebular Emission Info
     :direct:
       Abundances are taken directly from the simulation if possible. Defaults 
       to using "dopita" if there is an error. (Note: Works only for star particles that are 
-      added directly without binning. Make sure to set direct_add_stars to True)
+      added directly without binning. Make sure to set FORCE_BINNED to False)
 
    This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
 
