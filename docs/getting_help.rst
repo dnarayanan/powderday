@@ -1,16 +1,11 @@
 Getting Help
 **********
 
-
-`powderday <https://github.com/dnarayanan/powderday.git>`_ has an email
-list serve on google groups.  We encourage you to visit the group at
-`http://groups.google.com/group/powderday
-<http://groups.google.com/group/powderday>`_ and post any questions
-you have. You can also search the email archives there.  
-
-You can also directly email the group at [codename] AT googlegroups.com.  For the benefit of future archive readers, if you
-could please include a descriptive subject line of the issue you're
-having, that would very helpful.
+Please feel free to file an issue on the `github page
+<https://github.com/dnarayanan/powderday/issues?`_ if you have an
+issue or even a simple use question!  We will tag and sort them
+appropriately.  This issue tracker will serve as a repository for old
+questions as well.
 
 If a run crashes, it can oftentimes be very useful to post your
 parameters files as well as include which hash you're working off of.
@@ -25,3 +20,5 @@ parameters files, you can type::
   >yt pastebin parmaeters_model.py
 
 and two separate links will be created with the parameters files.
+(Sometimes the pasting will fail on the first attempt but work on a
+second attempt)
