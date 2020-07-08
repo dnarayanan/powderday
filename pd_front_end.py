@@ -217,7 +217,7 @@ if cfg.par.SED == True:
         sed = m.add_peeled_images(sed=True, image=False)
 
         if cfg.par.MANUAL_ORIENTATION == True:
-            sed.set_viewing_angles(np.array(cfg.model.THETA), np.array(cfg.model.PHI))
+            sed.set_viewing_angles(np.array(cfg.par.THETA), np.array(cfg.par.PHI))
 
         else:
             sed.set_viewing_angles(np.linspace(0, 90, par.NTHETA).tolist()*par.NPHI, np.repeat(np.linspace(0, 90, par.NPHI), par.NPHI))
@@ -240,7 +240,7 @@ if cfg.par.SED == True:
         sed.set_wavelength_range(2500, 0.001, 1000.)
 
         if cfg.par.MANUAL_ORIENTATION == True:
-            sed.set_viewing_angles(np.array(cfg.model.THETA), np.array(cfg.model.PHI))
+            sed.set_viewing_angles(np.array(cfg.par.THETA), np.array(cfg.par.PHI))
         else:
             sed.set_viewing_angles(np.linspace(0, 90, par.NTHETA).tolist(
             )*par.NPHI, np.repeat(np.linspace(0, 90, par.NPHI), par.NPHI))
@@ -291,7 +291,7 @@ if cfg.par.IMAGING == True:
         add_transmission_filters(image)
 
     if cfg.par.MANUAL_ORIENTATION == True:
-        image.set_viewing_angles(np.array(cfg.model.THETA), np.array(cfg.model.PHI))
+        image.set_viewing_angles(np.array(cfg.par.THETA), np.array(cfg.par.PHI))
     else:
         image.set_viewing_angles(np.linspace(0, 90, par.NTHETA).tolist()*par.NPHI, np.repeat(np.linspace(0, 90, par.NPHI), par.NPHI))
 
