@@ -4,13 +4,14 @@ Getting Started
 Overview of Requirements
 ============
 
-	* **python>=2.7,>=3.5**
+	* **python=3.6**
 
 	  * numpy (any version except 1.10.*)
 	  * scipy
 	  * astropy (3.2.3)
 	  * h5py
 	  * scikit-learn
+	  * six
 
 	* **compilers**
 
@@ -46,14 +47,11 @@ linked below in each subsection).
 python
 --------------
 
-`powderday <https://github.com/dnarayanan/powderday.git>`_ should work with python >=2.7 or >=3.5, but has not been heavily used under >=3.5.
+`powderday <https://github.com/dnarayanan/powderday.git>`_ should work with python >=3.5 though is ideal with 3.6 (and some issues have been noted that may relate to python 3.7).
 Please file an issue if you encounter one.
 
-As you will see, `powderday <https://github.com/dnarayanan/powderday.git>`_
-currently requires a particular branch of `yt
-<http://yt-project.org>`_. As a result, one path that we have seen work
-well for users is to set up a different python environment for the
-`powderday <https://github.com/dnarayanan/powderday.git>`_ installation.   This could look something like (assuming a ``conda`` installation of python)::
+We very strongly recommend that the user set up a new python environment for the
+`powderday <https://github.com/dnarayanan/powderday.git>`_ installation to avoid software conflicts.   This could look something like (assuming a ``conda`` installation of python)::
 
   >conda create --name pd_environment
   >source activate pd_environment
@@ -99,12 +97,18 @@ There are two ways to install `Hyperion <http://www.hyperion-rt.org>`_.  The fir
 
   >conda install -c conda-forge hyperion
 
-Note, this will eventually become deprecated for `powderday
-<https://github.com/dnarayanan/powderday.git>`_ (or at least modified as
-the `Hyperion <http://www.hyperion-rt.org>`_ ``conda`` install ships
-with `yt 3.x <http://yt-project.org>`_, and eventual upgrade to `yt
-4.x <http://yt-project.org>`_ is coming in Summer 2019.
+Please note, though, that there is an issue with six no longer being
+bundled with astropy that was fixed here:
+https://github.com/hyperion-rt/hyperion/issues/219.  This said, at the
+time of the last update of these docs (July 10th, 2020), this has not translated to the conda installation, meaning you will need to manually update all of the files listed here:
 
+https://github.com/hyperion-rt/hyperion/issues/219#issuecomment-600036854  by replacing::
+  >#from astropy.extern import six
+  >import six
+
+(for example, the files might be located in a location like:)::
+  >home/desika.narayanan/miniconda3/envs/pd_test/lib/python3.6/site-packages/hyperion/filter/filter.py
+  
 The second and manual way to install `Hyperion
 <http://www.hyperion-rt.org>`_ follows:
 1. First clone the main repository.::
@@ -151,6 +155,10 @@ supercomputer])::
 
   >module load git/2.14.1  intel/2018.1.163  openmpi/3.1.0  libz/1.2.8 hdf5/1.10.1
 
+of course please be careful of mixing and matching compilers, and
+ensuring that you have the same compilers loaded for all
+installations.
+  
 6. Compile the code::
 
    > make
@@ -221,28 +229,16 @@ you are eager to use `yt <http://yt-project.org>`_ 4.x for particle
 simulations, please see below.  
 
 
-First, it is recommended to make a new python environment in which to run the 
-4.x development branch::
-
-    > conda create -n pd4env
-    > conda activate pd4env
-
-Next, install `Hyperion <http://www.hyperion-rt.org>`_  as normal, via::
-
-    >conda install -c conda-forge hyperion
-
-And then install `yt <http://yt-project.org>`_ 4.x.  The latter is installed via first ensuring that you have all of the dependencies installed::
+First, install the necessary dependencies::
 
   >pip install numpy jupyter sphinx gitpython h5py matplotlib cython nose scipy astropy sympy mpi4py
 followed by actually installing  `yt <http://yt-project.org>`_::
   
-  >git clone https://github.com/AshKelly/yt.git
+  >git clone https://github.com/yt-project/yt
   >cd yt
-  >git checkout yt-4.0-new-octree
-  >git pull
   >pip install -e .
 
-If we do this, this will overwrite the `yt <http://yt-project.org>`_ installation that ships with `Hyperion <http://www.hyperion-rt.org>`_, and you should be good to go.  To check that everything worked, make sure the output of the following 
+If we do this, this will overwrite the `yt <http://yt-project.org>`_ installation that ships with `Hyperion <http://www.hyperion-rt.org>`_, and you should be good to go (this is necessary to do in this order because `Hyperion <http://www.hyperion-rt.org>`_ ships with `yt 3.x <http://yt-project.org>`_ .  While a number of `powderday <https://github.com/dnarayanan/powderday.git>`_ front ends (i.e. gizmo; tipsy) should work just fine with `yt 3.x <http://yt-project.org>`_, arepo most definitley will not.  To check that everything worked, make sure the output of the following 
 commands look something like this::
 
     > ipython
@@ -250,11 +246,6 @@ commands look something like this::
     In [2]: yt.__version__
     Out[2]: '4.0.dev0'
   
-Note, in the above we are actually not yet installing the master
-branch of `yt <http://yt-project.org>`_ 4.x, but rather Ashley Kelly's
-fork, and the yt-4.0-new-octree branch of Ash's fork.  As this branch gets merged into
-the master `yt <http://yt-project.org>`_ 4.x branch, we will update
-these docs.
 
 
 .. _fsps:
