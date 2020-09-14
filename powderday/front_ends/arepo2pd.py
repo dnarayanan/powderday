@@ -8,6 +8,8 @@ from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
 def arepo_field_add(fname, bounding_box=None, ds=None):
 
+    def _gassmoothinglength(field,data):
+        return data[('PartType0', 'smoothing_length')].in_units('pc')
 
     def _starmetals(field, data):
         return data[('newstars', 'GFM_Metallicity')]
@@ -101,8 +103,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
                                                         omega_matter=data.ds.omega_matter,
                                                         omega_lambda=data.ds.omega_lambda)
             simtime = yt_cosmo.t_from_z(ds.current_redshift).in_units('Gyr').value # Current age of the universe
-            scalefactor = ad[("newstars","GFM_StellarFormationTime")].value
-
+            scalefactor = data[("newstars","GFM_StellarFormationTime")].value
             formation_z = (1./scalefactor)-1.
             formation_time = yt_cosmo.t_from_z(formation_z).in_units('Gyr').value
             age = simtime - formation_time
@@ -244,6 +245,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
     ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
     ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
+    ds.add_field(('gassmoothinglength'),function=_gassmoothinglength,units='pc',particle_type=True)
 
     if cfg.par.BH_SED == True:
         try:

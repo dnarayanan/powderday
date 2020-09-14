@@ -154,39 +154,51 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
         bmet = [fsps_metals[cfg.par.bulge_stars_metals]]*len(bulgemasses)
         bage = [(cfg.par.bulge_stars_age*u.Gyr).to(u.yr).value]*len(bulgemasses)
 
+
     #ages and metallicities need to come from the stars list in case
     #we do something in parameters master to change the values
     smetallicity = [stars.metals for stars in stars_list] + dmet + bmet
     sage = [(stars.age*u.Gyr).to(u.yr).value for stars in stars_list] + dage + bage
     shsml = np.repeat(hsml_in_pc,len(sage))
 
-    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".stars.particles.txt"
-    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".stars.particles.txt"
-    np.savetxt(outfile, np.column_stack((spos_x,spos_y,spos_z,shsml,smasses,smetallicity,sage)))
-    
     #create the gas file for SPH-oids.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
-
 
     gpos_x = reg["gascoordinates"][:,0].in_units('pc').value
     gpos_y = reg["gascoordinates"][:,1].in_units('pc').value
     gpos_z = reg["gascoordinates"][:,2].in_units('pc').value
     gmass = reg["gasmasses"].in_units('Msun').value
-    ghsml = np.repeat(hsml_in_pc,len(gpos_x))
     gmetallicity = reg["gasmetals"].value
     grho = (reg["gasdensity"]*reg["gasmetals"].value*cfg.par.dusttometals_ratio).in_units('Msun/cm**3').value
-    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".gas.particles.txt"
-    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".gas.particles.txt"
+
+
+
+    #set the smoothing lengths. see if we have one defined from the front ends.  if not, then we just use a constant value
+    try:
+        ghsml = reg["gassmoothinglength"].in_units('pc').value
+    except:
+        ghsml = np.repeat(hsml_in_pc,len(gpos_x))
+
+    #file I/O
+    #stars output
+    try: outfile_stars = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".stars.particles.txt"
+    except: outfile_stars = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".stars.particles.txt"
+    np.savetxt(outfile_stars, np.column_stack((spos_x,spos_y,spos_z,shsml,smasses,smetallicity,sage)))
+
+    #gas output
+    try: outfile_gas = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".gas.particles.txt"
+    except: outfile_gas = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".gas.particles.txt"
 
     
     if ds_type in ['gadget_hdf5','tipsy']:
-        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+        np.savetxt(outfile_gas, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
     else:
     #if we ever get the arepo SKIRT ski files working, this is
         #actually the line we need. but since we are currently running
         #SKIRT for arepo in SPH/octree mode, we have to
         # save as though it's an octree..
         #np.savetxt(outfile,np.column_stack((gpos_x,gpos_y,gpos_z,grho)))
-        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+        np.savetxt(outfile_gas, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+
 
 # Saves logU, Q and other related parameters in a file (seperate file is created for each galaxy)
 def logu_diagnostic(logQ, Rin, LogU, mstar, cluster_mass, num_cluster, age, zmet, append = True):
