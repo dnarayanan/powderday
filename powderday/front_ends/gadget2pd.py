@@ -7,6 +7,9 @@ from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
 def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=True):
 
+    def _gassmoothinglength(field,data):
+        return data[('PartType0', 'SmoothingLength')].in_units('pc')
+
     def _starmetals_00(field, data):
         el_dict = {'He': '01',
                    'C': '02',
@@ -340,6 +343,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
     ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
     ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
+    ds.add_field(('gassmoothinglength'),function=_gassmoothinglength,units='pc',particle_type=True)
 
     if cfg.par.BH_SED == True:
         if ('PartType5','BH_Mass') in ds.derived_field_list:
