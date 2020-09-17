@@ -120,6 +120,18 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     def _li_ml_dustmass(field,data):
         return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
+    
+    def _dustmass_rr(field,data):
+        #hard coded values from remy-ruyer table 1
+        a = 2.21
+        alpha = 2.02
+        x_sun = 8.69
+        
+        x = 12.+np.log10(data["gasmetals"]/cfg.par.solar * 10.**(x_sun-12.) )
+        y = a + alpha*(x_sun-np.asarray(x))
+        gas_to_dust_ratio = 10.**(y)
+        dust_to_gas_ratio = 1./gas_to_dust_ratio
+        return dust_to_gas_ratio * data["gasmasses"]
 
     def _dustsmoothedmasses(field, data):
         if yt.__version__ == '4.0.dev0':
@@ -289,6 +301,13 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     if add_smoothed_quantities == True: ds.add_field(('metalsmoothedmasses'), function=_metalsmoothedmasses, units='code_metallicity', particle_type=True)
 
+
+    ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
+    ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
+    ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
+    ds.add_field(('gassmoothinglength'),function=_gassmoothinglength,units='pc',particle_type=True)
+
+
     # get the dust mass
 
     if cfg.par.dust_grid_type == 'dtm':
@@ -298,6 +317,9 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.add_field(('dustmass'), function=_dustmass_manual, units='code_mass', particle_type=True)
         ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
         if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
+    if cfg.par.dust_grid_type == 'rr':
+        ds.add_field(("dustmass"),function=_dustmass_rr,units='code_mass',particle_type=True)
+        
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
     #dust model in place, create a field for these so that
@@ -310,6 +332,9 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         #this is an icky way to pass this to the function for ds.add_field in the next line. but such is life.
         ds.parameters['li_ml_dustmass'] = li_ml_dustmass
         ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
+        #just adding a new field that is called 'dustmass' so that we
+        #can save it later in analytics.  
+        ds.add_field(("dustmass"),function=_li_ml_dustmass,units='code_mass',particle_type=True)
         ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
         if add_smoothed_quantities == True: 
             ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
@@ -340,10 +365,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
 
 
-    ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
-    ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
-    ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
-    ds.add_field(('gassmoothinglength'),function=_gassmoothinglength,units='pc',particle_type=True)
+    #ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
+    #ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
+    #ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
+    #ds.add_field(('gassmoothinglength'),function=_gassmoothinglength,units='pc',particle_type=True)
 
     if cfg.par.BH_SED == True:
         if ('PartType5','BH_Mass') in ds.derived_field_list:
