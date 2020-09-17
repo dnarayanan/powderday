@@ -133,6 +133,11 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         dust_to_gas_ratio = 1./gas_to_dust_ratio
         return dust_to_gas_ratio * data["gasmasses"]
 
+    def _dustmass_li_bestfit(field,data):
+        log_dust_to_gas_ratio = (2.445*np.log10(data["gasmetals"]/cfg.par.solar))-(2.029)
+        dust_to_gas_ratio = 10.**(log_dust_to_gas_ratio)
+        return dust_to_gas_ratio * data["gasmasses"]
+
     def _dustsmoothedmasses(field, data):
         if yt.__version__ == '4.0.dev0':
             return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
@@ -319,7 +324,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
     if cfg.par.dust_grid_type == 'rr':
         ds.add_field(("dustmass"),function=_dustmass_rr,units='code_mass',particle_type=True)
-        
+    if cfg.par.dust_grid_type == 'li_bestfit':
+        ds.add_field(("dustmass"),function=_dustmass_li_bestfit,units='code_mass',particle_type=True)
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
     #dust model in place, create a field for these so that
@@ -363,12 +369,6 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.add_field(('gassmoothedmetals'), function=_gassmoothedmetals, units='code_metallicity', particle_type=True)
         ds.add_field(('gassmoothedmasses'), function=_gassmoothedmasses, units='g', particle_type=True)
 
-
-
-    #ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
-    #ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
-    #ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
-    #ds.add_field(('gassmoothinglength'),function=_gassmoothinglength,units='pc',particle_type=True)
 
     if cfg.par.BH_SED == True:
         if ('PartType5','BH_Mass') in ds.derived_field_list:
