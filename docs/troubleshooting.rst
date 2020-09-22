@@ -95,7 +95,7 @@ Error::
     "zmet={0} out of range [1, {1}]".format(self._params["zmet"], NZ)
     AssertionError: zmet=20 out of range [1, 12]
 
-Recompile fsps with the libraries set to Padova (and not MIST) in sps_vars.f90. Also recompile python-fsps
+This is most likely to a mismatch between the isochrones set in parameters_master and the isochrone choice set in sps_vars.f90 in fsps.   These should be changed to be the same (and as necessary, recompile fsps and python-fsps).
 
 
 6. Pool.map errors in powderday

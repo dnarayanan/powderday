@@ -179,7 +179,7 @@ bulge_stars_metals = 19 # in fsps metallicity units
 N_STELLAR_AGE_BINS = 100
 
 
-metallicity_legend= "/home/desika.narayanan/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
+metallicity_legend= "/home/desika.narayanan/pd_git/fsps_files/zlegend.mist.dat"
 
 #===============================================
 #BLACK HOLE STUFF

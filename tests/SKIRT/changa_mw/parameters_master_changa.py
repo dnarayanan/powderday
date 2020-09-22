@@ -23,10 +23,10 @@ n_MPI_processes = 1 #number oF MPI processes to run
 #===============================================
 #RT INFORMATION
 #===============================================
-n_photons_initial = 5.e6
-n_photons_imaging = 5.e6
-n_photons_raytracing_sources = 5.e6
-n_photons_raytracing_dust = 5.e6
+n_photons_initial = 5.e3
+n_photons_imaging = 5.e3
+n_photons_raytracing_sources = 5.e3
+n_photons_raytracing_dust = 5.e3
 
 FORCE_RANDOM_SEED = False
 seed = -12345 #has to be an int, and negative.
@@ -37,7 +37,7 @@ seed = -12345 #has to be an int, and negative.
 dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = False
-dust_grid_type = 'dtm' #needs to be in ['dtm','rr','manual','li_bestfit','li_ml']
+dust_grid_type = 'li_ml' #needs to be in ['dtm','rr','manual','li_bestfit','li_ml']
 dusttometals_ratio = 0.25 #skirt assumes 0.25: see http://www.skirt.ugent.be/tutorials/_tutorial_hydro_s_p_h.html ("dust system"subheading) 
 enforce_energy_range = False #False is the default;  ensures energy conservation
 
@@ -96,7 +96,7 @@ bulge_stars_metals = 19 #in fsps metallicity units
 N_STELLAR_AGE_BINS = 100
 
 
-metallicity_legend= "/home/desika.narayanan/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
+metallicity_legend= "/home/desika.narayanan/pd_git/fsps_files/zlegend.mist.dat"
 
 #===============================================
 #BLACK HOLE STUFF
