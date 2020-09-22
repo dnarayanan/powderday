@@ -25,10 +25,10 @@ n_MPI_processes = 1 # number of MPI tasks to run. for TORQUE this is
 #===============================================
 #RT INFORMATION
 #===============================================
-n_photons_initial = 1.e5
-n_photons_imaging = 1.e5
-n_photons_raytracing_sources = 1.e5
-n_photons_raytracing_dust = 1.e5
+n_photons_initial = 1.e6
+n_photons_imaging = 1.e6
+n_photons_raytracing_sources = 1.e6
+n_photons_raytracing_dust = 1.e6
 
 FORCE_RANDOM_SEED = False
 seed = -12345 # has to be an int, and negative.

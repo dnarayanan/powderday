@@ -25,10 +25,10 @@ n_MPI_processes = 32 # number of MPI tasks to run. for TORQUE this is
 #===============================================
 #RT INFORMATION
 #===============================================
-n_photons_initial = 1.e8
-n_photons_imaging = 1.e8
-n_photons_raytracing_sources = 1.e8
-n_photons_raytracing_dust = 1.e8
+n_photons_initial = 1.e6
+n_photons_imaging = 1.e6
+n_photons_raytracing_sources = 1.e6
+n_photons_raytracing_dust = 1.e6
 
 FORCE_RANDOM_SEED = False
 seed = -12345 # has to be an int, and negative.
@@ -36,7 +36,7 @@ seed = -12345 # has to be an int, and negative.
 #===============================================
 #DUST INFORMATION 
 #===============================================
-dustdir = '/home/desika/pd/hyperion-dust-0.1.0/dust_files/' #location of your dust files
+dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
 
@@ -199,7 +199,7 @@ bulge_stars_metals = 19 # in fsps metallicity units
 N_STELLAR_AGE_BINS = 100
 
 
-metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
+metallicity_legend= "/home/desika.narayanan/pd_git/fsps_files/zlegend.mist.dat"
 
 #===============================================
 #BLACK HOLES
@@ -208,7 +208,7 @@ metallicity_legend= "/Users/desika/pd/fsps/ISOCHRONES/Padova/Padova2007/zlegend.
 BH_SED = True
 BH_eta = 0.1 #bhluminosity = BH_eta * mdot * c**2.
 BH_model = "Nenkova"
-BH_modelfile = "/home/desika.narayanan/powderday/agn_models/clumpy_models_201410_tvavg.hdf5"
+BH_modelfile = "/home/desika.narayanan/pd_git/agn_models/clumpy_models_201410_tvavg.hdf5"
 # The Nenkova BH_modelfile can be downloaded here:
 # https://www.clumpy.org/downloads/clumpy_models_201410_tvavg.hdf5
 BH_var = True # Include time variations on BH luminosity (default Hickox+ 2014)
@@ -236,7 +236,7 @@ SED_MONOCHROMATIC_max_lam = 1   # micron
 
 
 IMAGING = False
-filterdir = '/home/desika.narayanan/powderday/filters/'
+filterdir = '/home/desika.narayanan/pd_git/filters/'
 filterfiles = [
     'arbitrary.filter',
 #    'ACS_F475W.filter',
