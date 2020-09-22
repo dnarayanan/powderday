@@ -266,66 +266,65 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         #octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
         octree = ds.octree(left,right,n_ref=cfg.par.n_ref)
         ds.parameters['octree'] = octree
-        
 
     # for the metal fields have a few options since gadget can have different nomenclatures
     ad = ds.all_data()
     if ('PartType4', 'Metallicity_00') in ds.derived_field_list:
         try:
-            ds.add_field(('starmetals'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_He'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_C'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_N'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_O'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_Ne'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_Mg'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_Si'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_S'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_Ca'), function=_starmetals_00, units="code_metallicity", particle_type=True)
-            ds.add_field(('starmetals_Fe'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_He'), function=_starmetals_00, sampling_type='particle', units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_C'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_N'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_O'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Ne'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Mg'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Si'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_S'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Ca'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals_Fe'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
         except:
-            ds.add_field(('starmetals'), function=_starmetals_00, units="code_metallicity", particle_type=True)
+            ds.add_field(('starmetals'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
     else:
-        ds.add_field(('starmetals'), function=_starmetals, units="code_metallicity", particle_type=True)
+        ds.add_field(('starmetals'), function=_starmetals, sampling_type='particle',units="code_metallicity", particle_type=True)
 
     if ('PartType0', 'Metallicity_00') in ds.derived_field_list:
-        ds.add_field(('gasmetals'), function=_gasmetals_00, units="code_metallicity", particle_type=True)
-        ds.add_field(('metaldens'), function=_metaldens_00, units="g/cm**3", particle_type=True)
+        ds.add_field(('gasmetals'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+        ds.add_field(('metaldens'), function=_metaldens_00, sampling_type='particle',units="g/cm**3", particle_type=True)
         # we add this as part type 0 (a non-general name) as it gets
         # smoothed immediately and that's all we end up using downstream
-        ds.add_field(('PartType0', 'metalmass'), function=_metalmass_00, units="g", particle_type=True)
+        ds.add_field(('PartType0', 'metalmass'), function=_metalmass_00, sampling_type='particle',units="g", particle_type=True)
 
     else:
-        ds.add_field(('gasmetals'), function=_gasmetals, units="code_metallicity", particle_type=True)
-        ds.add_field(('metaldens'), function=_metaldens, units="g/cm**3", particle_type=True)
-        ds.add_field(('PartType0', 'metalmass'), function=_metalmass, units="g", particle_type=True)
+        ds.add_field(('gasmetals'), function=_gasmetals, sampling_type='particle',units="code_metallicity", particle_type=True)
+        ds.add_field(('metaldens'), function=_metaldens, sampling_type='particle',units="g/cm**3", particle_type=True)
+        ds.add_field(('PartType0', 'metalmass'), function=_metalmass, sampling_type='particle',units="g", particle_type=True)
 
     metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
                                                  "SmoothingLength", "Density", "metalmass",
                                                  ds.field_info)
 
-    if add_smoothed_quantities == True: ds.add_field(('metalsmoothedmasses'), function=_metalsmoothedmasses, units='code_metallicity', particle_type=True)
+    if add_smoothed_quantities == True: ds.add_field(('metalsmoothedmasses'), function=_metalsmoothedmasses, sampling_type='particle',units='code_metallicity', particle_type=True)
 
 
-    ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
-    ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
-    ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
-    ds.add_field(('gassmoothinglength'),function=_gassmoothinglength,units='pc',particle_type=True)
+    ds.add_field(('gasmasses'), function=_gasmasses, sampling_type='particle',units='g', particle_type=True)
+    ds.add_field(('gasfh2'), function=_gasfh2, sampling_type='particle',units='dimensionless', particle_type=True)
+    ds.add_field(('gassfr'), function=_gassfr, sampling_type='particle',units='g/s', particle_type=True)
+    ds.add_field(('gassmoothinglength'),function=_gassmoothinglength,sampling_type='particle',units='pc',particle_type=True)
 
 
     # get the dust mass
 
     if cfg.par.dust_grid_type == 'dtm':
-        ds.add_field(('dustmass'), function=_dustmass_dtm,units='code_mass',particle_type=True)
+        ds.add_field(('dustmass'), function=_dustmass_dtm,sampling_type='particle',units='code_mass',particle_type=True)
     if cfg.par.dust_grid_type == 'manual':
         #if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
-        ds.add_field(('dustmass'), function=_dustmass_manual, units='code_mass', particle_type=True)
+        ds.add_field(('dustmass'), function=_dustmass_manual, sampling_type='particle',units='code_mass', particle_type=True)
         ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
-        if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, units='code_mass', particle_type=True)
+        if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, sampling_type='particle',units='code_mass', particle_type=True)
     if cfg.par.dust_grid_type == 'rr':
-        ds.add_field(("dustmass"),function=_dustmass_rr,units='code_mass',particle_type=True)
+        ds.add_field(("dustmass"),function=_dustmass_rr,sampling_type='particle',units='code_mass',particle_type=True)
     if cfg.par.dust_grid_type == 'li_bestfit':
-        ds.add_field(("dustmass"),function=_dustmass_li_bestfit,units='code_mass',particle_type=True)
+        ds.add_field(("dustmass"),function=_dustmass_li_bestfit,sampling_type='particle',units='code_mass',particle_type=True)
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
     #dust model in place, create a field for these so that
@@ -337,37 +336,37 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         li_ml_dustmass = ((10.**li_ml_dgr)*ad["PartType0","Masses"]).in_units('code_mass')
         #this is an icky way to pass this to the function for ds.add_field in the next line. but such is life.
         ds.parameters['li_ml_dustmass'] = li_ml_dustmass
-        ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
+        ds.add_field(('PartType0','li_ml_dustmass'),function=_li_ml_dustmass,sampling_type='particle',units='code_mass',particle_type=True)
         #just adding a new field that is called 'dustmass' so that we
         #can save it later in analytics.  
-        ds.add_field(("dustmass"),function=_li_ml_dustmass,units='code_mass',particle_type=True)
+        ds.add_field(("dustmass"),function=_li_ml_dustmass,sampling_type='particle',units='code_mass',particle_type=True)
         ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
         if add_smoothed_quantities == True: 
-            ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
+            ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, sampling_type='particle',units='code_mass',particle_type=True)
 
-    ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
-    ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)
-    ds.add_field(('starformationtime'), function=_starformationtime, units='dimensionless', particle_type=True)
+    ds.add_field(('starmasses'), function=_starmasses, sampling_type='particle',units='g', particle_type=True)
+    ds.add_field(('starcoordinates'), function=_starcoordinates, sampling_type='particle',units='cm', particle_type=True)
+    ds.add_field(('starformationtime'), function=_starformationtime, sampling_type='particle',units='dimensionless', particle_type=True)
     
-    ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
+    ds.add_field(('stellarages'),function=_stellarages,sampling_type='particle',units='Gyr',particle_type=True)
    
     if ('PartType2', 'Masses') in ds.derived_field_list:
-        ds.add_field(('diskstarmasses'), function=_diskstarmasses, units='g', particle_type=True)
-        ds.add_field(('diskstarcoordinates'), function=_diskstarcoordinates, units='cm', particle_type=True)
+        ds.add_field(('diskstarmasses'), function=_diskstarmasses, sampling_type='particle',units='g', particle_type=True)
+        ds.add_field(('diskstarcoordinates'), function=_diskstarcoordinates, sampling_type='particle',units='cm', particle_type=True)
 
     if ('PartType3', 'Masses') in ds.derived_field_list:
-        ds.add_field(('bulgestarmasses'), function=_bulgestarmasses, units='g', particle_type=True)
-        ds.add_field(('bulgestarcoordinates'), function=_bulgestarcoordinates, units='cm', particle_type=True)
+        ds.add_field(('bulgestarmasses'), function=_bulgestarmasses, sampling_type='particle',units='g', particle_type=True)
+        ds.add_field(('bulgestarcoordinates'), function=_bulgestarcoordinates, sampling_type='particle',units='cm', particle_type=True)
 
-    if add_smoothed_quantities == True: ds.add_field(('starsmoothedmasses'), function=_starsmoothedmasses, units='g', particle_type=True)
+    if add_smoothed_quantities == True: ds.add_field(('starsmoothedmasses'), function=_starsmoothedmasses, sampling_type='particle',units='g', particle_type=True)
 
-    ds.add_field(('gasdensity'), function=_gasdensity, units='g/cm**3', particle_type=True)
+    ds.add_field(('gasdensity'), function=_gasdensity, sampling_type='particle',units='g/cm**3', particle_type=True)
     # Gas Coordinates need to be in Comoving/h as they'll get converted later.
-    ds.add_field(('gascoordinates'), function=_gascoordinates, units='cm', particle_type=True)
+    ds.add_field(('gascoordinates'), function=_gascoordinates, sampling_type='particle',units='cm', particle_type=True)
     if add_smoothed_quantities == True:
-        ds.add_field(('gassmootheddensity'), function=_gassmootheddensity, units='g/cm**3', particle_type=True)
-        ds.add_field(('gassmoothedmetals'), function=_gassmoothedmetals, units='code_metallicity', particle_type=True)
-        ds.add_field(('gassmoothedmasses'), function=_gassmoothedmasses, units='g', particle_type=True)
+        ds.add_field(('gassmootheddensity'), function=_gassmootheddensity, sampling_type='particle',units='g/cm**3', particle_type=True)
+        ds.add_field(('gassmoothedmetals'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmasses'), function=_gassmoothedmasses, sampling_type='particle',units='g', particle_type=True)
 
 
     if cfg.par.BH_SED == True:
@@ -385,10 +384,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                     from powderday.agn_models.hickox import vary_bhluminosity
                     cfg.par.bhlfrac = vary_bhluminosity(nholes)
 
-                ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
-                ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
-                ds.add_field(("bhnu"),function=_bhsed_nu,units='Hz',particle_type=True)
-                ds.add_field(("bhsed"),function=_bhsed_sed,units="erg/s",particle_type=True)
+                ds.add_field(("bhluminosity"),function=_bhluminosity,sampling_type='particle',units='erg/s',particle_type=True)
+                ds.add_field(("bhcoordinates"),function=_bhcoordinates,sampling_type='particle',units="cm",particle_type=True)
+                ds.add_field(("bhnu"),function=_bhsed_nu,sampling_type='particle',units='Hz',particle_type=True)
+                ds.add_field(("bhsed"),function=_bhsed_sed,sampling_type='particle',units="erg/s",particle_type=True)
                 
 
 
