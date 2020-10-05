@@ -1,14 +1,14 @@
 #snapshot parameters
 
-snapshot_num = 134
+snapshot_num = 600
 snapnum_str = '{:03d}'.format(snapshot_num)
 
-hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_safe_packages/pd/examples/gadget/mw_zoom/'
+hydro_dir = '/blue/narayanan/desika.narayanan/powderday_files/gizmo/fire1/FIRE_M12i_ref11/'
 
 snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
 #where the files should go
-PD_output_dir = '/ufrc/narayanan/desika.narayanan/pd/examples/gadget/mw_zoom/'
+PD_output_dir = '/home/desika.narayanan/pd_git/tests/SKIRT/gizmo_fire'
 Auto_TF_file = 'snap'+snapnum_str+'.logical'
 Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 
@@ -16,15 +16,15 @@ Auto_dustdens_file = 'snap'+snapnum_str+'.dustdens'
 #===============================================
 #FILE I/O
 #===============================================
-inputfile = PD_output_dir+'/example.'+snapnum_str+'.rtin'
-outputfile = PD_output_dir+'/example.'+snapnum_str+'.rtout'
+inputfile = PD_output_dir+'/pd_skirt_comparison.'+snapnum_str+'.rtin'
+outputfile = PD_output_dir+'/pd_skirt_comparison.'+snapnum_str+'.rtout'
 
 #===============================================
 #GRID POSITIONS
 #===============================================
-x_cent=28077.51291590734
-y_cent=22251.040921986722
-z_cent=28531.439944942518
+x_cent=29286.13137399
+y_cent=31049.24813692
+z_cent=32589.56154287
 
 #===============================================
 #CMB

@@ -84,8 +84,8 @@ Z_init = 0 #force a metallicity increase in the newstar particles.
 #Idealized Galaxy SED Parameters
 disk_stars_age = 8 #Gyr ;meaningless if this is a cosmological simulation; note, if this is <= 7, then these will live in birth clouds
 bulge_stars_age = 8 #Gyr ; meaningless if this is a cosmological simulation; note, if this is <= 7, then these will live in birth clouds
-disk_stars_metals = 19 #in fsps metallicity units
-bulge_stars_metals = 19 #in fsps metallicity units
+disk_stars_metals = 11 #in fsps metallicity units
+bulge_stars_metals = 11 #in fsps metallicity units
 
 
 
@@ -97,7 +97,7 @@ bulge_stars_metals = 19 #in fsps metallicity units
 N_STELLAR_AGE_BINS = 100
 
 
-metallicity_legend= "/home/desika.narayanan/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
+metallicity_legend= "/home/desika.narayanan/pd_git/fsps_files/zlegend.mist.dat"
 
 #===============================================
 #BLACK HOLE STUFF

@@ -1,12 +1,12 @@
 #snapshot parameters
 
 snapnum_str = '59'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/yt_datasets/TNGHalo/'
+hydro_dir = '/blue/narayanan/desika.narayanan/yt_datasets/TNGHalo/'
 
 snapshot_name = 'halo_59.hdf5'
 
 #where the files should go
-PD_output_dir = '/ufrc/narayanan/desika.narayanan/pd_git/tests/SKIRT/arepo_cluster/'
+PD_output_dir = '/home/desika.narayanan/pd_git/tests/SKIRT/arepo_cluster/'
 Auto_TF_file = 'halo_59.logical'
 Auto_dustdens_file = 'halo_59.dustdens'
 

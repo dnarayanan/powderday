@@ -23,10 +23,10 @@ n_MPI_processes = 1 #number oF MPI processes to run
 #===============================================
 #RT INFORMATION
 #===============================================
-n_photons_initial = 5.e6
-n_photons_imaging = 5.e6
-n_photons_raytracing_sources = 5.e6
-n_photons_raytracing_dust = 5.e6
+n_photons_initial = 1.e6
+n_photons_imaging = 1.e6
+n_photons_raytracing_sources = 1.e6
+n_photons_raytracing_dust = 1.e6
 
 FORCE_RANDOM_SEED = False
 seed = -12345 #has to be an int, and negative.
@@ -96,7 +96,7 @@ bulge_stars_metals = 19 #in fsps metallicity units
 N_STELLAR_AGE_BINS = 100
 
 
-metallicity_legend= "/home/desika.narayanan/fsps/ISOCHRONES/Padova/Padova2007/zlegend.dat"
+metallicity_legend= "/home/desika.narayanan/pd_git/fsps_files/zlegend.mist.dat"
 
 #===============================================
 #BLACK HOLE STUFF

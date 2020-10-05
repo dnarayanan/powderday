@@ -1,7 +1,7 @@
 #snapshot parameters
 
 snapnum_str = '004096'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_files/tremmel/starform_example/'
+hydro_dir = '/blue/narayanan/desika.narayanan/powderday_files/tremmel/starform_example/'
 
 snapshot_name = 'pioneer50h243.1536gst1bwK1BH.004096'
 
