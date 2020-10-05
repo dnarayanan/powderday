@@ -8,6 +8,66 @@ def variable_set():
         cfg.par.FORCE_RANDOM_SEED  = None
 
     try:
+        cfg.par.imf1
+    except:
+        cfg.par.imf1 = 1.3
+
+    try:
+        cfg.par.imf2
+    except:
+        cfg.par.imf2 = 2.3
+
+    try:
+        cfg.par.imf3
+    except:
+        cfg.par.imf3 = 2.3
+
+    try:
+        cfg.par.add_pagb_stars
+    except:
+        cfg.par.add_pagb_stars = True
+
+    try:
+        cfg.par.PAGB_min_age
+    except:
+        cfg.par.PAGB_min_age = 1.e-1
+
+    try:
+        cfg.par.PAGB_max_age
+    except:
+        cfg.par.PAGB_min_age = 14.
+
+    try:
+        cfg.par.PAGB_N_enhancement
+    except:
+        cfg.par.PAGB_N_enhancement = 0.4
+
+    try:
+        cfg.par.PAGB_C_enhancement
+    except:
+        cfg.par.PAGB_C_enhancement = 0.4
+    
+    try:
+        cfg.par.Rinner_per_Rs
+    except:
+        cfg.par.Rinner_per_Rs = 0.01
+    
+    try:
+        cfg.par.cloudy_nlam
+    except:
+        cfg.par.cloudy_nlam = 128
+
+    try:
+        cfg.par.dump_emlines
+    except:
+        cfg.par.dump_emlines = False
+
+    try:
+        cfg.par.use_cmdf
+    except:
+        cfg.par.use_cmdf = False
+    
+    try:
         cfg.par.max_age_direct
     except:
         cfg.par.max_age_direct = 1.e-2
@@ -247,9 +307,9 @@ def variable_set():
         cfg.par.cloudy_cleanup = True
     
     try:
-        cfg.par.neb_file_output
+        cfg.par.NEB_DEBUG
     except:
-        cfg.par.neb_file_output = True
+        cfg.par.NEB_DEBUG = True
 
     try:
         cfg.par.stellar_cluster_mass
@@ -280,4 +340,4 @@ def variable_set():
     except:
         cfg.par.FORCE_BINNED = True
 
-    return cfg.par.FORCE_RANDOM_SEED,cfg.par.max_age_direct,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logu_init,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.source_logq,cfg.par.FORCE_logq,cfg.par.FORCE_inner_radius,cfg.par.inner_radius,cfg.par.use_Q,cfg.par.neb_dust,cfg.par.cmdf_min_mass,cfg.par.cmdf_max_mass,cfg.par.cmdf_bins,cfg.par.cmdf_beta,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.BH_model,cfg.par.BH_modelfile,cfg.par.BH_var,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,cfg.par.HII_T,cfg.par.HII_nh,cfg.par.HII_max_age,cfg.par.HII_escape_fraction,cfg.par.neb_abund,cfg.par.use_cloudy_tables,cfg.par.cloudy_cleanup,cfg.par.neb_file_output,cfg.par.stellar_cluster_mass, cfg.par.filterdir, cfg.par.filterfiles, cfg.par.PAH_frac, cfg.par.FORCE_BINNED
+    return cfg.par.FORCE_RANDOM_SEED,cfg.par.NEB_DEBUG,cfg.par.imf1,cfg.par.imf2,cfg.par.imf3,cfg.par.add_pagb_stars,cfg.par.PAGB_min_age,cfg.par.PAGB_max_age,cfg.par.PAGB_N_enhancement,cfg.par.PAGB_N_enhancement,cfg.par.Rinner_per_Rs,cfg.par.cloudy_nlam,cfg.par.dump_emlines,cfg.par.use_cmdf,cfg.par.max_age_direct,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logu_init,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.source_logq,cfg.par.FORCE_logq,cfg.par.FORCE_inner_radius,cfg.par.inner_radius,cfg.par.use_Q,cfg.par.neb_dust,cfg.par.cmdf_min_mass,cfg.par.cmdf_max_mass,cfg.par.cmdf_bins,cfg.par.cmdf_beta,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.BH_model,cfg.par.BH_modelfile,cfg.par.BH_var,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,cfg.par.HII_T,cfg.par.HII_nh,cfg.par.HII_max_age,cfg.par.HII_escape_fraction,cfg.par.neb_abund,cfg.par.use_cloudy_tables,cfg.par.cloudy_cleanup,cfg.par.stellar_cluster_mass, cfg.par.filterdir, cfg.par.filterfiles, cfg.par.PAH_frac, cfg.par.FORCE_BINNED

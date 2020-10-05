@@ -68,6 +68,7 @@ def write_cloudy_input(**kwargs):
             "r_in_pc": False,
             "use_Q": True,
             "dust": False,
+            "pagb":False,
             "efrac": -1.0,
             "geometry": "sphere",
             "abundance": "dopita",
@@ -103,7 +104,7 @@ def write_cloudy_input(**kwargs):
         this_print('ionization parameter = {0:.3f} log'.format(pars['logU']))
 
     if pars['dust']:
-        this_print('grains ism {0:.2f} log no qheat'.format(pars['gas_logZ']))
+        this_print('grains orion {0:.2f} log no qheat'.format(pars['gas_logZ']))
 
     if pars['r_in_pc']:
         pc_to_cm = 3.08568e18
@@ -123,6 +124,15 @@ def write_cloudy_input(**kwargs):
         abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
         abund_metal = convert_metals(pars["metals"][1:])
         abund_str = "abundances "
+        
+        # Enhancing abundances for post-AGB stars
+        if pars["pagb"]:
+            abund_metal[1] += cfg.par.PAGB_C_enhancement
+            abund_metal[2] += cfg.par.PAGB_N_enhancement
+
+        if cfg.par.FORCE_N_O_ratio:
+            abund_metal[2] = cfg.par.N_O_ratio + abund_metal[3]
+
         for e in range(len(abund_el)):
             el_str = str(abund_el[e]) + " " + str(abund_metal[e]) + " "
             abund_str = abund_str + el_str
@@ -195,7 +205,7 @@ def clean_files(dir_, model_name, error=False):
     os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".out"))
 
 
-def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals, Dust=False, abund="dopita", useq=True, clean_up=True):
+def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals, Dust=False, abund="dopita", useq=True, Pagb=False, clean_up=True):
     nspec = len(spec_lambda)
     frac_obrun = 0.0
     clight = constants.c.cgs.value*1.e8
@@ -219,6 +229,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals,
                        logZ=logz,
                        abundance=abund,
                        dust=Dust,
+                       pagb=Pagb,
                        metals=Metals)
 
     logging.info("Input SED file written")
@@ -267,8 +278,8 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals,
     sspo = sspo + 10 ** nebem_cont * (10**logq_1)
     for i in range(nemline):
         sspo = sspo + nebem_line[i] * gaussnebarr[i] * (10**logq_1)
-
+        
     if clean_up:
         clean_files(dir_, model_name,  error=False)
 
-    return sspo
+    return sspo, nebem_line_pos, np.array(nebem_line)*(10**logq_1)
