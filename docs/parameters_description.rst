@@ -241,27 +241,73 @@ Stellar SEDs Info
 
    Though note options 3 and 4 are currently not supported.
 
+:imf1:
+    
+    Logarithmic slope of the IMF over the range 0.08 < M < 0.5. Only used if imf_type = 2. (Default: 1.3)    
+
+:imf2:
+
+    Logarithmic slope of the IMF over the range 0.5 < M < 1.0. Only used if imf_type = 2. (Default: 2.3)
+
+:imf3:
+
+    Logarithmic slope of the IMF over the range 1.0 < M < 120. Only used if imf_type = 2. (Default: 2.3)
+
 :pagb:
 
-   Weight given to post AGB stars.  1 is the default.
+    Weight given to post AGB stars.  1 is the default.
+
+:add_agb_dust_model:
+    
+    Add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
+
+:use_cmdf:    
+    
+    If True, star particles that fit the criteria for nebular emission (see next section) are broken down 
+    using a cluster mass distribution function (cmdf) even if nebular emission is turned off (add_nebular_emission = False). 
+    This allows for one to one comparison of models with and without nebular emission. The cmdf is set by the following 
+    parameters defined under nebular emission info (next section): cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
 
 
 Nebular Emission Info
 ------------
 
-
 :add_neb_emission:
 
-    Boolean. If set to True, nebular line emission from Cloudy lookup tables 
-    (dev. by Nell Byler) will be added.
-
-:add_agb_dust_model:
+    Boolean. If set to True, nebular line emission will be added. (under active development)
 
 :use_cloudy_tables:
     
-    If True, CLOUDY look up tables will be used to calculate nebular emission.
-    Otherwise CLOUDY models are generated individually 
-    for each young star particle (under active development)
+    If True, CLOUDY look up tables (dev. by Nell Byler) will be used to calculate nebular emission.
+    Otherwise CLOUDY models are generated individually for each young star particle.
+
+:add_pagb_stars:
+
+    If set, the Post-AGB stars are included when calculating nebular emission (Default: False)
+
+:PAGB_min_age:
+
+    Sets the minimum age limit for calculating nebular emission from post-AGB stars, in units of Gyr. 
+    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
+    add_pagb_stars is set to True (Default = 0.1)
+
+:PAGB_max_age: 
+
+    Sets the maximum age limit for calculating nebular emission from post-AGB stars, in units of Gyr.
+    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
+    add_pagb_stars is set to True (Default = 10)
+
+:PAGB_N_enhancement: 
+
+    Enhances the Nitrogen abundance Post-AGB stars by increasing the log(N/O) by this value. 
+    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
+    add_pagb_stars is set to True (Default = 0.4)  
+
+:PAGB_C_enhancement:
+    
+    Enhances the Carbon abundance Post-AGB stars by increasing the log(C/O) by this value.
+    Only relevant if add_neb_emission is set to True, use_cloudy_tables is seet to False and 
+    add_pagb_stars is set to True (Default = 0.4)
 
 :FORCE_gas_logu:
     
@@ -300,6 +346,15 @@ Nebular Emission Info
     Only relevant if add_neb_emission = True, use_cloudy_tables = True and 
     FORCE_gas_logq = True (Default: 1.e47)
  
+:Rinner_per_Rs:
+
+    Rinner for cloudy calculations is set to this value times the Stromgen Radius. 
+    For example, if set to 0.01 Rinner is taken to be 1 % of Stromgren Radius. 
+    If FORCE_inner_radius (next parameter) is set to True then this is overridden
+    and the value set by the inner_radius is used. This parameter is used 
+    only when add_neb_emission is set True and use_cloudy_tables is 
+    set to False. (Defualt: 0.01)
+    
 :FORCE_inner_radius:
     
     If set, then we force the inner radius of the cloud to be inner_radius (next parameter) 
@@ -379,12 +434,18 @@ Nebular Emission Info
 :cdmf_beta:
     
     The power law exponent (beta) for calculating CMDF (dN/dM goes as M^(beta))
+
+:cloudy_nlam:
     
-:neb_file_output:
-   
-    If set to True creates an output file with ionization parameter (LogU), 
-    number of ionizing photons (LogQ), inner radius, stellar mass, age and 
-    metallicity(zmet) for each particle. (Default: True)
+    Number of lines calculated by CLOUDY. Please do not change this unless you are changing 
+    the underlying CLOUDY model. (Default: 128)
+
+:dump_emlines:        
+
+    If True, The emission lines are saved in a file before going through the dust radiative transfer. 
+    This can be used as a fast way getting emission lines for the purpose of debugging the code.
+    Naming convention: emlines.galaxy*.txt where * is the galaxy number. This works only when 
+    add_neb_emission is set to True (Default: False) 
 
 :stellar_cluster_mass:
    
@@ -397,8 +458,9 @@ Nebular Emission Info
    Note that in case an error occurs, the files are not deleted even if this value is set to True.
    (Default: True)  
    
-   
 
+Birth Cloud Information
+------------
 
 :CF_on:
 
@@ -411,6 +473,10 @@ Nebular Emission Info
    Stars with age < birth_cloud_clearing_age have Charlot & Fall
    birthclouds (if CF_on == True).  Meaningless if CF_on == False.
    Units: Gyr.
+
+
+Idealized Galaxy SED Parameters
+-------------------------------
 
 :Z_init:
 
@@ -447,14 +513,14 @@ Nebular Emission Info
 
    As disk_stars_metals but for bulge stars.
 
+
+Stellar Ages and Metallicities
+-------------------------------
+   
 :N_STELLAR_AGE_BINS:
    
    Number of bins to bin the stellar ages in (boundaries are the
    oldest and youngest star particles; linear bins in log(age)).
-
-:N_MASS_BINS:
-
-   Meaningless parameter; place holder for future code additions.
 
 :metallicity_legend:
 

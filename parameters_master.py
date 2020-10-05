@@ -67,17 +67,17 @@ pagb = 1 # weight given to post agb stars# 1 is the default
 add_agb_dust_model = False    # add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 
 use_cmdf = False     # If True, star particles that fit the criteria for nebular emission (see next section) are broken down 
-                     # using a cluster mass distrbution funtion (cmdf) even if nebular emission is turned off (add_nebular_emission = False). 
+                     # using a cluster mass distribution function (cmdf) even if nebular emission is turned off (add_nebular_emission = False). 
                      # This allows for one to one comparison of models with and without nebular emission. The cmdf is set by the following 
-                     # parmameters defined under nebular emission info (next section): cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
+                     # parameters defined under nebular emission info (next section): cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
 
 #===============================================
 #NEBULAR EMISSION INFO
 #===============================================
-add_neb_emission = False    # add nebular line emission from Cloudy Lookup tables (dev. by Nell Byler)
+add_neb_emission = False    # add nebular line emission (under active development)
 
-use_cloudy_tables = True    # If True, CLOUDY look up tables will be used to calculate nebular emission.
-                            # Otherwise CLOUDY models are generated individually 
+use_cloudy_tables = True    # If True, CLOUDY look up tables (dev. by Nell Byler) will be used to calculate 
+                            # nebular emission. Otherwise CLOUDY models are generated individually 
                             # for each young star particle (under active development) (Default: True)
 
 add_pagb_stars = False      # If set, the Post-AGB stars are included when calculating nebular emission (Default: False)
@@ -89,10 +89,10 @@ PAGB_max_age = 10           # Sets the maximum age limit for calculating nebular
                             # This is used only when add_neb_emission = True, use_cloudy_tables = False and add_pagb_stars = True (Default = 10)
 
 PAGB_N_enhancement = 0.4    # Enhances the Nitrogen abundance Post-AGB stars by increasing the log(N/O) by this value. 
-                            # This used only when when add_neb_emission = True, use_cloudy_tables = False and add_pagb_stars = True (Default = 0.4)  
+                            # This used only when add_neb_emission = True, use_cloudy_tables = False and add_pagb_stars = True (Default = 0.4)  
 
 PAGB_C_enhancement = 0.4    # Enhances the Carbon abundance Post-AGB stars by increasing the log(C/O) by this value.
-                            # This used only when when add_neb_emission = True, use_cloudy_tables = False and add_pagb_stars = True (Default = 0.4)
+                            # This used only when add_neb_emission = True, use_cloudy_tables = False and add_pagb_stars = True (Default = 0.4)
 
 FORCE_gas_logu = False      # If set, then we force the ionization parameter (gas_logu) of HII regions to be 
                             # gas_logu (next parameter) else, it is taken to be variable and dependent on ionizing 
@@ -119,10 +119,10 @@ source_logq = 1.e47         # Number of ionizing photons emitted by the source i
                             # FORCE_gas_logq = True (Default: 1.e47)
  
 Rinner_per_Rs = 0.01        # Rinner for cloudy calculations is set to this value times the Stromgen Radius. 
-                            # For example if set to 0.01 Rinner is taken to be 1 % of Stromgren Radius. 
-                            # If FORCE_inner_radius (next parameter) is set to True the this value is overridden
-                            # and the value set by the inner_radius parameter is used. This parameter is used 
-                            # only when add_neb_emission = True and use_cloudy_tables = False 
+                            # For example, if set to 0.01 Rinner is taken to be 1 % of Stromgren Radius. 
+                            # If FORCE_inner_radius (next parameter) is set to True then this is overridden
+                            # and the value set by the inner_radius is used. This parameter is used 
+                            # only when add_neb_emission = True and use_cloudy_tables = False (Default: 0.01)
 
 FORCE_inner_radius = False  # If set, then we force the inner radius of the cloud to be the value set by inner_radius (next parameter) 
                             # else, it is taken to be the Rinner_per_Rs*Stromgren radius (see previous parameter). (Default: False)
