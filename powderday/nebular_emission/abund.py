@@ -2,6 +2,7 @@ from __future__ import (division, print_function, absolute_import,
                         unicode_literals)
 
 import numpy as np
+import powderday.config as cfg
 from scipy.interpolate import InterpolatedUnivariateSpline as InterpUS
 from powderday.nebular_emission.cloudy_tools import sym_to_name
 
@@ -14,7 +15,7 @@ retrieved in October 2019)
 """
 
 
-def getNebAbunds(set_name, logZ, dust=True, re_z=False, **kwargs):
+def getNebAbunds(set_name, logZ, pagb=False, dust=True, re_z=False, **kwargs):
     """
     neb_abund.get_abunds(set_name, logZ, dust=True, re_z=False)
     set_name must be 'dopita', 'newdopita', 'cl01' or 'yeh'
@@ -22,18 +23,19 @@ def getNebAbunds(set_name, logZ, dust=True, re_z=False, **kwargs):
     allowed_names = ['dopita', 'newdopita', 'cl01', 'yeh',
                      'varyNO', 'gutkin', 'UVbyler', 'varyCO']
     if set_name in allowed_names:
-        return eval('{}({}, dust={}, re_z={})'.format(set_name, logZ, dust, re_z))
+        return eval('{}({}, pagb={}, dust={}, re_z={})'.format(set_name, logZ, pagb, dust, re_z))
     else:
         raise IOError(allowed_names)
 
 
 class abundSet(object):
-    def __init__(self, set_name, logZ):
+    def __init__(self, set_name, logZ, pagb):
         """
         overarching class for abundance sets.
         abundSet('dopita', 0.0)
         """
         self.logZ = logZ
+        self.pagb = pagb
         self.abund_0 = load_abund(set_name)
         self.depl = load_depl(set_name)
         self.calcSpecial()
@@ -53,9 +55,16 @@ class abundSet(object):
         for key in self.abund_0.keys():
             elm = names[key]
             abund = self.__getattribute__(key)
-            # if hasattr(self, 're_z'):
-            #    if key != 'He':
-            #        abund -= self.re_z
+            print (self.pagb)
+            if self.pagb:
+                if key == 'C':
+                    abund += cfg.par.PAGB_C_enhancement
+                elif key == 'N':
+                    abund += cfg.par.PAGB_N_enhancement
+            
+            if cfg.par.FORCE_N_O_ratio and key == 'N':
+                abund = cfg.par.N_O_ratio + self.__getattribute__('O')
+
             outstr = 'element abundance {0} {1:.2f} log'.format(elm, abund)
             elem_strs.append(outstr)
         self.__setattr__('elem_strs', elem_strs)
@@ -65,7 +74,7 @@ class abundSet(object):
 class dopita(abundSet):
     solar = 'old solar 84'
 
-    def __init__(self, logZ, dust=True, re_z=False):
+    def __init__(self, logZ, pagb=False, dust=True, re_z=False):
         """
         Dopita+2001: old solar abundances = 0.019
         ISM grains
@@ -78,7 +87,7 @@ class dopita(abundSet):
             self.re_z = logZ
         else:
             self.re_z = 0.0
-        abundSet.__init__(self, 'dopita', logZ)
+        abundSet.__init__(self, 'dopita', logZ, pagb)
 
     def calcSpecial(self):
         """
@@ -111,7 +120,7 @@ class dopita(abundSet):
 class newdopita(abundSet):
     solar = 'GASS10'
 
-    def __init__(self, logZ, dust=True, re_z=False):
+    def __init__(self, logZ, pagb=False, dust=True, re_z=False):
         """
         Abundances from Dopita (2013)
             Solar Abundances from Grevasse 2010 - z= 0.013
@@ -125,7 +134,7 @@ class newdopita(abundSet):
         else:
             self.grains = 'no grains'
         self.re_z = re_z
-        abundSet.__init__(self, 'newdopita', logZ)
+        abundSet.__init__(self, 'newdopita', logZ, pagb)
 
     def calcSpecial(self):
         def calc_He(logZ):
@@ -158,7 +167,7 @@ class newdopita(abundSet):
 class UVbyler(abundSet):
     solar = 'GASS10'
 
-    def __init__(self, logZ, dust=True, re_z=False):
+    def __init__(self, logZ, pagb=False, dust=True, re_z=False):
         """
         Abundances from Dopita (2013)
             Solar Abundances from Grevasse 2010 - z= 0.013
@@ -172,7 +181,7 @@ class UVbyler(abundSet):
         else:
             self.grains = 'no grains'
         self.re_z = re_z
-        abundSet.__init__(self, 'UVbyler', logZ)
+        abundSet.__init__(self, 'UVbyler', logZ, pagb)
 
     def calcSpecial(self):
         def calc_He(logZ):
@@ -203,7 +212,7 @@ class UVbyler(abundSet):
 class gutkin(abundSet):
     solar = 'GASS10'
 
-    def __init__(self, logZ, dust=True, re_z=False):
+    def __init__(self, logZ, pagb=False, dust=True, re_z=False):
         """
         Gutkin+2016
             PARSEC metallicity (Bressan+2012)
@@ -214,7 +223,7 @@ class gutkin(abundSet):
         else:
             self.grains = 'no grains'
         self.re_z = re_z
-        abundSet.__init__(self, 'gutkin', logZ)
+        abundSet.__init__(self, 'gutkin', logZ, pagb)
 
     def calcSpecial(self):
         def calc_He(logZ):

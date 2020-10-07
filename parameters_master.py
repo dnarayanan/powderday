@@ -115,7 +115,7 @@ FORCE_logq = False          # If set, then we force the number of ionizing photo
                             # from star particles. (Default: False)
 
 source_logq = 1.e47         # Number of ionizing photons emitted by the source in units of s^-1.
-                            # Only relevant if add_neb_emission = True, use_cloudy_tables = True and 
+                            # Only relevant if add_neb_emission = True, use_cloudy_tables = False and 
                             # FORCE_gas_logq = True (Default: 1.e47)
  
 Rinner_per_Rs = 0.01        # Rinner for cloudy calculations is set to this value times the Stromgen Radius. 
@@ -129,6 +129,12 @@ FORCE_inner_radius = False  # If set, then we force the inner radius of the clou
 
 inner_radius = 1.e19        # This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
                             # use_cloudy_tables = False and FORCE_inner_radius = True (Default: 1.e19, Units = cm)
+
+FORCE_N_O_ratio = False     # If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
+                            # This can be used as a template fix adundance ratio of other elements (Default: False)
+
+N_O_ratio = -0.85           # This sets the log of N/O ratio. This is used only when add_neb_emission = True,
+                            # use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = -0.85)
 
 neb_abund = "dopita"        # This sets the HII region elemental abundances for generating CLOUDY models. 
                             # Available abundaces are.
@@ -157,11 +163,8 @@ HII_nh = 1.e2               # Gas hydrogen density for calcualting nebular emiss
 HII_max_age = 1.e-2         # Sets the maximum age limit for calculating nebular emission in units of Gyr. 
                             # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e-2)
 
-HII_escape_fraction = 0.0   # fraction of H-ionizaing photons that escape the HII region. 
+HII_escape_fraction = 0.0   # Fraction of H-ionizaing photons that escape the HII region. 
                             # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 0.0)
-
-neb_dust = False            # If True dust is included in HII regions when calculating nebular emission. 
-                            # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = False)
 
 cmdf_min_mass = 3.5         # While calulating nebular emission one star particle is broken down into smaller star cluster by
 			                # assuming a cluster mass distribution function of the form dN/dM goes as M^(beta). This parameter
@@ -174,15 +177,10 @@ cmdf_bins = 6               # The number of bins used for calulating the cluster
 
 cmdf_beta = -2.0            # Beta (power law exponent) for calculating CMDF (dN/dM goes as M^(beta))
 
-cloudy_nlam = 128           # Number of lines calculated by CLOUDY. Please do not change this unless you are changing 
-                            # the underlying CLOUDY model. (Default: 128)
-
 dump_emlines = False        # If True, The emission lines are saved in a file before going through the dust radiative transfer. 
-                            # This can br used as a fast way getting emission lines for the purpose of debugging the code.
+                            # This can be used as a fast way getting emission lines for the purpose of debugging the code.
                             # Naming convention: emlines.galaxy*.txt where * is the galaxy number 
                             # This works only when add_neb_emission = True (Default: False) 
-
-stellar_cluster_mass = 1.e4 # Mass of star clusters in Msun. This is used only when add_neb_emission = True (Default = 1.e4)
 
 cloudy_cleanup = True       # If set to True, all the CLOUDY files will be deleted after the source addition is complete. 
                             # Only relevant if add_neb_emission = True and use_cloudy_tables = False (Default: True)

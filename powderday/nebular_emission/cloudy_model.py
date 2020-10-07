@@ -142,12 +142,15 @@ def write_cloudy_input(**kwargs):
         this_print(abund_str)
 
     else:
+        print ("************* ",pars["pagb"])
         abunds = getNebAbunds(pars["abundance"],
                             pars["logZ"],
+                            pagb=pars["pagb"],
                             dust=pars["dust"],
                             re_z=False)
         this_print(abunds.solarstr)
         for line in abunds.elem_strs:
+            print (line)
             this_print(line)
     
     this_print('radius {0:.3f} log'.format(r_out))

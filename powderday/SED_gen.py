@@ -442,16 +442,16 @@ def newstars_gen(stars_list):
             cluster_mass, num_clusters = cmdf(stars_list[i].mass/constants.M_sun.cgs.value,int(cfg.par.cmdf_bins),cfg.par.cmdf_min_mass,
                                                 cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
             f = np.zeros(nlam)
-            line_em = np.zeros([cfg.par.cloudy_nlam])
+            cloudy_nlam = len(np.genfromtxt(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat", delimiter=','))
+            line_em = np.zeros([cloudy_nlam])
             for j in range(len(cluster_mass)):
                 num_HII_clusters = num_clusters[j]
                 neb_file_output = cfg.par.NEB_DEBUG
-            
+                print (j, 10**cluster_mass[j], num_HII_clusters) 
                 sp.params["add_neb_emission"] = False
-                
                 if cfg.par.add_neb_emission:
                     spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
-                    print (j, 10**cluster_mass[j], num_HII_clusters, stars_list[i].age, LogZ)
+
                     if cfg.par.FORCE_gas_logu:
                         alpha = 2.5e-13*((cfg.par.HII_T/(10**4))**(-0.85))
                         LogU = cfg.par.gas_logu

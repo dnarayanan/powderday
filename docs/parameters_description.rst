@@ -365,6 +365,16 @@ Nebular Emission Info
     This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
     use_cloudy_tables = True and FORCE_inner_radius = True (Default: 1.e19)
 
+:FORCE_N_O_ratio: 
+    
+    If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
+    This can be used as a template fix adundance ratio of other elements (Default: False)
+
+:N_O_ratio: 
+    
+    This sets the log of N/O ratio. This is used only when add_neb_emission = True,
+    use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = -0.85)
+
 :neb_abund:
 
     This sets the HII region elemental abundances for generating CLOUDY models. 
@@ -408,10 +418,6 @@ Nebular Emission Info
    
     Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 1.e-2)
 
-:neb_dust:
-    
-    If True dust is included in HII regions when calculating nebular emission. (Default = False)
-
 :HII_escape_fraction:
     
     HII region escape fraction (Default = 0.0)
@@ -435,21 +441,12 @@ Nebular Emission Info
     
     The power law exponent (beta) for calculating CMDF (dN/dM goes as M^(beta))
 
-:cloudy_nlam:
-    
-    Number of lines calculated by CLOUDY. Please do not change this unless you are changing 
-    the underlying CLOUDY model. (Default: 128)
-
 :dump_emlines:        
 
     If True, The emission lines are saved in a file before going through the dust radiative transfer. 
     This can be used as a fast way getting emission lines for the purpose of debugging the code.
     Naming convention: emlines.galaxy*.txt where * is the galaxy number. This works only when 
     add_neb_emission is set to True (Default: False) 
-
-:stellar_cluster_mass:
-   
-    Mass of star clusters in Msun (Default = 1.e4)
 
 :cloudy_cleanup:
    
