@@ -252,7 +252,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
                     #print(stars_metals, metal_bins[wz], fsps_metals[wz])
                     sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz],stars_metals))
    
-    print ("NUMBER:   ",len(sed_bins_list_has_stellar_mass))
     #sed_bins_list is a list of Sed_Bins objects that have the
     #information about what mass bin, metal bin and age bin they
     #correspond to.  It is unnecessary, and heavy computational work

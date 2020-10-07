@@ -55,7 +55,6 @@ class abundSet(object):
         for key in self.abund_0.keys():
             elm = names[key]
             abund = self.__getattribute__(key)
-            print (self.pagb)
             if self.pagb:
                 if key == 'C':
                     abund += cfg.par.PAGB_C_enhancement

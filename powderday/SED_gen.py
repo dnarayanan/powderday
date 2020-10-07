@@ -447,7 +447,7 @@ def newstars_gen(stars_list):
             for j in range(len(cluster_mass)):
                 num_HII_clusters = num_clusters[j]
                 neb_file_output = cfg.par.NEB_DEBUG
-                print (j, 10**cluster_mass[j], num_HII_clusters) 
+
                 sp.params["add_neb_emission"] = False
                 if cfg.par.add_neb_emission:
                     spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
