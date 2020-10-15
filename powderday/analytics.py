@@ -201,7 +201,7 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
 
 
 # Saves logU, Q and other related parameters in a file (seperate file is created for each galaxy)
-def logu_diagnostic(logQ, Rin, LogU, mstar, cluster_mass, num_cluster, age, zmet, append = True):
+def logu_diagnostic(logQ, LogU, LogZ, Rin, cluster_mass, num_cluster, age, append = True):
     if append == False:
         try: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
         except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
@@ -211,10 +211,28 @@ def logu_diagnostic(logQ, Rin, LogU, mstar, cluster_mass, num_cluster, age, zmet
         try:outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
         except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
         f = open(outfile, 'a+')
-        f.write(str(logQ) + "\t" + str(Rin) + "\t" + str(LogU) + "\t" + str(mstar) + "\t"+ str(cluster_mass) + "\t" + str(num_cluster) + "\t" + str(age) + "\t" + str(zmet) + "\n")
+        f.write(str(logQ) + "\t" + str(LogU) + "\t" + str(LogZ) + "\t" + str(Rin) + "\t"+ str(cluster_mass) + "\t" + str(num_cluster) + "\t" + str(age) + "\n")
         f.close()
 
-    # Dumps AGN SEDs
+
+# Dumps emission lines
+def dump_emlines(line_wav, line_em, append=True):
+    if hasattr(cfg.model, 'galaxy_num_str'):
+        outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy" + cfg.model.galaxy_num_str + ".txt"
+    else:
+        outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy.txt"
+
+    if append == False:
+        f = open(outfile_lines,'w')
+        f.close()
+    else:
+        f = open(outfile_lines,'a+')
+        if os.stat(outfile_lines).st_size == 0:
+            np.savetxt(f,np.expand_dims(line_wav,axis=0))
+        np.savetxt(f,np.expand_dims(line_em,axis=0))
+        f.close()
+
+# Dumps AGN SEDs
 def dump_AGN_SEDs(nu,fnu,luminosity):
     
     if hasattr(cfg.model,'galaxy_num_str'):
@@ -225,7 +243,7 @@ def dump_AGN_SEDs(nu,fnu,luminosity):
     np.savez(outfile_bh,nu = nu,fnu = fnu, luminosity = luminosity)
                       
 
-
+'''
 #def dump_emline(emline_wavelengths,emline_luminosity,append=True):
 def dump_emline(emline_wave,emline_lum,append=True):
 
@@ -243,5 +261,4 @@ def dump_emline(emline_wave,emline_lum,append=True):
         f = open(outfile_lines,'a+')
         np.savetxt(f,emline_lum)#,fmt='%.18g', delimiter=' ', newline=os.linesep)
         f.close()
-
-
+'''

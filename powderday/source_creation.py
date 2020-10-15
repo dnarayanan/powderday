@@ -186,8 +186,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     metal_bins = np.arange(N_METAL_BINS)+1
 
     # define the age bins in log space so that we maximise resolution around young stars
-    # Setting minimum age to be 10 Myr since we do not want to bins young stars if nebular emission is turned on
-    
     age_bins = 10.**(np.linspace(np.log10(minimum_age),np.log10(maximum_age),cfg.par.N_STELLAR_AGE_BINS))
     #tack on the maximum age bin
     age_bins = np.append(age_bins,age_bins[-1]+delta_age)
@@ -195,13 +193,11 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
    
     #define the mass bins (log)
     #note - for some codes, all star particles have the same mass.  in this case, we have to have a trap:
-    if minimum_mass == maximum_mass: 
+    if minimum_mass == maximum_mass or cfg.par.N_MASS_BINS == 0: 
         mass_bins = np.zeros(cfg.par.N_MASS_BINS+1)+minimum_mass
     else:
         delta_mass = (np.log10(maximum_mass)-np.log10(minimum_mass))/cfg.par.N_MASS_BINS
-        mass_bins = np.arange(np.log10(minimum_mass),
-                              np.log10(maximum_mass),
-                              delta_mass)
+        mass_bins = np.arange(np.log10(minimum_mass),np.log10(maximum_mass),delta_mass)
         mass_bins = np.append(mass_bins,mass_bins[-1]+delta_mass)
         mass_bins = 10.**mass_bins
         
@@ -248,9 +244,14 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
             for wm in range(cfg.par.N_MASS_BINS+1):
                 sed_bins_list.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz]))
                 if has_stellar_mass[wz,wa,wm] == True:
-                    sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz]))
+                    stars_metals = []
+                    for star in stars_in_bin[(wz,wa,wm)]:
+                        stars_metals.append(stars_list[star].all_metals)
+                    stars_metals = np.array(stars_metals)
+                    stars_metals = np.mean(stars_metals,axis=0)
+                    #print(stars_metals, metal_bins[wz], fsps_metals[wz])
+                    sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz],stars_metals))
    
-
     #sed_bins_list is a list of Sed_Bins objects that have the
     #information about what mass bin, metal bin and age bin they
     #correspond to.  It is unnecessary, and heavy computational work

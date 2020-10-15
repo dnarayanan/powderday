@@ -16,7 +16,7 @@ from functools import partial
 from scipy.integrate import simps
 from powderday.nebular_emission.cloudy_tools import calc_LogU
 from powderday.nebular_emission.cloudy_tools import cmdf
-from powderday.analytics import logu_diagnostic,dump_emline
+from powderday.analytics import logu_diagnostic,dump_emlines
 from powderday.nebular_emission.cloudy_model import get_nebular
 
 #this is required to keep the reg as a strong reference.  for some
@@ -115,7 +115,6 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
     
     bulgestars_list = []
     diskstars_list = []
-
 
     
     #in principle, we should just be able to do the following blocks
@@ -226,13 +225,6 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
 
     nprocesses = np.min([cfg.par.n_processes,len(stars_list)]) #the pool.map will barf if there are less star bins than process threads
 
-    
-    #initializing the logU file newly
-    #logu_diagnostic(None,None,None,None,None,None,None,None,append=False)
-    #save the emission lines from the newstars#
-    if cfg.par.add_neb_emission: calc_emline(stars_list)
-
-
     #initialize the process pool and build the chunks
     p = Pool(processes = nprocesses)
     nchunks = nprocesses
@@ -313,6 +305,9 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
 
         sp.params["tage"] = cfg.par.disk_stars_age
         sp.params["imf_type"] = cfg.par.imf_type
+        sp.params["imf1"] = cfg.par.imf1
+        sp.params["imf2"] = cfg.par.imf2
+        sp.params["imf3"] = cfg.par.imf3
         sp.params["pagb"] = cfg.par.pagb
         sp.params["sfh"] = 0
         sp.params["zmet"] = cfg.par.disk_stars_metals
@@ -330,6 +325,9 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
         #calculate the SED for bulge stars
         sp.params["tage"] = cfg.par.bulge_stars_age
         sp.params["imf_type"] = cfg.par.imf_type
+        sp.params["imf1"] = cfg.par.imf1
+        sp.params["imf2"] = cfg.par.imf2
+        sp.params["imf3"] = cfg.par.imf3
         sp.params["pagb"] = cfg.par.pagb
         sp.params["sfh"] = 0
         sp.params["zmet"] = cfg.par.bulge_stars_metals
@@ -411,6 +409,9 @@ def newstars_gen(stars_list):
         
         sp.params["tage"] = stars_list[i].age
         sp.params["imf_type"] = cfg.par.imf_type
+        sp.params["imf1"] = cfg.par.imf1
+        sp.params["imf2"] = cfg.par.imf2
+        sp.params["imf3"] = cfg.par.imf3
         sp.params["pagb"] = cfg.par.pagb
         sp.params["sfh"] = 0
         sp.params["zmet"] = stars_list[i].fsps_zmet
@@ -433,67 +434,93 @@ def newstars_gen(stars_list):
         spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
         f = spec[1]
         
+        pagb = cfg.par.add_pagb_stars and stars_list[i].age >= cfg.par.PAGB_min_age and stars_list[i].age <= cfg.par.PAGB_max_age
+        
         #Only including particles below the maximum age limit for calulating nebular emission
-        if cfg.par.add_neb_emission and stars_list[i].age <= cfg.par.HII_max_age:
+        if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (stars_list[i].age <= cfg.par.HII_max_age or pagb):
+            
             cluster_mass, num_clusters = cmdf(stars_list[i].mass/constants.M_sun.cgs.value,int(cfg.par.cmdf_bins),cfg.par.cmdf_min_mass,
-                                              cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
+                                                cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
             f = np.zeros(nlam)
+            cloudy_nlam = len(np.genfromtxt(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat", delimiter=','))
+            line_em = np.zeros([cloudy_nlam])
             for j in range(len(cluster_mass)):
                 num_HII_clusters = num_clusters[j]
-                neb_file_output = cfg.par.neb_file_output
-            
+                neb_file_output = cfg.par.NEB_DEBUG
+
                 sp.params["add_neb_emission"] = False
-                spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
-                
-                if cfg.par.FORCE_gas_logu:
-                    alpha = 2.5e-13*((cfg.par.HII_T/(10**4))**(-0.85))
-                    LogU = cfg.par.gas_logu
-                    LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*cfg.par.HII_nh))
-                    Rin = ((3*(10 ** LogQ))/(4*np.pi*(cfg.par.HII_nh**2)*alpha))**(1./3.)
-                else:
-                    LogQ, Rin, LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value,
+                if cfg.par.add_neb_emission:
+                    spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+
+                    if cfg.par.FORCE_gas_logu:
+                        alpha = 2.5e-13*((cfg.par.HII_T/(10**4))**(-0.85))
+                        LogU = cfg.par.gas_logu
+                        LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*cfg.par.HII_nh))
+                        Rs = ((3*(10 ** LogQ))/(4*np.pi*(cfg.par.HII_nh**2)*alpha))**(1./3.)
+                    else:
+                        LogQ, Rs, LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value,
                                                 cfg.par.HII_nh, cfg.par.HII_T, cfg.par.HII_escape_fraction, mstar=10**cluster_mass[j])
                 
-                alpha = 2.5e-13*((cfg.par.HII_T/(10**4))**(-0.85))
-                LogU = LogU + cfg.par.gas_logu_init
-                LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*cfg.par.HII_nh))
-                Rin = ((3*(10 ** LogQ))/(4*np.pi*(cfg.par.HII_nh**2)*alpha))**(1./3.)
-                
-                if cfg.par.FORCE_logq:
-                    LogQ = cfg.par.source_logq
+                    alpha = 2.5e-13*((cfg.par.HII_T/(10**4))**(-0.85))
+                    LogU = LogU + cfg.par.gas_logu_init
+                    LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*cfg.par.HII_nh))
+                    Rs = ((3*(10 ** LogQ))/(4*np.pi*(cfg.par.HII_nh**2)*alpha))**(1./3.)
+                    
+                    Rin = cfg.par.Rinner_per_Rs*Rs
+                    
+                    if cfg.par.FORCE_logq:
+                        LogQ = cfg.par.source_logq
 
-                if cfg.par.FORCE_inner_radius:
-                    Rin = cfg.par.inner_radius
+                    if cfg.par.FORCE_inner_radius:
+                        Rin = cfg.par.inner_radius
                
-                if neb_file_output: 
-                    logu_diagnostic(LogQ, Rin, LogU, cfg.par.stellar_cluster_mass, 10**cluster_mass[j], num_HII_clusters, stars_list[i].age, stars_list[i].fsps_zmet, append=True)
-                    neb_file_output = False
- 
-                sp.params['gas_logu'] = LogU
-                sp.params['gas_logz'] = LogZ
-                sp.params["add_neb_emission"] = True 
-                
-                if cfg.par.use_cloudy_tables:
-                    lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
-                else:
-                    try:
-                        # Calculating ionizing photons again but for 1 Msun in order to scale the output for FSPS
-                        LogQ_1, Rin_1, LogU_1 = calc_LogU(1.e8 * constants.c.cgs.value / spec[0],
-                                                          spec[1] * constants.L_sun.cgs.value, cfg.par.HII_nh,
-                                                          cfg.par.HII_T, cfg.par.HII_escape_fraction)
+                    if neb_file_output:
+                        if cfg.par.use_cloudy_tables:
+                            Rin = 1.e19   # Rinner is fixed at 1.e19 cm for lookup tables
+                        logu_diagnostic(LogQ, LogU, LogZ, Rin, 10**cluster_mass[j], num_HII_clusters, stars_list[i].age, append=True)
+                        neb_file_output = False
 
-                        spec_neb = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, LogQ_1, stars_list[i].all_metals, 
-                                                Dust=cfg.par.neb_dust, abund=cfg.par.neb_abund, useq = cfg.par.use_Q, clean_up = cfg.par.cloudy_cleanup)
-                    except ValueError as err:
-                        print ("WARNING: CLOUDY run was unsucessful. Using lookup tables for nebular emission")
+                        sp.params['gas_logu'] = LogU
+                        sp.params['gas_logz'] = LogZ
+                        sp.params["add_neb_emission"] = True 
+                
+                    if cfg.par.use_cloudy_tables:
                         lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+                        line_lum = sp.emline_luminosity
+                        wave_line = sp.emline_wavelengths
+                    else:
+                        try:
+                            # Calculating ionizing photons again but for 1 Msun in order to scale the output for FSPS
+                            LogQ_1, Rin_1, LogU_1 = calc_LogU(1.e8 * constants.c.cgs.value / spec[0],
+                                                            spec[1] * constants.L_sun.cgs.value, cfg.par.HII_nh,
+                                                            cfg.par.HII_T, cfg.par.HII_escape_fraction)
+                               
+                            
+                            spec_neb, wave_line, line_lum = get_nebular(spec[0], spec[1], cfg.par.HII_nh, LogQ, Rin, LogU, LogZ, LogQ_1, stars_list[i].all_metals, 
+                                                    Dust=cfg.par.neb_dust, abund=cfg.par.neb_abund, useq = cfg.par.use_Q, Pagb=pagb, clean_up = cfg.par.cloudy_cleanup)
+                        except ValueError as err:
+                            print ("WARNING: CLOUDY run was unsucessful. Using lookup tables for nebular emission")
+                            lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+                            line_lum = sp.emline_luminosity
+                            wave_line = sp.emline_wavelengths
+                
+                else:
+                    lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
 
                 weight = num_HII_clusters*(10**cluster_mass[j])/(stars_list[i].mass/constants.M_sun.cgs.value)
                 f = f + spec_neb*weight
+                if cfg.par.add_neb_emission and cfg.par.dump_emlines:
+                    line_em = line_em + line_lum*weight
+        
+            if cfg.par.add_neb_emission and cfg.par.dump_emlines:
+                #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
+                line_em = line_em * ((stars_list[i].mass*u.g).to(u.Msun).value) * (3.839e33)  # Units: ergs/s
+                line_em = np.append(line_em, stars_list[i].age)
+                dump_emlines(wave_line, line_em)
 
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f
-        
+
     return stellar_fnu
 
 def fsps_metallicity_interpolate(metals):
@@ -518,96 +545,4 @@ def find_nearest_zmet(array,value):
 
     idx = (np.abs(array-value)).argmin()
     
-    return idx+1
-
-
-def calc_emline(stars_list):
-    print ('[SED_gen/calc_emline]: Calculating Emission Line Fluxes')
-    #this function is awful and redundant.  itloops over just the new
-    #stars in the box and calculates the SEDs for the ones smaller
-    #than cfg.par.HII_max_age.  its a bit wasteful since we already
-    #calculate these SEDs, but its difficult to get the file to save
-    #in a nice format without incl
-    global sp
-    if sp is None:
-        sp = fsps.StellarPopulation()
-
-    #set up arrays 
-    #first how many young stars are there?
-    
-    newstars_idx = []
-    for counter,star in enumerate(stars_list):
-        if star.age <= cfg.par.HII_max_age:
-            newstars_idx.append(counter)
-    num_newstars = len(newstars_idx)
- 
-    #set up a dummy sps model just to get number of wavelengths
-    sp.params["tage"] = stars_list[0].age
-    sp.params["zmet"] = stars_list[0].fsps_zmet
-    sp.params["add_neb_emission"] = True
-    wav,spec = sp.get_spectrum()
-    n_emlines = len(sp.emline_wavelengths)
-    
-    #now set up the actual arrays
-    master_emline_wavelength = np.zeros([n_emlines])
-    master_emline_lum = np.zeros([num_newstars,n_emlines])
-    emline_luminosity = np.zeros([n_emlines])
-
-    #loop through the newstars now and save the emlines
-    for counter,i in enumerate(newstars_idx):
-
-        cluster_mass, num_clusters = cmdf(stars_list[i].mass/constants.M_sun.cgs.value,int(cfg.par.cmdf_bins),cfg.par.cmdf_min_mass,
-                cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
-
-        #first we calculate the spectrum without lines on to get logU
-        sp.params["tage"] = stars_list[i].age
-        sp.params["imf_type"] = cfg.par.imf_type
-        sp.params["pagb"] = cfg.par.pagb
-        sp.params["sfh"] = 0
-        sp.params["zmet"] = stars_list[i].fsps_zmet
-        sp.params["add_neb_emission"] = False
-        sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
-        sp.params['gas_logu'] = cfg.par.gas_logu
-        if cfg.par.FORCE_gas_logz == False:
-            sp.params['gas_logz'] =np.log10(stars_list[i].metals/cfg.par.solar)
-        else:
-            sp.params['gas_logz'] = cfg.par.gas_logz
-
-        if cfg.par.CF_on == True:
-            sp.params["dust_type"] = 0
-            sp.params["dust1"] = 1
-            sp.params["dust2"] = 0
-            sp.params["dust_tesc"] = tesc_age
-
-        spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
-        neb_file_output = False
-        sp.params["add_neb_emission"] = False
-        spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
-        
-        for j in range(len(cluster_mass)):
-            #now we know logU, so recalculate the lines
-            if cfg.par.FORCE_gas_logu:
-                LogU = cfg.par.gas_logu
-            else:
-                LogQ, Rin, LogU = calc_LogU(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, cfg.par.HII_nh, cfg.par.HII_T,
-                                            cfg.par.HII_escape_fraction, mstar=cluster_mass[j])
-            sp.params['gas_logu'] = LogU
-            sp.params["add_neb_emission"] = True
-            spec = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
-
-            weight = num_clusters[j]*(10**cluster_mass[j])/(stars_list[i].mass/constants.M_sun.cgs.value)
-            emline_luminosity = emline_luminosity + sp.emline_luminosity * num_clusters[j] * weight
-        
-        emline_wavelength = sp.emline_wavelengths
-
-        #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
-        master_emline_lum[counter,:] = emline_luminosity*((stars_list[i].mass*u.g).to(u.Msun).value)
-        if counter == 0: 
-            master_emline_wavelength = emline_wavelength
-            #set up the emline output file as new, and insert the wavelengths
-            dump_emline(master_emline_wavelength,None,append=False)
-    
-    #write the remainder of the emline file
-    dump_emline(master_emline_wavelength,master_emline_lum,append=True)
-
-                    
+    return idx+1      
