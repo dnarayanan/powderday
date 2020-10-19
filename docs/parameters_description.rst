@@ -443,10 +443,20 @@ Nebular Emission Info
 
 :dump_emlines:        
 
-    If True, The emission lines are saved in a file before going through the dust radiative transfer. 
-    This can be used as a fast way getting emission lines for the purpose of debugging the code.
-    Naming convention: emlines.galaxy*.txt where * is the galaxy number. This works only when 
-    add_neb_emission is set to True (Default: False) 
+    If True, The emission lines are saved in a file before going
+    through the dust radiative transfer.  These are the cloudy
+    computed emission line strengths, and are calculated for all lines
+    cloudy calculates (i.e. not just those undergoing radiative
+    transfer).  The format for the output is a wavelength array,
+    followed by a (nlam+1) list for each HII-region bearing particle.
+    The +1 in the (nlam+1) list is the stellar age of that particle.
+    There is a convenience package in /convenience to help read in
+    this file.
+
+    This can be used as a fast way getting emission lines for the
+    purpose of debugging the code.  Naming convention:
+    emlines.galaxy*.txt where * is the galaxy number. This works only
+    when add_neb_emission is set to True (Default: False)
 
 :cloudy_cleanup:
    

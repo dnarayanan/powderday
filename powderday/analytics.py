@@ -59,9 +59,11 @@ def stellar_sed_write(m):
 
     README = "Note: nu is in Hz, and fnu is in Lsun/Hz; lam is in micron and flam is in Lsun/micron"
     #saving: nu is in Hz and fnu is in Lsun/Hz
-    outfile = cfg.model.PD_output_dir+"stellar_seds."+cfg.model.snapnum_str+".npz"
 
-
+    
+    try: outfile = cfg.model.PD_output_dir+"/stellar_seds."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".npz"
+    except:
+        outfile = cfg.model.PD_output_dir+"/stellar_seds."+cfg.model.snapnum_str+".npz"
 
     np.savez(outfile,nu=nu,fnu=fnu,lam = lam.value, flam = flam.value, README=README)
    
