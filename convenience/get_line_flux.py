@@ -12,16 +12,20 @@ import astropy.units as u
 def func(x, *params):
     return (params[1]*np.exp(-(((x - params[0])/abs(params[2]))**2)*(2.772588724)))+abs(params[3])
 
-
-def get_flux(lam, spec, fit_level):
+def get_flux(lam_cent,left_edge,right_edge,lam, spec, fit_level):
     # Calculates line luminosity by fitting a Gaussian. 
     # Needs wavelength in microns and SED in ergs/s/microns
     # fit_level is the minimum Rsquare value needed. It detemines the goodness of fit (the higher it is the better the fit) 
     # Returns -1.0 if there is an error or if Rsuqare of the fit is less than fit_level
     
-    left = 0.6556
-    right = 0.6576
-    lam_peak = 0.65645131
+    left = left_edge
+    right = right_edge
+    lam_peak = lam_cent
+
+
+    #left = 0.6556
+    #right = 0.6576
+    #lam_peak = 0.65645131
     
     index_left = np.abs(lam - left).argmin()
     index_right = np.abs(lam - right).argmin()
@@ -69,6 +73,11 @@ wav *= u.micron
 flam = (nufnu/wav).to(u.erg/u.s/u.micron)
 flam = flam[0]
 
-line_flux = get_flux(wav.value, flam.value, 0.98)
+lam_cent = 0.6564 #micron of central wavelength
+left_edge = lam_cent*0.999 #wavelength of left edge of line (guessed)
+right_edge = lam_cent*1.001 #wavelength of right edge of line (guessed)
+
+
+line_flux = get_flux(lam_cent,left_edge,right_edge,wav.value, flam.value, 0.98)
 print ("line flux :"+ str(line_flux) +" ergs/s")
 
