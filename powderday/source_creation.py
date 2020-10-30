@@ -53,7 +53,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         nu = nu[::-1]
         fnu = fnu[::-1]
         
-        lum = np.absolute(np.trapz(fnu, x=nu))*stars_list[i].mass/constants.M_sun.cgs.value 
+        lum = np.absolute(np.trapz(fnu, x=nu))*unbinned_stars_list[i].mass/constants.M_sun.cgs.value 
         lum *= constants.L_sun.cgs.value
 
         pos = unbinned_stars_list[i].positions
