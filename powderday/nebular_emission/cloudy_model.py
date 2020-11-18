@@ -1,6 +1,6 @@
 from powderday.nebular_emission.abund import getNebAbunds
 from powderday.nebular_emission.ASCIItools import *
-from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogU, convert_metals
+from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogQ, convert_metals
 import powderday.config as cfg
 from astropy import constants
 import logging

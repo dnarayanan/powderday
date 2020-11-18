@@ -14,7 +14,7 @@ from powderday.grid_construction import stars_coordinate_boost
 from multiprocessing import Pool
 from functools import partial
 from scipy.integrate import simps
-from powderday.nebular_emission.cloudy_tools import calc_LogU
+from powderday.nebular_emission.cloudy_tools import calc_LogQ
 from powderday.nebular_emission.cloudy_tools import cmdf
 from powderday.analytics import logu_diagnostic,dump_emlines
 from powderday.nebular_emission.cloudy_model import get_nebular
@@ -41,10 +41,6 @@ class Stars:
 
     def info(self):
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
-
-
-class AGN:
-    def__init__(self,)
 
 def star_list_gen(boost,dx,dy,dz,reg,ds):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
@@ -464,7 +460,7 @@ def newstars_gen(stars_list):
 
                     if cfg.par.FORCE_gas_logu[id_val]:
                         LogU = cfg.par.gas_logu[id_val]
-                        LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*nh)
+                        LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*nh))
                         Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
                     
                     elif cfg.par.FORCE_gas_logq[id_val]:
@@ -478,7 +474,7 @@ def newstars_gen(stars_list):
                         
                         Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
                         LogU = np.log10((10**logQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
-                        LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*nh)
+                        LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*nh))
                         Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
 
                     if cfg.par.FORCE_inner_radius[id_val]:
@@ -543,19 +539,18 @@ def newstars_gen(stars_list):
 
 
 def get_gas_metals():
-    
-    nstars = len(reg["stellarages"].value)
-    el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe' ]
-        try:
-            metals = np.zeros((ngas,11))-10.0
-            for i in range(11):
-                if i == 0:
-                    el_str = ""
-                else:
-                    el_str = "_"+el[i-1]
-                    metals[:, i] = reg["gasmetals"+el_str].value
-        except:
-            metals = reg["gasmetals"].value
+
+    el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+    try:
+        metals = np.zeros((ngas,11))-10.0
+        for i in range(11):
+            if i == 0:
+                el_str = ""
+            else:
+                el_str = "_"+el[i-1]
+                metals[:, i] = reg["gasmetals"+el_str].value
+    except:
+        metals = reg["gasmetals"].value
     
     return metals
 
@@ -615,7 +610,7 @@ def agn_sed(agn_id, reg):
 
         if cfg.par.FORCE_gas_logu[id_val]:
             LogU = cfg.par.gas_logu[id_val]
-            LogQ = np.log10((10**logU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value)
+            LogQ = np.log10((10**logU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
         
         elif cfg.par.FORCE_gas_logq[id_val]:
             LogQ = cfg.par.gas_logq[id_val]
@@ -624,7 +619,7 @@ def agn_sed(agn_id, reg):
         else:
             LogQ = calc_LogQ(nu, fnu, cfg.par.AGN_nh)
             LogU = np.log10((10**logQ)/(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
-            LogQ = np.log10((10**logU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value)
+            LogQ = np.log10((10**logU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
 
     
         spec, wave_line, line_lum = get_nebular(nu, fnu, cfg.par.AGN_nh, LogQ, Rin, LogU, LogZ, LogQ, metals,
