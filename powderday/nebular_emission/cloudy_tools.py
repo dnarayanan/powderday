@@ -12,19 +12,17 @@ From cloudyfsps written by Nell Byler.
 """
 
 
-def calc_LogU(nuin0, specin0, nh, T, efrac, mstar=1.0):
+def calc_LogQ(nuin0, specin0, nh, efrac=0.0, mstar=1.0):
     '''
     Claculates the number of lyman ionizing photons for given a spectrum
     Input spectrum must be in ergs/s/Hz!!
     Q = int(Lnu/hnu dnu, nu_0, inf) , number of hydrogen ionizing photons
     mstar is in units of solar mass
-    Rin is in units of cm-3
     nh is in units of cm-3
     '''
 
     c = constants.c.cgs.value  # cm/s
     h = constants.h.cgs.value  # erg/s
-    alpha = 2.5e-13*((T/(10**4))**(-0.85)) # cm3/s
     lam_0 = 911.6 * 1e-8  # Halpha wavelength in cm
 
     nuin = np.asarray(nuin0)
@@ -35,12 +33,10 @@ def calc_LogU(nuin0, specin0, nh, T, efrac, mstar=1.0):
     nu = hlam[::-1]
     f_nu = hflu[::-1]
     integrand = f_nu / (h * nu)
-    logQ = np.log10(integrate.simps(integrand, x=nu)*mstar*(1-efrac)) 
-    Rin = (3 * (10 ** logQ) / (4 * np.pi * nh * nh * alpha)) ** (1. / 3.)
-    logU = np.log10((10**logQ)/(4*np.pi*Rin*Rin*nh*c))
-    return logQ, Rin, logU
+    logQ = np.log10(integrate.simps(integrand, x=nu)*mstar*(1-efrac))
+    return logQ
 
-
+   
 def air_to_vac(inpt, no_uv_conv=True):
     """
     from morton 1991
@@ -144,3 +140,15 @@ def convert_metals(metals):
 
     return metals_conv
 
+
+def get_nearest(particle_list, particle_central, num=32):
+    
+    all_particles = particle_list.copy()
+    all_particles = np.array(all_particles)
+    tree = spatial.KDTree(all_particles)
+    arg = (tree.query(particle_central, k=num))
+    # Removing
+    mask = np.where(arg[1]<len(all_particles))[0]
+    
+    return arg[0][mask], arg[1][mask]
+    

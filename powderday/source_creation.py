@@ -407,59 +407,65 @@ def BH_source_add(m,reg,df_nu,boost):
         nholes = reg["bhsed"].shape[0]
 
     except: 
-        print('BH source creation failed.')
+        print('BH source creation failed. No BH found')
         nholes = 0
 
-    if nholes > 0:
+
+    if nholes == 0:
+        print('BH source creation failed. No BH found')
+    
+    else:
         #temporary wavelength compress just to get the length of the
         #compressed nu for a master array
         dumnu,dumfnu = wavelength_compress(reg["bhnu"].value,reg["bhsed"][0,:].value,df_nu)
         master_bh_fnu = np.zeros([nholes,len(dumnu)])
-        
-        holecounter = 0
-        for i in range(nholes):  
+         
+        width = reg.right_edge-reg.left_edge
 
-            #don't create a BH luminsoity source if there's no luminosity since the SED will be nans/infs
-            if reg["bhluminosity"][i].value > 0 :
-                
-                nu = reg["bhnu"].value
-                fnu = reg["bhsed"][i,:].value/nu#.tolist()
-                nu,fnu = wavelength_compress(nu,fnu,df_nu)
+        agn_ids = []
+
+        for i in range(nholes):  
+            #since the BH was added in a front end, we don't know
+            #if the hole is in the actual cut out region of the yt
+            #dataset.  so we need to filter out any holes that
+            #might not be in the simulation domain or have no luminosity.
+
+            if ((reg["bhcoordinates"][i,0].in_units('kpc') <  (reg.center[0].in_units('kpc')+(0.5*width[0].in_units('kpc'))))
+            and
+            (reg["bhcoordinates"][i,0].in_units('kpc') >  (reg.center[0].in_units('kpc')-(0.5*width[0].in_units('kpc'))))
+            and
+            (reg["bhcoordinates"][i,1].in_units('kpc') <  (reg.center[1].in_units('kpc')+(0.5*width[1].in_units('kpc'))))
+            and
+            (reg["bhcoordinates"][i,1].in_units('kpc') >  (reg.center[1].in_units('kpc')-(0.5*width[1].in_units('kpc'))))
+            and
+            (reg["bhcoordinates"][i,2].in_units('kpc') <  (reg.center[2].in_units('kpc')+(0.5*width[2].in_units('kpc'))))
+            and
+            (reg["bhcoordinates"][i,2].in_units('kpc') >  (reg.center[2].in_units('kpc')-(0.5*width[2].in_units('kpc'))))
+            and 
+            (reg["bhluminosity"][i].value > 0)):
+
+                agn_ids.append(i)
+
+
+        print ('Number AGNs in the cutout with non zero luminositites: ', len(agn_ids))
+
+        fnu_arr = get_agn_seds(reg, agn_ids)
+    
+        nu = reg["bhnu"].value
+        
+        for j in range(len(agn_ids)):
+                i = agn_ids[j]
+                fnu = fnu_arr[j]
+                nu, fnu = wavelength_compress(nu,fnu,df_nu)
 
                 master_bh_fnu[i,:] = fnu
-                
-                if holecounter == 0:
-                    fnu_compressed = np.zeros([nholes,len(nu)])
-                fnu_compressed[i,:] = fnu
 
-                #since the BH was added in a front end, we don't know
-                #if the hole is in the actual cut out region of the yt
-                #dataset.  so we need to filter out any holes that
-                #might not be in the simulation domain.
-                width = reg.right_edge-reg.left_edge
-
-                if ((reg["bhcoordinates"][i,0].in_units('kpc') <  (reg.center[0].in_units('kpc')+(0.5*width[0].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,0].in_units('kpc') >  (reg.center[0].in_units('kpc')-(0.5*width[0].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,1].in_units('kpc') <  (reg.center[1].in_units('kpc')+(0.5*width[1].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,1].in_units('kpc') >  (reg.center[1].in_units('kpc')-(0.5*width[1].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,2].in_units('kpc') <  (reg.center[2].in_units('kpc')+(0.5*width[2].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,2].in_units('kpc') >  (reg.center[2].in_units('kpc')-(0.5*width[2].in_units('kpc'))))
-                ):
-
-                    print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
+                print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
                 #the tolist gets rid of the array brackets
-                    bh = m.add_point_source(luminosity = reg["bhluminosity"][i].value.tolist(), 
-                                            spectrum = (nu,fnu),
-                                            position = (reg["bhcoordinates"][i,:].in_units('cm').value-boost).tolist())
-                else:
-                    print('black hole #%d is not in the domain: rejecting adding it to the source list'%i)
+                bh = m.add_point_source(luminosity = reg["bhluminosity"][i].value.tolist(), 
+                                        spectrum = (nu,fnu),
+                                        position = (reg["bhcoordinates"][i,:].in_units('cm').value-boost).tolist())
 
-                holecounter += 1
         dump_AGN_SEDs(nu,master_bh_fnu,reg["bhluminosity"].value)
 
 
