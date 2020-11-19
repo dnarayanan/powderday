@@ -199,6 +199,7 @@ def enzo_zoom(fname,ds,field_add):
     ds1.domain_width = reg.right_edge - reg.left_edge
     ds1.domain_left_edge = reg.left_edge
     ds1.domain_right_edge = reg.right_edge
+    ds1.domain_center = reg.center
     ds1.index.get_levels = reg.index.get_levels
     ds1.index.get_smallest_ds = reg.index.get_smallest_dx
     ds1.index.grid = reg.index.grid
