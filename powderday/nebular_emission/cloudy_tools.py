@@ -123,7 +123,7 @@ def cmdf(stellar_mass, nbins, min_mass, max_mass, beta, rescale_masses=True):
 
     for i in range(nbins):
         N = A*((10**mass[i])**(1. + beta))
-        num.append(round(N))
+        num.append(int(round(N)))
 
     ## rescale masses so that they sum to initial mass
     if rescale_masses:
