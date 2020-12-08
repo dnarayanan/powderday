@@ -106,7 +106,7 @@ def grouper(n, iterable):
         yield chunk
 
 
-def cmdf(stellar_mass, nbins, min_mass, max_mass, beta, rescale_masses=False):
+def cmdf(stellar_mass, nbins, min_mass, max_mass, beta, rescale_masses=True):
     """
     Calculates the number of clusters per mass interval assuming a cluster
     mass distribution function of the form dN/dM goes as M^(-beta)
