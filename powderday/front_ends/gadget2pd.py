@@ -74,7 +74,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         else:
             el_num = '00'
     
-        return data[('PartType4', 'Metallicity_'+el_num)]
+        return data[('PartType0', 'Metallicity_'+el_num)]
 
     def _gasmetals(field, data):
         return data[('PartType0', 'Metallicity')]

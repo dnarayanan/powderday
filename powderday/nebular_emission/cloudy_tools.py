@@ -1,7 +1,7 @@
 from astropy import constants
 import itertools
 import numpy as np
-from scipy import integrate
+from scipy import integrate, spatial
 
 """
 ----------------------------------------------------------------------------------------------------------------
@@ -33,6 +33,7 @@ def calc_LogQ(nuin0, specin0, nh, efrac=0.0, mstar=1.0):
     nu = hlam[::-1]
     f_nu = hflu[::-1]
     integrand = f_nu / (h * nu)
+    #print (nu, f_nu)
     logQ = np.log10(integrate.simps(integrand, x=nu)*mstar*(1-efrac))
     return logQ
 
@@ -150,5 +151,5 @@ def get_nearest(particle_list, particle_central, num=32):
     # Removing
     mask = np.where(arg[1]<len(all_particles))[0]
     
-    return arg[0][mask], arg[1][mask]
+    return np.array(arg[0][mask]), np.array(arg[1][mask])
     

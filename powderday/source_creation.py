@@ -449,13 +449,13 @@ def BH_source_add(m,reg,df_nu,boost):
 
         print ('Number AGNs in the cutout with non zero luminositites: ', len(agn_ids))
 
-        fnu_arr = get_agn_seds(reg, agn_ids)
-    
+        fnu_arr = sg.get_agn_seds(reg, agn_ids)
         nu = reg["bhnu"].value
-        
+        print ("************************************************")
+        print (fnu_arr)
         for j in range(len(agn_ids)):
                 i = agn_ids[j]
-                fnu = fnu_arr[j]
+                fnu = fnu_arr[j,:]
                 nu, fnu = wavelength_compress(nu,fnu,df_nu)
 
                 master_bh_fnu[i,:] = fnu

@@ -33,7 +33,8 @@ def write_input_sed(wav, spec):
     ascii_file = str(uuid.uuid4().hex) + ".ascii"
     while compiled_exists(ascii_file):
         ascii_file = str(uuid.uuid4().hex) + ".ascii"
-
+    
+    #ascii_file = "test_agn_hop.ascii"
     logging.info("Executing write ascii sequence...")
     logging.info("Writing.....")
     WriteASCII(ascii_file, wav, spec, nx=len(wav), nmod=1, par1_val=1.e6)
@@ -68,10 +69,10 @@ def write_cloudy_input(**kwargs):
             "r_in_pc": False,
             "use_Q": True,
             "dust": False,
-            "pagb":False,
             "efrac": -1.0,
             "geometry": "sphere",
             "abundance": "dopita",
+            "id_val": 1,
             "metals": [-1., -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.]
             }
     for key, value in list(kwargs.items()):
@@ -90,6 +91,12 @@ def write_cloudy_input(**kwargs):
             f.write(to_print)
 
     # -----------------------------------------------------
+    _id = int(pars["id_val"])
+    if _id == 1:
+        Pagb = True
+    else:
+        Pagb = False
+
     pars["gas_logZ"] = pars["logZ"]
     this_print('////////////////////////////////////')
     this_print('title {0}'.format(pars["model_name"].split('/')[-1]))
@@ -114,6 +121,7 @@ def write_cloudy_input(**kwargs):
 
     linefile = "cloudyLines.dat"
 
+    print (pars["metals"][1:])
     # Check to see if there was an error in getting metallicities from the simulation
     # If so code revert back to using "dopita" abundances in place of "direct"
     if (any(q <= -1.0 for q in pars["metals"][1:]) and pars["abundance"] == "direct"):
@@ -126,12 +134,12 @@ def write_cloudy_input(**kwargs):
         abund_str = "abundances "
         
         # Enhancing abundances for post-AGB stars
-        if pars["pagb"]:
+        if Pagb:
             abund_metal[1] += cfg.par.PAGB_C_enhancement
             abund_metal[2] += cfg.par.PAGB_N_enhancement
 
-        if cfg.par.FORCE_N_O_ratio:
-            abund_metal[2] = cfg.par.N_O_ratio + abund_metal[3]
+        if cfg.par.FORCE_N_O_ratio[_id]:
+            abund_metal[2] = cfg.par.N_O_ratio[_id] + abund_metal[3]
 
         for e in range(len(abund_el)):
             el_str = str(abund_el[e]) + " " + str(abund_metal[e]) + " "
@@ -144,7 +152,7 @@ def write_cloudy_input(**kwargs):
     else:
         abunds = getNebAbunds(pars["abundance"],
                             pars["logZ"],
-                            pagb=pars["pagb"],
+                            pagb=Pagb,
                             dust=pars["dust"],
                             re_z=False)
         this_print(abunds.solarstr)
@@ -206,7 +214,7 @@ def clean_files(dir_, model_name, error=False):
     os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".out"))
 
 
-def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals, Dust=False, abund="dopita", useq=True, Pagb=False, clean_up=True):
+def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals, Dust=False, abund="dopita", useq=True, clean_up=True, index=1):
     nspec = len(spec_lambda)
     frac_obrun = 0.0
     clight = constants.c.cgs.value*1.e8
@@ -230,7 +238,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals,
                        logZ=logz,
                        abundance=abund,
                        dust=Dust,
-                       pagb=Pagb,
+                       ids = index,
                        metals=Metals)
 
     logging.info("Input SED file written")

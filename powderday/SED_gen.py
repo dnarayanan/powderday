@@ -13,9 +13,10 @@ from powderday.grid_construction import stars_coordinate_boost
 
 from multiprocessing import Pool
 from functools import partial
+from itertools import repeat
 from scipy.integrate import simps
-from powderday.nebular_emission.cloudy_tools import calc_LogQ
-from powderday.nebular_emission.cloudy_tools import cmdf
+
+from powderday.nebular_emission.cloudy_tools import calc_LogQ, cmdf, get_nearest,convert_metals
 from powderday.analytics import logu_diagnostic,dump_emlines
 from powderday.nebular_emission.cloudy_model import get_nebular
 
@@ -442,21 +443,20 @@ def newstars_gen(stars_list):
                     
                     if young_star:
                         id_val = 0
-                        Rinner_per_Rs = cfg.par.Rinner_per_Rs
+                        Rinner_per_Rs = cfg.par.HII_Rinner_per_Rs
                         nh = cfg.par.HII_nh       
-                        escape_fraction  = cfg.par.escape_fraction
+                        escape_fraction  = cfg.par.HII_escape_fraction
                     
                     elif pagb:
                         id_val = 1
-                        Rinner_per_Rs = cfg.par.Rinner_per_Rs
-                        nh = cfg.par.HII_nh    
-                        escape_fraction  = cfg.par.escape_fraction
+                        Rinner_per_Rs = cfg.par.PAGB_Rinner_per_Rs
+                        nh = cfg.par.PAGB_nh    
+                        escape_fraction  = cfg.par.PAGB_escape_fraction
 
 
                     spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
 
                     alpha = 2.5e-13#*((cfg.par.HII_T/(10**4))**(-0.85))
-                    Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
 
                     if cfg.par.FORCE_gas_logu[id_val]:
                         LogU = cfg.par.gas_logu[id_val]
@@ -465,15 +465,15 @@ def newstars_gen(stars_list):
                     
                     elif cfg.par.FORCE_gas_logq[id_val]:
                         LogQ = cfg.par.gas_logq[id_val]
-                        LogU = np.log10((10**logQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))
                         Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
+                        LogU = np.log10((10**LogQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))
 
                     else:
                         LogQ = calc_LogQ(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value,
                                         nh, efrac=escape_fraction, mstar=10**cluster_mass[j])
                         
                         Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
-                        LogU = np.log10((10**logQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
+                        LogU = np.log10((10**LogQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
                         LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*nh))
                         Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
 
@@ -483,17 +483,19 @@ def newstars_gen(stars_list):
                     else:
                         Rin = Rinner_per_Rs*Rs
                
+                    
+                    if cfg.par.FORCE_gas_logz[id_val]:
+                        LogZ = cfg.par.gas_logz[id_val]
+                    
+                    else:
+                        LogZ = np.log10(stars_list[i].metals/cfg.par.solar)
+                    
+                    
                     if neb_file_output:
                         if cfg.par.use_cloudy_tables:
                             Rin = 1.e19   # Rinner is fixed at 1.e19 cm for lookup tables
                         logu_diagnostic(LogQ, LogU, LogZ, Rin, 10**cluster_mass[j], num_HII_clusters, stars_list[i].age, append=True)
                         neb_file_output = False
-
-                    
-                    if FORCE_gas_logz[id_val]:
-                        LogZ = FORCE_gas_logz[id_val]
-                    else:
-                        LogZ = np.log10(stars_list[i].metals/cfg.par.solar)
 
                     sp.params['gas_logu'] = LogU
                     sp.params['gas_logz'] = LogZ
@@ -511,7 +513,7 @@ def newstars_gen(stars_list):
                                
                             spec_neb, wave_line, line_lum = get_nebular(spec[0], spec[1], nh, LogQ, Rin, LogU, LogZ, LogQ_1, stars_list[i].all_metals, 
                                                     Dust=False, abund=cfg.par.neb_abund[id_val], useq = cfg.par.use_Q[id_val], 
-                                                    Pagb=pagb, clean_up = cfg.par.cloudy_cleanup)
+                                                    clean_up = cfg.par.cloudy_cleanup,index=id_val)
                         except ValueError as err:
                             print ("WARNING: CLOUDY run was unsucessful. Using lookup tables for nebular emission")
                             lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
@@ -538,11 +540,11 @@ def newstars_gen(stars_list):
     return stellar_fnu
 
 
-def get_gas_metals():
+def get_gas_metals(ngas, reg):
 
     el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+    metals = np.zeros((ngas,11))-10.0
     try:
-        metals = np.zeros((ngas,11))-10.0
         for i in range(11):
             if i == 0:
                 el_str = ""
@@ -555,51 +557,67 @@ def get_gas_metals():
     return metals
 
 
-def get_agn_seds(reg1, agn_ids):
+def get_agn_seds(reg, agn_ids):
   
     nprocesses = np.min([cfg.par.n_processes,len(agn_ids)])
-
-    p2 = Pool(nprocesses)
+    
+    #p2 = Pool(nprocesses)
     
     print ('Entering Pool.map multiprocessing for AGN SED generation')
-    
     t1 = datetime.now()
-    fnu = p2.map(partial(agn_sed, reg=reg1), agn_ids)
-    t2 = datetime.now()
     
-    p2.close()
-    p2.join()
+    fnu = []
+    #fnu = p2.map(agn_sed, reg)
+    for agn_id in agn_ids:
+        f_nu = agn_sed(reg, int(agn_id))
+        fnu.append(f_nu)
+    
+    fnu = np.atleast_2d(fnu)    
+    
+    t2 = datetime.now()
+    #p2.close()
+    #p2.join()
     
     print ('Execution time for AGN SED generation in Pool.map multiprocessing = '+str(t2-t1))
     
     return fnu
 
 
-def agn_sed(agn_id, reg):
-    
-    nu = reg["bhnu"].value
-    fnu = reg["bhsed"][agn_id,:].value/nu
+def agn_sed(reg, agn_id):
+   
+    #agn_id = int(agn_ids[0])
+    nu = reg["bhnu"].in_units("Hz").value
+    fnu = reg["bhsed"][agn_id,:].in_units("Lsun").value/nu
 
-    if cfg.par.add_neb_emission and cfg.par.include_AGN:
+    # Hopkins model returns the nu and fnu in reversed order. 
+    # Thus, we have to reverse it back to make it compatible
+    if cfg.par.BH_model != 'Nenkova': 
+        nu = nu[::-1]
+        fnu = fnu[::-1]
+
+    if cfg.par.add_neb_emission and cfg.par.add_AGN_neb:
         
         id_val = 2
 
         all_gas_coordinates = reg["gascoordinates"].in_units('kpc')
         agn_coordinates = reg["bhcoordinates"][agn_id].in_units('kpc')
-        all_gas_metals = get_gas_metals()
 
-        nearest_gas_dist, nearest_gas_id = get_nearest(all_gas_coordinates, agn_coordinates, num=cfg.par.num_gas)
-    
+        all_gas_metals = get_gas_metals(len(all_gas_coordinates), reg)
+
+        nearest_gas_dist, nearest_gas_id = get_nearest(all_gas_coordinates, agn_coordinates, num=cfg.par.AGN_num_gas)
+   
+        #np.savez('hopkins', Lam=1.e8 * constants.c.cgs.value / nu, Nu = nu, f_nu = fnu)
+
         metals_avg = []
+        #print (all_gas_metals)
         for q in range(11):
-            nearest_gas_metals = np.array(all_gas_metals[q][gas_nearest_id]) 
+            nearest_gas_metals = np.array(all_gas_metals[:,q][nearest_gas_id])
             metals_avg.append(np.sum(nearest_gas_metals*nearest_gas_dist)/np.sum(nearest_gas_dist))
 
 
         tot_metals = metals_avg[0]
-        metals_avg.pop(0)
-        metals = convert_metals(metals_avg)
-        
+        metals = metals_avg
+
         if cfg.par.FORCE_gas_logz[id_val]:
             LogZ = gas_logz[id_val]
 
@@ -610,22 +628,30 @@ def agn_sed(agn_id, reg):
 
         if cfg.par.FORCE_gas_logu[id_val]:
             LogU = cfg.par.gas_logu[id_val]
-            LogQ = np.log10((10**logU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
+            LogQ = np.log10((10**LogU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
         
         elif cfg.par.FORCE_gas_logq[id_val]:
             LogQ = cfg.par.gas_logq[id_val]
-            LogU = np.log10((10**logQ)/(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
+            LogU = np.log10((10**LogQ)/(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
 
         else:
-            LogQ = calc_LogQ(nu, fnu, cfg.par.AGN_nh)
-            LogU = np.log10((10**logQ)/(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
-            LogQ = np.log10((10**logU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
+            LogQ = calc_LogQ(nu, fnu*constants.L_sun.cgs.value, cfg.par.AGN_nh)
+            LogU = np.log10((10**LogQ)/(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
+            LogQ = np.log10((10**LogU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
 
-    
-        spec, wave_line, line_lum = get_nebular(nu, fnu, cfg.par.AGN_nh, LogQ, Rin, LogU, LogZ, LogQ, metals,
-                                        Dust=False, abund=cfg.par.neb_abund[id_val], useq = cfg.par.use_Q[id_val], Pagb=False, 
-                                        clean_up = cfg.par.cloudy_cleanup)
 
+        spec, wave_line, line_lum = get_nebular(1.e8 * constants.c.cgs.value / nu, fnu, cfg.par.AGN_nh, LogQ, Rin, LogU, LogZ, LogQ, metals,
+                                        Dust=False, abund=cfg.par.neb_abund[id_val], useq = cfg.par.use_Q[id_val],
+                                        clean_up = cfg.par.cloudy_cleanup, index=2)
+
+        
+        print ("######################################################################")
+        if cfg.par.dump_emlines:
+        #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
+            line_em = line_lum * 3.839e33  # Units: ergs/s
+            line_em = np.append(line_em, -1.0)
+            print (wave_line, line_em)
+            dump_emlines(wave_line, line_em)
 
     else:
         spec = fnu

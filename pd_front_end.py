@@ -93,10 +93,6 @@ df.close()
 stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds)
 nstars = len(stars_list)
 
-if cfg.par.BH_SED == True:
-    BH_source_add(m, reg, df_nu, boost)
-
-
 # figure out N_METAL_BINS:
 fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
 N_METAL_BINS = len(fsps_metals)
@@ -105,6 +101,11 @@ N_METAL_BINS = len(fsps_metals)
 #initializing the nebular diagnostic file newly
 if cfg.par.add_neb_emission and cfg.par.NEB_DEBUG: logu_diagnostic(None,None,None,None,None,None,None,append=False)
 if cfg.par.add_neb_emission and cfg.par.dump_emlines: dump_emlines(None,None,append=False)
+
+
+if cfg.par.BH_SED == True:
+    BH_source_add(m, reg, df_nu, boost)
+
 
 if cfg.par.FORCE_BINNED == False:
     m = direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, ds.cosmological_simulation, m, sp)
