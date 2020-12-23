@@ -55,15 +55,6 @@ class abundSet(object):
         for key in self.abund_0.keys():
             elm = names[key]
             abund = self.__getattribute__(key)
-            if self.pagb:
-                if key == 'C':
-                    abund += cfg.par.PAGB_C_enhancement
-                elif key == 'N':
-                    abund += cfg.par.PAGB_N_enhancement
-            
-            if cfg.par.FORCE_N_O_ratio and key == 'N':
-                abund = cfg.par.N_O_ratio + self.__getattribute__('O')
-
             outstr = 'element abundance {0} {1:.2f} log'.format(elm, abund)
             elem_strs.append(outstr)
         self.__setattr__('elem_strs', elem_strs)

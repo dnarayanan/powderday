@@ -1,5 +1,7 @@
 import powderday.config as cfg
 import os.path
+import numpy as np
+
 
 def variable_set():
     try:
@@ -7,6 +9,16 @@ def variable_set():
     except:
         cfg.par.FORCE_RANDOM_SEED  = None
 
+    try:
+        cfg.par.FORCE_BINNED
+    except:
+        cfg.par.FORCE_BINNED = True
+        
+    try:
+        cfg.par.max_age_direct
+    except:
+        cfg.par.max_age_direct = 1.e-2
+        
     try:
         cfg.par.imf1
     except:
@@ -21,6 +33,140 @@ def variable_set():
         cfg.par.imf3
     except:
         cfg.par.imf3 = 2.3
+        
+    try:
+        cfg.par.use_cmdf
+    except:
+        cfg.par.use_cmdf = False
+      
+    try:
+        cfg.par.use_cloudy_tables
+    except:
+        cfg.par.use_cloudy_tables = False
+     
+    try:
+        cfg.par.cmdf_min_mass
+    except:
+        cfg.par.cmdf_min_mass = 3.5
+    
+    try:
+        cfg.par.cmdf_max_mass
+    except:
+        cfg.par.cmdf_max_mass = 5.0
+
+    try:
+        cfg.par.cmdf_bins
+    except:
+        cfg.par.cmdf_bins = 6
+    
+    try:
+        cfg.par.cmdf_beta
+    except:
+        cfg.par.cmdf_beta = -2.0
+            
+    try:
+        if len(np.atleast_1d(cfg.par.FORCE_gas_logu)) == 1:
+            cfg.par.FORCE_gas_logu = [cfg.par.FORCE_gas_logu,cfg.par.FORCE_gas_logu,cfg.par.FORCE_gas_logu]
+    except:
+        cfg.par.FORCE_gas_logu = [False, False, False]
+
+    try:
+        if len(np.atleast_1d(cfg.par.gas_logu)) == 1:
+            cfg.par.gas_logu = [cfg.par.gas_logu,cfg.par.gas_logu,cfg.par.gas_logu]
+    except:
+        cfg.par.gas_logu = [-2.0,-2.0,-2.0]
+
+    try:
+        if len(np.atleast_1d(cfg.par.gas_logu_init)) == 1:
+            cfg.par.gas_logu_init = [cfg.par.gas_logu_init,cfg.par.gas_logu_init,cfg.par.gas_logu_init]
+    except:
+        cfg.par.gas_logu_init = [0.0,0.0,0.0]
+    
+    try:
+        if len(np.atleast_1d(cfg.par.FORCE_gas_logz)) == 1:
+            cfg.par.FORCE_gas_logz = [cfg.par.FORCE_gas_logz,cfg.par.FORCE_gas_logz,cfg.par.FORCE_gas_logz]
+    except:
+        cfg.par.FORCE_gas_logz = [False,False,False]
+    
+    try:
+        if len(np.atleast_1d(cfg.par.gas_logz)) == 1:
+            cfg.par.gas_logz = [cfg.par.gas_logz,cfg.par.gas_logz,cfg.par.gas_logz]
+    except:
+        cfg.par.gas_logz = [0.0,0.0,0.0]
+
+    try:
+        if len(np.atleast_1d(cfg.par.FORCE_logz)) == 1:
+            cfg.par.FORCE_logz = [cfg.par.FORCE_logz,cfg.par.FORCE_logz,cfg.par.FORCE_logz]
+    except:
+        cfg.par.FORCE_logq = [False,False,False]
+    
+    try:
+        if len(np.atleast_1d(cfg.par.source_logq)) == 1:
+            cfg.par.source_logq = [cfg.par.source_logq,cfg.par.source_logq,cfg.par.source_logq]
+
+    except:
+        cfg.par.source_logq = [1.e47,1.e47,1.e47]
+
+    
+    try:
+        if len(np.atleast_1d(cfg.par.FORCE_inner_radius)) == 1:
+            cfg.par.FORCE_inner_radius = [cfg.par.FORCE_inner_radius,cfg.par.FORCE_inner_radius,True]
+
+    except:
+        cfg.par.FORCE_inner_radius = [False, False, True]
+    
+    try:
+        if len(np.atleast_1d(cfg.par.inner_radius)) == 1:
+            cfg.par.inner_radius = [cfg.par.inner_radius,cfg.par.inner_radius,2.777e+20]
+    except:
+        cfg.par.inner_radius = [1.e19,1.e19,2.777e+20]
+
+    try:
+        if len(np.atleast_1d(cfg.par.FORCE_N_O_ratio)) == 1:
+            cfg.par.FORCE_N_O_ratio = [cfg.par.FORCE_N_O_ratio,cfg.par.FORCE_N_O_ratio,cfg.par.FORCE_N_O_ratio]
+    except:
+        cfg.par.FORCE_N_O_ratio = [False, False, False]
+        
+    try:
+        if len(np.atleast_1d(cfg.par.N_O_ratio)) == 1:
+            cfg.par.N_O_ratio = [cfg.par.N_O_ratio,cfg.par.N_O_ratio,cfg.par.N_O_ratio]
+    except:
+        cfg.par.N_O_ratio = [-0.85,-0.85,-0.85]
+
+
+    try:
+        if len(np.atleast_1d(cfg.par.neb_abund)) == 1:
+            cfg.par.neb_abund = [cfg.par.neb_abund,cfg.par.neb_abund,cfg.par.neb_abund]
+    except:
+        cfg.par.neb_abund = ["dopita","dopita","dopita"]
+    
+    try:
+        cfg.par.add_young_stars
+    except:
+        cfg.par.add_young_stars = True
+    
+    try:
+        cfg.par.HII_Rinner_per_Rs
+    except:
+        try:
+            cfg.par.HII_Rinner_per_Rs = cfg.par.Rinner_per_Rs
+        except:
+            cfg.par.HII_Rinner_per_Rs = 0.01
+
+    try: 
+        cfg.par.HII_nh
+    except:
+        cfg.par.HII_nh = 1.e2
+
+    try:
+        cfg.par.HII_max_age
+    except: 
+        cfg.par.HII_max_age = 1.e-2
+        
+    try:
+        cfg.par.HII_escape_fraction
+    except:
+        cfg.par.HII_escape_fraction = 0.0
 
     try:
         cfg.par.add_pagb_stars
@@ -47,10 +193,46 @@ def variable_set():
     except:
         cfg.par.PAGB_C_enhancement = 0.4
     
-    try:
-        cfg.par.Rinner_per_Rs
+    try: 
+        cfg.par.PAGB_Rinner_per_Rs
     except:
-        cfg.par.Rinner_per_Rs = 0.01
+        try:
+            cfg.par.PAGB_Rinner_per_Rs = cfg.par.Rinner_per_Rs
+        except:
+            cfg.par.PAGB_Rinner_per_Rs = 0.01
+
+    try:
+        cfg.par.PAGN_nh
+    except:
+        try:
+            cfg.par.PAGN_nh = cfg.par.HII_nh
+        except:
+            cfg.par.PAGN_nh = 1.e2
+
+
+    try:
+        cfg.par.PAGB_escape_fraction
+    except:
+        try:
+            cfg.par.PAGB_escape_fraction = cfg.par.HII_escape_fraction
+        except:
+            cfg.par.PAGB_escape_fraction = 0.0
+
+
+    try:
+        cfg.par.add_AGN_neb
+    except:
+        cfg.par.add_AGN_neb = False
+        
+    try:
+        cfg.par.AGN_nh
+    except:
+        cfg.par.AGN_nh = 1.e3
+        
+    try:
+        cfg.par.AGN_num_gas
+    except:
+        cfg.par.AGN_num_gas = 32    
 
     try:
         cfg.par.dump_emlines
@@ -58,15 +240,10 @@ def variable_set():
         cfg.par.dump_emlines = False
 
     try:
-        cfg.par.use_cmdf
+        cfg.par.cloudy_cleanup
     except:
-        cfg.par.use_cmdf = False
-    
-    try:
-        cfg.par.max_age_direct
-    except:
-        cfg.par.max_age_direct = 1.e-2
-
+        cfg.par.cloudy_cleanup = True
+        
     try:
         cfg.par.BH_SED
     except:
@@ -97,99 +274,20 @@ def variable_set():
     except:
         cfg.par.SKIP_RT = False
 
-
     try:
         cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS 
     except:
         cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS = True
-
 
     try:
         cfg.par.n_MPI_processes
     except:
         cfg.par.n_MPI_processes = cfg.par.n_processes #default is to make the same as the number of pool processes
 
-        
     try:
         cfg.par.SOURCES_RANDOM_POSITIONS
     except:
         cfg.par.SOURCES_RANDOM_POSITIONS = False
-        
-    try:
-        cfg.par.FORCE_gas_logu
-    except:
-        cfg.par.FORCE_gas_logu = False
-
-    try:
-        cfg.par.gas_logu
-    except:
-        cfg.par.gas_logu = -2
-
-    try:
-        cfg.par.gas_logu_init
-    except:
-        cfg.par.gas_logu_init = 0.0
-        
-    try:
-        cfg.par.gas_logz
-    except:
-        cfg.par.gas_logz = 0
-
-    try:
-        cfg.par.FORCE_gas_logz
-    except:
-        cfg.par.FORCE_gas_logz = False
-
-    try:
-        cfg.par.source_logq
-    except:
-        cfg.par.source_logq = 1.e47
-
-    try:
-        cfg.par.FORCE_logq
-    except:
-        cfg.par.FORCE_logq = False
-
-    try:
-        cfg.par.FORCE_inner_radius
-    except:
-        cfg.par.FORCE_inner_radius = False
-    
-    try:
-        cfg.par.inner_radius
-    except:
-        cfg.par.inner_radius = 1.e19
-
-    try:
-        cfg.par.use_Q
-    except:
-        cfg.par.use_Q = True
-
-    try:
-        cfg.par.neb_dust
-    except:
-        cfg.par.neb_dust = False
-
-    try:
-        cfg.par.cmdf_min_mass
-    except:
-        cfg.par.cmdf_min_mass = 3.5
-    
-    try:
-        cfg.par.cmdf_max_mass
-    except:
-        cfg.par.cmdf_max_mass = 5.0
-
-    try:
-        cfg.par.cmdf_bins
-    except:
-        cfg.par.cmdf_bins = 6
-    
-    try:
-        cfg.par.cmdf_beta
-
-    except:
-        cfg.par.cmdf_beta = -2.0
 
     try:
         cfg.par.SUBLIMATION
@@ -265,41 +363,6 @@ def variable_set():
         cfg.par.FORCE_STELLAR_METALLICITIES_VALUE
     except:
         cfg.par.FORCE_STELLAR_METALLICITIES_VALUE = 0.013
-
-    try:
-        cfg.par.HII_T
-    except:
-        cfg.par.HII_T = 1.e4
-
-    try: 
-        cfg.par.HII_nh
-    except:
-        cfg.par.HII_nh = 1.e2
-
-    try:
-        cfg.par.HII_max_age
-    except: 
-        cfg.par.HII_max_age = 1.e-2
-        
-    try:
-        cfg.par.HII_escape_fraction
-    except:
-        cfg.par.HII_escape_fraction = 0.0
-
-    try:
-        cfg.par.neb_abund
-    except:
-        cfg.par.neb_abund = "dopita"
-    
-    try:
-        cfg.par.use_cloudy_tables
-    except:
-        cfg.par.use_cloudy_tables = False
-
-    try:
-        cfg.par.cloudy_cleanup
-    except:
-        cfg.par.cloudy_cleanup = True
     
     try:
         cfg.par.NEB_DEBUG
@@ -310,7 +373,6 @@ def variable_set():
         cfg.par.filterdir
     except:
         try:
-            cfg.par.filter_file
             cfg.par.filterdir = os.path.dirname(cfg.par.filter_file)+'/'
         except:
             cfg.par.filterdir = ''
@@ -325,9 +387,4 @@ def variable_set():
     except:
         cfg.par.PAH_frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063}
 
-    try:
-        cfg.par.FORCE_BINNED
-    except:
-        cfg.par.FORCE_BINNED = True
-
-    return cfg.par.FORCE_RANDOM_SEED,cfg.par.NEB_DEBUG,cfg.par.imf1,cfg.par.imf2,cfg.par.imf3,cfg.par.add_pagb_stars,cfg.par.PAGB_min_age,cfg.par.PAGB_max_age,cfg.par.PAGB_N_enhancement,cfg.par.PAGB_N_enhancement,cfg.par.Rinner_per_Rs,cfg.par.dump_emlines,cfg.par.use_cmdf,cfg.par.max_age_direct,cfg.par.BH_SED,cfg.par.IMAGING,cfg.par.SED,cfg.par.IMAGING_TRANSMISSION_FILTER,cfg.par.SED_MONOCHROMATIC,cfg.par.SKIP_RT,cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS,cfg.par.n_MPI_processes,cfg.par.SOURCES_RANDOM_POSITIONS,cfg.par.FORCE_gas_logu,cfg.par.gas_logu,cfg.par.gas_logu_init,cfg.par.gas_logz,cfg.par.FORCE_gas_logz,cfg.par.source_logq,cfg.par.FORCE_logq,cfg.par.FORCE_inner_radius,cfg.par.inner_radius,cfg.par.use_Q,cfg.par.neb_dust,cfg.par.cmdf_min_mass,cfg.par.cmdf_max_mass,cfg.par.cmdf_bins,cfg.par.cmdf_beta,cfg.par.SUBLIMATION,cfg.par.SUBLIMATION_TEMPERATURE,cfg.model.TCMB,cfg.model.THETA,cfg.model.PHI,cfg.par.MANUAL_ORIENTATION,cfg.par.solar,cfg.par.dust_grid_type,cfg.par.BH_model,cfg.par.BH_modelfile,cfg.par.BH_var,cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE,cfg.par.FORCE_STELLAR_METALLICITIES,cfg.par.FORCE_STELLAR_METALLICITIES_VALUE,cfg.par.HII_T,cfg.par.HII_nh,cfg.par.HII_max_age,cfg.par.HII_escape_fraction,cfg.par.neb_abund,cfg.par.use_cloudy_tables,cfg.par.cloudy_cleanup, cfg.par.filterdir, cfg.par.filterfiles, cfg.par.PAH_frac, cfg.par.FORCE_BINNED
+    return cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_BINNED, cfg.par.max_age_direct, cfg.par.imf1, cfg.par.imf2, cfg.par.imf3, cfg.par.use_cmdf, cfg.par.use_cloudy_tables, cfg.par.cmdf_min_mass, cfg.par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.par.cmdf_beta, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logu_init, cfg.par.FORCE_gas_logz, cfg.par.gas_logz, cfg.par.FORCE_logq, cfg.par.source_logq, cfg.par.FORCE_inner_radius, cfg.par.inner_radius, cfg.par.FORCE_N_O_ratio, cfg.par.N_O_ratio, cfg.par.neb_abund, cfg.par.add_young_stars, cfg.par.HII_Rinner_per_Rs, cfg.par.HII_nh, cfg.par.HII_max_age, cfg.par.HII_escape_fraction, cfg.par.add_pagb_stars, cfg.par.PAGB_min_age, cfg.par.PAGB_max_age, cfg.par.PAGB_N_enhancement, cfg.par.PAGB_C_enhancement, cfg.par.PAGB_Rinner_per_Rs, cfg.par.PAGN_nh, cfg.par.PAGB_escape_fraction, cfg.par.add_AGN_neb, cfg.par.AGN_nh, cfg.par.AGN_num_gas, cfg.par.dump_emlines, cfg.par.cloudy_cleanup, cfg.par.BH_SED, cfg.par.IMAGING, cfg.par.SED, cfg.par.IMAGING_TRANSMISSION_FILTER, cfg.par.SED_MONOCHROMATIC, cfg.par.SKIP_RT, cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS, cfg.par.n_MPI_processes, cfg.par.SOURCES_RANDOM_POSITIONS, cfg.par.SUBLIMATION, cfg.par.SUBLIMATION_TEMPERATURE, cfg.model.TCMB, cfg.model.THETA, cfg.model.PHI, cfg.par.MANUAL_ORIENTATION, cfg.par.solar, cfg.par.dust_grid_type, cfg.par.BH_model, cfg.par.BH_modelfile, cfg.par.BH_var, cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE, cfg.par.FORCE_STELLAR_METALLICITIES, cfg.par.FORCE_STELLAR_METALLICITIES_VALUE, cfg.par.NEB_DEBUG, cfg.par.filterdir, cfg.par.filterfiles,  cfg.par.PAH_frac
