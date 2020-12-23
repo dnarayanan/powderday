@@ -420,12 +420,12 @@ def newstars_gen(stars_list):
 
         spec_noneb = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
         f = spec_noneb[1]
-        
-        pagb = cfg.par.add_pagb_stars and stars_list[i].age >= cfg.par.PAGB_min_age and stars_list[i].age <= cfg.par.PAGB_max_age
+
+        pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= stars_list[i].age <= cfg.par.PAGB_max_age
         young_star = cfg.par.add_young_stars and stars_list[i].age <= cfg.par.HII_max_age
 
         if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (young_star or pagb):
-            
+
             cluster_mass, num_clusters = cmdf(stars_list[i].mass/constants.M_sun.cgs.value,int(cfg.par.cmdf_bins),cfg.par.cmdf_min_mass,
                                                 cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
             f = np.zeros(nlam)
@@ -438,7 +438,7 @@ def newstars_gen(stars_list):
 
                 sp.params["add_neb_emission"] = False
                 if cfg.par.add_neb_emission:
-                    
+                    # id_val = 0, 1, 2 for young stars, Post-AGB star and AGNs respectively.
                     if young_star:
                         id_val = 0
                         Rinner_per_Rs = cfg.par.HII_Rinner_per_Rs
@@ -454,7 +454,7 @@ def newstars_gen(stars_list):
                     
                     spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
 
-                    alpha = 2.5e-13#*((cfg.par.HII_T/(10**4))**(-0.85))
+                    alpha = 2.5e-13 # Recombination Rate (assuming T = 10^4 K)
 
                     if cfg.par.FORCE_gas_logu[id_val]:
                         LogU = cfg.par.gas_logu[id_val]
@@ -508,23 +508,24 @@ def newstars_gen(stars_list):
                                     efrac=escape_fraction)
                                
                             spec_neb, wave_line, line_lum = get_nebular(spec[0], spec[1], nh, LogQ, Rin, LogU, LogZ, LogQ_1, stars_list[i].all_metals, 
-                                                    Dust=False, abund=cfg.par.neb_abund[id_val], clean_up = cfg.par.cloudy_cleanup,index=id_val)
+                                                    Dust=False, abund=cfg.par.neb_abund[id_val], clean_up = cfg.par.cloudy_cleanup, index=id_val)
                         except ValueError as err:
-                            if (stars_list[i].age <= 1.e-2) and (LogU >= -4.0 and LogU <= -1.0)and (LogZ > -2.0 and LogZ <= 0.2):
-                                print ("WARNING: Switching to using loookup tables pre-packed with FSPS to calculate nebular emission for this particle.") 
-                                print ("WARNING: The emission line fluxes repoted may not be accurate.")
+                            # If the CLOUDY run crashes we switch to using lookup tables for young stars but throw an error for post-AGB stars.
+                            if  young_star:
+                                print ("WARNING: Switching to using lookup tables pre-packed with FSPS to calculate nebular emission for this particle.") 
+                                print ("WARNING: The emission line fluxes repoted may not be accurate if the particle lies outside the range of the lookup table paramters.")
                                 lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
                                 line_lum = sp.emline_luminosity
                                 wave_line = sp.emline_wavelengths
                             else:
-                                print ("WARNING: Can't switch to using lookup tables. This particle lies outside the range of the lookup table paramters")
-                                print ("WARNING: Skipping this particle from nebular emission calculation" )
-                                return spec_noneb[1]
+                                print ("ERROR: Can't switch to using lookup tables. ")
+                                print ("ERROR: Please check the CLOUDY output file to figure out why the run was unsuccessful" )
+                                raise ValueError('CLOUDY run was unsucessful')
                 
                 else:
                     lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
 
-                weight = num_HII_clusters*(10**cluster_mass[j])/(stars_list[i].mass/constants.M_sun.cgs.value)
+                weight = num_HII_clusters*(10**cluster_mass[j])/(stars_list[i].mass/constants.M_sun.cgs.value)    
                 f = f + spec_neb*weight
                 if cfg.par.add_neb_emission and cfg.par.dump_emlines:
                     line_em = line_em + line_lum*weight
@@ -542,7 +543,8 @@ def newstars_gen(stars_list):
 
 
 def get_gas_metals(ngas, reg):
-
+    # This function outputs the metallicity (total as well as all the 10 elements tracked by the simulation)
+    # for all the gas particles
     el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
     metals = np.zeros((ngas,11))-10.0
     try:
@@ -577,7 +579,7 @@ def get_agn_seds(reg, agn_ids):
 
 
 def agn_sed(reg, agn_id):
-   
+
     nu = reg["bhnu"].in_units("Hz").value
     fnu = reg["bhsed"][agn_id,:].in_units("Lsun").value/nu
 
@@ -595,9 +597,12 @@ def agn_sed(reg, agn_id):
         agn_coordinates = reg["bhcoordinates"][agn_id].in_units('kpc')
 
         all_gas_metals = get_gas_metals(len(all_gas_coordinates), reg)
+        # Getting N nearest gas particles to the AGN where N is defined by cfg.par.AGN_num_gas
         nearest_gas_dist, nearest_gas_id = get_nearest(all_gas_coordinates, agn_coordinates, num=cfg.par.AGN_num_gas)
         metals_avg = []
-        
+
+        # We take the distance weighted avearge of the metallicity of nearest N gas particles.
+        # This is used as input to the CLOUDY model.
         for q in range(11):
             nearest_gas_metals = np.array(all_gas_metals[:,q][nearest_gas_id])
             metals_avg.append(np.sum(nearest_gas_metals*nearest_gas_dist)/np.sum(nearest_gas_dist))
@@ -630,7 +635,7 @@ def agn_sed(reg, agn_id):
                                         Dust=False, abund=cfg.par.neb_abund[id_val],clean_up = cfg.par.cloudy_cleanup, index=id_val)
 
         if cfg.par.dump_emlines:
-        #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
+        # The stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
             line_em = line_lum * 3.839e33  # Units: ergs/s
             line_em = np.append(line_em, -1.0)
             dump_emlines(wave_line, line_em)
@@ -644,8 +649,8 @@ def agn_sed(reg, agn_id):
 
 def fsps_metallicity_interpolate(metals):
 
-    #takes a list of metallicities for star particles, and returns a
-    #list of interpolated metallicities
+    # takes a list of metallicities for star particles, and returns a
+    # list of interpolated metallicities
     
     fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
     nstars = len(metals)
@@ -658,9 +663,9 @@ def fsps_metallicity_interpolate(metals):
     return zmet
     
 def find_nearest_zmet(array,value):
-    #this is modified from the normal find_nearest in that it forces
-    #the output to be 1 index higher than the true value since the
-    #minimum zmet value fsps will take is 1 (not 0)
+    # this is modified from the normal find_nearest in that it forces
+    # the output to be 1 index higher than the true value since the
+    # minimum zmet value fsps will take is 1 (not 0)
 
     idx = (np.abs(array-value)).argmin()
     

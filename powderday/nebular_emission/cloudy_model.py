@@ -263,8 +263,7 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals,
 
     else:
         print ("WARNING: The CLOUDY run was unsucessful. Please see the cloudy output file "+ model_name+".out"+
-               " located in "+ dir_ + "/temp_files/"+" to figure out why this happened. Switching to using loookup tables to get nebular emission for "
-               "this particle. NOTE: The emission line fluxes repoted may not be accurate.")
+               " located in "+ dir_ + "/temp_files/"+" to figure out why this happened.")
         if clean_up:
             clean_files(dir_, model_name, error=True)
         raise ValueError('CLOUDY run was unsucessful')

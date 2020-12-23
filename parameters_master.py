@@ -95,27 +95,27 @@ cmdf_beta = -2.0                            # Beta (power law exponent) for calc
 
 #**********************
 # COMMON PARAMETERS
-***********************
+#***********************
 # NOTE: These parmeters take three values as an input. They correspond to the value of the pararmeter for young_stars, PAGB stars and AGN respectively.
 
 FORCE_gas_logu = [False, False, False] 	    # If set, then we force the ionization parameter (gas_logu) to be 
                             			    # gas_logu (next parameter) else, it is taken to be variable and dependent on ionizing 
-                            			    # radiation from star particles. (Default: False)
+                            			    # radiation from star particles. (Default: [False, False, False])
 
 gas_logu = [-2.0, -2.0, -2.0]        		# Gas ionization parameter. This is only relevant 
-                            			    # if add_neb_emission is set to True and FORCE_gas_logu is set to True (Default: -2.0)
+                            			    # if add_neb_emission is set to True and FORCE_gas_logu is set to True (Default: [-2.0, -2.0, -2.0])
 
 gas_logu_init = [0.0, 0.0, 0.0]        	    # Force the ionization parameter to increase/decrease by this value (Scale: log). 
-                            		    	# Useful if you want to run tests (Default: 0.0)
+                            		    	# Useful if you want to run tests (Default: [0.0, 0.0, 0.0])
 
 FORCE_gas_logz = [False, False, False]      # If set, then we force the metallicity (gas_logz) to be gas_logz (next parameter)
-                            	            # else, it is taken to be the star particles metallicity. (Default: False)
+                            	            # else, it is taken to be the star particles metallicity. (Default: [False, False, False])
 
 gas_logz = [0.0, 0.0, 0.0]  			    # Metallicity of the HII region in units of log(Z/Z_sun)
-                            			    # only relevant if add_neb_emission = True and FORCE_gas_logz = True (Default: 0.0)
+                            			    # only relevant if add_neb_emission = True and FORCE_gas_logz = True (Default: [0.0, 0.0, 0.0])
 
 FORCE_logq = [False, False, False]      	# If set, then we force the number of ionizing photons to be source_logq (next parameter)
-                                            # else, it is taken to be variable and dependent on ionizing radiation of the source. (Default: False)
+                                            # else, it is taken to be variable and dependent on ionizing radiation of the source. (Default: [False, False, False])
 
 source_logq = [1.e47, 1.e47,1.e47]          # The number of ionizing photons emitted by the source in units of s^-1. Only relevant if add_neb_emission = True, 
     										# use_cloudy_tables = True and  FORCE_gas_logq = True (Default: [1.e47,1.e47,1.e47])  
@@ -126,20 +126,20 @@ FORCE_inner_radius = [False, False, True]   # If set, then we force the inner ra
     										# irrespective of what this parameter is set to. (Default: [False,False,True])
 
 inner_radius = [1.e19, 1.e19, 2.777e+20]   	# This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
-                            		    	# use_cloudy_tables = False and FORCE_inner_radius = True (Default: 1.e19, Units = cm)
+                            		    	# use_cloudy_tables = False and FORCE_inner_radius = True (Default: [1.e19, 1.e19, 2.777e+20], Units = cm)
 
 FORCE_N_O_ratio = [False, False, False]     # If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
-                            			    # This can be used as a template fix adundance ratio of other elements (Default: False)
+                            			    # This can be used as a template fix adundance ratio of other elements (Default:  [False, False, False])
 
 N_O_ratio = [-0.85, -0.85, -0.85]           # This sets the log of N/O ratio. This is used only when add_neb_emission = True,
-                            			    # use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = -0.85)
+                            			    # use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = [-0.85, -0.85, -0.85])
 
 use_Q = [True, True, True]                	# If True, we run CLOUDY by specifying number of ionizing photons which are calculated 
                             			    # based on the input sed and the inner radius which is set to the Strömgren radius. 
                             			    # else, CLOUDY is run by specifying just the ionization parameter.Only relevant if 
-                            			    # add_neb_emission = True and use_cloudy_tables = False (Default: True)
+                            			    # add_neb_emission = True and use_cloudy_tables = False (Default: [True, True, True])
 
-neb_abund = ["direct", "direct", "direct"]  # This sets the HII region elemental abundances for generating CLOUDY models. 
+neb_abund = ["dopita", "dopita", "dopita"]  # This sets the HII region elemental abundances for generating CLOUDY models. 
                             			    # Available abundaces are.
                             			    #    dopita:    Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
                             			    #    newdopita: Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
@@ -150,13 +150,12 @@ neb_abund = ["direct", "direct", "direct"]  # This sets the HII region elemental
                             			    #    direct:    Abundances are taken directly from the simulation if possible. Defaults to using "dopita" if there is 
                             			    #               an error. (Note: Works only for AGNs and star particles that are added directly without binning.
                             			    #               Make sure to set FORCE_BINNED to False)
-                            			    # This is used only when add_neb_emission = True and use_cloudy_tables = False. (Default: dopita)
-
+                            			    # This is used only when add_neb_emission = True and use_cloudy_tables = False. (Default: ["dopita", "dopita", "dopita"])
 #***************************
 # YOUNG STARS (HII regions)
 #***************************
 
-add_young_stars = False      			    # If set, the young stars are included when calculating nebular emission (Default: False)
+add_young_stars = True     			    # If set, the young stars are included when calculating nebular emission (Default: True)
 
 
 HII_Rinner_per_Rs = 0.01        		    # Rinner for cloudy calculations is set to this value times the Stromgen Radius. 
