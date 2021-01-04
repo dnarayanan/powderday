@@ -57,7 +57,24 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         return data[('PartType0', 'Density')]
 
     def _gasmetals_00(field, data):
-        return data[('PartType0', 'Metallicity_00')]
+        el_dict = {'He': '01',
+                   'C': '02',
+                   'N': '03',
+                   'O': '04',
+                   'Ne': '05',
+                   'Mg': '06',
+                   'Si': '07',
+                   'S': '08',
+                   'Ca': '09',
+                   'Fe': '10'}
+        el_str = field.name[1]
+        if '_' in el_str:
+            el_name = field.name[1][field.name[1].find('_')+1:]
+            el_num = el_dict[el_name]
+        else:
+            el_num = '00'
+    
+        return data[('PartType0', 'Metallicity_'+el_num)]
 
     def _gasmetals(field, data):
         return data[('PartType0', 'Metallicity')]
@@ -288,7 +305,21 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.add_field(('starmetals'), function=_starmetals, sampling_type='particle',units="code_metallicity", particle_type=True)
 
     if ('PartType0', 'Metallicity_00') in ds.derived_field_list:
-        ds.add_field(('gasmetals'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+        try:
+            ds.add_field(('gasmetals'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_He'), function=_gasmetals_00, sampling_type='particle', units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_C'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_N'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_O'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_Ne'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_Mg'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_Si'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_S'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_Ca'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('gasmetals_Fe'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+        except:
+            ds.add_field(('gasmetals'), function=_gasmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+        
         ds.add_field(('metaldens'), function=_metaldens_00, sampling_type='particle',units="g/cm**3", particle_type=True)
         # we add this as part type 0 (a non-general name) as it gets
         # smoothed immediately and that's all we end up using downstream

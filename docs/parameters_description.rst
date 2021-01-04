@@ -279,148 +279,8 @@ Nebular Emission Info
 :use_cloudy_tables:
     
     If True, CLOUDY look up tables (dev. by Nell Byler) will be used to calculate nebular emission.
-    Otherwise CLOUDY models are generated individually for each young star particle.
-
-:add_pagb_stars:
-
-    If set, the Post-AGB stars are included when calculating nebular emission (Default: False)
-
-:PAGB_min_age:
-
-    Sets the minimum age limit for calculating nebular emission from post-AGB stars, in units of Gyr. 
-    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
-    add_pagb_stars is set to True (Default = 0.1)
-
-:PAGB_max_age: 
-
-    Sets the maximum age limit for calculating nebular emission from post-AGB stars, in units of Gyr.
-    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
-    add_pagb_stars is set to True (Default = 10)
-
-:PAGB_N_enhancement: 
-
-    Enhances the Nitrogen abundance Post-AGB stars by increasing the log(N/O) by this value. 
-    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
-    add_pagb_stars is set to True (Default = 0.4)  
-
-:PAGB_C_enhancement:
-    
-    Enhances the Carbon abundance Post-AGB stars by increasing the log(C/O) by this value.
-    Only relevant if add_neb_emission is set to True, use_cloudy_tables is seet to False and 
-    add_pagb_stars is set to True (Default = 0.4)
-
-:FORCE_gas_logu:
-    
-    If set, then we force the ionization parameter (gas_logu) of HII regions to be 
-    gas_logu (next parameter) else, it is taken to be variable and dependent on ionizing 
-    radiation from star particles. (Default: False)
-
-:gas_logu:
-   
-    Gas ionization parameter for HII regions. This is only relevant 
-    if add_neb_emission is set to True and FORCE_gas_logu is set to True (Default: -2.0)
-
-:gas_logu_init:         
-
-    Force the ionization parameter to increase/decrease by this value (Scale: log). Useful if you want to run tests (Default: 0.0)
-    
-:FORCE_gas_logz:
-   
-    If set, then we force the metallicity (gas_logz) of HII regions to be gas_logz (next parameter)
-    else, it is taken to be the star particle's metallicity. (Default: False)
-
-:gas_logz:
-   
-    Metallicity of the HII region in units of log(Z/Z_sun)
-    only relevant if add_neb_emission = True and FORCE_gas_logz = True (Default: 0.0)
-
-:FORCE_logq:
-    
-    If set, then we force the number of ionizing photons to be source_logq (next parameter) 
-    else, it is taken to be variable and dependent on ionizing radiation 
-    from star particles. (Default: False)
-
-:source_logq:
-
-    The number of ionizing photons emitted by the source in units of s^-1.
-    Only relevant if add_neb_emission = True, use_cloudy_tables = True and 
-    FORCE_gas_logq = True (Default: 1.e47)
- 
-:Rinner_per_Rs:
-
-    Rinner for cloudy calculations is set to this value times the Stromgen Radius. 
-    For example, if set to 0.01 Rinner is taken to be 1 % of Stromgren Radius. 
-    If FORCE_inner_radius (next parameter) is set to True then this is overridden
-    and the value set by the inner_radius is used. This parameter is used 
-    only when add_neb_emission is set True and use_cloudy_tables is 
-    set to False. (Defualt: 0.01)
-    
-:FORCE_inner_radius:
-    
-    If set, then we force the inner radius of the cloud to be inner_radius (next parameter) 
-    else, it is taken to be the Stromgren sphere radius. (Default: False)
-
-:inner_radius:
-
-    This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
-    use_cloudy_tables = True and FORCE_inner_radius = True (Default: 1.e19)
-
-:FORCE_N_O_ratio: 
-    
-    If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
-    This can be used as a template fix adundance ratio of other elements (Default: False)
-
-:N_O_ratio: 
-    
-    This sets the log of N/O ratio. This is used only when add_neb_emission = True,
-    use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = -0.85)
-
-:neb_abund:
-
-    This sets the HII region elemental abundances for generating CLOUDY models. 
-    Available abundances are:
-    
-    :dopita:    
-      Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
-    
-    :newdopita: 
-      Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
-      includes smooth polynomial for N/O, C/O relationship functional form for He(z),
-      new depletion and factors in ISM grains.
-    
-    :gutkin:    
-      Abundances from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on 
-      Grevesse+Sauvel (1998) and Caffau+2011 
-    
-    :direct:
-      Abundances are taken directly from the simulation if possible. Defaults 
-      to using "dopita" if there is an error. (Note: Works only for star particles that are 
-      added directly without binning. Make sure to set FORCE_BINNED to False)
-
-   This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: dopita)
-
-:use_Q:
-
-    If True, we run CLOUDY by specifying the number of ionizing photons that are calculated 
-    based on the input sed and the inner radius which is set to the Strömgren radius. 
-    else, CLOUDY is run by specifying just the ionization parameter.Only relevant if 
-    add_neb_emission = True and use_cloudy_tables = True (Default: True)
-   
-:HII_T:
-    
-    Ionized gas temperature in K for calculating nebular emission. (Default = 1.e4)
-
-:HII_nh: 
-   
-    Gas hydrogen density for calcualting nebular emission in units if cm^-3. (Default = 1.e2)
-
-:HII_max_age:
-   
-    Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 1.e-2)
-
-:HII_escape_fraction:
-    
-    HII region escape fraction (Default = 0.0)
+    Otherwise CLOUDY models are generated individually for each young star particle. 
+    Note:  The lookup tables work only for stars particles below 10 Myr. (Default: True)
 
 :cmdf_min_mass:
 
@@ -440,6 +300,187 @@ Nebular Emission Info
 :cdmf_beta:
     
     The power law exponent (beta) for calculating CMDF (dN/dM goes as M^(beta))
+
+COMMON PARAMETERS
+~~~~~~~~~~~~~~~~~~~~~~
+
+NOTE: These parmeters take three values as an input. They correspond to the value of the pararmeter for young_stars, Post-AGB stars and AGN respectively.
+
+:FORCE_gas_logu:
+    
+    If set, then we force the ionization parameter (gas_logu) to be gas_logu (next parameter) else, 
+    it is taken to be variable and dependent on ionizing radiation from star particles. (Default: [False,False,False])
+
+:gas_logu:
+   
+    Gas ionization parameter. This is only relevant if add_neb_emission is set to True and FORCE_gas_logu is set to True (Default: [-2.0,-2.0,-2.0])
+
+:gas_logu_init:         
+
+    Force the ionization parameter to increase/decrease by this value (Scale: log). Useful if you want to run tests (Default: [0.0,0.0,0.0])
+    
+:FORCE_gas_logz:
+   
+    If set, then we force the metallicity (gas_logz) to be gas_logz (next parameter) else, it is taken to be 
+    the star particle's metallicity. (Default: [False,False,False])
+
+:gas_logz:
+   
+    Gas metallicity in units of log(Z/Z_sun) only relevant if add_neb_emission = True 
+    and FORCE_gas_logz = True (Default: [0.0,0.0,0.0])
+
+:FORCE_logq:
+    
+    If set, then we force the number of ionizing photons to be source_logq (next parameter) 
+    else, it is taken to be variable and dependent on ionizing radiation of the source. (Default: [False,False,False])
+
+:source_logq:
+
+    The number of ionizing photons emitted by the source in units of s^-1. Only relevant if add_neb_emission = True, 
+    use_cloudy_tables = True and  FORCE_gas_logq = True (Default: [1.e47,1.e47,1.e47])
+     
+:FORCE_inner_radius:
+    
+    If set, then we force the inner radius of the cloud to be inner_radius (next parameter). This works only for young stars and Post-AGB stars. 
+    IMP Note: For AGN we keep the inner radius fixed at whatever is set by inner_radius (next parameter) irrespective of what this parameter is set to. 
+    (Default: [False,False,True])
+    
+
+:inner_radius:
+
+    This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
+    use_cloudy_tables = True and FORCE_inner_radius = True (Default: [1.e19,1.e19,2.777e+20])
+
+:FORCE_N_O_ratio: 
+    
+    If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
+    This can be used as a template fix adundance ratio of other elements (Default: False)
+
+:N_O_ratio: 
+    
+    This sets the log of N/O ratio. This is used only when add_neb_emission = True,
+    use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = -0.85)
+
+:neb_abund:
+
+    This sets the elemental abundances for generating CLOUDY models. 
+    Available abundances are:
+    
+    :dopita:    
+      Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
+    
+    :newdopita: 
+      Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
+      includes smooth polynomial for N/O, C/O relationship functional form for He(z),
+      new depletion and factors in ISM grains.
+    
+    :gutkin:    
+      Abundances from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on 
+      Grevesse+Sauvel (1998) and Caffau+2011 
+    
+    :direct:
+      Abundances are taken directly from the simulation if possible. Defaults 
+      to using "dopita" if there is an error. (Note: Works only for AGNs and star particles that are 
+      added directly without binning. Make sure to set FORCE_BINNED to False)
+
+   This is used only when add_neb_emission = True and use_cloudy_tables = True. (Default: ["dopita","dopita","dopita"])
+
+
+Young Stars
+~~~~~~~~~~~~~~~~~~~~~~
+
+:add_young_stars:
+    
+    If set, the stars with age below HII_max_age (described below) are included when calculating nebular emission (Default: True)
+
+:HII_Rinner_per_Rs:        		    
+
+	Rinner for cloudy calculations is set to this value times the Stromgen Radius. For example, if set to 0.01 Rinner is taken 
+	to be 1 % of Stromgren Radius. If FORCE_inner_radius (described above) is set to True for young stars then this is overridden 
+	and the value set by the inner_radius (described above) is used. 
+    
+:HII_nh: 
+   
+    Gas hydrogen density for calcualting nebular emission in units if cm^-3. (Default = 1.e2)
+
+:HII_max_age:
+   
+    Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 1.e-2)
+
+:HII_escape_fraction:
+    
+    HII region escape fraction (Default = 0.0)
+
+
+Post-AGB stars
+~~~~~~~~~~~~~~~~~~~~~~
+
+:add_pagb_stars:
+
+    If set, the Post-AGB stars are included when calculating nebular emission (Default: False)
+
+:PAGB_N_enhancement: 
+
+    Enhances the Nitrogen abundance Post-AGB stars by increasing the log(N/O) by this value. 
+    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
+    add_pagb_stars is set to True (Default = 0.4)  
+
+:PAGB_C_enhancement:
+    
+    Enhances the Carbon abundance Post-AGB stars by increasing the log(C/O) by this value.
+    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
+    add_pagb_stars is set to True (Default = 0.4)
+    
+    
+:PAGB_Rinner_per_Rs:        		    
+
+	Rinner for cloudy calculations is set to this value times the Stromgen Radius. 
+    For example, if set to 0.01 Rinner is taken to be 1 % of Stromgren Radius. 
+    If FORCE_inner_radius (described above) is set to True for young stars then this 
+    is overridden and the value set by the inner_radius (described above) is used. 
+    
+:PAGB_nh: 
+   
+    Gas hydrogen density for calcualting nebular emission in units if cm^-3. (Default = 1.e2)
+
+
+:PAGB_min_age:
+
+    Sets the minimum age limit for calculating nebular emission from post-AGB stars, in units of Gyr. 
+    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
+    add_pagb_stars is set to True (Default = 0.1)
+
+:PAGB_max_age: 
+
+    Sets the maximum age limit for calculating nebular emission from post-AGB stars, in units of Gyr.
+    Only relevant if add_neb_emission is set to True, use_cloudy_tables is set to False and 
+    add_pagb_stars is set to True (Default = 10)
+
+:PAGB_escape_fraction:	    
+	
+	Fraction of H-ionizaing photons that escape the HII region. 
+    This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 0.0)
+
+AGN
+~~~~~~~~~~~~~~~~~~~~~~
+
+:add_AGN_neb: 			            
+	
+	If set, AGNs are included when calculating nebular emission (Default: False)
+
+:AGN_nh:					            
+	
+	Gas hydrogen density for calcualting nebular emission in units if cm^-3. 
+    This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e3)
+
+:AGN_num_gas:
+
+	For CLOUDY calculations we use the distance weighted average metallicity of gas particles around the AGN. 
+	The number of gas particles used for doing so is set by this parameter. 
+	(Default: 32)
+	
+DEBUGGING AND CLEAN UP
+~~~~~~~~~~~~~~~~~~~~~~
 
 :dump_emlines:        
 
