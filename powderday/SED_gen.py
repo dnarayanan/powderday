@@ -426,8 +426,16 @@ def newstars_gen(stars_list):
 
         if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (young_star or pagb):
 
-            cluster_mass, num_clusters = cmdf(stars_list[i].mass/constants.M_sun.cgs.value,int(cfg.par.cmdf_bins),cfg.par.cmdf_min_mass,
-                                                cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
+            # Cluster Mass Distribution Funtion is used only when the star particle's mass is gretaer than the maximum cluster mass and use_cmdf is True. 
+
+            if stars_list[i].mass/constants.M_sun.cgs.value > 10**cfg.par.cmdf_max_mass and cfg.par.use_cmdf:
+                cluster_mass, num_clusters = cmdf(stars_list[i].mass/constants.M_sun.cgs.value,int(cfg.par.cmdf_bins),cfg.par.cmdf_min_mass,
+                        cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
+            
+            else:
+                cluster_mass = [np.log10(stars_list[i].mass/constants.M_sun.cgs.value)]
+                num_clusters = [1]
+
             f = np.zeros(nlam)
             cloudy_nlam = len(np.genfromtxt(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat", delimiter=','))
             line_em = np.zeros([cloudy_nlam])
@@ -451,7 +459,6 @@ def newstars_gen(stars_list):
                         nh = cfg.par.PAGB_nh    
                         escape_fraction  = cfg.par.PAGB_escape_fraction
 
-                    
                     spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
 
                     alpha = 2.5e-13 # Recombination Rate (assuming T = 10^4 K)

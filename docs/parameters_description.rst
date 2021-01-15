@@ -261,14 +261,6 @@ Stellar SEDs Info
     
     Add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 
-:use_cmdf:    
-    
-    If True, star particles that fit the criteria for nebular emission (see next section) are broken down 
-    using a cluster mass distribution function (cmdf) even if nebular emission is turned off (add_nebular_emission = False). 
-    This allows for one to one comparison of models with and without nebular emission. The cmdf is set by the following 
-    parameters defined under nebular emission info (next section): cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
-
-
 Nebular Emission Info
 ------------
 
@@ -282,16 +274,21 @@ Nebular Emission Info
     Otherwise CLOUDY models are generated individually for each young star particle. 
     Note:  The lookup tables work only for stars particles below 10 Myr. (Default: True)
 
+:use_cmdf:
+
+    If True, star particles that have mass greater than cmdf_mas_mass (defined below) are broken down using a cluster mass
+    distribution defined as dN/dM goes as M^(beta). This works irrespecitve of whether nebular emission is turned on or not. 
+    The cmdf is set by the following parameters defined below: cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
+
 :cmdf_min_mass:
 
-    While calulating nebular emission one star particle is broken down into smaller star cluster by
-    assuming a cluster mass distribution function of the form dN/dM goes as M^(-2.0). This parameter 
-    sets the minimum mass of the star clusters in units of log(Msun). Note this value should not be 
-    set lower than 3.5. (Default = 3.5)
+    Minimum mass of the star clusters in units of log(Msun). Note: Results might be inconsistent if
+    set lower than 3.5. (See Chandar et al.2014 for more info) (Default = 3.5)
 
 :cmdf_max_mass:
     
-    Minimum mass of the star clusters in units of log(Msun). (Default = 5.0)
+    Maximum mass of the star clusters in units of log(Msun). (Default = 5.0). Note: Only star particles that
+    have a mass greater than this parameter are broken down.
 
 :cmdf_bins:
 
