@@ -169,7 +169,9 @@ if __name__ == "__main__":
     nbins = 25
     
     grain_size_left_edge_array = np.linspace(np.min(x),np.max(x),nbins)
-    
+    grain_size_right_edge_array = []
+    outfile_filenames = []
+
     Aext_array = np.zeros([len(wlen.value),nbins])
 
     #set up an array for storing the weighted fractional contribution
@@ -183,6 +185,8 @@ if __name__ == "__main__":
         
         grain_sizes_this_bin = np.linspace(grain_size_left_edge_array[i],grain_size_left_edge_array[i+1],41)#this 41 is an arbitrary choice
         
+        #save the right edge of the bin
+        grain_size_right_edge_array.append(grain_size_left_edge_array[i+1])
         
         idx = find_nearest(x,grain_size_left_edge_array[i]) #can remove eventually
         
@@ -207,27 +211,44 @@ if __name__ == "__main__":
         #kappa (a) = 3 * Qext (a) / ( 4 * a * rho_grain)
         kappa = 3.*np.sum(temp_Qext,axis=0)/(4.*np.median( (10.**(grain_sizes_this_bin)*u.micron).to(u.cm)*ASSUMED_DENSITY_OF_DUST))
         
+
+        #----------------------------------
         #create the HDF5 file for powderday
+        #----------------------------------
         d = IsotropicDust(nu.value,albedo,kappa.value)
         
         if not os.path.exists('dust_files/'):
             os.makedirs('dust_files/')
-
         filename = 'dust_files/binned_dust_sizes.'+str(counter)+'.hdf5'
-        
+        outfile_filenames.append(filename)
+
         d.write(filename)
-        
 
 
 
-        
-        #PLOTTING JUST FOR TESTING
-        final_Aext = np.average(Aext_array,axis=1,weights=frac)
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.loglog(1/wlen,final_Aext/np.max(final_Aext),label='coadded')
-        ax.loglog(1/wlen,Aext/np.max(Aext),label='original')
-        plt.legend(loc=2)
 
-        fig.savefig('extinction.png',dpi=300)
+    #----------------------------------
+    #save the metadata
+    #----------------------------------
+    grain_size_right_edge_array = np.asarray(grain_size_right_edge_array)
+
+    x = grain_size_left_edge_array[0:-1]
+    y = grain_size_right_edge_array
+    z = np.asarray(outfile_filenames)
+    #np.savetxt('dust_files/binned_dust_sizes.key',np.transpose([grain_size_left_edge_array[0:-1],grain_size_right_edge_array,np.asarray(outfile_filenames)]))
+
+    np.savez('dust_files/binned_dust_sizes.npz',grain_size_left_edge_array = grain_size_left_edge_array,grain_size_right_edge_array = grain_size_right_edge_array,outfile_filenames = outfile_filenames)
+
+
+
+    
+    #PLOTTING JUST FOR TESTING
+    final_Aext = np.average(Aext_array,axis=1,weights=frac)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.loglog(1/wlen,final_Aext/np.max(final_Aext),label='coadded')
+    ax.loglog(1/wlen,Aext/np.max(Aext),label='original')
+    plt.legend(loc=2)
+
+    fig.savefig('extinction.png',dpi=300)
         
