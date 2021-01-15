@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import astropy.units as u
 import astropy.constants as constants
 from hyperion.dust import IsotropicDust
+import os
+
 
 def find_nearest(array,value):
     idx = (np.abs(np.array(array)-value)).argmin()
@@ -131,69 +133,101 @@ def extinction_law(x,dsf,wlen,cfrac,t_Qext,t_Qext_V):
 
 
 if __name__ == "__main__":
-        x=np.linspace(-4,0,41)
+
+    #grain size range that we're modeling.  we set it up as a linspace
+    #array so that it can have two purposes: (a) to serve as an input
+    #array for a test run where we compare against a known size
+    #distribution function read in from DNSF_example.txt, and then (b)
+    #to set the limits for the grain size bins that we're going to
+    #create for powderday
+    x=np.linspace(-4,0,41)
         
-        wlen = 1. / np.logspace(-5,1,201)*u.micron
-        ASSUMED_DENSITY_OF_DUST = 2.4*u.g/u.cm**3
+    #avelength array that we're modeling: 0.1-1000 micron
+    wlen = 1. / np.logspace(-3,1,201)*u.micron
+    ASSUMED_DENSITY_OF_DUST = 2.4*u.g/u.cm**3
 
-        nu = (constants.c/wlen).to(u.Hz)
+    nu = (constants.c/wlen).to(u.Hz)
+    
+    #load an example dust size function for testing against
+    dsf = np.loadtxt('DNSF_example.txt')
 
-        dsf = np.loadtxt('DNSF_example.txt')
-        #dsf = np.ones(len(x))*1.e60
+    #assumed graphite fraction
+    cfrac = 0.54
+
+    #compute quantities for exmaple dsf above
+    xtab, Qtab = Qext_tab_load()
+    t_Qext = Qext_get(x,wlen.value,cfrac,xtab,Qtab)
+    t_Qext_V = Qext_get(x,np.array([0.551]),cfrac,xtab,Qtab)
+    Aext, R, dumQext = extinction_law(x,dsf,wlen.value,cfrac,t_Qext,t_Qext_V)
         
-        cfrac = 0.54
-        xtab, Qtab = Qext_tab_load()
-        t_Qext = Qext_get(x,wlen.value,cfrac,xtab,Qtab)
-        t_Qext_V = Qext_get(x,np.array([0.551]),cfrac,xtab,Qtab)
-        Aext, R, dumQext = extinction_law(x,dsf,wlen.value,cfrac,t_Qext,t_Qext_V)
+
+
+    #nowbreak up the size distribution into bins and then
+    #scale wiht the loaded up DSF to see if their co-added
+    #extinction laws look reasonable or not.
+    
+    nbins = 25
+    
+    grain_size_left_edge_array = np.linspace(np.min(x),np.max(x),nbins)
+    
+    Aext_array = np.zeros([len(wlen.value),nbins])
+
+    #set up an array for storing the weighted fractional contribution
+    #each size bin contributes to the final extinction curve. note -
+    #this is only done for testing here by comparing these co-added
+    #extinction laws back to the original one computed from dsf
+    frac = np.zeros(nbins)
+    
+    #loop through the bins (but not the right most one, hence the -1)
+    for counter,i in enumerate(range(nbins-1)):
         
-
-
-        #try to break up the size distribution into bins and then
-        #scale wiht the loaded up DSF to see if their co-added
-        #extinction laws look reasonable or not.
-
-        nbins = 250
-
-        MIN_GRAIN_SIZES = -4 #log, micron
-        MAX_GRAIN_SIZES = 0 #log, micron
-        grain_size_left_edge_array = np.linspace(-4,0,nbins)
-
-        Aext_array = np.zeros([len(wlen.value),nbins])
-
-        frac = np.zeros(nbins) #can remove eventually
-
-        for i in range(nbins-1):
-            grain_sizes_this_bin = np.linspace(grain_size_left_edge_array[i],grain_size_left_edge_array[i+1],41)#this 41 is hard coded to change it need to recompute t_Qext and t_qext_v
-            idx = find_nearest(x,grain_size_left_edge_array[i]) #can remove eventually
+        grain_sizes_this_bin = np.linspace(grain_size_left_edge_array[i],grain_size_left_edge_array[i+1],41)#this 41 is an arbitrary choice
         
-            #assuming a flat distribution of sizes within each bin
-            temp_dsf = np.repeat(1.e59,len(grain_sizes_this_bin))
-            
-            frac[i] = dsf[idx] #can remove eventually
-            t_Qext = Qext_get(grain_sizes_this_bin,wlen.value,cfrac,xtab,Qtab)
-            t_Qext_V = Qext_get(grain_sizes_this_bin,np.array([0.551]),cfrac,xtab,Qtab)
-            
-            temp_Aext,albedo,temp_Qext = extinction_law(grain_sizes_this_bin,temp_dsf,wlen.value,cfrac,t_Qext,t_Qext_V)
-            
-            Aext_array[:,i] = temp_Aext
+        
+        idx = find_nearest(x,grain_size_left_edge_array[i]) #can remove eventually
+        
+        #assuming a flat distribution of sizes within each bin
+        temp_dsf = np.repeat(1.e59,len(grain_sizes_this_bin))
+        
+        #set the weighted fraction to scale the binned final dust size distribution by  for testing
+        frac[i] = dsf[idx]
 
-           
+        #calculate Qext for the bins
+        t_Qext = Qext_get(grain_sizes_this_bin,wlen.value,cfrac,xtab,Qtab)
+        t_Qext_V = Qext_get(grain_sizes_this_bin,np.array([0.551]),cfrac,xtab,Qtab)
+        
+        #compute the stuff!
+        temp_Aext,albedo,temp_Qext = extinction_law(grain_sizes_this_bin,temp_dsf,wlen.value,cfrac,t_Qext,t_Qext_V)
+        
+        #save the extinction laws to an array, just fo rtesting
+        Aext_array[:,i] = temp_Aext
+        
+        
         #calculate kappa
         #kappa (a) = 3 * Qext (a) / ( 4 * a * rho_grain)
         kappa = 3.*np.sum(temp_Qext,axis=0)/(4.*np.median( (10.**(grain_sizes_this_bin)*u.micron).to(u.cm)*ASSUMED_DENSITY_OF_DUST))
-
+        
+        #create the HDF5 file for powderday
         d = IsotropicDust(nu.value,albedo,kappa.value)
-        d.write('smc_dust_dn.hdf5')
+        
+        if not os.path.exists('dust_files/'):
+            os.makedirs('dust_files/')
 
-        '''
+        filename = 'dust_files/binned_dust_sizes.'+str(counter)+'.hdf5'
+        
+        d.write(filename)
+        
+
+
+
+        
+        #PLOTTING JUST FOR TESTING
         final_Aext = np.average(Aext_array,axis=1,weights=frac)
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        
-        ax.plot(1/wlen,final_Aext/np.max(final_Aext),label='coadded')
-        ax.plot(1/wlen,Aext/np.max(Aext),label='original')
+        ax.loglog(1/wlen,final_Aext/np.max(final_Aext),label='coadded')
+        ax.loglog(1/wlen,Aext/np.max(Aext),label='original')
         plt.legend(loc=2)
 
         fig.savefig('extinction.png',dpi=300)
-        '''
+        
