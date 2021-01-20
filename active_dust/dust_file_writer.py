@@ -143,7 +143,7 @@ if __name__ == "__main__":
     x=np.linspace(-4,0,41)
         
     #avelength array that we're modeling: 0.1-1000 micron
-    wlen = 1. / np.logspace(-4,3,201)*u.micron
+    wlen = 1. / np.logspace(-3,1,201)*u.micron
     ASSUMED_DENSITY_OF_DUST = 2.4*u.g/u.cm**3
 
     nu = (constants.c/wlen).to(u.Hz)
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     #scale wiht the loaded up DSF to see if their co-added
     #extinction laws look reasonable or not.
     
-    nbins = 50
+    nbins = 25
     
     grain_size_left_edge_array = np.linspace(np.min(x),np.max(x),nbins)
     grain_size_right_edge_array = []
@@ -188,9 +188,7 @@ if __name__ == "__main__":
         #save the right edge of the bin
         grain_size_right_edge_array.append(grain_size_left_edge_array[i+1])
         
-
-        #used to figure out what bin size of the sample dsf the current size bin we're on corresponds to
-        idx = find_nearest(x,grain_size_left_edge_array[i])
+        idx = find_nearest(x,grain_size_left_edge_array[i]) #can remove eventually
         
         #assuming a flat distribution of sizes within each bin
         temp_dsf = np.repeat(1.e59,len(grain_sizes_this_bin))
