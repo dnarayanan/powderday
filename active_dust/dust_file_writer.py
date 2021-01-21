@@ -168,7 +168,7 @@ if __name__ == "__main__":
     #scale wiht the loaded up DSF to see if their co-added
     #extinction laws look reasonable or not.
     
-    nbins = 50
+    nbins = 100
     
     grain_size_left_edge_array = np.linspace(np.min(x),np.max(x),nbins)
     grain_size_right_edge_array = []
@@ -213,13 +213,19 @@ if __name__ == "__main__":
         
         #calculate kappa
         #kappa (a) = 3 * Qext (a) / ( 4 * a * rho_grain)
-        kappa = 3.*np.sum(temp_Qext,axis=0)/(4.*np.median( (10.**(grain_sizes_this_bin)*u.micron).to(u.cm)*ASSUMED_DENSITY_OF_DUST))
+
+        kappa_a_lambda = np.zeros(temp_Qext.shape)
+        for i in range(kappa_a_lambda.shape[1]):
+            kappa_a_lambda[:,i] = 3.*temp_Qext[:,i]/(10.**(grain_sizes_this_bin)*u.micron.to(u.cm)*ASSUMED_DENSITY_OF_DUST)
+        kappa_lambda = np.sum(kappa_a_lambda,axis=0)
+
+        #kappa = 3.*np.sum(temp_Qext,axis=0)/(4.*np.median( (10.**(grain_sizes_this_bin)*u.micron).to(u.cm)*ASSUMED_DENSITY_OF_DUST))
         
 
         #----------------------------------
         #create the HDF5 file for powderday
         #----------------------------------
-        d = IsotropicDust(nu.value,albedo,kappa.value)
+        d = IsotropicDust(nu.value,albedo,kappa_lambda)
         
         if not os.path.exists('dust_files/'):
             os.makedirs('dust_files/')
