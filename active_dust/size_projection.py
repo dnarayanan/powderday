@@ -22,7 +22,7 @@ nsizes = ad['PartType3','Dust_Size'].shape[1]
 #set up master array to hold the deposited sizes
 
 
-for isize in range(2):
+for isize in range(nsizes):
 
     ds.parameters['size'] = 0 #just to clear it out
 
@@ -33,17 +33,18 @@ for isize in range(2):
     #actually add the sliced field now.  we do this so that we can
     #prepare for depositing onto the octree. we call this a dummy size
     #since this is just there for a place holder to deposit into a dummy octree
-    ds.add_field(('PartType3','dummy_size'),function=_size_with_units,sampling_type='particle',units='dimensionless',particle_type=True,force_override=True)
 
-    pdb.set_trace()
+    print('adding and depositing fields for dust size bin '+str(isize))
+    ds.add_field(('PartType3','dummy_size_bin'+str(isize)),function=_size_with_units,sampling_type='particle',units='dimensionless',particle_type=True,force_override=True)
+    ad = ds.all_data()
 
     #deposit onto the octree.   this is what will get merged into the final octree
-    ds.add_deposited_particle_field(('PartType3','dummy_size'),"sum")
+    ds.add_deposited_particle_field(('PartType3','dummy_size_bin'+str(isize)),"sum")
 
     if isize == 0:
-        octree_of_sizes = np.zeros((ad[('deposit','PartType3_sum_dummy_size')].shape[0],nsizes))
+        octree_of_sizes = np.zeros((ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))].shape[0],nsizes))
         
-    octree_of_sizes[:,isize] = ad[('deposit','PartType3_sum_dummy_size')]
+    octree_of_sizes[:,isize] = ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))]
     
 
 
