@@ -11,11 +11,17 @@ def _size_with_units(field,data):
 def _position_x(field,data):
     return data[('PartType3', 'Coordinates')][:,0]
 
+def _dust_density(field,data):
+    return data.ds.arr(data[('PartType3','Dust_Density')],'code_mass/code_length**3')
+
 
 ds = yt.load(snapshot)
-ds.add_field('posx',function=_position_x,sampling_type='particle',units='cm',particle_type=True)
+ds.add_field('posx',function=_position_x,sampling_type='particle',units='cm')#particle_type=True)
 ad = ds.all_data()
+ds._sph_ptypes = ('PartType0','PartType3')
 
+#add the dust density field
+ds.add_field(('PartType3','density'),function=_dust_density,units='code_mass/code_length**3',sampling_type='particle',particle_type=True)
 
 #loop through the sizes now 
 nsizes = ad['PartType3','Dust_Size'].shape[1]
@@ -37,15 +43,22 @@ for isize in range(nsizes):
     print('adding and depositing fields for dust size bin '+str(isize))
     ds.add_field(('PartType3','dummy_size_bin'+str(isize)),function=_size_with_units,sampling_type='particle',units='dimensionless',particle_type=True,force_override=True)
     ad = ds.all_data()
-
+    
     #deposit onto the octree.   this is what will get merged into the final octree
-    ds.add_deposited_particle_field(('PartType3','dummy_size_bin'+str(isize)),"sum")
+    if yt.__version__ != '4.0.dev0':
+        ds.add_deposited_particle_field(('PartType3','dummy_size_bin'+str(isize)),"sum")
 
     if isize == 0:
-        octree_of_sizes = np.zeros((ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))].shape[0],nsizes))
-        
-    octree_of_sizes[:,isize] = ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))]
-    
+        if  yt.__version__ != '4.0.dev0':
+            octree_of_sizes = np.zeros((ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))].shape[0],nsizes))
+        else:
+            octree = ds.octree()
+            octree_of_sizes = np.zeros((octree[('PartType3', 'dummy_size_bin'+str(isize))].shape[0],nsizes))
 
+    if  yt.__version__ != '4.0.dev0':
+        octree_of_sizes[:,isize] = ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))]
+    else:
+        octree_of_sizes[:,isize] = octree[('PartType3', 'dummy_size_bin'+str(isize))]
 
+octree_of_sizes[np.isnan(octree_of_sizes)] = 0 #just because the density can be zero in some extreme cases which screws up the particle deposition
 
