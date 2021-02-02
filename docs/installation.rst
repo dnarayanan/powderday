@@ -110,7 +110,7 @@ https://github.com/hyperion-rt/hyperion/issues/219#issuecomment-600036854  by re
   >home/desika.narayanan/miniconda3/envs/pd_test/lib/python3.6/site-packages/hyperion/filter/filter.py
   
 The second and manual way to install `Hyperion
-<http://www.hyperion-rt.org>`_ follows:
+<http://www.hyperion-rt.org>`_ follows (note, for the manual installation you don't have to worry about the six replacement above):
 1. First clone the main repository.::
 
      >git clone https://github.com/astrofrog/hyperion.git
@@ -232,10 +232,11 @@ simulations, please see below.
 First, install the necessary dependencies::
 
   >pip install numpy jupyter sphinx gitpython h5py matplotlib cython nose scipy astropy sympy mpi4py
-followed by actually installing  `yt <http://yt-project.org>`_::
+followed by actually installing  `yt <http://yt-project.org>`_ from Ash Kelly's branch::
   
-  >git clone https://github.com/yt-project/yt
+  >git clone https://github.com/AshKelly/yt.git
   >cd yt
+  >python setup.py install
   >pip install -e .
 
 If we do this, this will overwrite the `yt <http://yt-project.org>`_ installation that ships with `Hyperion <http://www.hyperion-rt.org>`_, and you should be good to go (this is necessary to do in this order because `Hyperion <http://www.hyperion-rt.org>`_ ships with `yt 3.x <http://yt-project.org>`_ .  While a number of `powderday <https://github.com/dnarayanan/powderday.git>`_ front ends (i.e. gizmo; tipsy) should work just fine with `yt 3.x <http://yt-project.org>`_, arepo most definitley will not.  To check that everything worked, make sure the output of the following 
