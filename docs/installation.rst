@@ -232,10 +232,11 @@ simulations, please see below.
 First, install the necessary dependencies::
 
   >pip install numpy jupyter sphinx gitpython h5py matplotlib cython nose scipy astropy sympy mpi4py
-followed by actually installing  `yt <http://yt-project.org>`_ from Ash Kelly's branch::
+followed by actually installing  `yt <http://yt-project.org>`_ from the yt-4.0-new-octree branch of Ash Kelly's fork::
   
   >git clone https://github.com/AshKelly/yt.git
   >cd yt
+  >git checkout yt-4.0-new-octree
   >python setup.py install
   >pip install -e .
 
