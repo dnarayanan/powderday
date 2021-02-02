@@ -157,8 +157,9 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     def _dustsmoothedmasses(field, data):
         if yt.__version__ == '4.0.dev0':
-            return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
-
+            dsm = ds.arr(data.ds.parameters['octree'][('PartType0','Dust_Masses')],'code_mass')
+            #return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
+            return dsm
         else:
             return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
 
