@@ -161,86 +161,10 @@ def sph_m_gen(fname,field_add):
         print("Note: For very high-resolution grids, this may cause memory issues due to adding ncells dust grids")
         print("==============================================\n")
 
-
-
-        '''
-        #THIS HAS BEEN MOVED TO GADGET2PD - hopefully can stay there and this can all be deleted.
-
-
-        #We're assuming that the particle type that the active dust is
-        #in in PartType3 and adding it to the sph types so that it can
-        #be deposited onto the octree
-        ds._sph_ptypes = ('PartType0','PartType3')
-        
-        #add the dust density field
-        ds.add_field(('PartType3','density'),function=_dust_density,units='code_mass/code_length**3',sampling_type='particle',particle_type=True)
-        ad = ds.all_data()
-        nsizes = ad['PartType3','Dust_Size'].shape[1] #number of dust size bins
-
-        #now loop through th esize bins and project them each onto
-        #their own octree.  we'll then, after projecting them into
-        #individual grids, collate those grids back together into a
-        #master size grid
-
-        for isize in range(nsizes):
-            
-            ds.parameters['size'] = 0 #just to clear it out
-            
-            #we have to slice it before we add the field.  if you try to slice
-            #in the field defintion (i.e., in _size_with_units), yt freaks
-            ds.parameters['size'] = ad['PartType3','Dust_Size'][:,isize]
-            
-            #actually add the sliced field now.  we do this so that we can
-            #prepare for depositing onto the octree. we call this a dummy size
-            #since this is just there for a place holder to deposit into a dummy octree
-            
-            print('adding and depositing fields for dust size bin '+str(isize))
-            ds.add_field(('PartType3','dummy_size_bin'+str(isize)),function=_size_with_units,sampling_type='particle',units='dimensionless',particle_type=True,force_override=True)
-            ad = ds.all_data()
-
-            #deposit onto the octree.   this is what will get merged into the final octree
-            if yt.__version__ != '4.0.dev0':
-                ds.add_deposited_particle_field(('PartType3','dummy_size_bin'+str(isize)),"sum")
-        '''
-
-        '''
-        EVERYTHING BEFORE THIS MAY NOT BE NEEDED IF ALL GOES WELL BECAUSE
-        THIS IS INCLUDED IN THE FRONT END. THIS SAID, AFTER THIS WE
-        NEED TO NOW ACCESS THESE DEPOSITED OCTREES FROM REG AND SUM THEM INTO THE FINAL OCTREE_OF_SIZES
-        '''
-        #WHERE WE'RE LEAVING OFF: AT THE END OF GADGET2PD, DOING
-        #LEN(DUM_SIZE_OCTREE) gives 512 (i.e., the size of the refined
-        #grid coming out of the reg region).  what we need to do is:
-        #(a) ensure that the dust octree HERE is the same size, anda
-        #(b) once we do, see if it has any information in it.  if it
-        #doesn't, then we need to put in a try/except like that
-        #commented below to crash the code.
-
-        ad = ds.all_data()
-        nsizes = ad['PartType3','Dust_Size'].shape[1] #number of dust size bins
-        for isize in range(nsizes):
-
-            if isize == 0:
-                if  yt.__version__ != '4.0.dev0':
-                    octree_of_sizes = np.zeros((ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))].shape[0],nsizes))
-                else:
-                    octree = ds.octree()
-                    octree_of_sizes = np.zeros((octree[('PartType3', 'dummy_size_bin'+str(isize))].shape[0],nsizes))
-
-            
-            if  yt.__version__ != '4.0.dev0':
-                octree_of_sizes[:,isize] = ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))]
-            else:
-                octree_of_sizes[:,isize] = octree[('PartType3', 'dummy_size_bin'+str(isize))]
-
-        octree_of_sizes[np.isnan(octree_of_sizes)] = 0 #just because the density can be zero in some extreme cases which screws up the particle deposition
-        import pdb
-        pdb.set_trace()
-        
-        #                try:
-        #            np.sum(dum_size_octree) > 0
-         #       except ValueError:
-         #           raise ValueError("[front_ends/gadget2pd:] The grain size distribution smoothed onto the octree has deposited no particles.  Try either increasing your box size, or decreasing n_ref in parameters_master")
+        try:
+             assert (np.sum(octree_of_sizes) > 0)
+        except AssertionError:
+            raise AssertionError("[sph_tributary:] The grain size distribution smoothed onto the octree has deposited no particles.  Try either increasing your box size, or decreasing n_ref in parameters_master")
 
 
         #now load the mapping between grain bin and filename for the lookup table
