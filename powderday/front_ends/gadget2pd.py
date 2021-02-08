@@ -280,6 +280,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     if fname != None:
         if  yt.__version__ == '4.0.dev0':
             ds = yt.load(fname)
+            
+            #ds.sph_smoothing_style = "gather"
             ds.index
             ad = ds.all_data()
 
@@ -442,6 +444,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     
     #OTF EXTINCTION
     if cfg.par.otf_extinction:
+        ds._sph_ptypes = ('PartType0','PartType3')
+
         if add_smoothed_quantities==True:
 
             print("==============================================\n")

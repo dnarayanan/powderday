@@ -160,11 +160,25 @@ def sph_m_gen(fname,field_add):
         print("Entering OTF Extinction Calculation\n")
         print("Note: For very high-resolution grids, this may cause memory issues due to adding ncells dust grids")
         print("==============================================\n")
+        
+        ad = ds.all_data()
+        nsizes = ad['PartType3','Dust_Size'].shape[1]
+        ncells = reg.parameters["octree_of_sizes"].shape[0]
+        #ensure that the grid has particles
+        for isize in range(nsizes):
+            try:
+                assert (np.sum(reg.parameters["octree_of_sizes"][:,isize]) > 0)
+            except AssertionError:
+                raise AssertionError("[sph_tributary:] The grain size distribution smoothed onto the octree has deposited no particles.  Try either increasing your box size, or decreasing n_ref in parameters_master.  Alternatively, run the simulation with otf_extinction=False")
 
-        try:
-             assert (np.sum(octree_of_sizes) > 0)
-        except AssertionError:
-            raise AssertionError("[sph_tributary:] The grain size distribution smoothed onto the octree has deposited no particles.  Try either increasing your box size, or decreasing n_ref in parameters_master")
+        #for empty cells, use the median size distribution
+        for isize in range(nsizes):
+            wzero = np.where(reg.parameters["octree_of_sizes"][:,isize] == 0)[0]
+            wnonzero = np.where(reg.parameters["octree_of_sizes"][:,isize] != 0)[0]
+
+            reg.parameters['octree_of_sizes'][wzero,isize] = np.median(reg.parameters['octree_of_sizes'][wnonzero,isize])
+
+            print(len(wzero)/len(wnonzero))
 
 
         #now load the mapping between grain bin and filename for the lookup table
@@ -178,35 +192,44 @@ def sph_m_gen(fname,field_add):
 
         #find which sizes in the hydro simulation correspond to the
         #pre-binned extinction law sizes from dust_file_writer.py
+
+        dust_file_to_grain_size_mapping_idx = []
         x=np.linspace(cfg.par.otf_extinction_log_min_size,cfg.par.otf_extinction_log_max_size,nsizes)
         for i in range(nbins):
-            idx = find_nearest(x,grain_size_left_edge_array[i])
+            dust_file_to_grain_size_mapping_idx.append(find_nearest(x,grain_size_left_edge_array[i]))
 
-        
+
+
         #now loop through the cells in the octree, and create a frac *
         #dustdens for each cell density grid, and add that density
         #grid.  this means we add ncells density grids NOTE: THIS
         #COULD END UP BEING A MEMORY PROBLEM FOR VERY HIGH-RES SIMS.
-        
-        for cell in range(len(dustdens)):
-            frac = octree_of_sizes[cell]
-            import pdb
-            if np.sum(frac > 0):
-                print(cell)
-                print(frac)
+
+        false_counter = 0
+        for icell in range(len(dustdens)):
+            print(icell)
+            if refined[icell] == False:
+                frac = reg.parameters['octree_of_sizes'][false_counter]
+                #normalize
+                frac/=np.sum(frac)
+                
+                false_counter +=1
+
+
+                #now make a dust grid that just has 1 cell with
+                #information in it, and add these in sequence with the
+                #grain size fractions weighted according to the size
+                #distribution in that cell
+                dustdens_onecell = dustdens*0
+                dustdens_onecell[icell] = dustdens[icell]
+                
+
+                for counter,file in enumerate(dust_filenames):
+                    d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
+                    m.add_density_grid(dustdens_onecell*frac[dust_file_to_grain_size_mapping_idx[counter]],d,specific_energy=specific_energy)
+                    
 
         
-
-        #this sets the fraction of each bin size we need (for the
-        #entire grid! this eventually needs to be cell by cell)
-
-        
-
-
-        import pdb
-        pdb.set_trace()
-        #STOPPING HERE: NEED TO FIGURE OUT HOW TO SET THIS RELATIVE RATIO OF GRAINS IN THIS SIZE FOR EVERY CELL
-        frac[i] = dsf[idx]
 
         
 
