@@ -155,7 +155,6 @@ def sph_m_gen(fname,field_add):
           #the simulation itself.
 
 
-
         print("==============================================\n")
         print("Entering OTF Extinction Calculation\n")
         print("Note: For very high-resolution grids, this may cause memory issues due to adding ncells dust grids")
@@ -181,6 +180,15 @@ def sph_m_gen(fname,field_add):
             print(len(wzero)/len(wnonzero))
 
 
+        #TO DO TO DO TO DO now that the octree is populated with
+        #grains, fit the size distribution in each cell to a degree 3
+        #polynomial (ax^3 + bx^2 + cx + d), and then bin these (a->d)
+        #parameters.  we then add a grid for each of these parameter
+        #combinations, and for each bin size 
+
+        
+
+
         #now load the mapping between grain bin and filename for the lookup table
         data = np.load(cfg.par.pd_source_dir+'active_dust/dust_files/binned_dust_sizes.npz')
         grain_size_left_edge_array = data['grain_size_left_edge_array']
@@ -188,7 +196,7 @@ def sph_m_gen(fname,field_add):
         dust_filenames = data['outfile_filenames']
 
         nbins = len(grain_size_left_edge_array)
-        frac = np.empty(nbins)
+
 
         #find which sizes in the hydro simulation correspond to the
         #pre-binned extinction law sizes from dust_file_writer.py
@@ -199,11 +207,37 @@ def sph_m_gen(fname,field_add):
             dust_file_to_grain_size_mapping_idx.append(find_nearest(x,grain_size_left_edge_array[i]))
 
 
+        #set up the frac arrays that are dustdens,nbins big 
+        frac = np.zeros([dustdens.shape[0],nbins])
 
+        #temp_frac is the frac at the WFalse points (i.e., where we
+        #have computed the octree_of_sizes in the front end). we do
+        #the computing here, and then stuff this into the wFalse cells
+        #of frac
+        temp_frac = np.empty(reg.parameters['octree_of_sizes'].shape[0]) 
+
+        wFalse = np.where(np.asarray(refined) == 0)[0]
+
+        for bin in range(nbins):
+            temp_frac = reg.parameters['octree_of_sizes'][:,dust_file_to_grain_size_mapping_idx[bin]]
+            frac[wFalse,bin] = temp_frac
+
+            file = dust_filenames[bin]
+
+            d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
+            m.add_density_grid(dustdens*frac[:,bin],d,specific_energy=specific_energy)
+            
+            
+
+        
+
+        '''
         #now loop through the cells in the octree, and create a frac *
         #dustdens for each cell density grid, and add that density
         #grid.  this means we add ncells density grids NOTE: THIS
         #COULD END UP BEING A MEMORY PROBLEM FOR VERY HIGH-RES SIMS.
+
+        frac = np.empty(nbins)
 
         false_counter = 0
         for icell in range(len(dustdens)):
@@ -228,15 +262,13 @@ def sph_m_gen(fname,field_add):
                     d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
                     m.add_density_grid(dustdens_onecell*frac[dust_file_to_grain_size_mapping_idx[counter]],d,specific_energy=specific_energy)
                     
-
+        '''
         
 
         
 
-    '''
+
     #TESTING BLOCK ONLY - MUCH OF THIS NEEDS TO BE REMOVED
-    '''
-
     '''
     #load the mapping between grain bin and filename
     data = np.load(cfg.par.pd_source_dir+'active_dust/dust_files/binned_dust_sizes.npz')
