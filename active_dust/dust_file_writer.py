@@ -168,10 +168,15 @@ if __name__ == "__main__":
     #scale wiht the loaded up DSF to see if their co-added
     #extinction laws look reasonable or not.
     
-    nbins = 100
+    nbins = 10
     
-    grain_size_left_edge_array = np.linspace(np.min(x),np.max(x),nbins)
-    grain_size_right_edge_array = []
+    #array that holds the left edge, right edge, and edges of bins in between.  we use this to set the left and right edge arrays
+    edges = np.linspace(np.min(x),np.max(x),nbins+1) 
+    grain_size_left_edge_array = edges[0:-1]
+    grain_size_right_edge_array = edges[1::]
+
+    #grain_size_left_edge_array = np.linspace(np.min(x),np.max(x),nbins)
+    #grain_size_right_edge_array = []
     outfile_filenames = []
 
     Aext_array = np.zeros([len(wlen.value),nbins])
@@ -183,12 +188,12 @@ if __name__ == "__main__":
     frac = np.zeros(nbins)
     
     #loop through the bins (but not the right most one, hence the -1)
-    for counter,i in enumerate(range(nbins-1)):
+    for counter,i in enumerate(range(nbins)):
         
-        grain_sizes_this_bin = np.linspace(grain_size_left_edge_array[i],grain_size_left_edge_array[i+1],41)#this 41 is an arbitrary choice
+        grain_sizes_this_bin = np.linspace(grain_size_left_edge_array[i],grain_size_right_edge_array[i],41)#this 41 is an arbitrary choice
         
         #save the right edge of the bin
-        grain_size_right_edge_array.append(grain_size_left_edge_array[i+1])
+        #grain_size_right_edge_array.append(grain_size_left_edge_array[i+1])
         
 
         #used to figure out what bin size of the sample dsf the current size bin we're on corresponds to
