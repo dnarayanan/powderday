@@ -122,11 +122,10 @@ def sph_m_gen(fname,field_add):
     specific_energy = np.repeat(energy_density_absorbed.value,dustdens.shape)
 
 
-    ''' #debug and remove this after testing is done'''
     if cfg.par.otf_extinction == False:
         
         if cfg.par.PAH == True:
-        
+
             # load PAH fractions for usg, vsg, and big (grain sizes)
             frac = cfg.par.PAH_frac
             
@@ -138,8 +137,8 @@ def sph_m_gen(fname,field_add):
                 d = SphericalDust(cfg.par.dustdir+'%s.hdf5'%size)
                 if cfg.par.SUBLIMATION == True:
                     d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
-            #m.add_density_grid(dustdens * frac[size], cfg.par.dustdir+'%s.hdf5' % size)
-            m.add_density_grid(dustdens*frac[size],d,specific_energy=specific_energy)
+                #m.add_density_grid(dustdens * frac[size], cfg.par.dustdir+'%s.hdf5' % size)
+                m.add_density_grid(dustdens*frac[size],d,specific_energy=specific_energy)
             m.set_enforce_energy_range(cfg.par.enforce_energy_range)
         else:
             d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
