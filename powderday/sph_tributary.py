@@ -221,8 +221,12 @@ def sph_m_gen(fname,field_add):
             temp_frac = reg.parameters['octree_of_sizes'][:,dust_file_to_grain_size_mapping_idx[bin]]
             frac[wFalse,bin] = temp_frac
 
-            file = dust_filenames[bin]
+        #exit the loop to normalize the fractional contributions of the individual dust files
+        frac/=np.sum(frac)
 
+        #now add the dust grids
+        for bin in range(nbins):
+            file = dust_filenames[bin]
             d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
             m.add_density_grid(dustdens*frac[:,bin],d,specific_energy=specific_energy)
             
