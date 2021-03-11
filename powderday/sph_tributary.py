@@ -179,14 +179,6 @@ def sph_m_gen(fname,field_add):
             print(len(wzero)/len(wnonzero))
 
 
-        #TO DO TO DO TO DO now that the octree is populated with
-        #grains, fit the size distribution in each cell to a degree 3
-        #polynomial (ax^3 + bx^2 + cx + d), and then bin these (a->d)
-        #parameters.  we then add a grid for each of these parameter
-        #combinations, and for each bin size 
-
-        
-
 
         #now load the mapping between grain bin and filename for the lookup table
         data = np.load(cfg.par.pd_source_dir+'active_dust/dust_files/binned_dust_sizes.npz')
@@ -233,44 +225,6 @@ def sph_m_gen(fname,field_add):
             
 
         
-
-        '''
-        #now loop through the cells in the octree, and create a frac *
-        #dustdens for each cell density grid, and add that density
-        #grid.  this means we add ncells density grids NOTE: THIS
-        #COULD END UP BEING A MEMORY PROBLEM FOR VERY HIGH-RES SIMS.
-
-        frac = np.empty(nbins)
-
-        false_counter = 0
-        for icell in range(len(dustdens)):
-            print(icell)
-            if refined[icell] == False:
-                frac = reg.parameters['octree_of_sizes'][false_counter]
-                #normalize
-                frac/=np.sum(frac)
-                
-                false_counter +=1
-
-
-                #now make a dust grid that just has 1 cell with
-                #information in it, and add these in sequence with the
-                #grain size fractions weighted according to the size
-                #distribution in that cell
-                dustdens_onecell = dustdens*0
-                dustdens_onecell[icell] = dustdens[icell]
-                
-
-                for counter,file in enumerate(dust_filenames):
-                    d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
-                    m.add_density_grid(dustdens_onecell*frac[dust_file_to_grain_size_mapping_idx[counter]],d,specific_energy=specific_energy)
-                    
-        '''
-        
-
-        
-
-
     #TESTING BLOCK ONLY - MUCH OF THIS NEEDS TO BE REMOVED
     '''
     #load the mapping between grain bin and filename
