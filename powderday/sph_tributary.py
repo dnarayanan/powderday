@@ -1,3 +1,7 @@
+#where we're leaving off: make the normal part of the code that does
+#not assume MRN for the fractional distribution of grain sizes match
+#the mrn part (i.e, put in the frac_grid stuff etc.)
+
 from __future__ import print_function
 import numpy as np
 import yt
@@ -169,6 +173,8 @@ def sph_m_gen(fname,field_add):
             except AssertionError:
                 raise AssertionError("[sph_tributary:] The grain size distribution smoothed onto the octree has deposited no particles.  Try either increasing your box size, or decreasing n_ref in parameters_master.  Alternatively, run the simulation with otf_extinction=False")
 
+
+
         #for empty cells, use the median size distribution
         for isize in range(nsizes):
             wzero = np.where(reg.parameters["octree_of_sizes"][:,isize] == 0)[0]
@@ -189,6 +195,8 @@ def sph_m_gen(fname,field_add):
         nbins = len(grain_size_left_edge_array)
 
 
+
+
         #find which sizes in the hydro simulation correspond to the
         #pre-binned extinction law sizes from dust_file_writer.py
 
@@ -197,36 +205,94 @@ def sph_m_gen(fname,field_add):
         for i in range(nbins):
             dust_file_to_grain_size_mapping_idx.append(find_nearest(x,grain_size_left_edge_array[i]))
 
+       
+        #set up the frac array that is nbins big.  this is the
+        #fractional contribution of each dust file bin which is based
+        #on the total number of grains in the grid in that bin.
 
-        #set up the frac arrays that are dustdens,nbins big 
-        frac = np.zeros([dustdens.shape[0],nbins])
+        #frac =np.zeros([dustdens.shape[0],nbins])
 
-        #temp_frac is the frac at the WFalse points (i.e., where we
-        #have computed the octree_of_sizes in the front end). we do
-        #the computing here, and then stuff this into the wFalse cells
-        #of frac
-        temp_frac = np.empty(reg.parameters['octree_of_sizes'].shape[0]) 
+        dsf_grid = np.zeros([dustdens.shape[0],nbins])
+        frac_grid = np.zeros([dustdens.shape[0],nbins])
 
-        wFalse = np.where(np.asarray(refined) == 0)[0]
+        #------------------------
+        #DEBUG BLOCK
 
-        for bin in range(nbins):
-            temp_frac = reg.parameters['octree_of_sizes'][:,dust_file_to_grain_size_mapping_idx[bin]]
-            frac[wFalse,bin] = temp_frac
+        if cfg.par.OTF_EXTINCTION_MRN_FORCE == True:
+            grid_sum = np.zeros(nbins)
 
-        #exit the loop to normalize the fractional contributions of the individual dust files
-        frac/=np.sum(frac)
+            #how DNSF was set up.  not needed other than for testing
+            x=np.linspace(-4,0,41)
+            #load an example dust size function for testing against
+            dsf = np.loadtxt(cfg.par.pd_source_dir+'active_dust/mrn_dn.txt')#DNSF_example.txt')
 
-        #now add the dust grids
+            nbins = len(grain_size_left_edge_array)
+            
+
+            for i in range(nbins):
+                idx = find_nearest(x,grain_size_left_edge_array[i])
+                #this sets the fraction of each bin size we need (for the
+                #entire grid!)
+                dsf_grid[:,i] = dsf[idx]
+                grid_sum[i] = np.sum(dsf_grid[:,i])
+
+            #set up the frac array that is nbins big.  this is the
+            #fractional contribution of each dust file bin which is based
+            #on the total number of grains in the grid in that bin.
+            frac = grid_sum/np.sum(grid_sum)
+            
+            #now we need to set the localized extinction law. we do
+            #this by comparing, fractionally, a given cell's number of
+            #grains in that bin to the maximum number of grains that
+            #the grid has in that bin.
+
+            for i in range(nbins):
+                frac_grid[:,i] = dsf_grid[:,i]/np.max(dsf_grid[:,i])*frac[i]
+
+
+
+        #------------------------
+        else:
+
+
+            grid_sum = np.zeros(nbins)
+            
+
+            #this sets the fraction of each bin size we need (for the
+            #entire grid!)
+            for i in range(nbins):
+                grid_sum[i] = np.sum(reg.parameters['octree_of_sizes'][:,dust_file_to_grain_size_mapping_idx[i]])
+
+            
+            #set up the frac array that is nbins big.  this is the
+            #fractional contribution of each dust file bin which is based
+            #on the total number of grains in the grid in that bin.
+            frac = grid_sum/np.sum(grid_sum)
+
+            #now we need to set the localized extinction law. we do
+            #this by comparing, fractionally, a given cell's number of
+            #grains in that bin to the maximum number of grains that
+            #the grid has in that bin.
+
+            wFalse = np.where(np.asarray(refined) == 0)[0]
+
+            for i in range(nbins):
+
+                frac_grid[wFalse,i] = reg.parameters['octree_of_sizes'][:,dust_file_to_grain_size_mapping_idx[i]]/np.max(reg.parameters['octree_of_sizes'][:,dust_file_to_grain_size_mapping_idx[i]])*frac[i]
+
+          
+        #now add the dust grids to hyperion
         for bin in range(nbins):
             file = dust_filenames[bin]
             d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
-            m.add_density_grid(dustdens*frac[:,bin],d,specific_energy=specific_energy)
-            
+            m.add_density_grid(dustdens*frac_grid[:,bin],d,specific_energy=specific_energy)
             
 
-        
-    #TESTING BLOCK ONLY - MUCH OF THIS NEEDS TO BE REMOVED
+
+
     '''
+    #TESTING BLOCK ONLY - MUCH OF THIS NEEDS TO BE REMOVED
+
     #load the mapping between grain bin and filename
     data = np.load(cfg.par.pd_source_dir+'active_dust/dust_files/binned_dust_sizes.npz')
     grain_size_left_edge_array = data['grain_size_left_edge_array']
@@ -251,13 +317,14 @@ def sph_m_gen(fname,field_add):
     # Normalize to 1
     total = np.sum(frac)
     frac/=total
+
     
     for counter,file in enumerate(dust_filenames):
         d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
         m.add_density_grid(dustdens*frac[counter],d,specific_energy=specific_energy)
 
+
     '''
-    
     
 
 
