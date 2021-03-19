@@ -515,25 +515,23 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             #------------------------
             #DEBUG BLOCK
 
-            if cfg.par.OTF_EXTINCTION_MRN_FORCE == True:
-                loga = np.linspace(-4,0,octree_of_sizes.shape[1])
-                a = 10.**loga
-                mrn_dn_da = a**(-3.5)
-                #mrn_dn_da /= np.max(mrn_dn_da)
+            #if cfg.par.OTF_EXTINCTION_MRN_FORCE == True:
+            #    loga = np.linspace(-4,0,octree_of_sizes.shape[1])
+            #    a = 10.**loga
+            #    mrn_dn_da = a**(-3.5)
+            
                 
-                da = [a[i+1]-a[i] for i in range(len(a)-1)]
-                da.append(da[-1])
-                mrn_dn = mrn_dn_da*da
+            #    da = [a[i+1]-a[i] for i in range(len(a)-1)]
+            #    da.append(da[-1])
+            #    mrn_dn = mrn_dn_da*da
 
-                for i in range(octree_of_sizes.shape[0]):
-                    octree_of_sizes[i,:] = mrn_dn
+            #    for i in range(octree_of_sizes.shape[0]):
+            #        octree_of_sizes[i,:] = mrn_dn
 
             #------------------------
 
             octree_of_sizes[np.isnan(octree_of_sizes)] = 0 #just because the density can be zero in some extreme cases which screws up the particle deposition
             ds.parameters['octree_of_sizes']=octree_of_sizes
-
-
 
 
 
