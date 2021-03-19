@@ -186,6 +186,8 @@ m.set_specific_energy_type('additional')
 
 print('Setting up Model')
 m_imaging = copy.deepcopy(m)
+m.conf.output.output_specific_energy = 'last'
+
 
 if cfg.par.SED == True:
     # set up the SEDs and images
