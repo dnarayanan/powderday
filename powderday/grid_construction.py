@@ -11,8 +11,8 @@ from powderday.dust_grid_gen import dtm_grid_oct, remy_ruyer_oct, manual_oct,li_
 
 #particle and/or mesh quantities for dust
 from powderday.dust_grid_gen import dtm_particle_mesh,remy_ruyer_particle_mesh,li_bestfit_particle_mesh,li_ml_particle_mesh
-
 from powderday.dust_grid_gen import dtm_amr,remy_ruyer_amr,li_bestfit_amr,li_ml_amr
+from powderday.analytics import proj_plots
 
 import yt
 import pdb
