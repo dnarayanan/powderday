@@ -234,10 +234,10 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     if cfg.par.dust_grid_type == 'dtm':
         ds.add_field(('dustmass'), function=_dustmass_dtm,  sampling_type='particle', units='code_mass',particle_type=True)
     if cfg.par.dust_grid_type == 'manual':
-        #if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
-        ds.add_field(('dustmass'), function=_dustmass_manual,  sampling_type='particle', units='code_mass', particle_type=True)
-        ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
-        if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses,  sampling_type='particle', units='code_mass', particle_type=True)
+        if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
+            ds.add_field(('dustmass'), function=_dustmass_manual,  sampling_type='particle', units='code_mass', particle_type=True)
+            ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+            if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses,  sampling_type='particle', units='code_mass', particle_type=True)
 
     if cfg.par.dust_grid_type == 'rr':
         ds.add_field(("dustmass"),function=_dustmass_rr, sampling_type='particle', units='code_mass',particle_type=True)
