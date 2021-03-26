@@ -62,7 +62,14 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
 
         
     def _dustmass_manual(field, data):
-        return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
+        if cfg.par.otf_extinction == True:
+            dust_dens = data.ds.arr(data[('PartType0', 'DustDensity')],'code_mass/code_length**3')
+            dtg = data.ds.arr(dust_dens/data[('PartType0', 'Density')].in_units('code_mass/code_length**3'))
+            dust_mass = (dtg.value*data[('PartType0','Masses')]).in_units('code_mass')
+            
+            return dust_mass
+        else:
+            return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
 
     def _dustmass_dtm(field,data):
         return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
@@ -234,10 +241,11 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     if cfg.par.dust_grid_type == 'dtm':
         ds.add_field(('dustmass'), function=_dustmass_dtm,  sampling_type='particle', units='code_mass',particle_type=True)
     if cfg.par.dust_grid_type == 'manual':
-        if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
-            ds.add_field(('dustmass'), function=_dustmass_manual,  sampling_type='particle', units='code_mass', particle_type=True)
-            ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
-            if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses,  sampling_type='particle', units='code_mass', particle_type=True)
+        ds.add_field(('dustmass'), function=_dustmass_manual,  sampling_type='particle', units='code_mass', particle_type=True)
+                
+        #ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+        #if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses,  sampling_type='particle', units='code_mass', particle_type=True)
+
 
     if cfg.par.dust_grid_type == 'rr':
         ds.add_field(("dustmass"),function=_dustmass_rr, sampling_type='particle', units='code_mass',particle_type=True)

@@ -79,7 +79,8 @@ def dump_data(reg,model):
     particle_gas_mass = reg["gasmasses"]
     particle_star_mass = reg["starmasses"]
     particle_star_metallicity = reg["starmetals"]
-    particle_stellar_formation_time = reg["starformationtime"]
+    #particle_stellar_formation_time = reg["starformationtime"]
+    particle_stellar_formation_time = reg["stellarages"]
     particle_sfr = reg['gassfr'].in_units('Msun/yr')
     particle_dustmass = reg["dustmass"].in_units('Msun')
 
