@@ -130,7 +130,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
         
     def _dustmass_manual(field, data):
-        return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
+        if cfg.par.otf_extinction == True:
+            return (data.ds.arr(data[("PartType3", "Masses")].value, 'code_mass'))
+        else:
+            return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
 
     def _dustmass_dtm(field,data):
         return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
@@ -157,11 +160,20 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     def _dustsmoothedmasses(field, data):
         if yt.__version__ == '4.0.dev0':
-            dsm = ds.arr(data.ds.parameters['octree'][('PartType0','Dust_Masses')],'code_mass')
+            if cfg.par.otf_extinction == True:
+                dsm = ds.arr(data.ds.parameters['octree'][('PartType3','Masses')],'code_mass')
+            else:
+                dsm = ds.arr(data.ds.parameters['octree'][('PartType0','Dust_Masses')],'code_mass')
             #return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
-            return dsm
         else:
-            return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+            if cfg.par.otf_extinction == True:
+                dsm = (data.ds.arr(data[("deposit", "PartType3_sum_Masses")].value,'code_mass'))
+            else:
+                dsm = (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+
+
+        return dsm
+
 
 
     def _li_ml_dustsmoothedmasses(field,data):
@@ -273,9 +285,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     def _size_with_units(field,data):
         return data.ds.parameters['size']
-
-
-
+    
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         if  yt.__version__ == '4.0.dev0':
@@ -290,7 +300,13 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
             ds.index
             ad = ds.all_data()
-    
+        
+    #We're assuming that the particle type that the active dust is
+    #in in PartType3 and adding it to the sph types so that it can
+    #be deposited onto the octree
+    if cfg.par.otf_extinction: ds._sph_ptypes = ('PartType0','PartType3')
+
+
     #if we're in the 4.x branch of yt, load up the octree for smoothing
     if  yt.__version__ == '4.0.dev0':
         left = np.array([pos[0] for pos in bounding_box])
@@ -365,8 +381,16 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     if cfg.par.dust_grid_type == 'manual':
         #if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
         ds.add_field(('dustmass'), function=_dustmass_manual, sampling_type='particle',units='code_mass', particle_type=True)
-        ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+
+        if cfg.par.otf_extinction:
+            #we need to add this density field so that the masses can be projected onto the octree in _dustsmoothedmasses
+            ds.add_field(('PartType3','density'),function=_dust_density,units='code_mass/code_length**3',sampling_type='particle',particle_type=True)
+            ds.add_deposited_particle_field(("PartType3", "Masses"), "sum")
+        else:
+            ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+    
         if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, sampling_type='particle',units='code_mass', particle_type=True)
+            
     if cfg.par.dust_grid_type == 'rr':
         ds.add_field(("dustmass"),function=_dustmass_rr,sampling_type='particle',units='code_mass',particle_type=True)
     if cfg.par.dust_grid_type == 'li_bestfit':
@@ -444,7 +468,6 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     
     #OTF EXTINCTION
     if cfg.par.otf_extinction:
-        ds._sph_ptypes = ('PartType0','PartType3')
 
         if add_smoothed_quantities==True:
 
@@ -452,10 +475,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             print("[front_ends/gadget2pd:] Entering OTF Field Addition\n")
             print("==============================================\n")
         
-            #We're assuming that the particle type that the active dust is
-            #in in PartType3 and adding it to the sph types so that it can
-            #be deposited onto the octree
-            ds._sph_ptypes = ('PartType0','PartType3')
+
         
             #add the dust density field
             ds.add_field(('PartType3','density'),function=_dust_density,units='code_mass/code_length**3',sampling_type='particle',particle_type=True)
