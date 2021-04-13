@@ -66,7 +66,7 @@ def Qext_get(x,wlen,cfrac,xtab,Qtab):
 	wlen = np.log10(1. / wlen)
 	print(wlen)
 
-	# original tables
+ 	# original tables
 	Qabs_C,Qabs_Si,Qsca_C,Qsca_Si = Qtab[0],Qtab[1],Qtab[2],Qtab[3]
 
 	# extended in wlen
@@ -162,8 +162,6 @@ if __name__ == "__main__":
     t_Qext_V = Qext_get(x,np.array([0.551]),cfrac,xtab,Qtab)
     Aext, R, dumQext = extinction_law(x,dsf,wlen.value,cfrac,t_Qext,t_Qext_V)
         
-
-
     #nowbreak up the size distribution into bins and then
     #scale wiht the loaded up DSF to see if their co-added
     #extinction laws look reasonable or not.
@@ -212,7 +210,7 @@ if __name__ == "__main__":
         #compute the stuff!
         temp_Aext,albedo,temp_Qext = extinction_law(grain_sizes_this_bin,temp_dsf,wlen.value,cfrac,t_Qext,t_Qext_V)
         
-        #save the extinction laws to an array, just fo rtesting
+        #save the extinction laws to an array, just for testing
         Aext_array[:,i] = temp_Aext
         
         
@@ -221,17 +219,28 @@ if __name__ == "__main__":
 
         kappa_a_lambda = np.zeros(temp_Qext.shape)
         for i in range(kappa_a_lambda.shape[1]):
-            kappa_a_lambda[:,i] = 3.*temp_Qext[:,i]/(10.**(grain_sizes_this_bin)*u.micron.to(u.cm)*ASSUMED_DENSITY_OF_DUST)
-        kappa_lambda = np.sum(kappa_a_lambda,axis=0)
+            kappa_a_lambda[:,i] = 3.*temp_Qext[:,i]/(4.* ((10.**grain_sizes_this_bin)*u.micron).to(u.cm)*ASSUMED_DENSITY_OF_DUST)
+        #kappa_lambda = np.sum(kappa_a_lambda,axis=0)
 
-        #kappa = 3.*np.sum(temp_Qext,axis=0)/(4.*np.median( (10.**(grain_sizes_this_bin)*u.micron).to(u.cm)*ASSUMED_DENSITY_OF_DUST))
-        
+        #to go from kappa_a_lambda-->kappa_lambda, we need to
+        #integrate over a size distribution (as we want the
+        #distribution-weighted average over the size range we're
+        #modeling here).  this represents a minor inconsistency in
+        #these methods as it {\it a priori} assumes a size
+        #distribution.  we will assume MRN (dn/da = a^-3.5, so dn = a^-2.5)
+
+        dN = 1400.*(10.**grain_sizes_this_bin)**(-2.5)
+        kappa_lambda = np.absolute(np.trapz(kappa_a_lambda,dN,axis=0)/np.sum(dN))
+
+        lam_micron = (constants.c/nu).to(u.micron)
 
         #----------------------------------
         #create the HDF5 file for powderday
         #----------------------------------
+
+
         d = IsotropicDust(nu.value,albedo,kappa_lambda)
-        
+
         if not os.path.exists('dust_files/'):
             os.makedirs('dust_files/')
         filename = 'dust_files/binned_dust_sizes.'+str(counter)+'.hdf5'
@@ -256,13 +265,17 @@ if __name__ == "__main__":
 
 
 
-    
-    #PLOTTING JUST FOR TESTING
+    #----------------------------------
+    #Making some plots just for testing
+    #----------------------------------
     final_Aext = np.average(Aext_array,axis=1,weights=frac)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.loglog(1/wlen,final_Aext/np.max(final_Aext),label='coadded')
-    ax.loglog(1/wlen,Aext/np.max(Aext),label='original')
+    #ax.loglog(1/wlen,final_Aext/np.max(final_Aext),label='coadded')
+    #ax.loglog(1/wlen,Aext/np.max(Aext),label='original')
+    ax.loglog(wlen,final_Aext,label='coadded')
+    ax.loglog(wlen,Aext,label='original')
+
     plt.legend(loc=2)
 
     fig.savefig('extinction.png',dpi=300)
