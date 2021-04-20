@@ -176,54 +176,6 @@ def sph_m_gen(fname,field_add):
         active_dust_add(m,grid_of_sizes,nsizes,dustdens,specific_energy,refined)
         
 
-    '''
-    #TESTING BLOCK ONLY - MUCH OF THIS NEEDS TO BE REMOVED
-
-    #load the mapping between grain bin and filename
-    data = np.load(cfg.par.pd_source_dir+'active_dust/dust_files/binned_dust_sizes.npz')
-    grain_size_left_edge_array = data['grain_size_left_edge_array']
-    grain_size_right_edge_array  = data['grain_size_right_edge_array']
-    dust_filenames = data['outfile_filenames']
-
-
-    #how DNSF was set up.  not needed other than for testing
-    x=np.linspace(-4,0,41)
-    #load an example dust size function for testing against
-    dsf = np.loadtxt(cfg.par.pd_source_dir+'active_dust/mrn_dn.txt')#DNSF_example.txt')
-
-    nbins = len(grain_size_left_edge_array)
-    frac = np.empty(nbins)
-    for i in range(nbins):
-        idx = find_nearest(x,grain_size_left_edge_array[i])
-        
-        #this sets the fraction of each bin size we need (for the
-        #entire grid! this eventually needs to be cell by cell)
-        frac[i] = dsf[idx]
-
-    # Normalize to 1
-    total = np.sum(frac)
-    frac/=total
-
-    
-    for counter,file in enumerate(dust_filenames):
-        d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
-        m.add_density_grid(dustdens*frac[counter],d,specific_energy=specific_energy)
-
-
-    '''
-    
-
-
-
-
-
     m.set_specific_energy_type('additional')
-
-
-
-
-
-
-
 
     return m,xcent,ycent,zcent,dx,dy,dz,reg,ds,boost
