@@ -103,7 +103,7 @@ def arepo_m_gen(fname,field_add):
         except AssertionError:
             raise AssertionError("[arepo_tributary:] There are no dust grains in this simulation.  This can sometimes happen in an early snapshot of a simulation where the dust has not yet had time to form.")
         grid_of_sizes = reg['PartType0','NumGrains']
-        active_dust_add(m,grid_of_sizes,nsizes,dustdens,specific_energy)
+        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy)
 
 
     m.set_specific_energy_type('additional')
