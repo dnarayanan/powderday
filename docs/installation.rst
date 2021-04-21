@@ -210,7 +210,7 @@ especially section 3.4.2.
 yt-4.x configuration 
 --------------------
 
-`yt <http://yt-project.org>`_ has recently (June 22nd, 2010)
+`yt <http://yt-project.org>`_ has recently (June 22nd, 2020)
 transitioned from 3.x to 4.x. The latter offers a number of advantages
 including a demeshed handling of particle datasets, as well as an
 `arepo <https://www.h-its.org/2014/10/28/arepo/>`_ front end.  We are
@@ -218,29 +218,12 @@ happy to announce that as of December 31st, 2019 via hash
 `59315f311535b5f2309c705f5a71519148aa4f29
 <https://github.com/dnarayanan/powderday/commit/59315f311535b5f2309c705f5a71519148aa4f29>`_,
 `powderday <https://github.com/dnarayanan/powderday.git>`_ is now `yt
-<http://yt-project.org>`_ 4.x compliant.
+<http://yt-project.org>`_ 4.x compliant.   Note, all front ends except arepo should work with either  `yt 3.x <http://yt-project.org>`_ or  `yt 4.x <http://yt-project.org>`_ ; arepo requires the latter. 
 
-Unfortunately, there are currently there are some bugs in the mainline
-`yt <http://yt-project.org>`_ 4.x branch that are impacting how the
-octree is built for particle-like simulations.  These, however, are
-fixed in Ashley Kelly's fork (and will be merged into the main `yt
-<http://yt-project.org>`_ branch soon enough).  In the mean time, if
-you are eager to use `yt <http://yt-project.org>`_ 4.x for particle
-simulations, please see below.  
+Thanks to the hard work of Ashley Kelly, `yt <http://yt-project.org>`_
+4.x supports octrees for particle-based codes, as of commit `7431b4d5a72e75c6e6782f19a234869895deb650 <https://github.com/yt-project/yt/commit/7431b4d5a72e75c6e6782f19a234869895deb650>`_.  What this means is that installing the main line branch of `yt <http://yt-project.org>`_ as normal should work with `powderday <https://github.com/dnarayanan/powderday.git>`_.
 
-
-First, install the necessary dependencies::
-
-  >pip install numpy jupyter sphinx gitpython h5py matplotlib cython nose scipy astropy sympy mpi4py
-followed by actually installing  `yt <http://yt-project.org>`_ from the yt-4.0-new-octree branch of Ash Kelly's fork::
-  
-  >git clone https://github.com/AshKelly/yt.git
-  >cd yt
-  >git checkout yt-4.0-new-octree
-  >python setup.py install
-  >pip install -e .
-
-If we do this, this will overwrite the `yt <http://yt-project.org>`_ installation that ships with `Hyperion <http://www.hyperion-rt.org>`_, and you should be good to go (this is necessary to do in this order because `Hyperion <http://www.hyperion-rt.org>`_ ships with `yt 3.x <http://yt-project.org>`_ .  While a number of `powderday <https://github.com/dnarayanan/powderday.git>`_ front ends (i.e. gizmo; tipsy) should work just fine with `yt 3.x <http://yt-project.org>`_, arepo most definitley will not.  To check that everything worked, make sure the output of the following 
+Note, it is important to install this *after*  `Hyperion <http://www.hyperion-rt.org>`_.  This is because  `Hyperion <http://www.hyperion-rt.org>`_ ships with `yt <http://yt-project.org>`_ 3.x and it is therefore necessary to install `yt <http://yt-project.org>`_ 4.x subsequently in order to overwrite the `yt <http://yt-project.org>`_ installation that ships with `Hyperion <http://www.hyperion-rt.org>`_ .   To check that everything worked, make sure the output of the following 
 commands look something like this::
 
     > ipython
