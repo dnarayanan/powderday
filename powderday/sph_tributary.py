@@ -173,7 +173,7 @@ def sph_m_gen(fname,field_add):
         #define the grid of sizes that will be used in tributary_dust_add
         grid_of_sizes = reg.parameters["octree_of_sizes"]
         
-        active_dust_add(m,grid_of_sizes,nsizes,dustdens,specific_energy,refined)
+        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined)
         
 
     m.set_specific_energy_type('additional')

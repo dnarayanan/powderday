@@ -11,7 +11,11 @@ import pdb
 from powderday.helpers import find_nearest
 
 
-def active_dust_add(m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[False]):
+def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[False]):
+        #first, save the grid_of_sizes to the ds.paramteters so we can carry it around
+        ds.parameters['reg_grid_of_sizes'] = grid_of_sizes #named 'reg_grid_of_sizes' 
+
+
         #for empty cells, use the median size distribution
         for isize in range(nsizes):
                 wzero = np.where(grid_of_sizes[:,isize] == 0)[0]
