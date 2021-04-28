@@ -3,20 +3,23 @@ from powderday.pah.pah_file_read import read_draine_file
 from powderday.helpers import find_nearest
 from astropy import units as u
 import pdb
+from tqdm import tqdm
 
 #to do:
 
-#1. speed up the convolution with grain size distribution
+#1. speed up the convolution with grain size distribution -- currently
+#takes ~2 hours per galaxy. Assume the slow part is the np.dot product.
 
-#2. test with a different filename to see if the resolution of the PAH spectra in the MIR changes
-
-#3. think about how to handle the thermal re-radiation in the FIR so
+#2. think about how to handle the thermal re-radiation in the FIR so
 #that it is self consistent with absorption and re-radiation of the
 #metagalactic field via hyperion.
 
-#4. put in the radiation fields and appropriate filename per cell
+#3. put in the radiation fields and appropriate filename per cell
 
-filename = '/home/desika.narayanan/PAHs/vsg_stat_therm.iout'
+#4. put in the ionization fraction and appropriate file name per cell.
+
+filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/iout_graD16emtPAHib_mmpisrf_1.00'
+#filename = '/home/desika.narayanan/PAHs/vsg_stat_therm.iout'
 
 def pah_source_add(ds,reg,m):
 
@@ -50,15 +53,35 @@ def pah_source_add(ds,reg,m):
         #become the left point.
         Draine_simulation_idx_left_edge_array.append(idx0)
 
-    
-    for i_cell in range(ncells):
+
+    size_arange = np.arange(len(simulation_sizes))
+
+    for i_cell in tqdm(range(ncells)):
         
         #-----------------------------
-        #THIS IS WHERE WE WILL NEED TO EVENTUALLY GET RID IF *FILENAME* UP TOP, AND DECIDE WHAT RADIATION FIELD WE'RE USING FOR THIS PARTICULAR CELL
+        #THIS IS WHERE WE WILL NEED TO EVENTUALLY GET RID OF *FILENAME* UP TOP, AND DECIDE WHAT RADIATION FIELD WE'RE USING FOR THIS PARTICULAR CELL
         #-----------------------------
         
         
-        for i_size in range(len(simulation_sizes)):
+        #in principle this doesn't need to be done inside the loop for
+        #a constant radiation field. However, for a radiation field
+        #that varies cell by cell, then PAH_list will change as we
+        #have different files that we read in, so we may as well keep it here for now.
+
+        pah_grid = np.array([x.lum for x in PAH_list])
+        idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
+        
+        #set the PAH luminosity of the cell to be the dot product of
+        #the Draine luminosities (i.e., pah_grid[idx,:] which has
+        #dimensions (simulation_sizes,wavelengths)) with the actual
+        #grain size distribution in that cell (i.e.,
+        #grid_of_sizes[i_cell,:]). note, we take the transpose of
+        #grid_of_sizes to get the dimensions to match up correctly for the dot product
+
+        grid_PAH_luminosity[i_cell,:] = np.dot(pah_grid[idx,:].T,grid_of_sizes[i_cell,:].T)
+
+        
+        #for i_size in range(len(simulation_sizes)):
 
             #while it would be optimal to interpolate, this is a very
             #slow process for every grain size and every wavelength.
@@ -67,28 +90,28 @@ def pah_source_add(ds,reg,m):
             #it's easiest to just assign it to the nearest index
             #value.              
 
-            idx0 = Draine_simulation_idx_left_edge_array[i_size]
+         #   idx0 = Draine_simulation_idx_left_edge_array[i_size]
 
 
-            grid_PAH_luminosity[i_cell,:] += PAH_list[idx0].lum * grid_of_sizes[i_cell,i_size]
+          #  grid_PAH_luminosity[i_cell,:] += PAH_list[idx0].lum * grid_of_sizes[i_cell,i_size]
 
-            total_PAH_luminosity += PAH_list[idx0].lum * grid_of_sizes[i_cell,i_size]
+           # total_PAH_luminosity += PAH_list[idx0].lum * grid_of_sizes[i_cell,i_size]
         
             
             
-    pdb.set_trace()
+           
 
-
+    total_PAH_luminosity =np.sum(grid_PAH_luminosity,axis=0)
 
     import matplotlib.pyplot as plt
     fig = plt.figure()
     ax = fig.add_subplot(111)
     ax.loglog(PAH_list[0].lam,total_PAH_luminosity[:]/PAH_list[0].lam)
-    ax.set_ylim([1e38,1e43])
+    ax.set_ylim([1e31,1e45])
     ax.set_xlim([1,1000])
     ax.set_xlabel(r'$\lambda (\mu $m)')
-    ax.set_ylabel(r'$L_\lambda$ (erg/s/micron)')
-    fig.savefig('/home/desika.narayanan/junk2.png',dpi=300)
+    ax.set_ylabel(r'$L_\lambda$ (erg/s/$\mu$m)')
+    fig.savefig('/home/desika.narayanan/PAH_sed.png',dpi=300)
     
     pdb.set_trace()
         
