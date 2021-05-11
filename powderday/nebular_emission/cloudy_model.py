@@ -132,6 +132,12 @@ def write_cloudy_input(**kwargs):
             abund_metal[1] += cfg.par.PAGB_C_enhancement
             abund_metal[2] += cfg.par.PAGB_N_enhancement
 
+        #if True: # Adding N/O pilyugin relation
+        #    if 12 + abund_metal[3] < 8.14:
+        #        abund_metal[2] = -1.493 + abund_metal[3]
+        #   else:
+        #        abund_metal[2] =  1.489*(12 + abund_metal[3]) - 13.613 + abund_metal[3]
+       
         if cfg.par.FORCE_N_O_ratio[_id]:
             abund_metal[2] = cfg.par.N_O_ratio[_id] + abund_metal[3]
 

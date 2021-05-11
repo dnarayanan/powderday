@@ -28,6 +28,7 @@ gc.set_threshold(0)
 
 # Lazily initialize FSPS
 sp = None
+reg_gl = None
 
 class Stars:
     def __init__(self,mass,metals,positions,age,sed_bin=[-1,-1,-1],lum=-1,fsps_zmet=20,all_metals=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
@@ -44,6 +45,10 @@ class Stars:
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
 
 def star_list_gen(boost,dx,dy,dz,reg,ds):
+    global reg_gl
+    if reg_gl is None:
+        reg_gl = reg
+
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
     mass = reg["starmasses"].value
     positions = reg["starcoordinates"].value
@@ -422,7 +427,7 @@ def newstars_gen(stars_list):
         f = spec_noneb[1]
 
         pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= stars_list[i].age <= cfg.par.PAGB_max_age
-        young_star = cfg.par.add_young_stars and stars_list[i].age <= cfg.par.HII_max_age
+        young_star = cfg.par.add_young_stars and cfg.par.HII_min_age <= stars_list[i].age <= cfg.par.HII_max_age
 
         if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (young_star or pagb):
 
@@ -459,7 +464,35 @@ def newstars_gen(stars_list):
                         nh = cfg.par.PAGB_nh    
                         escape_fraction  = cfg.par.PAGB_escape_fraction
 
-                    spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+                    if cfg.par.HII_alpha_enhance: #Setting Zstar based on Fe/H 
+                        Fe = stars_list[i].all_metals[-1]
+                        FeH = (Fe/0.7314)*(1.008/55.845)
+                        FeH_sol = 3.22580645e-5
+                        Logzsol = np.log10(FeH/FeH_sol)
+                        
+                        sp1 = fsps.StellarPopulation(zcontinuous=1)
+                        sp1.params["tage"] = stars_list[i].age
+                        sp1.params["imf_type"] = cfg.par.imf_type
+                        sp1.params["imf1"] = cfg.par.imf1
+                        sp1.params["imf2"] = cfg.par.imf2
+                        sp1.params["imf3"] = cfg.par.imf3
+                        sp1.params["pagb"] = cfg.par.pagb
+                        sp1.params["sfh"] = 0
+                        sp1.params["zmet"] = stars_list[i].fsps_zmet
+                        sp1.params["add_neb_emission"] = False
+                        sp1.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+                        sp1.params["logzsol"] = Logzsol
+
+                        if cfg.par.CF_on == True:
+                            sp1.params["dust_type"] = 0
+                            sp1.params["dust1"] = 1
+                            sp1.params["dust2"] = 0
+                            sp1.params["dust_tesc"] = tesc_age
+
+                        spec = sp1.get_spectrum(tage=stars_list[i].age)
+
+                    else:
+                        spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
 
                     alpha = 2.5e-13 # Recombination Rate (assuming T = 10^4 K)
 
@@ -475,7 +508,7 @@ def newstars_gen(stars_list):
 
                     else:
                         LogQ = calc_LogQ(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value
-                                , efrac=escape_fraction, mstar=10**cluster_mass[j])        
+                                , efrac=escape_fraction, mstar=10**cluster_mass[j])   
                         Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
                         LogU = np.log10((10**LogQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
                         LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*nh))
@@ -486,19 +519,24 @@ def newstars_gen(stars_list):
 
                     else:
                         Rin = Rinner_per_Rs*Rs
-               
-                    
+
                     if cfg.par.FORCE_gas_logz[id_val]:
                         LogZ = cfg.par.gas_logz[id_val]
                     
                     else:
-                        LogZ = np.log10(stars_list[i].metals/cfg.par.solar)
-                    
-                    
+                        LogZ = np.log10(metals[0]/cfg.par.solar)
+
+
                     if neb_file_output:
                         if cfg.par.use_cloudy_tables:
                             Rin = 1.e19   # Rinner is fixed at 1.e19 cm for lookup tables
-                        logu_diagnostic(LogQ, LogU, LogZ, Rin, 10**cluster_mass[j], num_HII_clusters, stars_list[i].age, append=True)
+                        
+                        if cfg.par.FORCE_inner_radius[id_val]:
+                            Rin = cfg.par.inner_radius[id_val]
+                        
+                        LogU = np.log10((10**LogQ)/(4*np.pi*Rin*Rin*nh*constants.c.cgs.value))
+
+                        logu_diagnostic(LogQ, LogU, LogZ, Rs, 10**cluster_mass[j], num_HII_clusters, stars_list[i].age, append=True)
                         neb_file_output = False
 
                     sp.params['gas_logu'] = LogU
@@ -512,7 +550,8 @@ def newstars_gen(stars_list):
                         try:
                             # Calculating ionizing photons again but for 1 Msun in order to scale the output for FSPS
                             LogQ_1 = calc_LogQ(1.e8 * constants.c.cgs.value / spec[0], spec[1] * constants.L_sun.cgs.value,
-                                    efrac=escape_fraction)
+                                    efrac=escape_fraction) 
+                            #LogQ_1 = LogQ_1 + cfg.par.gas_logu_init[id_val]
                                
                             spec_neb, wave_line, line_lum = get_nebular(spec[0], spec[1], nh, LogQ, Rin, LogU, LogZ, LogQ_1, stars_list[i].all_metals, 
                                                     Dust=False, abund=cfg.par.neb_abund[id_val], clean_up = cfg.par.cloudy_cleanup, index=id_val)
@@ -525,7 +564,7 @@ def newstars_gen(stars_list):
                                 line_lum = sp.emline_luminosity
                                 wave_line = sp.emline_wavelengths
                             else:
-                                print ("ERROR: Can't switch to using lookup tables. ")
+                                print ("ERROR: Can't switch to using lookup tables.")
                                 print ("ERROR: Please check the CLOUDY output file to figure out why the run was unsuccessful" )
                                 raise ValueError('CLOUDY run was unsucessful')
                 
@@ -549,9 +588,10 @@ def newstars_gen(stars_list):
     return stellar_fnu
 
 
-def get_gas_metals(ngas, reg):
+def get_gas_metals(ngas):
     # This function outputs the metallicity (total as well as all the 10 elements tracked by the simulation)
     # for all the gas particles
+    reg = reg_gl
     el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
     metals = np.zeros((ngas,11))-10.0
     try:
@@ -567,17 +607,33 @@ def get_gas_metals(ngas, reg):
     return metals
 
 
-def get_agn_seds(reg, agn_ids):
+def get_nearest_gas_metals(all_gas_coordinates, particle_coordinates):
+
+    all_gas_metals = get_gas_metals(len(all_gas_coordinates))
+    # Getting N nearest gas particles to the AGN where N is defined by cfg.par.AGN_num_gas
+    nearest_gas_dist, nearest_gas_id = get_nearest(all_gas_coordinates, particle_coordinates, num=cfg.par.AGN_num_gas)
+    metals_avg = []
+    # We take the distance weighted avearge of the metallicity of nearest N gas particles.
+    # This is used as input to the CLOUDY model.
+    for q in range(11):
+        nearest_gas_metals = np.array(all_gas_metals[:,q][nearest_gas_id])
+        metals_avg.append(np.sum(nearest_gas_metals*nearest_gas_dist)/np.sum(nearest_gas_dist))
+
+    return metals_avg
+                                                                                                                
+
+def get_agn_seds(agn_ids):
   
     print ('Starting AGN SED generation')
     
     t1 = datetime.now()
-    fnu = []
-    for agn_id in agn_ids:
-        f_nu = agn_sed(reg, int(agn_id))
-        fnu.append(f_nu)
-
-    fnu = np.atleast_2d(fnu)    
+    nprocesses = np.min([cfg.par.n_processes,len(agn_ids)])
+    p = Pool(processes = nprocesses)
+    fnu = p.map(agn_sed, agn_ids)
+    fnu = np.atleast_2d(fnu)
+    p.close()
+    p.terminate()
+    p.join()
     t2 = datetime.now()
 
     print ('Execution time for AGN SED generation = '+str(t2-t1))
@@ -585,8 +641,9 @@ def get_agn_seds(reg, agn_ids):
     return fnu
 
 
-def agn_sed(reg, agn_id):
-
+def agn_sed(agn_id):
+    agn_id = int(agn_id)
+    reg = reg_gl
     nu = reg["bhnu"].in_units("Hz").value
     fnu = reg["bhsed"][agn_id,:].in_units("Lsun").value/nu
 
@@ -600,20 +657,11 @@ def agn_sed(reg, agn_id):
         
         id_val = 2
 
-        all_gas_coordinates = reg["gascoordinates"].in_units('kpc')
-        agn_coordinates = reg["bhcoordinates"][agn_id].in_units('kpc')
-
-        all_gas_metals = get_gas_metals(len(all_gas_coordinates), reg)
-        # Getting N nearest gas particles to the AGN where N is defined by cfg.par.AGN_num_gas
-        nearest_gas_dist, nearest_gas_id = get_nearest(all_gas_coordinates, agn_coordinates, num=cfg.par.AGN_num_gas)
-        metals_avg = []
-
-        # We take the distance weighted avearge of the metallicity of nearest N gas particles.
-        # This is used as input to the CLOUDY model.
-        for q in range(11):
-            nearest_gas_metals = np.array(all_gas_metals[:,q][nearest_gas_id])
-            metals_avg.append(np.sum(nearest_gas_metals*nearest_gas_dist)/np.sum(nearest_gas_dist))
+        all_gas_coordinates = reg["gascoordinates"].in_units('kpc').value
+        agn_coordinates = reg["bhcoordinates"][agn_id].in_units('kpc').value
         
+        metals_avg = get_nearest_gas_metals(all_gas_coordinates, agn_coordinates)
+                
         tot_metals = metals_avg[0]
         metals = metals_avg
 
@@ -621,7 +669,7 @@ def agn_sed(reg, agn_id):
             LogZ = gas_logz[id_val]
         
         else:
-            LogZ = tot_metals
+            LogZ = tot_metals/cfg.par.solar
 
         Rin = cfg.par.inner_radius[id_val]
 
@@ -638,6 +686,7 @@ def agn_sed(reg, agn_id):
             LogU = np.log10((10**LogQ)/(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
             LogQ = np.log10((10**LogU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
 
+        
         spec, wave_line, line_lum = get_nebular(1.e8 * constants.c.cgs.value / nu, fnu, cfg.par.AGN_nh, LogQ, Rin, LogU, LogZ, LogQ, metals,
                                         Dust=False, abund=cfg.par.neb_abund[id_val],clean_up = cfg.par.cloudy_cleanup, index=id_val)
 
@@ -651,7 +700,6 @@ def agn_sed(reg, agn_id):
         spec = fnu
 
     return spec
-
 
 
 def fsps_metallicity_interpolate(metals):
