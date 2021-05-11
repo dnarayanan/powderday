@@ -168,4 +168,5 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
 
         #finally, save the grid_of_sizes and grain sizes to the ds.paramteters so we can carry it around
         ds.parameters['reg_grid_of_sizes'] = grid_of_sizes #named 'reg_grid_of_sizes'
-        ds.parameters['grain_sizes_in_micron '] = 10.**(x)
+        ds.parameters['grain_sizes_in_micron'] = 10.**(x)
+

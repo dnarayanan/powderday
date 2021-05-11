@@ -56,7 +56,26 @@ def pah_source_add(ds,reg,m):
 
     size_arange = np.arange(len(simulation_sizes))
 
-    for i_cell in tqdm(range(ncells)):
+    #in principle, PAH_list will change cell by cell as the radiation
+    #field changes cell by cell.  then, this should all go inside the
+    #coming up commented loop.  however, this takes forever...like 2
+    #hours vs a few sec.  for testing, for now, this is going to
+    #remain out of the loop.
+
+
+    pah_grid = np.array([x.lum for x in PAH_list])
+    idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
+
+    #set the PAH luminosity of the cell to be the dot product of
+    #the Draine luminosities (i.e., pah_grid[idx,:] which has
+    #dimensions (simulation_sizes,wavelengths)) with the actual
+    #grain size distribution in that cell (i.e.,
+    #grid_of_sizes[i_cell,:]). note, we take the transpose of
+    #grid_of_sizes to get the dimensions to match up correctly for the dot product
+
+    grid_PAH_luminosity = np.dot(pah_grid[idx,:].T, grid_of_sizes.T).T
+
+#    for i_cell in tqdm(range(ncells)):
         
         #-----------------------------
         #THIS IS WHERE WE WILL NEED TO EVENTUALLY GET RID OF *FILENAME* UP TOP, AND DECIDE WHAT RADIATION FIELD WE'RE USING FOR THIS PARTICULAR CELL
@@ -68,8 +87,8 @@ def pah_source_add(ds,reg,m):
         #that varies cell by cell, then PAH_list will change as we
         #have different files that we read in, so we may as well keep it here for now.
 
-        pah_grid = np.array([x.lum for x in PAH_list])
-        idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
+ #       pah_grid = np.array([x.lum for x in PAH_list])
+ #       idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
         
         #set the PAH luminosity of the cell to be the dot product of
         #the Draine luminosities (i.e., pah_grid[idx,:] which has
@@ -78,40 +97,22 @@ def pah_source_add(ds,reg,m):
         #grid_of_sizes[i_cell,:]). note, we take the transpose of
         #grid_of_sizes to get the dimensions to match up correctly for the dot product
 
-        grid_PAH_luminosity[i_cell,:] = np.dot(pah_grid[idx,:].T,grid_of_sizes[i_cell,:].T)
+  
+  #      grid_PAH_luminosity[i_cell,:] = np.dot(pah_grid[idx,:].T,grid_of_sizes[i_cell,:].T)
 
-        
-        #for i_size in range(len(simulation_sizes)):
-
-            #while it would be optimal to interpolate, this is a very
-            #slow process for every grain size and every wavelength.
-            #Given that the Draine sizes are significantly oversampled
-            #compared to the typical grain size array of a hydro sim,
-            #it's easiest to just assign it to the nearest index
-            #value.              
-
-         #   idx0 = Draine_simulation_idx_left_edge_array[i_size]
-
-
-          #  grid_PAH_luminosity[i_cell,:] += PAH_list[idx0].lum * grid_of_sizes[i_cell,i_size]
-
-           # total_PAH_luminosity += PAH_list[idx0].lum * grid_of_sizes[i_cell,i_size]
-        
-            
-            
-           
-
+  
     total_PAH_luminosity =np.sum(grid_PAH_luminosity,axis=0)
 
-    import matplotlib.pyplot as plt
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.loglog(PAH_list[0].lam,total_PAH_luminosity[:]/PAH_list[0].lam)
-    ax.set_ylim([1e31,1e45])
-    ax.set_xlim([1,1000])
-    ax.set_xlabel(r'$\lambda (\mu $m)')
-    ax.set_ylabel(r'$L_\lambda$ (erg/s/$\mu$m)')
-    fig.savefig('/home/desika.narayanan/PAH_sed.png',dpi=300)
+    #import matplotlib.pyplot as plt
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111)
+    #ax.loglog(PAH_list[0].lam,total_PAH_luminosity[:]/PAH_list[0].lam)
+    #ax.set_ylim([1e31,1e45])
+    #ax.set_xlim([1,1000])
+    #ax.set_xlabel(r'$\lambda (\mu $m)')
+    #ax.set_ylabel(r'$L_\lambda$ (erg/s/$\mu$m)')
+    #fig.savefig('/home/desika.narayanan/PAH_sed.png',dpi=300)
     
-    pdb.set_trace()
+
+
         
