@@ -1,7 +1,7 @@
 #snapshot parameters
 
 snapnum_str = '143'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_files/smuggle/low_res/'
+hydro_dir = '/blue/narayanan/desika.narayanan/powderday_files/smuggle/low_res/'
 
 snapshot_name = 'smuggle_snapshot_143.low_res.hdf5'
 

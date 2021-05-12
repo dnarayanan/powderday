@@ -74,7 +74,7 @@ m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 from powderday.pah.pah_source_create import pah_source_add
-pah_source_add(ds,reg,m)
+if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m)
 
 sp = fsps.StellarPopulation()
 

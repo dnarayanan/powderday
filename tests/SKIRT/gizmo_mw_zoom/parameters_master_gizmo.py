@@ -49,6 +49,23 @@ SUBLIMATION = True  # do we automatically kill dust grains above the
                     # mode 
 SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 
+#---------------------------------------------------------------
+#Experimental Dust -- Note, these features are not fully vetted
+#---------------------------------------------------------------
+
+otf_extinction = True #flag for on the fly extinction.  If set, then we
+                                    #ignore the dustdir/dustfile extinction information above. if
+                                    #false, all otf_extinction* quantities are meaningless
+otf_extinction_log_min_size = -3 #micron; must match what is set in the hydro simulation
+otf_extinction_log_max_size = 0 #micron; must match what is set in the hydro simulation
+
+draine21_pah_model = True
+draine21_pah_grid_write = True #this will write the PAH spectrum out
+                               #to the npz file for every cell in the
+                               #grid.  note, this causes the grid*.npz
+                               #files to be ~10 GB or more.
+
+
 #===============================================
 #STELLAR SEDS INFO
 #===============================================

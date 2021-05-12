@@ -2,6 +2,7 @@ import numpy as np
 from powderday.pah.pah_file_read import read_draine_file
 from powderday.helpers import find_nearest
 from astropy import units as u
+import powderday.config as cfg
 import pdb
 from tqdm import tqdm
 
@@ -75,8 +76,12 @@ def pah_source_add(ds,reg,m):
 
     grid_PAH_luminosity = np.dot(pah_grid[idx,:].T, grid_of_sizes.T).T
     reg.parameters = {}
-    reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
-    reg.parameters['PAH_lam'] = draine_lam
+
+    if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
+        reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
+        reg.parameters['PAH_lam'] = draine_lam
+
+
 
 #    for i_cell in tqdm(range(ncells)):
         
