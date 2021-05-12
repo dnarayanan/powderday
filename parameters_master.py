@@ -139,7 +139,10 @@ FORCE_inner_radius = [False, False, True]   # If set, then we force the inner ra
 inner_radius = [1.e19, 1.e19, 2.777e+20]   	# This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
                             		    	# use_cloudy_tables = False and FORCE_inner_radius = True (Default: [1.e19, 1.e19, 2.777e+20], Units = cm)
 
-FORCE_N_O_ratio = [False, False, False]     # If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
+FORCE_N_O_Pilyugin = [False, False, False]  # If set to True, Nitrogen abundances are set according to the N/O vs O/H relation form Pilyugin et al. 2012
+                                            # If FORCE_N_O ratio (next parameter) is set to True then this parameter is ignored.(Default: [False,False,False])
+
+FORCE_N_O_ratio = [False, False, False]     # If set, then we force the Nitrogen abundance such that the log of N/O ratio is N_O_ratio (next parameter). 
                             			    # This can be used as a template fix adundance ratio of other elements (Default:  [False, False, False])
 
 N_O_ratio = [-0.85, -0.85, -0.85]           # This sets the log of N/O ratio. This is used only when add_neb_emission = True,
@@ -152,7 +155,7 @@ use_Q = [True, True, True]                	# If True, we run CLOUDY by specifyin
 
 neb_abund = ["dopita", "dopita", "dopita"]  # This sets the HII region elemental abundances for generating CLOUDY models. 
                             			    # Available abundaces are.
-                            			    #    dopita:    Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
+                            			    #    dopita:    Abundances from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
                             			    #    newdopita: Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
                             			    #               includes smooth polynomial for N/O, C/O relationship functional form for He(z),
                             			    #               new depletion and factors in ISM grains.
@@ -166,7 +169,7 @@ neb_abund = ["dopita", "dopita", "dopita"]  # This sets the HII region elemental
 # YOUNG STARS (HII regions)
 #***************************
 
-add_young_stars = True     			    # If set, the young stars are included when calculating nebular emission (Default: True)
+add_young_stars = True     			        # If set, the young stars are included when calculating nebular emission (Default: True)
 
 
 HII_Rinner_per_Rs = 0.01        		    # Rinner for cloudy calculations is set to this value times the Stromgen Radius. 
@@ -178,12 +181,18 @@ HII_Rinner_per_Rs = 0.01        		    # Rinner for cloudy calculations is set to
 HII_nh = 1.e2               			    # Gas hydrogen density for calcualting nebular emission in units if cm^-3. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e2)
 
+HII_min_age = 1.e-3                         # Sets the minimum age limit for calculating nebular emission in units of Gyr. 
+                                            # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e-3)
+
 HII_max_age = 1.e-2         			    # Sets the maximum age limit for calculating nebular emission in units of Gyr. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e-2)
 
 HII_escape_fraction = 0.0   			    # Fraction of H-ionizaing photons that escape the HII region. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 0.0)
 
+HII_alpha_enhacement = False                # If set to True then the metallicity of star particles to [Fe/H] rather than the total metallicity. 
+                                            # Since FSPS does not support non solar abundance ratios. This parameter can be used to mimic the 
+                                            # hardnening to radiaiton field due to alpha-enhancement. (Default: False)
 
 #****************
 # Post-AGB STARS

@@ -348,6 +348,11 @@ NOTE: These parmeters take three values as an input. They correspond to the valu
     This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
     use_cloudy_tables = True and FORCE_inner_radius = True (Default: [1.e19,1.e19,2.777e+20])
 
+:FORCE_N_O_Pilyugin:
+    If set, then the Nitrogen abundances are set according to the N/O vs O/H relation form Pilyugin et al. 2012
+    If FORCE_N_O ratio (next parameter) is set to True then this parameter is ignored. (Default: [False,False,False])
+
+    
 :FORCE_N_O_ratio: 
     
     If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
@@ -400,6 +405,10 @@ Young Stars
    
     Gas hydrogen density for calcualting nebular emission in units if cm^-3. (Default = 1.e2)
 
+:HII_min_age:
+
+    Sets the minimum age limit for calculating nebular emission in units of Gyr. (Default = 1.e-3)
+
 :HII_max_age:
    
     Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 1.e-2)
@@ -408,6 +417,11 @@ Young Stars
     
     HII region escape fraction (Default = 0.0)
 
+:HII_alpha_enhacement:               
+    
+    If set, then the metallicity of star particles to [Fe/H] rather than the total metallicity. 
+    Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
+    hardnening to radiaiton field due to alpha-enhancement. (Default: False)
 
 Post-AGB stars
 ~~~~~~~~~~~~~~~~~~~~~~
