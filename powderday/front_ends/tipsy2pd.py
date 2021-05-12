@@ -5,7 +5,7 @@ from yt.config import ytcfg
 from yt.data_objects.particle_filters import add_particle_filter
 from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
-ytcfg["yt","skip_dataset_cache"] = "True"
+#ytcfg["yt","skip_dataset_cache"] = "True"
 
 
 def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=True):

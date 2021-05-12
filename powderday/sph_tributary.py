@@ -1,3 +1,7 @@
+#where we're leaving off: make the normal part of the code that does
+#not assume MRN for the fractional distribution of grain sizes match
+#the mrn part (i.e, put in the frac_grid stuff etc.)
+
 from __future__ import print_function
 import numpy as np
 import yt
@@ -16,8 +20,15 @@ from hyperion.dust import SphericalDust
 
 from powderday.helpers import energy_density_absorbed_by_CMB
 from powderday.analytics import dump_cell_info
+from powderday.tributary_dust_add import active_dust_add
 
 
+#only comes to be necessary if cfg.par.otf_extinction is set
+def _dust_density(field,data):
+    return data.ds.arr(data[('PartType3','Dust_Density')],'code_mass/code_length**3')
+
+def _size_with_units(field,data):
+    return data.ds.parameters['size']
 
 def sph_m_gen(fname,field_add):
     
@@ -58,6 +69,8 @@ def sph_m_gen(fname,field_add):
     print ('[sph_tributary] zmax (pc)= ',np.max(zmax.to('pc')))
     #Tom Robitaille's conversion from z-first ordering (yt's default) to
     #x-first ordering (the script should work both ways)
+
+
 
     refined_array = np.array(refined)
     refined_array = np.squeeze(refined_array)
@@ -109,35 +122,60 @@ def sph_m_gen(fname,field_add):
     energy_density_absorbed=energy_density_absorbed_by_CMB()
     specific_energy = np.repeat(energy_density_absorbed.value,dustdens.shape)
 
-    if cfg.par.PAH == True:
+
+    if cfg.par.otf_extinction == False:
         
-        # load PAH fractions for usg, vsg, and big (grain sizes)
-        frac = cfg.par.PAH_frac
+        if cfg.par.PAH == True:
 
-        # Normalize to 1
-        total = np.sum(list(frac.values()))
-        frac = {k: v / total for k, v in frac.items()}
+            # load PAH fractions for usg, vsg, and big (grain sizes)
+            frac = cfg.par.PAH_frac
+            
+            # Normalize to 1
+            total = np.sum(list(frac.values()))
+            frac = {k: v / total for k, v in frac.items()}
 
-        for size in frac.keys():
-            d = SphericalDust(cfg.par.dustdir+'%s.hdf5'%size)
+            for size in frac.keys():
+                d = SphericalDust(cfg.par.dustdir+'%s.hdf5'%size)
+                if cfg.par.SUBLIMATION == True:
+                    d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
+                #m.add_density_grid(dustdens * frac[size], cfg.par.dustdir+'%s.hdf5' % size)
+                m.add_density_grid(dustdens*frac[size],d,specific_energy=specific_energy)
+            m.set_enforce_energy_range(cfg.par.enforce_energy_range)
+        else:
+            d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
             if cfg.par.SUBLIMATION == True:
                 d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
-            #m.add_density_grid(dustdens * frac[size], cfg.par.dustdir+'%s.hdf5' % size)
-            m.add_density_grid(dustdens*frac[size],d,specific_energy=specific_energy)
-        m.set_enforce_energy_range(cfg.par.enforce_energy_range)
-    else:
-        d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
-        if cfg.par.SUBLIMATION == True:
-            d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
-        m.add_density_grid(dustdens,d,specific_energy=specific_energy)
+            m.add_density_grid(dustdens,d,specific_energy=specific_energy)
         #m.add_density_grid(dustdens,cfg.par.dustdir+cfg.par.dustfile)  
+
+
+    else: #instead of using a constant extinction law across the
+          #entire galaxy, we'll compute it on a cell-by-cell basis by
+          #using information about the grain size distribution from
+          #the simulation itself.
+
+
+        print("==============================================\n")
+        print("Entering OTF Extinction Calculation\n")
+        print("Note: For very high-resolution grids, this may cause memory issues due to adding ncells dust grids")
+        print("==============================================\n")
+        
+        ad = ds.all_data()
+        nsizes = ad['PartType3','Dust_Size'].shape[1]
+        ncells = reg.parameters["octree_of_sizes"].shape[0]
+        #ensure that the grid has particles
+        for isize in range(nsizes):
+            try:
+                assert (np.sum(reg.parameters["octree_of_sizes"][:,isize]) > 0)
+            except AssertionError:
+                raise AssertionError("[sph_tributary:] The grain size distribution smoothed onto the octree has deposited no particles.  Try either increasing your box size, or decreasing n_ref in parameters_master.  Alternatively, run the simulation with otf_extinction=False")
+
+        #define the grid of sizes that will be used in tributary_dust_add
+        grid_of_sizes = reg.parameters["octree_of_sizes"]
+        
+        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined)
+        
+
     m.set_specific_energy_type('additional')
-
-
-
-
-
-
-
 
     return m,xcent,ycent,zcent,dx,dy,dz,reg,ds,boost

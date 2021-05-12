@@ -130,7 +130,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
         
     def _dustmass_manual(field, data):
-        return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
+        if cfg.par.otf_extinction == True:
+            return (data.ds.arr(data[("PartType3", "Masses")].value, 'code_mass'))
+        else:
+            return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
 
     def _dustmass_dtm(field,data):
         return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
@@ -157,10 +160,20 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     def _dustsmoothedmasses(field, data):
         if yt.__version__ == '4.0.dev0':
-            return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
-
+            if cfg.par.otf_extinction == True:
+                dsm = ds.arr(data.ds.parameters['octree'][('PartType3','Masses')],'code_mass')
+            else:
+                dsm = ds.arr(data.ds.parameters['octree'][('PartType0','Dust_Masses')],'code_mass')
+            #return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
         else:
-            return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+            if cfg.par.otf_extinction == True:
+                dsm = (data.ds.arr(data[("deposit", "PartType3_sum_Masses")].value,'code_mass'))
+            else:
+                dsm = (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+
+
+        return dsm
+
 
 
     def _li_ml_dustsmoothedmasses(field,data):
@@ -265,17 +278,35 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         bh_sed = yt.YTArray(bh_sed, "erg/s")
         return bh_sed
 
+
+    #functions used for OTF_Extinction
+    def _dust_density(field,data):
+        return data.ds.arr(data[('PartType3','Dust_Density')],'code_mass/code_length**3')
+
+    def _size_with_units(field,data):
+        return data.ds.parameters['size']
+    
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         if  yt.__version__ == '4.0.dev0':
             ds = yt.load(fname)
+            
+            #ds.sph_smoothing_style = "gather"
             ds.index
             ad = ds.all_data()
+
+
         else:
             ds = yt.load(fname,bounding_box=bounding_box,over_refine_factor=cfg.par.oref,n_ref=cfg.par.n_ref)
             ds.index
             ad = ds.all_data()
-    
+        
+    #We're assuming that the particle type that the active dust is
+    #in in PartType3 and adding it to the sph types so that it can
+    #be deposited onto the octree
+    if cfg.par.otf_extinction: ds._sph_ptypes = ('PartType0','PartType3')
+
+
     #if we're in the 4.x branch of yt, load up the octree for smoothing
     if  yt.__version__ == '4.0.dev0':
         left = np.array([pos[0] for pos in bounding_box])
@@ -350,8 +381,16 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     if cfg.par.dust_grid_type == 'manual':
         #if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
         ds.add_field(('dustmass'), function=_dustmass_manual, sampling_type='particle',units='code_mass', particle_type=True)
-        ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+
+        if cfg.par.otf_extinction:
+            #we need to add this density field so that the masses can be projected onto the octree in _dustsmoothedmasses
+            ds.add_field(('PartType3','density'),function=_dust_density,units='code_mass/code_length**3',sampling_type='particle',particle_type=True)
+            ds.add_deposited_particle_field(("PartType3", "Masses"), "sum")
+        else:
+            ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+    
         if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses, sampling_type='particle',units='code_mass', particle_type=True)
+            
     if cfg.par.dust_grid_type == 'rr':
         ds.add_field(("dustmass"),function=_dustmass_rr,sampling_type='particle',units='code_mass',particle_type=True)
     if cfg.par.dust_grid_type == 'li_bestfit':
@@ -424,6 +463,97 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
             else:
                 print('No black holes found (length of BH_Mass field is 0)')
+
+                
+    
+    #OTF EXTINCTION
+    if cfg.par.otf_extinction:
+
+        if add_smoothed_quantities==True:
+
+            print("==============================================\n")
+            print("[front_ends/gadget2pd:] Entering OTF Field Addition\n")
+            print("==============================================\n")
+        
+
+        
+            #add the dust density field
+            ds.add_field(('PartType3','density'),function=_dust_density,units='code_mass/code_length**3',sampling_type='particle',particle_type=True)
+            ad = ds.all_data()
+            nsizes = ad['PartType3','Dust_Size'].shape[1] #number of dust size bins
+            
+            #now loop through th esize bins and project them each onto
+            #their own octree.  we'll then, after projecting them into
+            #individual grids, collate those grids back together into a
+            #master size grid
+            for isize in range(nsizes):
+                
+                ds.parameters['size'] = 0 #just to clear it out
+                
+                #we have to slice it before we add the field.  if you try to slice
+                #in the field defintion (i.e., in _size_with_units), yt freaks
+                ds.parameters['size'] = ad['PartType3','Dust_Size'][:,isize]
+                
+                #actually add the sliced field now.  we do this so that we can
+                #prepare for depositing onto the octree. we call this a dummy size
+                #since this is just there for a place holder to deposit into a dummy octree
+                
+                print('adding and depositing fields for dust size bin '+str(isize))
+                ds.add_field(('PartType3','dummy_size_bin'+str(isize)),function=_size_with_units,sampling_type='particle',units='dimensionless',particle_type=True,force_override=True)
+
+                #deposit onto the octree.
+                if yt.__version__ != '4.0.dev0':
+                    ds.add_deposited_particle_field(('PartType3','dummy_size_bin'+str(isize)),"sum")
+                    
+                    print(np.sum(ad["PartType3","dummy_size_bin"+str(isize)]))
+                else:
+                    #just call a dummy octree so that its deposited
+                    dum_size_octree = octree[('PartType3', 'dummy_size_bin'+str(isize))]
+                    print(np.sum(dum_size_octree))
+
+
+                #save in mater array that we lazily stuff into parameters.
+                #Note this has to be done here; attempting to do this
+                #downstream can cause the entire octree_of_sizes array to
+                #take on the value of the -1 size bin.  this is likely due
+                #to the order of operations of ds and octree construction
+                #in zoom.py
+
+                if isize == 0:
+                    if  yt.__version__ != '4.0.dev0':
+                        octree_of_sizes = np.zeros((ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))].shape[0],nsizes))
+                    else:
+                        octree_of_sizes = np.zeros((len(octree[('PartType3','dummy_size_bin'+str(isize))]),nsizes))
+
+                if  yt.__version__ != '4.0.dev0':
+                    octree_of_sizes[:,isize] = ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))]
+                else:
+                    octree_of_sizes[:,isize] = octree[('PartType3','dummy_size_bin'+str(isize))]
+
+
+
+            #------------------------
+            #DEBUG BLOCK
+
+            #if cfg.par.OTF_EXTINCTION_MRN_FORCE == True:
+            #    loga = np.linspace(-4,0,octree_of_sizes.shape[1])
+            #    a = 10.**loga
+            #    mrn_dn_da = a**(-3.5)
+            
+                
+            #    da = [a[i+1]-a[i] for i in range(len(a)-1)]
+            #    da.append(da[-1])
+            #    mrn_dn = mrn_dn_da*da
+
+            #    for i in range(octree_of_sizes.shape[0]):
+            #        octree_of_sizes[i,:] = mrn_dn
+
+            #------------------------
+
+            octree_of_sizes[np.isnan(octree_of_sizes)] = 0 #just because the density can be zero in some extreme cases which screws up the particle deposition
+            ds.parameters['octree_of_sizes']=octree_of_sizes
+
+
 
 
     return ds
