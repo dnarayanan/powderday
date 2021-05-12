@@ -31,7 +31,7 @@ def pah_source_add(ds,reg,m):
     #second, read the information from the Draine files
     PAH_list = read_draine_file(filename)
     draine_sizes = PAH_list[0].size_list
-    
+    draine_lam = PAH_list[0].lam
     #third, on a cell-by-cell basis, interpolate the luminosity for
     #each grain size bin, and multiply by the number of grains in that
     #bin
@@ -74,6 +74,9 @@ def pah_source_add(ds,reg,m):
     #grid_of_sizes to get the dimensions to match up correctly for the dot product
 
     grid_PAH_luminosity = np.dot(pah_grid[idx,:].T, grid_of_sizes.T).T
+    reg.parameters = {}
+    reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
+    reg.parameters['PAH_lam'] = draine_lam
 
 #    for i_cell in tqdm(range(ncells)):
         
