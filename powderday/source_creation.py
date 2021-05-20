@@ -446,7 +446,7 @@ def BH_source_add(m,reg,df_nu,boost):
 
         print ('Number AGNs in the cutout with non zero luminositites: ', len(agn_ids))
 
-        fnu_arr = sg.get_agn_seds(agn_ids)
+        fnu_arr = sg.get_agn_seds(agn_ids, reg)
         nu = reg["bhnu"].value
 
         for j in range(len(agn_ids)):

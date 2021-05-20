@@ -124,7 +124,7 @@ def variable_set():
     try:
         if len(np.atleast_1d(cfg.par.FORCE_N_O_Pilyugin)) == 1:
             cfg.par.FORCE_N_O_Pilyugin = [cfg.par.FORCE_N_O_Pilyugin,cfg.par.FORCE_N_O_Pilyugin,cfg.par.FORCE_N_O_Pilyugin]
-        except:
+    except:
             cfg.par.FORCE_N_O_Pilyugin = [False, False, False]
     
     try:
@@ -164,7 +164,7 @@ def variable_set():
     except:
         cfg.par.HII_nh = 1.e2
 
-	try:
+    try:
         cfg.par.HII_min_age
     except:
         cfg.par.HII_min_age = 1.e-3

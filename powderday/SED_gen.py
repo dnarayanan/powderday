@@ -28,7 +28,6 @@ gc.set_threshold(0)
 
 # Lazily initialize FSPS
 sp = None
-reg_gl = None
 
 class Stars:
     def __init__(self,mass,metals,positions,age,sed_bin=[-1,-1,-1],lum=-1,fsps_zmet=20,all_metals=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
@@ -45,10 +44,6 @@ class Stars:
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
 
 def star_list_gen(boost,dx,dy,dz,reg,ds):
-    global reg_gl
-    if reg_gl is None:
-        reg_gl = reg
-
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
     mass = reg["starmasses"].value
     positions = reg["starcoordinates"].value
@@ -524,7 +519,7 @@ def newstars_gen(stars_list):
                         LogZ = cfg.par.gas_logz[id_val]
                     
                     else:
-                        LogZ = np.log10(metals[0]/cfg.par.solar)
+                        LogZ = np.log10(stars_list[i].metals/cfg.par.solar)
 
 
                     if neb_file_output:
@@ -610,9 +605,12 @@ def get_gas_metals(ngas):
 def get_nearest_gas_metals(all_gas_coordinates, particle_coordinates):
 
     all_gas_metals = get_gas_metals(len(all_gas_coordinates))
+    
     # Getting N nearest gas particles to the AGN where N is defined by cfg.par.AGN_num_gas
     nearest_gas_dist, nearest_gas_id = get_nearest(all_gas_coordinates, particle_coordinates, num=cfg.par.AGN_num_gas)
+    
     metals_avg = []
+    
     # We take the distance weighted avearge of the metallicity of nearest N gas particles.
     # This is used as input to the CLOUDY model.
     for q in range(11):
@@ -622,15 +620,28 @@ def get_nearest_gas_metals(all_gas_coordinates, particle_coordinates):
     return metals_avg
                                                                                                                 
 
-def get_agn_seds(agn_ids):
+def get_agn_seds(agn_ids, reg):
   
     print ('Starting AGN SED generation')
     
     t1 = datetime.now()
     nprocesses = np.min([cfg.par.n_processes,len(agn_ids)])
     p = Pool(processes = nprocesses)
-    fnu = p.map(agn_sed, agn_ids)
-    fnu = np.atleast_2d(fnu)
+
+    # Pre-calculating average metallicity and fluxes for all the BH particles
+    nu = []
+    fnu_in = []
+    metals_avg = []
+    for agn_id in agn_ids:
+        fnu_in.append(reg["bhsed"][agn_id,:].in_units("Lsun").value/reg["bhnu"].in_units("Hz").value)
+        nu.append(reg["bhnu"].in_units("Hz").value)
+        all_gas_coordinates = reg["gascoordinates"].in_units('kpc').value
+        agn_coordinates = reg["bhcoordinates"][agn_id].in_units('kpc').value
+        metals_avg.append(get_nearest_gas_metals(all_gas_coordinates, agn_coordinates))
+
+    z = zip(agn_ids, nu, fnu_in, metals_avg)
+    fnu_out = p.starmap(agn_sed, z)
+    fnu_out = np.atleast_2d(fnu_out)
     p.close()
     p.terminate()
     p.join()
@@ -638,14 +649,11 @@ def get_agn_seds(agn_ids):
 
     print ('Execution time for AGN SED generation = '+str(t2-t1))
     
-    return fnu
+    return fnu_out
 
 
-def agn_sed(agn_id):
+def agn_sed(agn_id, nu, fnu, metals_avg):
     agn_id = int(agn_id)
-    reg = reg_gl
-    nu = reg["bhnu"].in_units("Hz").value
-    fnu = reg["bhsed"][agn_id,:].in_units("Lsun").value/nu
 
     # Hopkins model returns the nu and fnu in reversed order. 
     # Thus, we have to reverse it back to make it compatible.
@@ -656,15 +664,10 @@ def agn_sed(agn_id):
     if cfg.par.add_neb_emission and cfg.par.add_AGN_neb:
         
         id_val = 2
-
-        all_gas_coordinates = reg["gascoordinates"].in_units('kpc').value
-        agn_coordinates = reg["bhcoordinates"][agn_id].in_units('kpc').value
-        
-        metals_avg = get_nearest_gas_metals(all_gas_coordinates, agn_coordinates)
-                
+            
         tot_metals = metals_avg[0]
         metals = metals_avg
-
+        
         if cfg.par.FORCE_gas_logz[id_val]:
             LogZ = gas_logz[id_val]
         
@@ -686,13 +689,13 @@ def agn_sed(agn_id):
             LogU = np.log10((10**LogQ)/(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
             LogQ = np.log10((10**LogU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
 
-        
         spec, wave_line, line_lum = get_nebular(1.e8 * constants.c.cgs.value / nu, fnu, cfg.par.AGN_nh, LogQ, Rin, LogU, LogZ, LogQ, metals,
                                         Dust=False, abund=cfg.par.neb_abund[id_val],clean_up = cfg.par.cloudy_cleanup, index=id_val)
 
         if cfg.par.dump_emlines:
-        # The stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
+        # The stellar population returns the calculation in units of Lsun
             line_em = line_lum * 3.839e33  # Units: ergs/s
+            # The last column in dump_emlines is reserved for age of the star particle. For AGN we just set it to -1 as a place holder.
             line_em = np.append(line_em, -1.0)
             dump_emlines(wave_line, line_em)
 
