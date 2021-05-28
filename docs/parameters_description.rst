@@ -349,7 +349,7 @@ NOTE: These parmeters take three values as an input. They correspond to the valu
     use_cloudy_tables = True and FORCE_inner_radius = True (Default: [1.e19,1.e19,2.777e+20])
 
 :FORCE_N_O_Pilyugin:
-    If set, then the Nitrogen abundances are set according to the N/O vs O/H relation form Pilyugin et al. 2012
+    If set, then the Nitrogen abundances are set according to the N/O vs O/H relation from Pilyugin et al. 2012
     If FORCE_N_O ratio (next parameter) is set to True then this parameter is ignored. (Default: [False,False,False])
 
     
@@ -419,9 +419,9 @@ Young Stars
 
 :HII_alpha_enhacement:               
     
-    If set, then the metallicity of star particles to [Fe/H] rather than the total metallicity. 
+    If set, then the metallicity of star particles to [Fe/H] rather than the total metals. 
     Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
-    hardnening to radiaiton field due to alpha-enhancement. (Default: False)
+    hardening of the radiaiton field due to alpha-enhancement. (Default: False)
 
 Post-AGB stars
 ~~~~~~~~~~~~~~~~~~~~~~

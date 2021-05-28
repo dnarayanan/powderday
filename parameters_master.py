@@ -139,7 +139,7 @@ FORCE_inner_radius = [False, False, True]   # If set, then we force the inner ra
 inner_radius = [1.e19, 1.e19, 2.777e+20]   	# This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
                             		    	# use_cloudy_tables = False and FORCE_inner_radius = True (Default: [1.e19, 1.e19, 2.777e+20], Units = cm)
 
-FORCE_N_O_Pilyugin = [False, False, False]  # If set to True, Nitrogen abundances are set according to the N/O vs O/H relation form Pilyugin et al. 2012
+FORCE_N_O_Pilyugin = [False, False, False]  # If set to True, Nitrogen abundances are set according to the N/O vs O/H relation from Pilyugin et al. 2012
                                             # If FORCE_N_O ratio (next parameter) is set to True then this parameter is ignored.(Default: [False,False,False])
 
 FORCE_N_O_ratio = [False, False, False]     # If set, then we force the Nitrogen abundance such that the log of N/O ratio is N_O_ratio (next parameter). 
@@ -190,9 +190,9 @@ HII_max_age = 1.e-2         			    # Sets the maximum age limit for calculating 
 HII_escape_fraction = 0.0   			    # Fraction of H-ionizaing photons that escape the HII region. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 0.0)
 
-HII_alpha_enhacement = False                # If set to True then the metallicity of star particles to [Fe/H] rather than the total metallicity. 
-                                            # Since FSPS does not support non solar abundance ratios. This parameter can be used to mimic the 
-                                            # hardnening to radiaiton field due to alpha-enhancement. (Default: False)
+HII_alpha_enhacement = False                # If set to True then the metallicity of star particles to [Fe/H] rather than the total metals. 
+                                            # Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
+                                            # hardening of the radiation field due to alpha-enhancement. (Default: False)
 
 #****************
 # Post-AGB STARS
