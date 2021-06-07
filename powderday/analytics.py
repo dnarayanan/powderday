@@ -95,7 +95,10 @@ def dump_data(reg,model):
     except: grid_PAH_luminosity = -1
     try: PAH_lam = reg.parameters['PAH_lam']
     except: PAH_lam = -1
-
+    try: total_PAH_luminosity = reg.parameters['total_PAH_luminosity']
+    except: total_PAH_luminosity = -1
+    try: integrated_grid_PAH_luminosity = reg.parameters['integrated_grid_PAH_luminosity']
+    except: integrated_grid_PAH_luminosity = -1
     #get tdust
     #m = ModelOutput(model.outputfile+'.sed')
     #oct = m.get_quantities()
@@ -108,7 +111,7 @@ def dump_data(reg,model):
     except:
         outfile = cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+".npz"
 
-    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass,grid_PAH_luminosity = grid_PAH_luminosity,PAH_lam=PAH_lam)#,tdust = tdust)
+    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass,grid_PAH_luminosity = grid_PAH_luminosity,PAH_lam=PAH_lam,total_PAH_luminosity = total_PAH_luminosity,integrated_grid_PAH_luminosity = integrated_grid_PAH_luminosity)#,tdust = tdust)
 
 
 def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):

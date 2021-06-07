@@ -20,6 +20,9 @@ from tqdm import tqdm
 #4. put in the ionization fraction and appropriate file name per cell.
 
 filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/iout_graD16emtPAHib_mmpisrf_1.00'
+#filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/BC03_Z0.02_10Myr/iout_graD16emtPAHib_bc03_z0.02_1e7_1.00'
+#filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/BC03_Z0.0004_10Myr/iout_graD16emtPAHib_bc03_z0.0004_1e7_1.50'
+#iout_DH20Ad_P0.20_0.00_bc03_z0.02_1e7_1.00'
 #filename = '/home/desika.narayanan/PAHs/vsg_stat_therm.iout'
 
 def pah_source_add(ds,reg,m):
@@ -28,9 +31,10 @@ def pah_source_add(ds,reg,m):
     #hydro simulation
     grid_of_sizes = ds.parameters['reg_grid_of_sizes']
     simulation_sizes = (ds.parameters['grain_sizes_in_micron']*u.micron).to(u.cm).value
-    
+
     #second, read the information from the Draine files
     PAH_list = read_draine_file(filename)
+    print("reading Draine File",filename)
     draine_sizes = PAH_list[0].size_list
     draine_lam = PAH_list[0].lam
     #third, on a cell-by-cell basis, interpolate the luminosity for
@@ -81,6 +85,14 @@ def pah_source_add(ds,reg,m):
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
         reg.parameters['PAH_lam'] = draine_lam
 
+    total_PAH_luminosity =np.sum(grid_PAH_luminosity,axis=0)
+    reg.parameters['total_PAH_luminosity'] = total_PAH_luminosity
+    
+    grid_PAH_L_lam = grid_PAH_luminosity/draine_lam
+    integrated_grid_PAH_luminosity = np.trapz((grid_PAH_luminosity/draine_lam).value,draine_lam,axis=1)
+    reg.parameters['integrated_grid_PAH_luminosity'] = integrated_grid_PAH_luminosity
+
+
 
 
 #    for i_cell in tqdm(range(ncells)):
@@ -109,7 +121,7 @@ def pah_source_add(ds,reg,m):
   #      grid_PAH_luminosity[i_cell,:] = np.dot(pah_grid[idx,:].T,grid_of_sizes[i_cell,:].T)
 
   
-    total_PAH_luminosity =np.sum(grid_PAH_luminosity,axis=0)
+
 
     #import matplotlib.pyplot as plt
     #fig = plt.figure()
