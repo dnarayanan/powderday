@@ -92,7 +92,7 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
 
         reg.parameters={}
         reg.parameters['octree'] = octree
-
+        if cfg.par.otf_extinction: reg.parameters['octree_of_sizes'] = ds.parameters['octree_of_sizes']
  
 
     else:

@@ -1,6 +1,6 @@
 from powderday.nebular_emission.abund import getNebAbunds
 from powderday.nebular_emission.ASCIItools import *
-from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogU, convert_metals
+from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogQ, convert_metals
 import powderday.config as cfg
 from astropy import constants
 import logging
@@ -33,7 +33,7 @@ def write_input_sed(wav, spec):
     ascii_file = str(uuid.uuid4().hex) + ".ascii"
     while compiled_exists(ascii_file):
         ascii_file = str(uuid.uuid4().hex) + ".ascii"
-
+    
     logging.info("Executing write ascii sequence...")
     logging.info("Writing.....")
     WriteASCII(ascii_file, wav, spec, nx=len(wav), nmod=1, par1_val=1.e6)
@@ -66,12 +66,11 @@ def write_cloudy_input(**kwargs):
             "dens": 100.0,     # number density of hydrogen
             "r_inner": 1.e19,  # inner radius of cloud
             "r_in_pc": False,
-            "use_Q": True,
             "dust": False,
-            "pagb":False,
             "efrac": -1.0,
             "geometry": "sphere",
             "abundance": "dopita",
+            "id_val": 1,
             "metals": [-1., -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.]
             }
     for key, value in list(kwargs.items()):
@@ -90,6 +89,12 @@ def write_cloudy_input(**kwargs):
             f.write(to_print)
 
     # -----------------------------------------------------
+    _id = int(pars["id_val"])
+    if _id == 1:
+        Pagb = True
+    else:
+        Pagb = False
+
     pars["gas_logZ"] = pars["logZ"]
     this_print('////////////////////////////////////')
     this_print('title {0}'.format(pars["model_name"].split('/')[-1]))
@@ -98,10 +103,7 @@ def write_cloudy_input(**kwargs):
     this_print('print line precision 6')
     cloudy_mod = "{}.mod".format(pars["model_name"])
     this_print('table star "{0}" {1}={2:.2e}'.format(cloudy_mod, "age", pars['age']))
-    if pars['use_Q']:
-        this_print('Q(H) = {0:.3f} log'.format(pars['logQ']))
-    else:
-        this_print('ionization parameter = {0:.3f} log'.format(pars['logU']))
+    this_print('Q(H) = {0:.3f} log'.format(pars['logQ']))
 
     if pars['dust']:
         this_print('grains orion {0:.2f} log no qheat'.format(pars['gas_logZ']))
@@ -118,20 +120,20 @@ def write_cloudy_input(**kwargs):
     # If so code revert back to using "dopita" abundances in place of "direct"
     if (any(q <= -1.0 for q in pars["metals"][1:]) and pars["abundance"] == "direct"):
         pars["abundance"] = "dopita"
-        print ("Warning: Unable to get metallicities from the simulation. Using \"dopita\" abundance instead")
+        print ("Warning: Unable to get metallicities from the simulation. Using abundances from \"dopita et al. 2001\" instead")
 
     if pars["abundance"] == "direct":
         abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
         abund_metal = convert_metals(pars["metals"][1:])
         abund_str = "abundances "
-        
+    
         # Enhancing abundances for post-AGB stars
-        if pars["pagb"]:
+        if Pagb:
             abund_metal[1] += cfg.par.PAGB_C_enhancement
             abund_metal[2] += cfg.par.PAGB_N_enhancement
 
-        if cfg.par.FORCE_N_O_ratio:
-            abund_metal[2] = cfg.par.N_O_ratio + abund_metal[3]
+        if cfg.par.FORCE_N_O_ratio[_id]:
+            abund_metal[2] = cfg.par.N_O_ratio[_id] + abund_metal[3]
 
         for e in range(len(abund_el)):
             el_str = str(abund_el[e]) + " " + str(abund_metal[e]) + " "
@@ -144,9 +146,25 @@ def write_cloudy_input(**kwargs):
     else:
         abunds = getNebAbunds(pars["abundance"],
                             pars["logZ"],
-                            pagb=pars["pagb"],
                             dust=pars["dust"],
                             re_z=False)
+
+        abund_C = float(abunds.elem_strs[1].split(" ")[3])
+        abund_N = float(abunds.elem_strs[2].split(" ")[3])
+        abund_O = float(abunds.elem_strs[3].split(" ")[3])
+        
+        if Pagb:
+            abund_C += cfg.par.PAGB_C_enhancement
+            abund_N += cfg.par.PAGB_N_enhancement
+
+        if cfg.par.FORCE_N_O_ratio[_id]:
+            abund_N = cfg.par.N_O_ratio[_id] + abund_O
+
+        
+        abunds.elem_strs[1] = "element abundance carbon "+str(abund_C)+" log"
+        abunds.elem_strs[2] = "element abundance nitrogen "+str(abund_N)+" log"
+        abunds.elem_strs[3] = "element abundance oxygen "+str(abund_O)+" log"
+
         this_print(abunds.solarstr)
         for line in abunds.elem_strs:
             this_print(line)
@@ -206,7 +224,7 @@ def clean_files(dir_, model_name, error=False):
     os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".out"))
 
 
-def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals, Dust=False, abund="dopita", useq=True, Pagb=False, clean_up=True):
+def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals, Dust=False, abund="dopita", clean_up=True, index=1):
     nspec = len(spec_lambda)
     frac_obrun = 0.0
     clight = constants.c.cgs.value*1.e8
@@ -217,20 +235,19 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals,
     model_name = filename.split(".")[0]
 
     logging.info("Writing CLOUDY input file")
-    dir_= cfg.par.pd_source_dir + "/powderday/nebular_emission"
+    dir_= cfg.par.pd_source_dir + "powderday/nebular_emission"
     dir_base = os.getcwd()
 
     write_cloudy_input(dir_=dir_,
                        model_name=model_name,
                        r_inner=radius,
                        dens=nh,
-                       use_Q=useq,
                        logQ=logq,
                        logU=logu,
                        logZ=logz,
                        abundance=abund,
                        dust=Dust,
-                       pagb=Pagb,
+                       id_val = index,
                        metals=Metals)
 
     logging.info("Input SED file written")
@@ -245,7 +262,8 @@ def get_nebular(spec_lambda, sspi, nh, logq, radius, logu, logz, logq_1, Metals,
         logging.info("CLOUDY run finished sucessfully")
 
     else:
-        logging.info("CLOUDY run was unsucessful")
+        print ("WARNING: The CLOUDY run was unsucessful. Please see the cloudy output file "+ model_name+".out"+
+               " located in "+ dir_ + "/temp_files/"+" to figure out why this happened.")
         if clean_up:
             clean_files(dir_, model_name, error=True)
         raise ValueError('CLOUDY run was unsucessful')
