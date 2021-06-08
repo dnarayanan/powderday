@@ -127,13 +127,19 @@ def write_cloudy_input(**kwargs):
         abund_metal = convert_metals(pars["metals"][1:])
         abund_str = "abundances "
     
+        if cfg.par.FORCE_N_O_Pilyugin[_id]: # Adding N/O pilyugin relation
+            if 12 + abund_metal[3] < 8.14:
+                abund_metal[2] = -1.493 + abund_metal[3]
+            else:
+                abund_metal[2] =  1.489*(12 + abund_metal[3]) - 13.613 + abund_metal[3]
+       
+        if cfg.par.FORCE_N_O_ratio[_id]:
+            abund_metal[2] = cfg.par.N_O_ratio[_id] + abund_metal[3]
+
         # Enhancing abundances for post-AGB stars
         if Pagb:
             abund_metal[1] += cfg.par.PAGB_C_enhancement
             abund_metal[2] += cfg.par.PAGB_N_enhancement
-
-        if cfg.par.FORCE_N_O_ratio[_id]:
-            abund_metal[2] = cfg.par.N_O_ratio[_id] + abund_metal[3]
 
         for e in range(len(abund_el)):
             el_str = str(abund_el[e]) + " " + str(abund_metal[e]) + " "
@@ -153,14 +159,20 @@ def write_cloudy_input(**kwargs):
         abund_N = float(abunds.elem_strs[2].split(" ")[3])
         abund_O = float(abunds.elem_strs[3].split(" ")[3])
         
-        if Pagb:
-            abund_C += cfg.par.PAGB_C_enhancement
-            abund_N += cfg.par.PAGB_N_enhancement
+        if cfg.par.FORCE_N_O_Pilyugin[_id]: # Forcing the Nitrogen abundances to follow the N/O relation from Pilyugin et al. 2012
+            if 12 + abund_N < 8.14:
+                abund_N = -1.493 + abund_O
+            else:
+                abund_N =  1.489*(12 + abund_O) - 13.613 + abund_O
 
         if cfg.par.FORCE_N_O_ratio[_id]:
             abund_N = cfg.par.N_O_ratio[_id] + abund_O
 
-        
+        # Enhancing abundances for post-AGB stars
+        if Pagb:
+            abund_C += cfg.par.PAGB_C_enhancement
+            abund_N += cfg.par.PAGB_N_enhancement
+
         abunds.elem_strs[1] = "element abundance carbon "+str(abund_C)+" log"
         abunds.elem_strs[2] = "element abundance nitrogen "+str(abund_N)+" log"
         abunds.elem_strs[3] = "element abundance oxygen "+str(abund_O)+" log"

@@ -374,8 +374,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     return m
 
 
-
-
 def wavelength_compress(nu,fnu,df_nu):
     
     nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
@@ -384,18 +382,17 @@ def wavelength_compress(nu,fnu,df_nu):
     compressed_nu = nu[nu_inrange]
     compressed_fnu = np.asarray(fnu)[nu_inrange]
     
-  
     #get rid of all wavelengths below lyman limit
     dum_nu = compressed_nu*units.Hz
     dum_lam = constants.c.cgs/dum_nu
     dum_lam = dum_lam.to(units.angstrom)
 
     wll = np.where(dum_lam.value >= 912)[0] #where are lambda is above the lyman limit
-    nu = nu[wll]
-    fnu = fnu[wll]
-   
+    compressed_nu = compressed_nu[wll] 
+    compressed_fnu = compressed_fnu[wll]
+    
     return compressed_nu, compressed_fnu
-
+    
 
 def BH_source_add(m,reg,df_nu,boost):
 
@@ -449,7 +446,7 @@ def BH_source_add(m,reg,df_nu,boost):
 
         print ('Number AGNs in the cutout with non zero luminositites: ', len(agn_ids))
 
-        fnu_arr = sg.get_agn_seds(reg, agn_ids)
+        fnu_arr = sg.get_agn_seds(agn_ids, reg)
         nu = reg["bhnu"].value
 
         for j in range(len(agn_ids)):
