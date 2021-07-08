@@ -548,8 +548,9 @@ def newstars_gen(stars_list):
                                     efrac=escape_fraction) 
                             #LogQ_1 = LogQ_1 + cfg.par.gas_logu_init[id_val]
                                
-                            spec_neb, wave_line, line_lum = get_nebular(spec[0], spec[1], nh, LogQ, Rin, LogU, LogZ, LogQ_1, stars_list[i].all_metals, 
-                                                    Dust=False, abund=cfg.par.neb_abund[id_val], clean_up = cfg.par.cloudy_cleanup, index=id_val)
+                            spec_neb, wave_line, line_lum = get_nebular(spec[0], spec[1], nh, stars_list[i].all_metals, logq = LogQ, radius = Rin, 
+                                                    logu = LogU, logz = LogZ, logq_1 = LogQ_1, Dust=False, abund=cfg.par.neb_abund[id_val], 
+                                                    clean_up = cfg.par.cloudy_cleanup, index=id_val)
                         except ValueError as err:
                             # If the CLOUDY run crashes we switch to using lookup tables for young stars but throw an error for post-AGB stars.
                             if  young_star:
@@ -575,7 +576,7 @@ def newstars_gen(stars_list):
                 #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
                 line_em = line_em * ((stars_list[i].mass*u.g).to(u.Msun).value) * (3.839e33)  # Units: ergs/s
                 line_em = np.append(line_em, stars_list[i].age)
-                dump_emlines(wave_line, line_em)
+                dump_emlines(wave_line, line_em, id_val)
 
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f
@@ -624,6 +625,9 @@ def get_agn_seds(agn_ids, reg):
   
     print ('Starting AGN SED generation')
     
+    if cfg.par.dump_emlines:
+        dump_emlines(None, None, 2, add_header=True)
+
     t1 = datetime.now()
     nprocesses = np.min([cfg.par.n_processes,len(agn_ids)])
     p = Pool(processes = nprocesses)
@@ -689,19 +693,61 @@ def agn_sed(agn_id, nu, fnu, metals_avg):
             LogU = np.log10((10**LogQ)/(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
             LogQ = np.log10((10**LogU)*(4*np.pi*Rin*Rin*cfg.par.AGN_nh*constants.c.cgs.value))
 
-        spec, wave_line, line_lum = get_nebular(1.e8 * constants.c.cgs.value / nu, fnu, cfg.par.AGN_nh, LogQ, Rin, LogU, LogZ, LogQ, metals,
-                                        Dust=False, abund=cfg.par.neb_abund[id_val],clean_up = cfg.par.cloudy_cleanup, index=id_val)
+        spec, wave_line, line_lum = get_nebular(1.e8 * constants.c.cgs.value / nu, fnu, cfg.par.AGN_nh, metals, logq = LogQ, radius = Rin, logu = LogU, 
+                                        logz = LogZ, logq_1 = LogQ, Dust=False, abund=cfg.par.neb_abund[id_val],clean_up = cfg.par.cloudy_cleanup, index=id_val)
 
         if cfg.par.dump_emlines:
         # The stellar population returns the calculation in units of Lsun
             line_em = line_lum * 3.839e33  # Units: ergs/s
             # The last column in dump_emlines is reserved for age of the star particle. For AGN we just set it to -1 as a place holder.
             line_em = np.append(line_em, -1.0)
-            dump_emlines(wave_line, line_em)
+            dump_emlines(wave_line, line_em, id_val)
 
     else:
         spec = fnu
 
+    return spec
+
+
+def get_dig_seds(factors, cell_widths, metals):
+
+    print ('Starting DIG SED generation')
+    
+    t1 = datetime.now()
+    nprocesses = np.min([cfg.par.n_processes,len(cell_widths)])
+    p = Pool(processes = nprocesses)
+
+    z = zip(factors, cell_widths, metals)
+    fnu_out = p.starmap(dig_sed, z)
+    fnu_out = np.atleast_2d(fnu_out)
+    
+    p.close()
+    p.terminate()
+    p.join()
+    t2 = datetime.now()
+
+    print ('Execution time for DIG SED generation = '+str(t2-t1))
+
+    return fnu_out
+
+
+def dig_sed(factor, cell_width, metal):    
+    id_val = 3
+    
+    dat = np.load(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/black_1987.npz")
+    spec_lam = dat["lam"]
+    sspi = dat["sed"]*(cell_width**2)*factor # Lsun/Hz
+    
+    spec, wave_line, line_lum = get_nebular(spec_lam, sspi, cfg.par.DIG_nh, metal, Factor=factor, Cell_width=cell_width, Dust=False,
+                                            abund=cfg.par.neb_abund[id_val], clean_up = cfg.par.cloudy_cleanup, index=id_val)
+
+    if cfg.par.dump_emlines:
+        # The stellar population returns the calculation in units of Lsun
+        line_em = line_lum * 3.839e33  # Units: ergs/s
+        # The last column in dump_emlines is reserved for age of the star particle. For DIG we just set it to -1 as a place holder.
+        line_em = np.append(line_em, -1.0)
+        dump_emlines(wave_line, line_em, id_val)
+        
     return spec
 
 

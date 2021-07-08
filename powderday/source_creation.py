@@ -9,7 +9,8 @@ import astropy.units as units
 import astropy.constants as constants
 from powderday.helpers import find_nearest
 from powderday.analytics import dump_AGN_SEDs
-
+from hyperion.model import ModelOutput
+from hyperion.grid.yt3_wrappers import find_order
 
 class Sed_Bins:
     def __init__(self,mass,metals,age,fsps_zmet,all_metals=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
@@ -464,3 +465,77 @@ def BH_source_add(m,reg,df_nu,boost):
 
         dump_AGN_SEDs(nu,master_bh_fnu,reg["bhluminosity"].value)
 
+
+def DIG_source_add(m,reg,df_nu):
+
+    print("--------------------------------\n")
+    print("Adding DIG to Source List in source_creation\n")
+    print("--------------------------------\n")
+
+    print ("Getting specific energy dumped in each grid cell")
+
+    try:
+        rtout = cfg.model.outputfile + '.sed'
+        try: 
+            grid_properties = np.load(cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".npz")
+        except:
+            grid_properties = np.load(cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+".npz")
+
+        cell_info = np.load(cfg.model.PD_output_dir+"/cell_info."+cfg.model.snapnum_str+"_"+cfg.model.galaxy_num_str+".npz")
+    except:
+        print ("ERROR: Can't proceed with DIG nebular emission calculation. Code is unable to find the required files.") 
+        print ("Make sure you have the rtout.sed, grid_physical_properties.npz and cell_info.npz for the corresponding galaxy.")
+
+        return 
+
+    m_out = ModelOutput(rtout)
+    oct = m_out.get_quantities()
+    grid = oct
+    order = find_order(grid.refined)
+    refined = grid.refined[order]
+    quantities = {}
+    for field in grid.quantities:
+        quantities[('gas', field)] = grid.quantities[field][0][order][~refined]
+
+    cell_width = cell_info["fw1"][:,0]
+    mass = (quantities['gas','density']*units.g/units.cm**3).value * (cell_width**3)
+    met = grid_properties["grid_gas_metallicity"]
+    specific_energy = (quantities['gas','specific_energy']*units.erg/units.s/units.g).value
+    specific_energy = (specific_energy * mass) # in ergs/s
+
+    # Black 1987 curve has a integrated ergs/s/cm2 of 0.0278 so the factor we need to multiply it by is given by this value
+    factor = specific_energy/(cell_width**2)/(0.0278) 
+
+    mask1 = np.where(mass != 0 )[0]
+    mask = np.where((mass != 0 ) & (factor >= cfg.par.DIG_min_factor))[0] # Masking out all grid cells that have no gas mass and where the specific emergy is too low
+    print (len(factor), len(mask1), len(mask))
+    
+    factor = factor[mask]
+    cell_width = cell_width[mask]
+    cell_x = (cell_info["xmax"] - cell_info["xmin"])[mask]
+    cell_y = (cell_info["ymax"] - cell_info["ymin"])[mask]
+    cell_z = (cell_info["zmax"] - cell_info["zmin"])[mask]
+    pos = np.vstack([cell_x, cell_y, cell_z]).transpose()
+
+    met = grid_properties["grid_gas_metallicity"][:, mask]
+    met = np.transpose(met)
+    
+    fnu_arr = sg.get_dig_seds(factor, cell_width, met)
+    
+    dat = np.load(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/black_1987.npz")
+    spec_lam = dat["lam"]
+    nu = 1.e8 * constants.c.cgs.value / spec_lam 
+
+    for i in range(len(factor)):
+        fnu = fnu_arr[i,:]
+        nu, fnu = wavelength_compress(nu,fnu,df_nu)
+        
+        nu = nu[::-1]
+        fnu = fnu[::-1]
+        
+        lum = np.absolute(np.trapz(fnu,x=nu))*constants.L_sun.cgs.value
+        
+        source = m.add_point_source()
+        source.luminosity = lum # [ergs/s]
+        source.spectrum = (nu,fnu)
+        source.position = pos[i] # [cm]
