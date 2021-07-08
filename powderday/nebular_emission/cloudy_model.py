@@ -169,7 +169,7 @@ def write_cloudy_input(**kwargs):
         abund_N = float(abunds.elem_strs[2].split(" ")[3])
         abund_O = float(abunds.elem_strs[3].split(" ")[3])
         
-        if cfg.par.FORCE_N_O_Pilyugin[_id]: # Adding N/O pilyugin relation
+        if cfg.par.FORCE_N_O_Pilyugin[_id]: # Forcing the Nitrogen abundances to follow the N/O relation from Pilyugin et al. 2012
             if 12 + abund_N < 8.14:
                 abund_N = -1.493 + abund_O
             else:

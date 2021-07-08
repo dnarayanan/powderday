@@ -461,8 +461,19 @@ def newstars_gen(stars_list):
 
                     if cfg.par.HII_alpha_enhance: #Setting Zstar based on Fe/H 
                         Fe = stars_list[i].all_metals[-1]
-                        FeH = (Fe/0.7314)*(1.008/55.845)
+
+                        # Gizmo metallicity structure, photospheric abundances from Asplund et al. 2009:
+                        # Photospheric mass fraction of H = 0.7381
+                        # Photospheric mass fraction of Fe = 1.31e-3
+
+                        # Converting from mass fraction to atomic fraction of Fe
+                        # Taking atmoic mass of H = 1.008u
+                        # Taking atmoic mass of Fe = 55.845u
+                        FeH = (Fe/0.7381)*(1.008/55.845)
+
+                        # Solar atomic fraction of Fe. Calculated by substituting Fe = 1.31e-3 in the previous equation
                         FeH_sol = 3.22580645e-5
+
                         Logzsol = np.log10(FeH/FeH_sol)
                         
                         sp1 = fsps.StellarPopulation(zcontinuous=1)
