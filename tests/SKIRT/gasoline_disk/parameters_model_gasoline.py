@@ -3,6 +3,11 @@
 snapnum_str = '00300'
 hydro_dir = '/blue/narayanan/desika.narayanan/yt_datasets/TipsyGalaxy/'
 
+galaxy_num = 0
+
+
+galaxy_num_str = str(galaxy_num)
+
 snapshot_name = 'galaxy.00300'
 
 #where the files should go

@@ -412,4 +412,4 @@ NEB_DEBUG = False # Dumps parameters related to nebular line emission in a file 
                   # The file includes the ionization parameter, number of ionizing photons, 
                   # metallicity, inner radius, stellar mass and age for each particle.
                   # Naming convention: nebular_properties_galaxy*.txt where * is the galaxy number
-DIFF_DIG_SED = True # If set, SEDs with DIG nebular emission are saved sperately with "_DIG" appended to the rtout files
+DIFF_DIG_SED = False # If set, SEDs with DIG nebular emission are saved separately with "_DIG" appended to the rtout files

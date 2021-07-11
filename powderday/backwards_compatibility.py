@@ -141,7 +141,7 @@ def variable_set():
 
 
     try:
-        if len(np.atleast_1d(cfg.par.neb_abund)) == 3:
+        if len(np.atleast_1d(cfg.par.neb_abund)) == 1:
             cfg.par.neb_abund = [cfg.par.neb_abund,cfg.par.neb_abund,cfg.par.neb_abund,cfg.par.neb_abund]
     except:
         cfg.par.neb_abund = ["dopita","dopita","dopita","dopita"]
