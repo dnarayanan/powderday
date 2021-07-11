@@ -69,11 +69,11 @@ def stellar_sed_write(m):
    
 
 def dump_cell_info(refined,fc1,fw1,xmin,xmax,ymin,ymax,zmin,zmax):
-    outfile = cfg.model.PD_output_dir+"cell_info."+cfg.model.snapnum_str+".npz"
+    outfile = cfg.model.PD_output_dir+"cell_info."+cfg.model.snapnum_str+"_"+cfg.model.galaxy_num_str+".npz"
     np.savez(outfile,refined=refined,fc1=fc1,fw1=fw1,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,zmin=zmin,zmax=zmax)
 
 def dump_data(reg,model):
-
+    
     particle_fh2 = reg["gasfh2"]
     particle_fh1 = np.ones(len(particle_fh2))-particle_fh2
     particle_gas_mass = reg["gasmasses"]
@@ -87,8 +87,15 @@ def dump_data(reg,model):
     #these are in try/excepts in case we're not dealing with gadget and yt 3.x
     try: grid_gas_mass = reg["gassmoothedmasses"]
     except: grid_gas_mass = -1
-    try: grid_gas_metallicity = reg["gassmoothedmetals"]
+    try: 
+        grid_gas_metallicity = []
+        grid_gas_metallicity.append(reg["gassmoothedmetals"].value)
+        abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+        for i in abund_el:
+            grid_gas_metallicity.append(reg["gassmoothedmetals_"+str(i)].value)
+
     except: grid_gas_metallicity = -1
+
     try: grid_star_mass = reg["starsmoothedmasses"]
     except: grid_star_mass = -1
 
@@ -219,7 +226,7 @@ def logu_diagnostic(logQ, LogU, LogZ, Rin, cluster_mass, num_cluster, age, appen
 
 
 # Dumps emission lines
-def dump_emlines(line_wav, line_em, append=True):
+def dump_emlines(line_wav, line_em, id_val, append=True):
     if hasattr(cfg.model, 'galaxy_num_str'):
         outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy" + cfg.model.galaxy_num_str + ".txt"
     else:
@@ -232,7 +239,9 @@ def dump_emlines(line_wav, line_em, append=True):
         f = open(outfile_lines,'a+')
         if os.stat(outfile_lines).st_size == 0:
             np.savetxt(f,np.expand_dims(line_wav,axis=0))
+        
         np.savetxt(f,np.expand_dims(line_em,axis=0))
+        
         f.close()
 
 # Dumps AGN SEDs

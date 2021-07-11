@@ -5,6 +5,9 @@ snapnum_str = '{:03d}'.format(snapshot_num)
 
 hydro_dir = '/blue/narayanan/desika.narayanan/powderday_files/gizmo/fire1/FIRE_M12i_ref11/'
 
+galaxy_num = 0
+galaxy_num_str = str(galaxy_num)
+
 snapshot_name = 'snapshot_'+snapnum_str+'.hdf5'
 
 #where the files should go

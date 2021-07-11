@@ -3,6 +3,9 @@
 snapnum_str = '143'
 hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_files/smuggle/low_res/'
 
+galaxy_num = 0
+galaxy_num_str = str(galaxy_num)
+
 snapshot_name = 'smuggle_snapshot_143.low_res.hdf5'
 
 #where the files should go
