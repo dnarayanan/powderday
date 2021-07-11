@@ -96,7 +96,7 @@ def sph_m_gen(fname,field_add):
 
     pto.test_octree(refined,max_level)
 
-    dump_cell_info(refined,fc1,fw1,xmin,xmax,ymin,ymax,zmin,zmax)
+    dump_cell_info(refined,fc1.convert_to_units('cm'),fw1.convert_to_units('cm'),xmin,xmax,ymin,ymax,zmin,zmax)
     np.save('refined.npy',refined)
     np.save('density.npy',dustdens)
     

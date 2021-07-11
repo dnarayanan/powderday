@@ -5,6 +5,9 @@ snapnum_str = '{:03d}'.format(snapshot_num)
 
 hydro_dir = '/ufrc/narayanan/desika.narayanan/yt_datasets/enzo_iso_galaxy/galaxy0030/'
 
+galaxy_num = 0
+galaxy_num_str = str(galaxy_num)
+
 snapshot_name = 'galaxy0030'
 
 #where the files should go
