@@ -5,7 +5,7 @@
 # IMPORT STATEMENTS
 # =========================================================
 from __future__ import print_function
-from front_end_tools import make_SED, make_image
+from powderday.front_end_tools import make_SED, make_image
 from powderday.source_creation import direct_add_stars, add_binned_seds, BH_source_add, DIG_source_add
 from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump, logu_diagnostic,dump_emlines
 from astropy import constants
