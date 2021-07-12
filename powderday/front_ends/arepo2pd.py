@@ -206,7 +206,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         try:
-            yt.__version__ == '4.0.dev0'
+            float(yt.__version__[0:3]) >= 4
             ds = yt.load(fname)
             ds.index
             ad = ds.all_data()
