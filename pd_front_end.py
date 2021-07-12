@@ -317,3 +317,15 @@ if cfg.par.IMAGING == True:
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
     dump_data(reg, model)
+
+
+if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
+    DIG_source_add(m, reg, df_nu)
+
+    if cfg.par.DIFF_DIG_SED:
+        make_SED(m, par, model, DIG=True)
+    else:
+        make_SED(m, par, model)
+
+if cfg.par.IMAGING:
+    make_image(m, par, model)
