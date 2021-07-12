@@ -402,7 +402,7 @@ def BH_source_add(m,reg,df_nu,boost):
     print("--------------------------------\n")
  
     try:
-        nholes = reg["bhsed"].shape[0]
+        nholes = reg["bh","sed"].shape[0]
 
     except: 
         print('BH source creation failed. No BH found')
@@ -415,7 +415,7 @@ def BH_source_add(m,reg,df_nu,boost):
     else:
         #temporary wavelength compress just to get the length of the
         #compressed nu for a master array
-        dumnu,dumfnu = wavelength_compress(reg["bhnu"].value,reg["bhsed"][0,:].value,df_nu)
+        dumnu,dumfnu = wavelength_compress(reg["bh","nu"].value,reg["bh","sed"][0,:].value,df_nu)
         master_bh_fnu = np.zeros([nholes,len(dumnu)])
          
         width = reg.right_edge-reg.left_edge
@@ -428,19 +428,19 @@ def BH_source_add(m,reg,df_nu,boost):
             #dataset.  so we need to filter out any holes that
             #might not be in the simulation domain or have no luminosity.
 
-            if ((reg["bhcoordinates"][i,0].in_units('kpc') <  (reg.center[0].in_units('kpc')+(0.5*width[0].in_units('kpc'))))
+            if ((reg["bh","coordinates"][i,0].in_units('kpc') <  (reg.center[0].in_units('kpc')+(0.5*width[0].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,0].in_units('kpc') >  (reg.center[0].in_units('kpc')-(0.5*width[0].in_units('kpc'))))
+            (reg["bh","coordinates"][i,0].in_units('kpc') >  (reg.center[0].in_units('kpc')-(0.5*width[0].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,1].in_units('kpc') <  (reg.center[1].in_units('kpc')+(0.5*width[1].in_units('kpc'))))
+            (reg["bh","coordinates"][i,1].in_units('kpc') <  (reg.center[1].in_units('kpc')+(0.5*width[1].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,1].in_units('kpc') >  (reg.center[1].in_units('kpc')-(0.5*width[1].in_units('kpc'))))
+            (reg["bh","coordinates"][i,1].in_units('kpc') >  (reg.center[1].in_units('kpc')-(0.5*width[1].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,2].in_units('kpc') <  (reg.center[2].in_units('kpc')+(0.5*width[2].in_units('kpc'))))
+            (reg["bh","coordinates"][i,2].in_units('kpc') <  (reg.center[2].in_units('kpc')+(0.5*width[2].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,2].in_units('kpc') >  (reg.center[2].in_units('kpc')-(0.5*width[2].in_units('kpc'))))
+            (reg["bh","coordinates"][i,2].in_units('kpc') >  (reg.center[2].in_units('kpc')-(0.5*width[2].in_units('kpc'))))
             and 
-            (reg["bhluminosity"][i].value > 0)):
+            (reg["bh","luminosity"][i].value > 0)):
 
                 agn_ids.append(i)
 
@@ -448,7 +448,7 @@ def BH_source_add(m,reg,df_nu,boost):
         print ('Number AGNs in the cutout with non zero luminositites: ', len(agn_ids))
 
         fnu_arr = sg.get_agn_seds(agn_ids, reg)
-        nu = reg["bhnu"].value
+        nu = reg["bh","nu"].value
 
         for j in range(len(agn_ids)):
                 i = agn_ids[j]
@@ -459,11 +459,11 @@ def BH_source_add(m,reg,df_nu,boost):
 
                 print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
                 #the tolist gets rid of the array brackets
-                bh = m.add_point_source(luminosity = reg["bhluminosity"][i].value.tolist(), 
+                bh = m.add_point_source(luminosity = reg["bh","luminosity"][i].value.tolist(), 
                                         spectrum = (nu,fnu),
-                                        position = (reg["bhcoordinates"][i,:].in_units('cm').value-boost).tolist())
+                                        position = (reg["bh","coordinates"][i,:].in_units('cm').value-boost).tolist())
 
-        dump_AGN_SEDs(nu,master_bh_fnu,reg["bhluminosity"].value)
+        dump_AGN_SEDs(nu,master_bh_fnu,reg["bh","luminosity"].value)
 
 
 def DIG_source_add(m,reg,df_nu):
