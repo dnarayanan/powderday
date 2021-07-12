@@ -48,7 +48,7 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
     #yt 3.x
     box_len = ds.quan(box_len,'kpc')
     #yt 4.x
-    if yt.__version__ == '4.0.dev0':
+    if float(yt.__version__[0:3]) >= 4:
         box_len = float(box_len.to('code_length').value)
         bbox_lim = box_len
     else:
@@ -74,7 +74,7 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
     #dataset.  We pass around the octree itself in a newly created
     #dictionary called reg.parameters
 
-    if yt.__version__ == '4.0.dev0':
+    if float(yt.__version__[0:3]) >= 4:
         
         #re load the field names, but now with the bounding box
         #set. this will allow us to map the field names to those

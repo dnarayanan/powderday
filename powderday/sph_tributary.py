@@ -34,7 +34,7 @@ def sph_m_gen(fname,field_add):
     
     refined,dustdens,fc1,fw1,reg,ds = yt_octree_generate(fname,field_add)
     
-    if yt.__version__ == '4.0.dev0':
+    if float(yt.__version__[0:3]) >= 4:
         xmin = (fc1[:,0]-fw1[:,0]/2.).to('cm') #in proper cm 
         xmax = (fc1[:,0]+fw1[:,0]/2.).to('cm')
         ymin = (fc1[:,1]-fw1[:,1]/2.).to('cm')

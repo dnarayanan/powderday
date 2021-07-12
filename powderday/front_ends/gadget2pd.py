@@ -91,15 +91,15 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
     def _gassfr(field, data):
         return data[('PartType0', 'StarFormationRate')]
-
+        
     def _gassmootheddensity(field, data):
-        if  yt.__version__ == '4.0.dev0':
+        if float(yt.__version__[0:3]) >= 4:
             return data.ds.parameters['octree'][('PartType0', 'density')]
         else:
             return data[("deposit","PartType0_smoothed_density")]
-
+            
     def _gassmoothedmetals(field, data):
-        if  yt.__version__ == '4.0.dev0':
+        if float(yt.__version__[0:3]) >= 4:
             return data.ds.parameters['octree'][('PartType0', 'metallicity')]
         else:
             el_str = field.name[1]
@@ -110,7 +110,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             return data[("deposit","PartType0_smoothed_"+el_name+"metallicity")]
 
     def _gassmoothedmasses(field, data):
-        if  yt.__version__ == '4.0.dev0':
+        if float(yt.__version__[0:3]) >= 4:
             return data.ds.parameters['octree'][('PartType0', 'Masses')]
         else:
             return data[('deposit', 'PartType0_mass')]
@@ -128,7 +128,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         return (data["PartType0", "Masses"]*(data["PartType0", "Metallicity"].value))
 
     def _metalsmoothedmasses(field, data):
-        if  yt.__version__ == '4.0.dev0':
+        if float(yt.__version__[0:3]) >= 4:
             return (data.ds.parameters['octree'][('PartType0', 'Masses')]* data.ds.parameters['octree'][('PartType0','metallicity')])
         else:
             return (data[('deposit', 'PartType0_smoothed_metalmass')].value)
@@ -164,7 +164,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         return dust_to_gas_ratio * data["gasmasses"]
 
     def _dustsmoothedmasses(field, data):
-        if yt.__version__ == '4.0.dev0':
+        if float(yt.__version__[0:3]) >= 4:
             if cfg.par.otf_extinction == True:
                 dsm = ds.arr(data.ds.parameters['octree'][('PartType3','Masses')],'code_mass')
             else:
@@ -182,7 +182,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
 
     def _li_ml_dustsmoothedmasses(field,data):
-        if yt.__version__ == '4.0.dev0':
+        if float(yt.__version__[0:3]) >= 4:
             return (data.ds.parameters['octree'][('PartType0', 'li_ml_dustmass')])
         else:
             return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
@@ -293,7 +293,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
-        if  yt.__version__ == '4.0.dev0':
+        if float(yt.__version__[0:3]) >= 4:
             ds = yt.load(fname)
             
             #ds.sph_smoothing_style = "gather"
@@ -313,7 +313,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
 
     #if we're in the 4.x branch of yt, load up the octree for smoothing
-    if  yt.__version__ == '4.0.dev0':
+    if float(yt.__version__[0:3]) >= 4:
         left = np.array([pos[0] for pos in bounding_box])
         right = np.array([pos[1] for pos in bounding_box])
         #octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
@@ -519,7 +519,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                 ds.add_field(('PartType3','dummy_size_bin'+str(isize)),function=_size_with_units,sampling_type='particle',units='dimensionless',particle_type=True,force_override=True)
 
                 #deposit onto the octree.
-                if yt.__version__ != '4.0.dev0':
+                if float(yt.__version__[0:3]) >= 4:
                     ds.add_deposited_particle_field(('PartType3','dummy_size_bin'+str(isize)),"sum")
                     
                     print(np.sum(ad["PartType3","dummy_size_bin"+str(isize)]))
@@ -537,12 +537,12 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                 #in zoom.py
 
                 if isize == 0:
-                    if  yt.__version__ != '4.0.dev0':
+                    if float(yt.__version__[0:3]) >= 4:
                         octree_of_sizes = np.zeros((ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))].shape[0],nsizes))
                     else:
                         octree_of_sizes = np.zeros((len(octree[('PartType3','dummy_size_bin'+str(isize))]),nsizes))
 
-                if  yt.__version__ != '4.0.dev0':
+                if float(yt.__version__[0:3]) >= 4:
                     octree_of_sizes[:,isize] = ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))]
                 else:
                     octree_of_sizes[:,isize] = octree[('PartType3','dummy_size_bin'+str(isize))]

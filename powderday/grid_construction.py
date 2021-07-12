@@ -64,7 +64,7 @@ def yt_octree_generate(fname, field_add):
     #pu = ParticleUnion("all", list(ds.particle_types_raw))
 
     
-    if  yt.__version__ == '4.0.dev0':
+    if float(yt.__version__[0:3]) >= 4:
         refined = reg.parameters['octree'][('index','refined')].astype('bool')
 
         #get central positions of cells as edges + width/2.
