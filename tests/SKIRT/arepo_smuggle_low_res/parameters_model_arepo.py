@@ -1,7 +1,7 @@
 #snapshot parameters
 
 snapnum_str = '143'
-hydro_dir = '/ufrc/narayanan/desika.narayanan/powderday_files/smuggle/low_res/'
+hydro_dir = '/blue/narayanan/desika.narayanan/powderday_files/smuggle/low_res/'
 
 galaxy_num = 0
 galaxy_num_str = str(galaxy_num)

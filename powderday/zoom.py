@@ -22,9 +22,9 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
     print ("[octree zoom_bbox_filter:] Calculating Center of Mass")
 
 
-    gas_com_x = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,0])/np.sum(ad["gasdensity"])
-    gas_com_y = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,1])/np.sum(ad["gasdensity"])
-    gas_com_z = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,2])/np.sum(ad["gasdensity"])
+    gas_com_x = np.sum(ad["gas","density"] * ad["gas","coordinates"][:,0])/np.sum(ad["gas","density"])
+    gas_com_y = np.sum(ad["gas","density"] * ad["gas","coordinates"][:,1])/np.sum(ad["gas","density"])
+    gas_com_z = np.sum(ad["gas","density"] * ad["gas","coordinates"][:,2])/np.sum(ad["gas","density"])
 
 
     com = [gas_com_x,gas_com_y,gas_com_z]

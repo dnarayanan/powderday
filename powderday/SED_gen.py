@@ -45,10 +45,10 @@ class Stars:
 
 def star_list_gen(boost,dx,dy,dz,reg,ds):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
-    mass = reg["starmasses"].value
-    positions = reg["starcoordinates"].value
-    age = reg["stellarages"].value
-    nstars = len(reg["stellarages"].value) 
+    mass = reg["star","masses"].value
+    positions = reg["star","coordinates"].value
+    age = reg["stellar","ages"].value
+    nstars = len(reg["stellar","ages"].value) 
     el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe' ]
 
     try:                                                                                                                                                                
@@ -58,9 +58,9 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
                 el_str = ""
             else:
                 el_str = "_"+el[i-1]
-            metals[:, i] = reg["starmetals"+el_str].value
+            metals[:, i] = reg["star","metals"+el_str].value
     except:
-        metals = reg["starmetals"].value
+        metals = reg["star","metals"].value
     print ('number of new stars =',nstars)
     
     #calculate the fsps interpolated metallicity
@@ -127,10 +127,10 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
 
         #Disk Stars
 
-        if ("diskstarcoordinates") in ds.derived_field_list:
+        if ("diskstar","coordinates") in ds.derived_field_list:
             
-            disk_positions = reg[("diskstarcoordinates")].value
-            disk_masses =  reg[("diskstarmasses")].value
+            disk_positions = reg[("diskstar","coordinates")].value
+            disk_masses =  reg[("diskstar","masses")].value
             nstars_disk = len(disk_masses)
      
             #create the disk_list full of DiskStars objects
@@ -147,8 +147,8 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
 
 
         if ("bulgestarcoordinates") in ds.derived_field_list:
-            bulge_positions = reg[("bulgestarcoordinates")].value
-            bulge_masses =  reg[("bulgestarmasses")].value
+            bulge_positions = reg[("bulgestar","coordinates")].value
+            bulge_masses =  reg[("bulgestar","masses")].value
             nstars_bulge = len(bulge_masses)
             
             #create the bulge_list full of BulgeStars objects
@@ -165,7 +165,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
     if cfg.par.SOURCES_IN_CENTER == True:
         for i in range(nstars):
             stars_list[i].positions[:] =  np.array([0,0,0])
-        if ("bulgestarcoordinates") in ds.derived_field_list:
+        if ("bulgestar","coordinates") in ds.derived_field_list:
             for i in range(nstars_bulge):
                 bulgestars_list[i].positions[:] =  np.array([0,0,0])
             for i in range(nstars_disk):
@@ -179,7 +179,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
             xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
             stars_list[i].positions[:] = np.array([xpos,ypos,zpos])
 
-        if ("bulgestarcoordinates") in ds.derived_field_list:
+        if ("bulgestar","coordinates") in ds.derived_field_list:
             for i in range(nstars_bulge):
                 xpos,ypos,zpos = np.random.uniform(-0.9*dx/2.,0.9*dx/2.),np.random.uniform(-0.9*dy/2.,0.9*dy/2.),np.random.uniform(-0.9*dz/2.,0.9*dz/2.)
                 bulgestars_list[i].positions[:] = np.array([xpos,ypos,zpos])
@@ -607,9 +607,9 @@ def get_gas_metals(ngas):
                 el_str = ""
             else:
                 el_str = "_"+el[i-1]
-            metals[:, i] = reg["gasmetals"+el_str].value
+            metals[:, i] = reg["gas","metals"+el_str].value
     except:
-        metals[:,0] = reg["gasmetals"].value
+        metals[:,0] = reg["gas","metals"].value
     
     return metals
 
@@ -648,10 +648,10 @@ def get_agn_seds(agn_ids, reg):
     fnu_in = []
     metals_avg = []
     for agn_id in agn_ids:
-        fnu_in.append(reg["bhsed"][agn_id,:].in_units("Lsun").value/reg["bhnu"].in_units("Hz").value)
-        nu.append(reg["bhnu"].in_units("Hz").value)
-        all_gas_coordinates = reg["gascoordinates"].in_units('kpc').value
-        agn_coordinates = reg["bhcoordinates"][agn_id].in_units('kpc').value
+        fnu_in.append(reg["bh","sed"][agn_id,:].in_units("Lsun").value/reg["bhnu"].in_units("Hz").value)
+        nu.append(reg["bh","nu"].in_units("Hz").value)
+        all_gas_coordinates = reg["gas","coordinates"].in_units('kpc').value
+        agn_coordinates = reg["bh","coordinates"][agn_id].in_units('kpc').value
         metals_avg.append(get_nearest_gas_metals(all_gas_coordinates, agn_coordinates))
 
     z = zip(agn_ids, nu, fnu_in, metals_avg)
