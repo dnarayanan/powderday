@@ -102,7 +102,12 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         if  yt.__version__ == '4.0.dev0':
             return data.ds.parameters['octree'][('PartType0', 'metallicity')]
         else:
-            return data[("deposit","PartType0_smoothed_metallicity")]
+            el_str = field.name[1]
+            if '_' in el_str:
+                el_name = field.name[1][field.name[1].find('_')+1:]+"_"
+            else:
+                el_name = ""
+            return data[("deposit","PartType0_smoothed_"+el_name+"metallicity")]
 
     def _gassmoothedmasses(field, data):
         if  yt.__version__ == '4.0.dev0':
@@ -435,9 +440,21 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     ds.add_field(('gascoordinates'), function=_gascoordinates, sampling_type='particle',units='cm', particle_type=True)
     if add_smoothed_quantities == True:
         ds.add_field(('gassmootheddensity'), function=_gassmootheddensity, sampling_type='particle',units='g/cm**3', particle_type=True)
-        ds.add_field(('gassmoothedmetals'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
         ds.add_field(('gassmoothedmasses'), function=_gassmoothedmasses, sampling_type='particle',units='g', particle_type=True)
-
+        #try:
+        ds.add_field(('gassmoothedmetals'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_He'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_C'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_N'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_O'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_Ne'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_Mg'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_Si'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_S'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_Ca'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        ds.add_field(('gassmoothedmetals_Fe'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
+        #except:
+        #    ds.add_field(('gassmoothedmetals'), function=_gassmoothedmetals, sampling_type='particle',units='code_metallicity', particle_type=True)
 
     if cfg.par.BH_SED == True:
         if ('PartType5','BH_Mass') in ds.derived_field_list:

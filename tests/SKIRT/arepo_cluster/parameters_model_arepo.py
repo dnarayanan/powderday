@@ -3,6 +3,9 @@
 snapnum_str = '59'
 hydro_dir = '/blue/narayanan/desika.narayanan/yt_datasets/TNGHalo/'
 
+galaxy_num = 0
+galaxy_num_str = str(galaxy_num)
+
 snapshot_name = 'halo_59.hdf5'
 
 #where the files should go
