@@ -519,7 +519,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                 ds.add_field(('PartType3','dummy_size_bin'+str(isize)),function=_size_with_units,sampling_type='particle',units='dimensionless',particle_type=True,force_override=True)
 
                 #deposit onto the octree.
-                if float(yt.__version__[0:3]) >= 4:
+                if float(yt.__version__[0:3]) < 4:
                     ds.add_deposited_particle_field(('PartType3','dummy_size_bin'+str(isize)),"sum")
                     
                     print(np.sum(ad["PartType3","dummy_size_bin"+str(isize)]))
@@ -537,12 +537,12 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
                 #in zoom.py
 
                 if isize == 0:
-                    if float(yt.__version__[0:3]) >= 4:
+                    if float(yt.__version__[0:3]) < 4:
                         octree_of_sizes = np.zeros((ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))].shape[0],nsizes))
                     else:
                         octree_of_sizes = np.zeros((len(octree[('PartType3','dummy_size_bin'+str(isize))]),nsizes))
 
-                if float(yt.__version__[0:3]) >= 4:
+                if float(yt.__version__[0:3]) < 4:
                     octree_of_sizes[:,isize] = ad[('deposit','PartType3_sum_dummy_size_bin'+str(isize))]
                 else:
                     octree_of_sizes[:,isize] = octree[('PartType3','dummy_size_bin'+str(isize))]
