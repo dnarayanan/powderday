@@ -188,8 +188,6 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
         
 
-
-
     def _stellarages(field, data):
         ad = data.ds.all_data()
         if data.ds.cosmological_simulation == False:
@@ -291,6 +289,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     def _size_with_units(field,data):
         return data.ds.parameters['size']
     
+    def _dust_numgrains(field,data):
+        return data.ds.arr(data['PartType3','Dust_Size'])
+
+
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         if float(yt.__version__[0:3]) >= 4:
@@ -391,6 +393,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             #we need to add this density field so that the masses can be projected onto the octree in _dustsmoothedmasses
             ds.add_field(('PartType3','density'),function=_dust_density,units='code_mass/code_length**3',sampling_type='particle',particle_type=True)
             ds.add_deposited_particle_field(("PartType3", "Masses"), "sum")
+
+            #just adding this so that we have access to it later for analytics
+            ds.add_field(('dust','numgrains'),function=_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
+
         else:
             ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
     
@@ -418,6 +424,9 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
         if add_smoothed_quantities == True: 
             ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, sampling_type='particle',units='code_mass',particle_type=True)
+
+
+
 
     ds.add_field(('star','masses'), function=_starmasses, sampling_type='particle',units='g', particle_type=True)
     ds.add_field(('star','coordinates'), function=_starcoordinates, sampling_type='particle',units='cm', particle_type=True)

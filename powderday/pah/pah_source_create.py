@@ -32,6 +32,27 @@ def pah_source_add(ds,reg,m):
     grid_of_sizes = ds.parameters['reg_grid_of_sizes']
     simulation_sizes = (ds.parameters['grain_sizes_in_micron']*u.micron).to(u.cm).value
 
+    #determine q_PAH for analysis and save it to parameters for writing out
+    ad = ds.all_data()
+    idx_pah = np.where(simulation_sizes <= 3.e-7)[0]
+    dN_pah = np.sum(grid_of_sizes[:,idx_pah],axis=1)
+    dN_total = np.sum(grid_of_sizes,axis=1)
+
+    try: #mesh based codes or arepo 
+        q_pah = (dN_pah * ad['dust','mass'])/(dN_total* ad['dust','mass'])
+        ds.parameters['q_pah'] = q_pah
+        #compute the mass weighted grain size distributions for comparison in analytics.py #DEBUG DEBUG DEBUG THIS IS TOO GIZMO CENTRIC
+        particle_mass_weighted_gsd = np.average(reg['dust','numgrains'],weights=reg['dust','mass'],axis=0)
+        grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','mass'],axis=0)
+    except:
+        q_pah = (dN_pah * reg['dust','smoothedmasses'])/(dN_total* reg['dust','smoothedmasses'])
+        q_pah[np.isnan(q_pah)] = 0 #since we often have octs with no dust
+        ds.parameters['q_pah'] = q_pah
+        #compute the mass weighted grain size distributions for comparison in analytics.py #DEBUG DEBUG DEBUG THIS IS TOO GIZMO CENTRIC
+        particle_mass_weighted_gsd = np.average(reg['dust','numgrains'],weights=reg['dust','mass'],axis=0)
+        grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','smoothedmasses'],axis=0)
+        
+
     #second, read the information from the Draine files
     PAH_list = read_draine_file(filename)
     print("reading Draine File",filename)
@@ -89,10 +110,14 @@ def pah_source_add(ds,reg,m):
     reg.parameters['total_PAH_luminosity'] = total_PAH_luminosity
     
     grid_PAH_L_lam = grid_PAH_luminosity/draine_lam
-    integrated_grid_PAH_luminosity = np.trapz((grid_PAH_luminosity/draine_lam).value,draine_lam,axis=1)
+    integrated_grid_PAH_luminosity = np.trapz((grid_PAH_luminosity/draine_lam),draine_lam,axis=1)
     reg.parameters['integrated_grid_PAH_luminosity'] = integrated_grid_PAH_luminosity
-
-
+    
+    #save some information for dumping into analytics
+    reg.parameters['q_pah'] = q_pah
+    reg.parameters['particle_mass_weighted_gsd'] = particle_mass_weighted_gsd
+    reg.parameters['grid_mass_weighted_gsd'] = grid_mass_weighted_gsd
+    reg.parameters['simulation_sizes'] = simulation_sizes
 
 
 #    for i_cell in tqdm(range(ncells)):

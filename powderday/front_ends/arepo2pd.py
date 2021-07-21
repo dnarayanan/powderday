@@ -74,6 +74,9 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     def _dustmass_dtm(field,data):
         return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
 
+    def _dust_numgrains(field,data):
+        return (data[('PartType0', 'NumGrains')])
+
 
     def _li_ml_dustmass(field,data):
         li_ml_dgr = dgr_ert(data["gasmetals"],data["PartType0","StarFormationRate"],data["PartType0","Masses"])
@@ -265,6 +268,12 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
         #ds.add_field(('li_ml_dustmass'),function=_li_ml_dustmass, sampling_type='particle', units='code_mass',particle_type=True)
         ds.add_field(("dust","mass"),function=_li_ml_dustmass, sampling_type='particle', units='code_mass',particle_type=True)
+
+
+    #add the numgrains (in case we're in OTF extinction mode)
+    if cfg.par.otf_extinction:
+        ds.add_field(('dust','numgrains'),function=_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
+
 
     ds.add_field(('star','masses'), function=_starmasses,  sampling_type='particle', units='g', particle_type=True)
     ds.add_field(('star','coordinates'), function=_starcoordinates,  sampling_type='particle', units='cm', particle_type=True)

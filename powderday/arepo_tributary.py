@@ -60,7 +60,7 @@ def arepo_m_gen(fname,field_add):
     z_pos_boost = (particle_z-zcent).to('cm')
     
     m.set_voronoi_grid(x_pos_boost.value, y_pos_boost.value, z_pos_boost.value)
-
+    print ('Finished computing the Voronoi Grid')
     #get CMB:
     
     energy_density_absorbed=energy_density_absorbed_by_CMB()
@@ -102,7 +102,7 @@ def arepo_m_gen(fname,field_add):
             assert(np.sum(ad['PartType0','NumGrains']) > 0)
         except AssertionError:
             raise AssertionError("[arepo_tributary:] There are no dust grains in this simulation.  This can sometimes happen in an early snapshot of a simulation where the dust has not yet had time to form.")
-        grid_of_sizes = reg['PartType0','NumGrains']
+        grid_of_sizes = reg['PartType0','NumGrains'].value
         active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy)
 
 

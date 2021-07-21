@@ -65,6 +65,11 @@ otf_extinction_log_min_size = -4 #micron; must match what is set in the hydro si
 otf_extinction_log_max_size = 0 #micron; must match what is set in the hydro simulation
 
 
+draine21_pah_model = True
+draine21_pah_grid_write = False #this will write the PAH spectrum out
+                               #to the npz file for every cell in the
+                               #grid.  note, this causes the grid*.npz
+                               #files to be ~10 GB or more.
 #===============================================
 #STELLAR SEDS INFO
 #===============================================

@@ -83,7 +83,7 @@ def dump_data(reg,model):
     particle_stellar_formation_time = reg["stellar","ages"]
     particle_sfr = reg['gas','sfr'].in_units('Msun/yr')
     particle_dustmass = reg["dust","mass"].in_units('Msun')
-
+    
     #these are in try/excepts in case we're not dealing with gadget and yt 3.x
     try: grid_gas_mass = reg["gas","smoothedmasses"]
     except: grid_gas_mass = -1
@@ -98,6 +98,8 @@ def dump_data(reg,model):
 
     try: grid_star_mass = reg["star","smoothedmasses"]
     except: grid_star_mass = -1
+
+    #PAH information
     try: grid_PAH_luminosity = reg.parameters['grid_PAH_luminosity']
     except: grid_PAH_luminosity = -1
     try: PAH_lam = reg.parameters['PAH_lam']
@@ -106,6 +108,16 @@ def dump_data(reg,model):
     except: total_PAH_luminosity = -1
     try: integrated_grid_PAH_luminosity = reg.parameters['integrated_grid_PAH_luminosity']
     except: integrated_grid_PAH_luminosity = -1
+    try: q_pah = reg.parameters['q_pah']
+    except: q_pah = -1
+    try: particle_mass_weighted_gsd = reg.parameters['particle_mass_weighted_gsd']
+    except: particle_mass_weighted_gsd = -1
+    try: grid_mass_weighted_gsd = reg.parameters['grid_mass_weighted_gsd']
+    except: grid_mass_weighted_gsd = -1
+    try: simulation_sizes = reg.parameters['simulation_sizes']
+    except: simulation_sizes = -1
+
+
     #get tdust
     #m = ModelOutput(model.outputfile+'.sed')
     #oct = m.get_quantities()
@@ -118,7 +130,7 @@ def dump_data(reg,model):
     except:
         outfile = cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+".npz"
 
-    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass,grid_PAH_luminosity = grid_PAH_luminosity,PAH_lam=PAH_lam,total_PAH_luminosity = total_PAH_luminosity,integrated_grid_PAH_luminosity = integrated_grid_PAH_luminosity)#,tdust = tdust)
+    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass,grid_PAH_luminosity = grid_PAH_luminosity,PAH_lam=PAH_lam,total_PAH_luminosity = total_PAH_luminosity,integrated_grid_PAH_luminosity = integrated_grid_PAH_luminosity,q_pah=q_pah,particle_mass_weighted_gsd = particle_mass_weighted_gsd,grid_mass_weighted_gsd = grid_mass_weighted_gsd,simulation_sizes=simulation_sizes)#,tdust = tdust)
 
 
 def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
