@@ -82,8 +82,30 @@ def dump_data(reg,model):
     #particle_stellar_formation_time = reg["starformationtime"]
     particle_stellar_formation_time = reg["stellar","ages"]
     particle_sfr = reg['gas','sfr'].in_units('Msun/yr')
-    particle_dustmass = reg["dust","mass"].in_units('Msun')
     
+    #save dustmasses.  for particle type codes where the particles are
+    #projected onto an octree (gizmo/gadget) this will be the
+    #smoothedmasses field; else, it will just be the ('dust','mass')
+    #tuple which is the mesh values 
+    try: grid_dustmass = reg['dust','smoothedmasses'].in_units('Msun')
+    except: grid_dustmass = reg["dust","mass"].in_units('Msun')  #for arepo/AMR codes,
+                                                 #this is the grid
+                                                 #values (and also
+                                                 #parttype0 for
+                                                 #arepo).  for
+                                                 #gizmo/gadget, this
+                                                 #is particle
+                                                 #information which is
+                                                 #why it has to be in
+                                                 #the except
+                                                 #statement, and not
+                                                 #the try statemetn in logical flow.
+
+    #if we have separate particle dust masses, save them. 
+    try: particle_dustmass = reg['particle_dust','mass'].in_units('Msun')
+    except: particle_dustmass = -1
+
+
     #these are in try/excepts in case we're not dealing with gadget and yt 3.x
     try: grid_gas_mass = reg["gas","smoothedmasses"]
     except: grid_gas_mass = -1
@@ -130,7 +152,7 @@ def dump_data(reg,model):
     except:
         outfile = cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+".npz"
 
-    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass,grid_PAH_luminosity = grid_PAH_luminosity,PAH_lam=PAH_lam,total_PAH_luminosity = total_PAH_luminosity,integrated_grid_PAH_luminosity = integrated_grid_PAH_luminosity,q_pah=q_pah,particle_mass_weighted_gsd = particle_mass_weighted_gsd,grid_mass_weighted_gsd = grid_mass_weighted_gsd,simulation_sizes=simulation_sizes)#,tdust = tdust)
+    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass,grid_dustmass=grid_dustmass,grid_PAH_luminosity = grid_PAH_luminosity,PAH_lam=PAH_lam,total_PAH_luminosity = total_PAH_luminosity,integrated_grid_PAH_luminosity = integrated_grid_PAH_luminosity,q_pah=q_pah,particle_mass_weighted_gsd = particle_mass_weighted_gsd,grid_mass_weighted_gsd = grid_mass_weighted_gsd,simulation_sizes=simulation_sizes)#,tdust = tdust)
 
 
 def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):

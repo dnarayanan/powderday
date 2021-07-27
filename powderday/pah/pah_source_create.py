@@ -19,6 +19,7 @@ from tqdm import tqdm
 
 #4. put in the ionization fraction and appropriate file name per cell.
 
+
 filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/iout_graD16emtPAHib_mmpisrf_1.00'
 #filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/BC03_Z0.02_10Myr/iout_graD16emtPAHib_bc03_z0.02_1e7_1.00'
 #filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/BC03_Z0.0004_10Myr/iout_graD16emtPAHib_bc03_z0.0004_1e7_1.50'
@@ -30,26 +31,43 @@ def pah_source_add(ds,reg,m):
     #first establish the grain size distribution and sizes from the
     #hydro simulation
     grid_of_sizes = ds.parameters['reg_grid_of_sizes']
+
     simulation_sizes = (ds.parameters['grain_sizes_in_micron']*u.micron).to(u.cm).value
 
     #determine q_PAH for analysis and save it to parameters for writing out
     ad = ds.all_data()
-    idx_pah = np.where(simulation_sizes <= 3.e-7)[0]
-    dN_pah = np.sum(grid_of_sizes[:,idx_pah],axis=1)
-    dN_total = np.sum(grid_of_sizes,axis=1)
 
-    try: #mesh based codes or arepo 
-        q_pah = (dN_pah * ad['dust','mass'])/(dN_total* ad['dust','mass'])
-        ds.parameters['q_pah'] = q_pah
+    #ad['particle_dust','numgrains']
+    #ad['particle_dust','carbon_fraction']
+
+    idx_pah = np.where(simulation_sizes <= 3.e-7)[0]
+
+
+    dN_pah = np.sum(reg['particle_dust','numgrains'][:,idx_pah],axis=1)
+    dN_total = np.sum(reg['particle_dust','numgrains'],axis=1)
+
+    q_pah = (dN_pah * reg['particle_dust','mass'])/(dN_total*reg['particle_dust','mass'])
+    q_pah = q_pah * reg['particle_dust','carbon_fraction']
+
+    reg.parameters = {}
+    reg.parameters['q_pah'] = q_pah
+    #reg.parameters['mass_weighted_qpah'] = np.sum(q_pah*reg['particle_dust','mass'])/np.sum(reg['particle_dust','mass'])
+    
+    
+
+    #compute the mass weighted grain size distributions for comparison in analytics.py 
+    try: #for mesh based codes or arepo 
+        #q_pah = (dN_pah * ad['dust','mass'])/(dN_total* ad['dust','mass'])
+        #ds.parameters['q_pah'] = q_pah
         #compute the mass weighted grain size distributions for comparison in analytics.py #DEBUG DEBUG DEBUG THIS IS TOO GIZMO CENTRIC
         particle_mass_weighted_gsd = np.average(reg['dust','numgrains'],weights=reg['dust','mass'],axis=0)
         grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','mass'],axis=0)
     except:
-        q_pah = (dN_pah * reg['dust','smoothedmasses'])/(dN_total* reg['dust','smoothedmasses'])
-        q_pah[np.isnan(q_pah)] = 0 #since we often have octs with no dust
-        ds.parameters['q_pah'] = q_pah
+        #q_pah = (dN_pah * reg['dust','smoothedmasses'])/(dN_total* reg['dust','smoothedmasses'])
+        #q_pah[np.isnan(q_pah)] = 0 #since we often have octs with no dust
+        #ds.parameters['q_pah'] = q_pah
         #compute the mass weighted grain size distributions for comparison in analytics.py #DEBUG DEBUG DEBUG THIS IS TOO GIZMO CENTRIC
-        particle_mass_weighted_gsd = np.average(reg['dust','numgrains'],weights=reg['dust','mass'],axis=0)
+        particle_mass_weighted_gsd = np.average(reg['particle_dust','numgrains'],weights=reg['dust','mass'],axis=0)
         grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','smoothedmasses'],axis=0)
         
 
@@ -100,7 +118,7 @@ def pah_source_add(ds,reg,m):
     #grid_of_sizes to get the dimensions to match up correctly for the dot product
 
     grid_PAH_luminosity = np.dot(pah_grid[idx,:].T, grid_of_sizes.T).T
-    reg.parameters = {}
+
 
     if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
