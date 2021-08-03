@@ -36,9 +36,9 @@ def arepo_m_gen(fname,field_add):
     #because we boost the stars to a [0,0,0] coordinate center, we
     #want to make sure our vornoi tesslation is created in the same manner.
     
-    particle_x = reg["gascoordinates"][:,0].to('cm')
-    particle_y = reg["gascoordinates"][:,1].to('cm')
-    particle_z = reg["gascoordinates"][:,2].to('cm')
+    particle_x = reg["gas","coordinates"][:,0].to('cm')
+    particle_y = reg["gas","coordinates"][:,1].to('cm')
+    particle_z = reg["gas","coordinates"][:,2].to('cm')
 
 
     #just for the sake of symmetry, pass on a dx,dy,dz since it can be

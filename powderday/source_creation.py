@@ -9,7 +9,8 @@ import astropy.units as units
 import astropy.constants as constants
 from powderday.helpers import find_nearest
 from powderday.analytics import dump_AGN_SEDs
-
+from hyperion.model import ModelOutput
+from hyperion.grid.yt3_wrappers import find_order
 
 class Sed_Bins:
     def __init__(self,mass,metals,age,fsps_zmet,all_metals=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
@@ -374,8 +375,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     return m
 
 
-
-
 def wavelength_compress(nu,fnu,df_nu):
     
     nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
@@ -384,18 +383,17 @@ def wavelength_compress(nu,fnu,df_nu):
     compressed_nu = nu[nu_inrange]
     compressed_fnu = np.asarray(fnu)[nu_inrange]
     
-  
     #get rid of all wavelengths below lyman limit
     dum_nu = compressed_nu*units.Hz
     dum_lam = constants.c.cgs/dum_nu
     dum_lam = dum_lam.to(units.angstrom)
 
     wll = np.where(dum_lam.value >= 912)[0] #where are lambda is above the lyman limit
-    nu = nu[wll]
-    fnu = fnu[wll]
-   
+    compressed_nu = compressed_nu[wll] 
+    compressed_fnu = compressed_fnu[wll]
+    
     return compressed_nu, compressed_fnu
-
+    
 
 def BH_source_add(m,reg,df_nu,boost):
 
@@ -404,7 +402,7 @@ def BH_source_add(m,reg,df_nu,boost):
     print("--------------------------------\n")
  
     try:
-        nholes = reg["bhsed"].shape[0]
+        nholes = reg["bh","sed"].shape[0]
 
     except: 
         print('BH source creation failed. No BH found')
@@ -417,7 +415,7 @@ def BH_source_add(m,reg,df_nu,boost):
     else:
         #temporary wavelength compress just to get the length of the
         #compressed nu for a master array
-        dumnu,dumfnu = wavelength_compress(reg["bhnu"].value,reg["bhsed"][0,:].value,df_nu)
+        dumnu,dumfnu = wavelength_compress(reg["bh","nu"].value,reg["bh","sed"][0,:].value,df_nu)
         master_bh_fnu = np.zeros([nholes,len(dumnu)])
          
         width = reg.right_edge-reg.left_edge
@@ -430,27 +428,27 @@ def BH_source_add(m,reg,df_nu,boost):
             #dataset.  so we need to filter out any holes that
             #might not be in the simulation domain or have no luminosity.
 
-            if ((reg["bhcoordinates"][i,0].in_units('kpc') <  (reg.center[0].in_units('kpc')+(0.5*width[0].in_units('kpc'))))
+            if ((reg["bh","coordinates"][i,0].in_units('kpc') <  (reg.center[0].in_units('kpc')+(0.5*width[0].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,0].in_units('kpc') >  (reg.center[0].in_units('kpc')-(0.5*width[0].in_units('kpc'))))
+            (reg["bh","coordinates"][i,0].in_units('kpc') >  (reg.center[0].in_units('kpc')-(0.5*width[0].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,1].in_units('kpc') <  (reg.center[1].in_units('kpc')+(0.5*width[1].in_units('kpc'))))
+            (reg["bh","coordinates"][i,1].in_units('kpc') <  (reg.center[1].in_units('kpc')+(0.5*width[1].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,1].in_units('kpc') >  (reg.center[1].in_units('kpc')-(0.5*width[1].in_units('kpc'))))
+            (reg["bh","coordinates"][i,1].in_units('kpc') >  (reg.center[1].in_units('kpc')-(0.5*width[1].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,2].in_units('kpc') <  (reg.center[2].in_units('kpc')+(0.5*width[2].in_units('kpc'))))
+            (reg["bh","coordinates"][i,2].in_units('kpc') <  (reg.center[2].in_units('kpc')+(0.5*width[2].in_units('kpc'))))
             and
-            (reg["bhcoordinates"][i,2].in_units('kpc') >  (reg.center[2].in_units('kpc')-(0.5*width[2].in_units('kpc'))))
+            (reg["bh","coordinates"][i,2].in_units('kpc') >  (reg.center[2].in_units('kpc')-(0.5*width[2].in_units('kpc'))))
             and 
-            (reg["bhluminosity"][i].value > 0)):
+            (reg["bh","luminosity"][i].value > 0)):
 
                 agn_ids.append(i)
 
 
         print ('Number AGNs in the cutout with non zero luminositites: ', len(agn_ids))
 
-        fnu_arr = sg.get_agn_seds(reg, agn_ids)
-        nu = reg["bhnu"].value
+        fnu_arr = sg.get_agn_seds(agn_ids, reg)
+        nu = reg["bh","nu"].value
 
         for j in range(len(agn_ids)):
                 i = agn_ids[j]
@@ -461,9 +459,83 @@ def BH_source_add(m,reg,df_nu,boost):
 
                 print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
                 #the tolist gets rid of the array brackets
-                bh = m.add_point_source(luminosity = reg["bhluminosity"][i].value.tolist(), 
+                bh = m.add_point_source(luminosity = reg["bh","luminosity"][i].value.tolist(), 
                                         spectrum = (nu,fnu),
-                                        position = (reg["bhcoordinates"][i,:].in_units('cm').value-boost).tolist())
+                                        position = (reg["bh","coordinates"][i,:].in_units('cm').value-boost).tolist())
 
-        dump_AGN_SEDs(nu,master_bh_fnu,reg["bhluminosity"].value)
+        dump_AGN_SEDs(nu,master_bh_fnu,reg["bh","luminosity"].value)
 
+
+def DIG_source_add(m,reg,df_nu):
+
+    print("--------------------------------\n")
+    print("Adding DIG to Source List in source_creation\n")
+    print("--------------------------------\n")
+
+    print ("Getting specific energy dumped in each grid cell")
+
+    try:
+        rtout = cfg.model.outputfile + '.sed'
+        try: 
+            grid_properties = np.load(cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".npz")
+        except:
+            grid_properties = np.load(cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+".npz")
+
+        cell_info = np.load(cfg.model.PD_output_dir+"/cell_info."+cfg.model.snapnum_str+"_"+cfg.model.galaxy_num_str+".npz")
+    except:
+        print ("ERROR: Can't proceed with DIG nebular emission calculation. Code is unable to find the required files.") 
+        print ("Make sure you have the rtout.sed, grid_physical_properties.npz and cell_info.npz for the corresponding galaxy.")
+
+        return 
+
+    m_out = ModelOutput(rtout)
+    oct = m_out.get_quantities()
+    grid = oct
+    order = find_order(grid.refined)
+    refined = grid.refined[order]
+    quantities = {}
+    for field in grid.quantities:
+        quantities[('gas', field)] = grid.quantities[field][0][order][~refined]
+
+    cell_width = cell_info["fw1"][:,0]
+    mass = (quantities['gas','density']*units.g/units.cm**3).value * (cell_width**3)
+    met = grid_properties["grid_gas_metallicity"]
+    specific_energy = (quantities['gas','specific_energy']*units.erg/units.s/units.g).value
+    specific_energy = (specific_energy * mass) # in ergs/s
+
+    # Black 1987 curve has a integrated ergs/s/cm2 of 0.0278 so the factor we need to multiply it by is given by this value
+    factor = specific_energy/(cell_width**2)/(0.0278) 
+
+    mask1 = np.where(mass != 0 )[0]
+    mask = np.where((mass != 0 ) & (factor >= cfg.par.DIG_min_factor))[0] # Masking out all grid cells that have no gas mass and where the specific emergy is too low
+    print (len(factor), len(mask1), len(mask))
+    
+    factor = factor[mask]
+    cell_width = cell_width[mask]
+    cell_x = (cell_info["xmax"] - cell_info["xmin"])[mask]
+    cell_y = (cell_info["ymax"] - cell_info["ymin"])[mask]
+    cell_z = (cell_info["zmax"] - cell_info["zmin"])[mask]
+    pos = np.vstack([cell_x, cell_y, cell_z]).transpose()
+
+    met = grid_properties["grid_gas_metallicity"][:, mask]
+    met = np.transpose(met)
+    
+    fnu_arr = sg.get_dig_seds(factor, cell_width, met)
+    
+    dat = np.load(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/black_1987.npz")
+    spec_lam = dat["lam"]
+    nu = 1.e8 * constants.c.cgs.value / spec_lam 
+
+    for i in range(len(factor)):
+        fnu = fnu_arr[i,:]
+        nu, fnu = wavelength_compress(nu,fnu,df_nu)
+        
+        nu = nu[::-1]
+        fnu = fnu[::-1]
+        
+        lum = np.absolute(np.trapz(fnu,x=nu))*constants.L_sun.cgs.value
+        
+        source = m.add_point_source()
+        source.luminosity = lum # [ergs/s]
+        source.spectrum = (nu,fnu)
+        source.position = pos[i] # [cm]

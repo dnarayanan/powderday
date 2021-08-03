@@ -1,4 +1,5 @@
 from . import front_ends
+from . import front_end_tools
 from . import agn_models
 from . import agn_spectrum
 from . import SED_gen

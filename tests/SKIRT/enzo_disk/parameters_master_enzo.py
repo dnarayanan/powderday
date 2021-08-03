@@ -125,32 +125,27 @@ FORCE_inner_radius = [False, False, True]   # If set, then we force the inner ra
     										# For AGN we keep the inner radius fixed at whatever is set by inner_radius (next parameter) 
     										# irrespective of what this parameter is set to. (Default: [False,False,True])
 
-inner_radius = [1.e19, 1.e19, 2.777e+20]   	# This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
-                            		    	# use_cloudy_tables = False and FORCE_inner_radius = True (Default: [1.e19, 1.e19, 2.777e+20], Units = cm)
+FORCE_N_O_Pilyugin = [False, False, False, False]  # If set to True, Nitrogen abundances are set according to the N/O vs O/H relation from Pilyugin et al. 2012
+                                            # If FORCE_N_O ratio (next parameter) is set to True then this parameter is ignored.(Default: [False,False,False])
 
-FORCE_N_O_ratio = [False, False, False]     # If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
-                            			    # This can be used as a template fix adundance ratio of other elements (Default:  [False, False, False])
+FORCE_N_O_ratio = [False, False, False, False]  # If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
+                            			        # This can be used as a template fix adundance ratio of other elements (Default: False)
 
-N_O_ratio = [-0.85, -0.85, -0.85]           # This sets the log of N/O ratio. This is used only when add_neb_emission = True,
-                            			    # use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = [-0.85, -0.85, -0.85])
+N_O_ratio = [-0.85, -0.85, -0.85, -0.85]        # This sets the log of N/O ratio. This is used only when add_neb_emission = True,
+                            			        # use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = -0.85)
 
-use_Q = [True, True, True]                	# If True, we run CLOUDY by specifying number of ionizing photons which are calculated 
-                            			    # based on the input sed and the inner radius which is set to the Strömgren radius. 
-                            			    # else, CLOUDY is run by specifying just the ionization parameter.Only relevant if 
-                            			    # add_neb_emission = True and use_cloudy_tables = False (Default: [True, True, True])
-
-neb_abund = ["dopita", "dopita", "dopita"]  # This sets the HII region elemental abundances for generating CLOUDY models. 
-                            			    # Available abundaces are.
-                            			    #    dopita:    Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
-                            			    #    newdopita: Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
-                            			    #               includes smooth polynomial for N/O, C/O relationship functional form for He(z),
-                            			    #               new depletion and factors in ISM grains.
-                            			    #    gutkin:    Abundabces from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on Grevesse+Sauvel (1998) 
-                            			    #               and Caffau+2011 
-                            			    #    direct:    Abundances are taken directly from the simulation if possible. Defaults to using "dopita" if there is 
-                            			    #               an error. (Note: Works only for AGNs and star particles that are added directly without binning.
-                            			    #               Make sure to set FORCE_BINNED to False)
-                            			    # This is used only when add_neb_emission = True and use_cloudy_tables = False. (Default: ["dopita", "dopita", "dopita"])
+neb_abund = ["direct", "direct", "direct", "direct"]  # This sets the HII region elemental abundances for generating CLOUDY models. 
+                            			              # Available abundaces are.
+                            			              #    dopita:    Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
+                            			              #    newdopita: Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
+                            			              #               includes smooth polynomial for N/O, C/O relationship functional form for He(z),
+                            			              #               new depletion and factors in ISM grains.
+                            			              #    gutkin:    Abundabces from Gutkin (2016) and PARSEC metallicity (Bressan+2012) based on Grevesse+Sauvel (1998) 
+                            			              #               and Caffau+2011 
+                            			              #    direct:    Abundances are taken directly from the simulation if possible. Defaults to using "dopita" if there is 
+                            			              #               an error. (Note: Works only for AGNs and star particles that are added directly without binning.
+                            			              #               Make sure to set FORCE_BINNED to False)
+                            			              # This is used only when add_neb_emission = True and use_cloudy_tables = False. (Default: dopita)
 
 #***************************
 # YOUNG STARS (HII regions)
@@ -168,13 +163,18 @@ HII_Rinner_per_Rs = 0.01        		    # Rinner for cloudy calculations is set to
 HII_nh = 1.e2               			    # Gas hydrogen density for calcualting nebular emission in units if cm^-3. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e2)
 
+HII_min_age = 1.e-3                         # Sets the minimum age limit for calculating nebular emission in units of Gyr. 
+                                            # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e-3)
+
 HII_max_age = 1.e-2         			    # Sets the maximum age limit for calculating nebular emission in units of Gyr. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e-2)
 
 HII_escape_fraction = 0.0   			    # Fraction of H-ionizaing photons that escape the HII region. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 0.0)
 
-
+HII_alpha_enhacement = False                # If set to True then the metallicity of star particles to Fe/H rather than the total metals. 
+                                            # Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
+                                            # hardening of the radiaiton field due to alpha-enhancement. (Default: False)
 #****************
 # Post-AGB STARS
 #****************
@@ -216,6 +216,23 @@ AGN_nh = 1.e3					            # Gas hydrogen density for calcualting nebular emi
 
 AGN_num_gas = 32							# For CLOUDY calculations we use the distance weighted average metallicity of gas particles around the AGN. 
 											# The number of gas particles used for doing so is set by this parameter. (Default: 32)
+
+#**********************
+# DIffused Ionized Gas (DIG)
+#**********************
+
+add_DIG_neb = False                         # If set, Contribution from DIG is included when calculating nebular emission (Default: False)
+
+DIG_nh = 1.e1                               # Gas hydrogen density for calcualting nebular emission in units of cm^-3. (Default: 10)
+
+DIG_min_factor = 3500                        # For DIG CLOUDY calculations we use Black (1987) SED as a template. The normalization of the SED is 
+                                            # set by a parameter called  "Factor". It is the ratio of total energy dumped in a cell to the total 
+                                            # energy of the Black (1987) SED, which we use as the template for setting the SED shape for calculating 
+                                            # DIG emission. This parameter sets the minimum factor that the code uses for calculation. For example, 
+                                            # setting this parameter to 1 causes the code to ignore all the cells that have a factor < 1 or in other 
+                                            # words ignore all the cells where the total energy dumped is less than the integrated energy of the 
+                                            # Black (1987) SED (Default: 1).
+
 #*************************
 # DEBUGGING AND CLEAN UP
 #*************************
@@ -379,3 +396,4 @@ NEB_DEBUG = False # Dumps parameters related to nebular line emission in a file 
                   # The file includes the ionization parameter, number of ionizing photons, 
                   # metallicity, inner radius, stellar mass and age for each particle.
                   # Naming convention: nebular_properties_galaxy*.txt where * is the galaxy number
+DIFF_DIG_SED = False # If set, SEDs with DIG nebular emission are saved separately with "_DIG" appended to the rtout files

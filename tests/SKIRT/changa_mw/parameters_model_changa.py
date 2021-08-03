@@ -2,6 +2,11 @@
 
 snapnum_str = '004096'
 hydro_dir = '/blue/narayanan/desika.narayanan/powderday_files/tremmel/starform_example/'
+galaxy_num = 0
+
+
+galaxy_num_str = str(galaxy_num)
+snapnum_str = '{:03d}'.format(snapshot_num)
 
 snapshot_name = 'pioneer50h243.1536gst1bwK1BH.004096'
 

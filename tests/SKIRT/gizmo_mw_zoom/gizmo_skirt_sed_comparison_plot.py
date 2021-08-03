@@ -12,8 +12,8 @@ import h5py
 import fsps
 
 #SKIRT STUFF
-sedfile = '/ufrc/narayanan/desika.narayanan/SKIRT/run/pd_test.dust_i90_sed.dat'
-run = '/ufrc/narayanan/desika.narayanan/pd_git/tests/SKIRT/gizmo_mw_zoom/pd_skirt_comparison.134.rtout.sed'
+sedfile = '/home/desika.narayanan/SKIRT8/run/gizmo_test/pd_submission_safe/pd_test.dust_i90_sed.dat'
+run = './pd_skirt_comparison.134.rtout.sed'
 
 data = np.loadtxt(sedfile)
 skirt_lam = data[:,0]

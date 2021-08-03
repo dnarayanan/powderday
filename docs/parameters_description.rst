@@ -301,7 +301,8 @@ Nebular Emission Info
 COMMON PARAMETERS
 ~~~~~~~~~~~~~~~~~~~~~~
 
-NOTE: These parmeters take three values as an input. They correspond to the value of the pararmeter for young_stars, Post-AGB stars and AGN respectively.
+NOTE: These parmeters take three or four values as an input. 
+They correspond to the value of the pararmeter for young_stars, Post-AGB stars , AGNs and Diffuse Ionized Gas (DIG) respectively.
 
 :FORCE_gas_logu:
     
@@ -348,6 +349,11 @@ NOTE: These parmeters take three values as an input. They correspond to the valu
     This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
     use_cloudy_tables = True and FORCE_inner_radius = True (Default: [1.e19,1.e19,2.777e+20])
 
+:FORCE_N_O_Pilyugin:
+    If set, then the Nitrogen abundances are set according to the N/O vs O/H relation from Pilyugin et al. 2012
+    If FORCE_N_O ratio (next parameter) is set to True then this parameter is ignored. (Default: [False,False,False])
+
+    
 :FORCE_N_O_ratio: 
     
     If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
@@ -400,6 +406,10 @@ Young Stars
    
     Gas hydrogen density for calcualting nebular emission in units if cm^-3. (Default = 1.e2)
 
+:HII_min_age:
+
+    Sets the minimum age limit for calculating nebular emission in units of Gyr. (Default = 1.e-3)
+
 :HII_max_age:
    
     Sets the maximum age limit for calculating nebular emission in units of Gyr. (Default = 1.e-2)
@@ -408,6 +418,11 @@ Young Stars
     
     HII region escape fraction (Default = 0.0)
 
+:HII_alpha_enhacement:               
+    
+    If set, then the metallicity of star particles to [Fe/H] rather than the total metals. 
+    Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
+    hardening of the radiaiton field due to alpha-enhancement. (Default: False)
 
 Post-AGB stars
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -456,7 +471,8 @@ Post-AGB stars
 :PAGB_escape_fraction:	    
 	
 	Fraction of H-ionizaing photons that escape the HII region. 
-    This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 0.0)
+    This is used only when add_neb_emission = True and use_cloudy_tables = False and
+    add_pagb_stars is set to True (Default = 0.0)
 
 AGN
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -467,15 +483,34 @@ AGN
 
 :AGN_nh:					            
 	
-	Gas hydrogen density for calcualting nebular emission in units if cm^-3. 
-    This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e3)
+	Gas hydrogen density for calcualting nebular emission in units if cm^-3. (Default = 1.e3)
 
 :AGN_num_gas:
 
 	For CLOUDY calculations we use the distance weighted average metallicity of gas particles around the AGN. 
 	The number of gas particles used for doing so is set by this parameter. 
 	(Default: 32)
-	
+
+
+DIG
+~~~~~~~~~~~~~~~~~~~~~~
+
+:add_DIG_neb:
+    
+    If set, Contribution from DIG is included when calculating nebular emission (Default: False)
+
+:DIG_nh:
+
+    Gas hydrogen density for calcualting nebular emission in units of cm^-3. (Default: 10)
+
+:DIG_min_factor:
+
+    For DIG CLOUDY calculations we use Black (1987) SED as a template. The normalization of the SED is set by a parameter called  "Factor". 
+    It is the ratio of total energy dumped in a cell to the total energy of the Black (1987) SED, which we use as the template for setting 
+    the SED shape for calculating DIG emission. This parameter sets the minimum factor that the code uses for calculation. 
+    For example, setting this parameter to 1 causes the code to ignore all the cells that have a factor < 1 or in other words ignore all the 
+    cells where the total energy dumped is less than the integrated energy of the Black (1987) SED. (Default: 1)
+
 DEBUGGING AND CLEAN UP
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -503,7 +538,7 @@ DEBUGGING AND CLEAN UP
    Note that in case an error occurs, the files are not deleted even if this value is set to True.
    (Default: True)  
    
-
+   
 Birth Cloud Information
 ------------
 

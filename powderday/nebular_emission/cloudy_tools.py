@@ -137,13 +137,14 @@ def convert_metals(metals):
     Converts metalicity from units of percentage by mass (SIMBA) 
     to atom per hydrogen atoms (CLOUDY)
     """
+    per_H = 0.7381 # Photospheric mass fraction from Asplund et al. 2009
     # mass of elements in unified atomic mass units
     # [He, C, N, O, Ne, Mg, Si, S, Ca, Fe]
-    per_H = 0.7314
     mass_H = 1.008
-    mass = [4.002602, 12.001, 14.007, 15.999, 20.1797, 
+    mass = [4.002602, 12.001, 14.007, 15.999, 20.1797,
             24.305, 28.085, 32.06, 40.078, 55.845]
     metals_conv = np.zeros(len(metals))
+    # Converting from mass fraction to atomic fraction
     for i in range(len(metals)):
         metals_conv[i] = np.log10((metals[i]/per_H)*(mass_H/mass[i]))
 

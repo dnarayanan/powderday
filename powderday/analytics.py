@@ -69,27 +69,34 @@ def stellar_sed_write(m):
    
 
 def dump_cell_info(refined,fc1,fw1,xmin,xmax,ymin,ymax,zmin,zmax):
-    outfile = cfg.model.PD_output_dir+"cell_info."+cfg.model.snapnum_str+".npz"
+    outfile = cfg.model.PD_output_dir+"cell_info."+cfg.model.snapnum_str+"_"+cfg.model.galaxy_num_str+".npz"
     np.savez(outfile,refined=refined,fc1=fc1,fw1=fw1,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,zmin=zmin,zmax=zmax)
 
 def dump_data(reg,model):
-
-    particle_fh2 = reg["gasfh2"]
+    
+    particle_fh2 = reg["gas","fh2"]
     particle_fh1 = np.ones(len(particle_fh2))-particle_fh2
-    particle_gas_mass = reg["gasmasses"]
-    particle_star_mass = reg["starmasses"]
-    particle_star_metallicity = reg["starmetals"]
+    particle_gas_mass = reg["gas","masses"]
+    particle_star_mass = reg["star","masses"]
+    particle_star_metallicity = reg["star","metals"]
     #particle_stellar_formation_time = reg["starformationtime"]
-    particle_stellar_formation_time = reg["stellarages"]
-    particle_sfr = reg['gassfr'].in_units('Msun/yr')
-    particle_dustmass = reg["dustmass"].in_units('Msun')
+    particle_stellar_formation_time = reg["stellar","ages"]
+    particle_sfr = reg['gas','sfr'].in_units('Msun/yr')
+    particle_dustmass = reg["dust","mass"].in_units('Msun')
 
     #these are in try/excepts in case we're not dealing with gadget and yt 3.x
-    try: grid_gas_mass = reg["gassmoothedmasses"]
+    try: grid_gas_mass = reg["gas","smoothedmasses"]
     except: grid_gas_mass = -1
-    try: grid_gas_metallicity = reg["gassmoothedmetals"]
+    try: 
+        grid_gas_metallicity = []
+        grid_gas_metallicity.append(reg["gas","smoothedmetals"].value)
+        abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+        for i in abund_el:
+            grid_gas_metallicity.append(reg["gas","smoothedmetals_"+str(i)].value)
+
     except: grid_gas_metallicity = -1
-    try: grid_star_mass = reg["starsmoothedmasses"]
+
+    try: grid_star_mass = reg["star","smoothedmasses"]
     except: grid_star_mass = -1
 
     #get tdust
@@ -117,24 +124,24 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
 
     #create stars file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 
-    spos_x = reg["starcoordinates"][:,0].in_units('pc').value
-    spos_y = reg["starcoordinates"][:,1].in_units('pc').value
-    spos_z = reg["starcoordinates"][:,2].in_units('pc').value
-    smasses = reg["starmasses"].in_units('Msun').value
+    spos_x = reg["star","coordinates"][:,0].in_units('pc').value
+    spos_y = reg["star","coordinates"][:,1].in_units('pc').value
+    spos_z = reg["star","coordinates"][:,2].in_units('pc').value
+    smasses = reg["star","masses"].in_units('Msun').value
 
     try:
-        disk_x = reg["diskstarcoordinates"][:,0].in_units('pc').value
-        disk_y = reg["diskstarcoordinates"][:,1].in_units('pc').value
-        disk_z = reg["diskstarcoordinates"][:,2].in_units('pc').value
-        diskmasses = reg["diskstarmasses"].in_units('Msun').value
+        disk_x = reg["diskstar","coordinates"][:,0].in_units('pc').value
+        disk_y = reg["diskstar","coordinates"][:,1].in_units('pc').value
+        disk_z = reg["diskstar","coordinates"][:,2].in_units('pc').value
+        diskmasses = reg["diskstar","masses"].in_units('Msun').value
     except:
         disk_x, disk_y, disk_z, diskmasses = (np.array([]),)*4
 
     try:
-        bulge_x = reg["bulgestarcoordinates"][:,0].in_units('pc').value
-        bulge_y = reg["bulgestarcoordinates"][:,1].in_units('pc').value
-        bulge_z = reg["bulgestarcoordinates"][:,2].in_units('pc').value
-        bulgemasses = reg["bulgestarmasses"].in_units('Msun').value
+        bulge_x = reg["bulgestar","coordinates"][:,0].in_units('pc').value
+        bulge_y = reg["bulgestar","coordinates"][:,1].in_units('pc').value
+        bulge_z = reg["bulgestar","coordinates"][:,2].in_units('pc').value
+        bulgemasses = reg["bulgestar","masses"].in_units('Msun').value
     except:
         bulge_x, bulge_y, bulge_z, bulgemasses = (np.array([]),)*4
 
@@ -166,18 +173,18 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
 
     #create the gas file for SPH-oids.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 
-    gpos_x = reg["gascoordinates"][:,0].in_units('pc').value
-    gpos_y = reg["gascoordinates"][:,1].in_units('pc').value
-    gpos_z = reg["gascoordinates"][:,2].in_units('pc').value
-    gmass = reg["gasmasses"].in_units('Msun').value
-    gmetallicity = reg["gasmetals"].value
-    grho = (reg["gasdensity"]*reg["gasmetals"].value*cfg.par.dusttometals_ratio).in_units('Msun/cm**3').value
+    gpos_x = reg["gas","coordinates"][:,0].in_units('pc').value
+    gpos_y = reg["gas","coordinates"][:,1].in_units('pc').value
+    gpos_z = reg["gas","coordinates"][:,2].in_units('pc').value
+    gmass = reg["gas","masses"].in_units('Msun').value
+    gmetallicity = reg["gas","metals"].value
+    grho = (reg["gas","density"]*reg["gas","metals"].value*cfg.par.dusttometals_ratio).in_units('Msun/cm**3').value
 
 
 
     #set the smoothing lengths. see if we have one defined from the front ends.  if not, then we just use a constant value
     try:
-        ghsml = reg["gassmoothinglength"].in_units('pc').value
+        ghsml = reg["gas","smoothinglength"].in_units('pc').value
     except:
         ghsml = np.repeat(hsml_in_pc,len(gpos_x))
 
@@ -219,7 +226,7 @@ def logu_diagnostic(logQ, LogU, LogZ, Rin, cluster_mass, num_cluster, age, appen
 
 
 # Dumps emission lines
-def dump_emlines(line_wav, line_em, append=True):
+def dump_emlines(line_wav, line_em, id_val, append=True):
     if hasattr(cfg.model, 'galaxy_num_str'):
         outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy" + cfg.model.galaxy_num_str + ".txt"
     else:
@@ -232,7 +239,9 @@ def dump_emlines(line_wav, line_em, append=True):
         f = open(outfile_lines,'a+')
         if os.stat(outfile_lines).st_size == 0:
             np.savetxt(f,np.expand_dims(line_wav,axis=0))
+        
         np.savetxt(f,np.expand_dims(line_em,axis=0))
+        
         f.close()
 
 # Dumps AGN SEDs
