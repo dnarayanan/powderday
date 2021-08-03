@@ -84,21 +84,20 @@ def make_SED(m, par, model, DIG=False):
                   n_processes=par.n_MPI_processes, overwrite=True)
 
 
-def make_image(m ,par, model):
+def make_image(m_imaging, par, model,dx,dy,dz):
     print("Beginning Monochromatic Imaging RT")
-
+    
     if cfg.par.IMAGING_TRANSMISSION_FILTER == False:
-
+        
         # read in the filters file
         try:
-            filter_data = [np.loadtxt(par.filterdir + f) for f in par.filterfiles]
+            filter_data = [np.loadtxt(par.filterdir+f) for f in par.filterfiles]
         except:
-            raise ValueError(
-                "Filters not found. You may be running above changeset 'f1f16eb' with an outdated parameters_master file. Please update to the most recent parameters_master format or ensure that the 'filterdir' and 'filterfiles' parameters are set properly.")
-
+            raise ValueError("Filters not found. You may be running above changeset 'f1f16eb' with an outdated parameters_master file. Please update to the most recent parameters_master format or ensure that the'filterdir' and 'filterfiles' parameters are set properly.")
+            
         # Extract and flatten all wavelengths in the filter files
         wavs = [wav[0] for single_filter in filter_data for wav in single_filter]
-        wavs = list(set(wavs))  # Remove duplicates, if they exist
+        wavs = list(set(wavs))      # Remove duplicates, if they exist
 
         m_imaging.set_monochromatic(True, wavelengths=wavs)
         m_imaging.set_raytracing(True)
@@ -121,21 +120,13 @@ def make_image(m ,par, model):
     if cfg.par.MANUAL_ORIENTATION == True:
         image.set_viewing_angles(np.array(cfg.par.THETA), np.array(cfg.par.PHI))
     else:
-        image.set_viewing_angles(np.linspace(0, 90, par.NTHETA).tolist() * par.NPHI,
-                                 np.repeat(np.linspace(0, 90, par.NPHI), par.NPHI))
+        image.set_viewing_angles(np.linspace(0, 90, par.NTHETA).tolist()*par.NPHI, np.repeat(np.linspace(0, 90, par.NPHI), par.NPHI))
 
     image.set_track_origin('basic')
     image.set_image_size(cfg.par.npix_x, cfg.par.npix_y)
-    image.set_image_limits(-dx / 2., dx / 2., -dy / 2., dy / 2.)
+    image.set_image_limits(-dx/2., dx/2., -dy/2., dy/2.)
 
-    if cfg.par.SKIP_RT == False:
-        m_imaging.write(model.inputfile + '.image', overwrite=True)
-        m_imaging.run(model.outputfile + '.image', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
-
-        convolve(model.outputfile + '.image', par.filterfiles, filter_data)
-    else:
-        # Print a message in case that skip_rt debugging flag is set:
-        print('++++++++++++++++++++++++++++++++++++')
-        print('WARNING: SKIP RT is set in the parameters_master file - this is why your code didnt run')
-        print('++++++++++++++++++++++++++++++++++++')
-        
+    m_imaging.write(model.inputfile+'.image', overwrite=True)
+    m_imaging.run(model.outputfile+'.image', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+    
+    convolve(model.outputfile+'.image', par.filterfiles, filter_data)

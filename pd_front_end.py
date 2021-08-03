@@ -200,5 +200,7 @@ if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
     else:
         make_SED(m, par, model)
 
+
 if cfg.par.IMAGING:
-    make_image(m, par, model)
+    make_image(m_imaging, par, model, dx, dy, dz)
+
