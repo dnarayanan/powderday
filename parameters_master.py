@@ -103,6 +103,8 @@ cmdf_bins = 6                               # The number of bins used for calula
 
 cmdf_beta = -2.0                            # Beta (power law exponent) for calculating CMDF (dN/dM goes as M^(beta)) 
 
+cmdf_rescale = True                         # Rescale cluster masses to initial mass
+
 
 #**********************
 # COMMON PARAMETERS
