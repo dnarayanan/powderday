@@ -113,7 +113,7 @@ The second and manual way to install `Hyperion
 <http://www.hyperion-rt.org>`_ follows (note, for the manual installation you don't have to worry about the six replacement above):
 1. First clone the main repository.::
 
-     >git clone https://github.com/astrofrog/hyperion.git
+     >git clone https://github.com/hyperion-rt/hyperion.git
      
 2. Install the python module::
 
