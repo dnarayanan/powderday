@@ -136,6 +136,9 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         ad = data.ds.all_data()
         return (ad['PartType3','Masses'])
 
+    def _particle_dust_coordinates(field,data):
+        ad = data.ds.all_data()
+        return (ad['PartType3','Coordinates'])
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
@@ -305,6 +308,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         ds.add_field(('particle_dust','carbon_fraction'),function=_particle_dust_carbon_fraction,units='dimensionless',sampling_type='particle',particle_type=True)
         ds.add_field(('particle_dust','numgrains'),function=_particle_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
         ds.add_field(('particle_dust','mass'),function=_particle_dust_mass,units='code_mass',sampling_type='particle',particle_type=True)
+        ds.add_field(('particle_dust','coordinates'),function=_particle_dust_coordinates,units='code_length',sampling_type='particle',particle_type=True)
 
     ds.add_field(('star','masses'), function=_starmasses,  sampling_type='particle', units='g', particle_type=True)
     ds.add_field(('star','coordinates'), function=_starcoordinates,  sampling_type='particle', units='cm', particle_type=True)

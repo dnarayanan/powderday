@@ -315,6 +315,11 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         #(non-particle-based) front ends.
         return (data.ds.arr(data[("PartType3", "Masses")].value, 'code_mass'))
 
+    def _particle_dust_coordinates(field,data):
+        ad = data.ds.all_data()
+        return (ad['PartType3','Coordinates'])
+
+
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         if float(yt.__version__[0:3]) >= 4:
@@ -420,6 +425,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             ds.add_field(('particle_dust','numgrains'),function=_particle_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
             ds.add_field(('particle_dust','carbon_fraction'),function=_particle_dust_carbon_fraction,units='dimensionless',sampling_type='particle',particle_type=True)
             ds.add_field(('particle_dust','mass'),function=_particle_dust_mass,units='code_mass',sampling_type='particle',particle_type=True)
+            ds.add_field(('particle_dust','coordinates'),function=_particle_dust_coordinates,units='code_length',sampling_type='particle',particle_type=True)
 
         else:
             ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")

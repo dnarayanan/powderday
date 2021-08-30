@@ -2,6 +2,7 @@ import numpy as np
 from powderday.pah.pah_file_read import read_draine_file
 from powderday.helpers import find_nearest
 from astropy import units as u
+from astropy import constants as constants
 import powderday.config as cfg
 import pdb
 from tqdm import tqdm
@@ -26,7 +27,7 @@ filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/iout_graD16emt
 #iout_DH20Ad_P0.20_0.00_bc03_z0.02_1e7_1.00'
 #filename = '/home/desika.narayanan/PAHs/vsg_stat_therm.iout'
 
-def pah_source_add(ds,reg,m):
+def pah_source_add(ds,reg,m,boost):
 
     #first establish the grain size distribution and sizes from the
     #hydro simulation
@@ -36,9 +37,6 @@ def pah_source_add(ds,reg,m):
 
     #determine q_PAH for analysis and save it to parameters for writing out
     ad = ds.all_data()
-
-    #ad['particle_dust','numgrains']
-    #ad['particle_dust','carbon_fraction']
 
     idx_pah = np.where(simulation_sizes <= 3.e-7)[0]
 
@@ -51,22 +49,13 @@ def pah_source_add(ds,reg,m):
 
     reg.parameters = {}
     reg.parameters['q_pah'] = q_pah
-    #reg.parameters['mass_weighted_qpah'] = np.sum(q_pah*reg['particle_dust','mass'])/np.sum(reg['particle_dust','mass'])
-    
     
 
     #compute the mass weighted grain size distributions for comparison in analytics.py 
     try: #for mesh based codes or arepo 
-        #q_pah = (dN_pah * ad['dust','mass'])/(dN_total* ad['dust','mass'])
-        #ds.parameters['q_pah'] = q_pah
-        #compute the mass weighted grain size distributions for comparison in analytics.py #DEBUG DEBUG DEBUG THIS IS TOO GIZMO CENTRIC
         particle_mass_weighted_gsd = np.average(reg['dust','numgrains'],weights=reg['dust','mass'],axis=0)
         grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','mass'],axis=0)
     except:
-        #q_pah = (dN_pah * reg['dust','smoothedmasses'])/(dN_total* reg['dust','smoothedmasses'])
-        #q_pah[np.isnan(q_pah)] = 0 #since we often have octs with no dust
-        #ds.parameters['q_pah'] = q_pah
-        #compute the mass weighted grain size distributions for comparison in analytics.py #DEBUG DEBUG DEBUG THIS IS TOO GIZMO CENTRIC
         particle_mass_weighted_gsd = np.average(reg['particle_dust','numgrains'],weights=reg['dust','mass'],axis=0)
         grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','smoothedmasses'],axis=0)
         
@@ -75,7 +64,7 @@ def pah_source_add(ds,reg,m):
     PAH_list = read_draine_file(filename)
     print("reading Draine File",filename)
     draine_sizes = PAH_list[0].size_list
-    draine_lam = PAH_list[0].lam
+    draine_lam = PAH_list[0].lam*u.micron
     #third, on a cell-by-cell basis, interpolate the luminosity for
     #each grain size bin, and multiply by the number of grains in that
     #bin
@@ -118,17 +107,41 @@ def pah_source_add(ds,reg,m):
     #grid_of_sizes to get the dimensions to match up correctly for the dot product
 
     grid_PAH_luminosity = np.dot(pah_grid[idx,:].T, grid_of_sizes.T).T
+    particle_PAH_luminosity = np.dot(pah_grid[idx,:].T,reg['particle_dust','numgrains'].T).T
 
+    flam = (np.divide(particle_PAH_luminosity,draine_lam.cgs.value))
+    fnu = draine_lam.cgs.value**2/constants.c.cgs.value*flam
+    nu = (constants.c/draine_lam).to(u.Hz)
+
+    #Because the Draine templates include re-emission, but we want to
+    #add the PAHs as sources only, we restrict to the PAH range.
+    nu_reverse = nu[::-1]
+    nu_pah2 = (constants.c/(3*u.micron)).to(u.Hz) #start of the pah range
+    nu_pah1 = (constants.c/(20.*u.micron)).to(u.Hz) #end of pah range
+    wpah_nu_reverse = np.where( (nu_reverse.value < nu_pah2.value) & (nu_reverse.value > nu_pah1.value))[0]
+
+
+
+    import pdb
+    pdb.set_trace()
+    for i in range(particle_PAH_luminosity.shape[0]):
+        #lum = np.trapz(draine_lam[wpah_lam].cgs.value,flam[i,wpah_lam]).value
+        fnu_reverse = fnu[i,:][::-1]
+
+        lum = np.absolute(np.trapz(nu_reverse[wpah_nu_reverse].cgs.value,fnu_reverse[wpah_nu_reverse])).value.item()
+        #reversing arrays to make nu increasing, and therefore correct for hyperion addition
+        m.add_point_source(luminosity = lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse].value), position = reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
+        
 
     if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
-        reg.parameters['PAH_lam'] = draine_lam
+    reg.parameters['PAH_lam'] = draine_lam.value
 
     total_PAH_luminosity =np.sum(grid_PAH_luminosity,axis=0)
     reg.parameters['total_PAH_luminosity'] = total_PAH_luminosity
     
-    grid_PAH_L_lam = grid_PAH_luminosity/draine_lam
-    integrated_grid_PAH_luminosity = np.trapz((grid_PAH_luminosity/draine_lam),draine_lam,axis=1)
+    grid_PAH_L_lam = grid_PAH_luminosity/draine_lam.value
+    integrated_grid_PAH_luminosity = np.trapz((grid_PAH_luminosity/draine_lam.value),draine_lam.value,axis=1)
     reg.parameters['integrated_grid_PAH_luminosity'] = integrated_grid_PAH_luminosity
     
     #save some information for dumping into analytics

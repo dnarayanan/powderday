@@ -74,7 +74,7 @@ m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 from powderday.pah.pah_source_create import pah_source_add
-if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m)
+if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
 
 
 sp = fsps.StellarPopulation()
@@ -127,7 +127,7 @@ else:
 
 # save SEDs
 # stars and black holes can't both be in the sim and write stellar SEDs to a file becuase they have different wavelength sizes
-if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
+if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED) and not (par.draine21_pah_model):
     stellar_sed_write(m)
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
