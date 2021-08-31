@@ -153,7 +153,7 @@ active (so, on a supercomputer you might need to load these modules
 such as [for example, on the University of Florida HiPerGator
 supercomputer])::
 
-  >module load git/2.14.1  intel/2018.1.163  openmpi/3.1.0  libz/1.2.8 hdf5/1.10.1
+  >module load  1) intel/2018.1.163   2) openmpi/4.0.3   3) hdf5/1.10.1
 
 of course please be careful of mixing and matching compilers, and
 ensuring that you have the same compilers loaded for all
