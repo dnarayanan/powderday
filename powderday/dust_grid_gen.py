@@ -12,13 +12,13 @@ def manual_oct(reg,refined):
     wFalse = np.where(np.array(refined) == False)[0]
     
     
-    density_smoothed = reg["gassmootheddensity"]
-    metallicity_smoothed = reg["gassmoothedmetals"]
-    masses_smoothed = reg["gassmoothedmasses"]
+    density_smoothed = reg["gas","smootheddensity"]
+    metallicity_smoothed = reg["gas","smoothedmetals"]
+    masses_smoothed = reg["gas","smoothedmasses"]
 
     
     try:
-        smoothed_dust_masses = reg[('dustsmoothedmasses')]
+        smoothed_dust_masses = reg[('dust','smoothedmasses')]
     except:
         raise KeyError('Dust mass information not present in this snapshot. Please set another dust grid type in the parameters.')
     dust_to_gas_ratio = smoothed_dust_masses.in_units('g')/masses_smoothed
@@ -36,9 +36,9 @@ def dtm_grid_oct(reg,refined):
 
     
 
-    density_smoothed = reg["gassmootheddensity"]
-    metallicity_smoothed = reg["gassmoothedmetals"]
-    masses_smoothed = reg["gassmoothedmasses"]
+    density_smoothed = reg["gas","smootheddensity"]
+    metallicity_smoothed = reg["gas","smoothedmetals"]
+    masses_smoothed = reg["gas","smoothedmasses"]
     
     dust_smoothed = np.zeros(len(refined))
     
@@ -70,9 +70,9 @@ def remy_ruyer_oct(reg,refined):
 
 
 
-    density_smoothed = reg["gassmootheddensity"]
-    metallicity_smoothed = reg["gassmoothedmetals"]
-    masses_smoothed = reg["gassmoothedmasses"]
+    density_smoothed = reg["gas","smootheddensity"]
+    metallicity_smoothed = reg["gas","smoothedmetals"]
+    masses_smoothed = reg["gas","smoothedmasses"]
  
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
@@ -106,9 +106,9 @@ def li_bestfit_oct(reg,refined):
     wFalse = np.where(np.array(refined) == False)[0]
 
 
-    density_smoothed = reg["gassmootheddensity"]
-    metallicity_smoothed = reg["gassmoothedmetals"]
-    masses_smoothed = reg["gassmoothedmasses"]
+    density_smoothed = reg["gas","smootheddensity"]
+    metallicity_smoothed = reg["gas","smoothedmetals"]
+    masses_smoothed = reg["gas","smoothedmasses"]
 
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
@@ -151,9 +151,9 @@ def li_ml_oct(reg,refined):
     wFalse = np.where(np.array(refined) == False)[0]
 
     
-    density_smoothed = reg["gassmootheddensity"]
-    metallicity_smoothed = reg["gassmoothedmetals"]
-    masses_smoothed = reg["gassmoothedmasses"]
+    density_smoothed = reg["gas","smootheddensity"]
+    metallicity_smoothed = reg["gas","smoothedmetals"]
+    masses_smoothed = reg["gas","smoothedmasses"]
 
 
     try:
@@ -175,10 +175,24 @@ def dtm_particle_mesh(reg):
     #calculates the dust based on the DTM ratio for either particles
     #directly (i.e. arepo quantities) or a mesh (i.e AMR simulations)
 
-    metaldens = reg["metaldens"]
+    metaldens = reg["metal","dens"]
     dustdens = (metaldens*cfg.par.dusttometals_ratio).to('g/cm**3').value
 
     return dustdens
+
+
+def manual_particle_mesh(reg):
+    #calculates the dust based on the DTM ratio for either particles
+    #directly (i.e. arepo quantities) or a mesh (i.e AMR simulations)
+
+    if ('PartType0','DustDensity') in reg.ds.derived_field_list:
+        dustdens = reg.ds.arr(reg["PartType0","DustDensity"].value,'code_mass/code_length**3')
+        dustdens = dustdens.to('g/cm**3').value
+    else:
+        raise ValueError('It looks like we cant find PartType0,DustDensity in your Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml].  Alternatively, edit [dust_grid_gen/manual_particle_mesh] to change the value of the field assigned to dustdens')
+
+    return dustdens
+
 
 
 
@@ -197,9 +211,9 @@ def remy_ruyer_particle_mesh(reg):
     x_sun = 8.69
 
 
-    density = reg["gasdensity"]
-    metallicity=reg["gasmetals"]
-    masses = reg["gasmasses"]
+    density = reg["gas","density"]
+    metallicity=reg["gas","metals"]
+    masses = reg["gas","masses"]
 
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
@@ -228,9 +242,9 @@ def li_bestfit_particle_mesh(reg):
     #does not include passive galaxies which lie significantly off of
     #this (and the remy-ruyer) relation.
 
-    density = reg["gasdensity"]
-    metallicity=reg["gasmetals"]
-    masses = reg["gasmasses"]
+    density = reg["gas","density"]
+    metallicity=reg["gas","metals"]
+    masses = reg["gas","masses"]
 
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
@@ -246,9 +260,9 @@ def li_bestfit_particle_mesh(reg):
 
 def li_ml_particle_mesh(reg):
 
-    density = reg["gasdensity"]
-    metallicity=reg["gasmetals"]
-    masses = reg["gasmasses"]
+    density = reg["gas","density"]
+    metallicity=reg["gas","metals"]
+    masses = reg["gas","masses"]
 
 
     try:
@@ -298,8 +312,8 @@ def remy_ruyer_amr(ds):
         x_sun = 8.69
 
 
-        density = data["gasdensity"]
-        metallicity = data["gasmetals"]
+        density = data["gas","density"]
+        metallicity = data["gas","metals"]
         masses = data["gasmasses"]
 
         #anywhere the smoothing finds a cell with zero metallicity, set
@@ -325,9 +339,9 @@ def li_bestfit_amr(ds):
     
     def _dust_density_li_bestfit_amr(field,data):
         
-        density = data["gasdensity"]
-        metallicity=data["gasmetals"]
-        masses = data["gasmasses"]
+        density = data["gas","density"]
+        metallicity=data["gas","metals"]
+        masses = data["gas","masses"]
 
         metallicity[metallicity == 0] = 1.e-10
 

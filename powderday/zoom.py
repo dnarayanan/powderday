@@ -22,9 +22,9 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
     print ("[octree zoom_bbox_filter:] Calculating Center of Mass")
 
 
-    gas_com_x = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,0])/np.sum(ad["gasdensity"])
-    gas_com_y = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,1])/np.sum(ad["gasdensity"])
-    gas_com_z = np.sum(ad["gasdensity"] * ad["gascoordinates"][:,2])/np.sum(ad["gasdensity"])
+    gas_com_x = np.sum(ad["gas","density"] * ad["gas","coordinates"][:,0])/np.sum(ad["gas","density"])
+    gas_com_y = np.sum(ad["gas","density"] * ad["gas","coordinates"][:,1])/np.sum(ad["gas","density"])
+    gas_com_z = np.sum(ad["gas","density"] * ad["gas","coordinates"][:,2])/np.sum(ad["gas","density"])
 
 
     com = [gas_com_x,gas_com_y,gas_com_z]
@@ -48,7 +48,7 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
     #yt 3.x
     box_len = ds.quan(box_len,'kpc')
     #yt 4.x
-    if yt.__version__ == '4.0.dev0':
+    if float(yt.__version__[0:3]) >= 4:
         box_len = float(box_len.to('code_length').value)
         bbox_lim = box_len
     else:
@@ -74,7 +74,7 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
     #dataset.  We pass around the octree itself in a newly created
     #dictionary called reg.parameters
 
-    if yt.__version__ == '4.0.dev0':
+    if float(yt.__version__[0:3]) >= 4:
         
         #re load the field names, but now with the bounding box
         #set. this will allow us to map the field names to those
@@ -92,7 +92,7 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
 
         reg.parameters={}
         reg.parameters['octree'] = octree
-
+        if cfg.par.otf_extinction: reg.parameters['octree_of_sizes'] = ds.parameters['octree_of_sizes']
  
 
     else:
@@ -181,11 +181,9 @@ def enzo_zoom(fname,ds,field_add):
     #set up the cut out region from the main dataset.  here, we create
     #a yt region out of the parent ds, and then re-save this as a cutout dataset named ds1
     center = ds.arr([cfg.model.x_cent,cfg.model.y_cent,cfg.model.z_cent],'code_length')
-    box_len = ds.quan(cfg.par.zoom_box_len,'kpc').in_units('code_length')
-    min_region = [center[0]-box_len,center[1]-box_len,center[2]-box_len]
-    max_region = [center[0]+box_len,center[1]+box_len,center[2]+box_len]
-    reg = ds.region(center,min_region,max_region)
-
+    box_len = ds.quan(cfg.par.zoom_box_len,'kpc').to('code_length')
+    reg = ds.region(center, center-box_len, center+box_len)
+    
     #now play a game where we save the region as a dataset and then
     #reload this as a new ds.  we need to do this because the
     #convenience function within hyperion, AMRGrid.from_yt requires a
@@ -194,10 +192,14 @@ def enzo_zoom(fname,ds,field_add):
     reg.save_as_dataset('temp_enzo.h5',fields=[('all','creation_time'),('gas','metal_density'),('gas','density'),('newstars','metallicity_fraction'),('newstars','particle_mass'),('all', 'particle_index'),('index', 'grid_level'),('gas','dust_density')])
     ds1 = yt.load('temp_enzo.h5')
     ad1 = ds1.all_data()
-    print("[zoom/enzo_zoom]: temporarily savingtemp_enzo.h5")
+    print("[zoom/enzo_zoom]: temporarily saving temp_enzo.h5")
 
 
     #now copy over all of the ds.index grid construction items that are in the region to the new dataset
+    ds1.domain_width = reg.right_edge - reg.left_edge
+    ds1.domain_left_edge = reg.left_edge
+    ds1.domain_right_edge = reg.right_edge
+    ds1.domain_center = reg.center
     ds1.index.get_levels = reg.index.get_levels
     ds1.index.get_smallest_ds = reg.index.get_smallest_dx
     ds1.index.grid = reg.index.grid

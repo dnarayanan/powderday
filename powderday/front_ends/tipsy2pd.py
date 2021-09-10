@@ -3,8 +3,9 @@ import yt
 import powderday.config as cfg
 from yt.config import ytcfg
 from yt.data_objects.particle_filters import add_particle_filter
+from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
-ytcfg["yt","skip_dataset_cache"] = "True"
+#ytcfg["yt","skip_dataset_cache"] = "True"
 
 
 def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=True):
@@ -40,7 +41,7 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=T
     
     def _gasdensity(field,data):
         return data[('Gas', 'Density')]
-        
+
     def _gasmetals(field,data):
         return data[('Gas', 'Metals')]
         
@@ -58,6 +59,54 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=T
 
     def _gasmasses(field,data):
         return data[('Gas','Mass')]
+
+    def _dustmass_dtm(field,data):
+        return (data["gasmasses"]*cfg.par.dusttometals_ratio)
+
+
+    def _dustmass_li_ml(field,data):
+        li_ml_dgr = dgr_ert(data["gasmetals"],data["gassfr"],data["gasmasses"])
+        li_ml_dustmass = data.ds.arr(((10.**li_ml_dgr)*data["gasmasses"]),'code_mass')
+
+    
+        return li_ml_dustmass
+
+
+    def _dustmass_rr(field,data):
+        #hard coded values from remy-ruyer table 1
+        a = 2.21
+        alpha = 2.02
+        x_sun = 8.69
+
+        x = 12.+np.log10(data["gasmetals"]/cfg.par.solar * 10.**(x_sun-12.) )
+        y = a + alpha*(x_sun-np.asarray(x))
+        gas_to_dust_ratio = 10.**(y)
+        dust_to_gas_ratio = 1./gas_to_dust_ratio
+        return dust_to_gas_ratio * data["gasmasses"]
+
+    def _dustmass_li_bestfit(field,data):
+        log_dust_to_gas_ratio = (2.445*np.log10(data["gasmetals"]/cfg.par.solar))-(2.029)
+        dust_to_gas_ratio = 10.**(log_dust_to_gas_ratio)
+        return dust_to_gas_ratio * data["gasmasses"]
+
+
+    def _dustsmoothedmasses(field, data):
+        #if yt.__version__ == '4.0.dev0':
+        #    return (data.ds.parameters['octree'][('PartType0','Dust_Masses')])
+            
+        #else:
+        return (data.ds.arr(data[("deposit", "PartType0_sum_Dust_Masses")].value, 'code_mass'))
+
+
+    def _li_ml_dustsmoothedmasses(field,data):
+        #if yt.__version__ == '4.0.dev0':
+        #    return (data.ds.parameters['octree'][('PartType0', 'li_ml_dustmass')])
+        #else:
+        return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
+
+
+
+
 
     def _metaldens(field,data):
         return (data["Gas","Density"]*data["Gas","Metals"])
@@ -124,7 +173,34 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=T
         ds.add_field(('diskstarmasses'),function=_diskstarmasses,units='g',particle_type=True)
         ds.add_field(('diskstarcoordinates'),function=_diskstarcoordinates,units='cm',particle_type=True)
 
+    #add the dust mass, but only if we're using the DTM dust mass
+    if cfg.par.dust_grid_type == 'dtm':
+        ds.add_field(('dustmass'), function=_dustmass_dtm,units='code_mass',particle_type=True)
 
+    if cfg.par.dust_grid_type == 'rr':
+        ds.add_field(("dustmass"),function=_dustmass_rr,  units='code_mass',particle_type=True)
+
+
+
+    if cfg.par.dust_grid_type == 'li_ml':
+        raise KeyError("Right now li_ml does not work for tipsy front ends.  Please set another dust grid type in the parameters")
+        #the issue is that we can't smooth the dust onto a grid that
+        #is necessary in dust_grid_gen/li_ml_oct because yt3.x
+        #requires a field: ('PartType0', 'particle_position').
+
+
+        #try: np.sum(ad["gasssfr"]) > 0:
+        #    ds.add_field(("dustmass"),function=_dustmass_li_ml, units='code_mass',particle_type=True)
+        #    ds.add_field(('PartType0','li_ml_dustmass'),function=_dustmass_li_ml,units='code_mass',particle_type=True)
+        #    ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
+        #    if add_smoothed_quantities == True:
+        #        ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, units='code_mass',particle_type=True)
+        #except: 
+        #     raise KeyError('The Gas SFR sums to zero; hence the li_ml model will not work.  Please set another dust grid type in the parameters.')
+
+
+    if cfg.par.dust_grid_type == 'li_bestfit':
+        ds.add_field(("dustmass"),function=_dustmass_li_bestfit,  units='code_mass',particle_type=True)
 
     ad = ds.all_data()
     return ds

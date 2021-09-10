@@ -8,6 +8,8 @@ from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
 def arepo_field_add(fname, bounding_box=None, ds=None):
 
+    def _gassmoothinglength(field,data):
+        return data[('PartType0', 'smoothing_length')].in_units('pc')
 
     def _starmetals(field, data):
         return data[('newstars', 'GFM_Metallicity')]
@@ -59,8 +61,19 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         return (data["PartType0", "Masses"]*(data["PartType0", "GFM_Metallicity"].value))
 
         
-    def _dustmass(field, data):
-        return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
+    def _dustmass_manual(field, data):
+        if cfg.par.otf_extinction == True:
+            dust_dens = data.ds.arr(data[('PartType0', 'DustDensity')],'code_mass/code_length**3')
+            dtg = data.ds.arr(dust_dens/data[('PartType0', 'Density')].in_units('code_mass/code_length**3'))
+            dust_mass = (dtg.value*data[('PartType0','Masses')]).in_units('code_mass')
+            
+            return dust_mass
+        else:
+            return (data.ds.arr(data[("PartType0", "Dust_Masses")].value, 'code_mass'))
+
+    def _dustmass_dtm(field,data):
+        return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
+
 
     def _li_ml_dustmass(field,data):
         li_ml_dgr = dgr_ert(data["gasmetals"],data["PartType0","StarFormationRate"],data["PartType0","Masses"])
@@ -69,6 +82,28 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
         ##return (data.ds.arr(data.ds.parameters['li_ml_dustmass'].value,'code_mass'))
         return li_ml_dustmass
+
+
+    def _dustmass_rr(field,data):
+        #hard coded values from remy-ruyer table 1
+        a = 2.21
+        alpha = 2.02
+        x_sun = 8.69
+
+        x = 12.+np.log10(data["gasmetals"]/cfg.par.solar * 10.**(x_sun-12.) )
+        y = a + alpha*(x_sun-np.asarray(x))
+        gas_to_dust_ratio = 10.**(y)
+        dust_to_gas_ratio = 1./gas_to_dust_ratio
+        return dust_to_gas_ratio * data["gasmasses"]
+
+    def _dustmass_li_bestfit(field,data):
+        log_dust_to_gas_ratio = (2.445*np.log10(data["gasmetals"]/cfg.par.solar))-(2.029)
+        dust_to_gas_ratio = 10.**(log_dust_to_gas_ratio)
+        return dust_to_gas_ratio * data["gasmasses"]
+
+
+
+
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
@@ -84,7 +119,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
             print("if this is not true - please edit _stellarages in front_ends/arepo2pd.py right under this warning message")
             print("------------------------------------------------------------------")
 
-            age = simtime-(data.ds.arr(ad[("PartType4","GFM_StellarFormationTime")],'s*kpc/km').in_units('Gyr')).value
+            age = simtime-(data.ds.arr(ad[("newstars","GFM_StellarFormationTime")],'s*kpc/km').in_units('Gyr')).value
             # make the minimum age 1 million years
             age[np.where(age < 1.e-3)[0]] = 1.e-3
 
@@ -171,7 +206,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         try:
-            yt.__version__ == '4.0.dev0'
+            float(yt.__version__[0:3]) >= 4
             ds = yt.load(fname)
             ds.index
             ad = ds.all_data()
@@ -189,17 +224,33 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     yt.add_particle_filter("newstars",function=_newstars,filtered_type='PartType4')
     ds.add_particle_filter("newstars")
     
-    ds.add_field(('starmetals'), function=_starmetals, units="code_metallicity", particle_type=True)
+    ds.add_field(('star','metals'), function=_starmetals, sampling_type='particle',units="code_metallicity", particle_type=True)
 
-    ds.add_field(('gasmetals'), function=_gasmetals, units="code_metallicity", particle_type=True)
-    ds.add_field(('metaldens'), function=_metaldens, units="g/cm**3", particle_type=True)
-    ds.add_field(('PartType0', 'metalmass'), function=_metalmass, units="g", particle_type=True)
+    ds.add_field(('gas','metals'), function=_gasmetals, sampling_type='particle', units="code_metallicity", particle_type=True)
+    ds.add_field(('metal','dens'), function=_metaldens,  sampling_type='particle',units="g/cm**3", particle_type=True)
+    ds.add_field(('PartType0', 'metalmass'), function=_metalmass,  sampling_type='particle', units="g", particle_type=True)
+
+    
+    ds.add_field(('gas','masses'), function=_gasmasses,  sampling_type='particle', units='g', particle_type=True)
+    ds.add_field(('gas','fh2'), function=_gasfh2,  sampling_type='particle', units='dimensionless', particle_type=True)
+    ds.add_field(('gas','sfr'), function=_gassfr,  sampling_type='particle', units='g/s', particle_type=True)
+    ds.add_field(('gas','smoothinglength'),function=_gassmoothinglength, sampling_type='particle', units='pc',particle_type=True)
 
     # get the dust mass
 
-    if ('PartType0', 'Dust_Masses') in ds.derived_field_list:
-        ds.add_field(('dustmass'), function=_dustmass, units='code_mass', particle_type=True)
-        ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+    if cfg.par.dust_grid_type == 'dtm':
+        ds.add_field(('dust','mass'), function=_dustmass_dtm,  sampling_type='particle', units='code_mass',particle_type=True)
+    if cfg.par.dust_grid_type == 'manual':
+        ds.add_field(('dust','mass'), function=_dustmass_manual,  sampling_type='particle', units='code_mass', particle_type=True)
+                
+        #ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+        #if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses,  sampling_type='particle', units='code_mass', particle_type=True)
+
+
+    if cfg.par.dust_grid_type == 'rr':
+        ds.add_field(("dust','mass"),function=_dustmass_rr, sampling_type='particle', units='code_mass',particle_type=True)
+    if cfg.par.dust_grid_type == 'li_bestfit':
+        ds.add_field(("dust','mass"),function=_dustmass_li_bestfit, sampling_type='particle', units='code_mass',particle_type=True)
 
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
@@ -212,14 +263,14 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         #li_ml_dustmass = ((10.**li_ml_dgr)*ad["PartType0","Masses"]).in_units('code_mass')
         #this is an icky way to pass this to the function for ds.add_field in the next line. but such is life.
         #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
-        ds.add_field(('li_ml_dustmass'),function=_li_ml_dustmass,units='code_mass',particle_type=True)
+        #ds.add_field(('li_ml_dustmass'),function=_li_ml_dustmass, sampling_type='particle', units='code_mass',particle_type=True)
+        ds.add_field(("dust","mass"),function=_li_ml_dustmass, sampling_type='particle', units='code_mass',particle_type=True)
 
-    ds.add_field(('starmasses'), function=_starmasses, units='g', particle_type=True)
-    ds.add_field(('starcoordinates'), function=_starcoordinates, units='cm', particle_type=True)
-    ds.add_field(('starformationtime'), function=_starformationtime, units='dimensionless', particle_type=True)
-    
-    ds.add_field(('stellarages'),function=_stellarages,units='Gyr',particle_type=True)
-   
+    ds.add_field(('star','masses'), function=_starmasses,  sampling_type='particle', units='g', particle_type=True)
+    ds.add_field(('star','coordinates'), function=_starcoordinates,  sampling_type='particle', units='cm', particle_type=True)
+    ds.add_field(('star','formationtime'), function=_starformationtime,  sampling_type='particle', units='dimensionless', particle_type=True)
+    ds.add_field(('stellar','ages'),function=_stellarages, sampling_type='particle', units='Gyr',particle_type=True)
+
 #    if ('PartType2', 'Masses') in ds.derived_field_list:
 #        ds.add_field(('diskstarmasses'), function=_diskstarmasses, units='g', particle_type=True)
 #        ds.add_field(('diskstarcoordinates'), function=_diskstarcoordinates, units='cm', particle_type=True)
@@ -229,13 +280,14 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
 #        ds.add_field(('bulgestarcoordinates'), function=_bulgestarcoordinates, units='cm', particle_type=True)
 
 
-    ds.add_field(('gasdensity'), function=_gasdensity, units='g/cm**3', particle_type=True)
+    ds.add_field(('gas','density'), function=_gasdensity, sampling_type='particle',units='g/cm**3', particle_type=True)
     # Gas Coordinates need to be in Comoving/h as they'll get converted later.
-    ds.add_field(('gascoordinates'), function=_gascoordinates, units='cm', particle_type=True)
+    ds.add_field(('gas','coordinates'), function=_gascoordinates, sampling_type='particle',units='cm', particle_type=True)
 
-    ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
-    ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
-    ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
+#    ds.add_field(('gasmasses'), function=_gasmasses, units='g', particle_type=True)
+#    ds.add_field(('gasfh2'), function=_gasfh2, units='dimensionless', particle_type=True)
+#    ds.add_field(('gassfr'), function=_gassfr, units='g/s', particle_type=True)
+#    ds.add_field(('gassmoothinglength'),function=_gassmoothinglength,units='pc',particle_type=True)
 
     if cfg.par.BH_SED == True:
         try:
@@ -251,10 +303,10 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
                     from powderday.agn_models.hickox import vary_bhluminosity
                     cfg.par.bhlfrac = vary_bhluminosity(nholes)
 
-                ds.add_field(("bhluminosity"),function=_bhluminosity,units='erg/s',particle_type=True)
-                ds.add_field(("bhcoordinates"),function=_bhcoordinates,units="cm",particle_type=True)
-                ds.add_field(("bhnu"),function=_bhsed_nu,units='Hz',particle_type=True)
-                ds.add_field(("bhsed"),function=_bhsed_sed,units="erg/s",particle_type=True)
+                ds.add_field(("bh","luminosity"),function=_bhluminosity,sampling_type='particle',units='erg/s',particle_type=True)
+                ds.add_field(("bh","coordinates"),function=_bhcoordinates,sampling_type='particle',units="cm",particle_type=True)
+                ds.add_field(("bh","nu"),function=_bhsed_nu,sampling_type='particle',units='Hz',particle_type=True)
+                ds.add_field(("bh","sed"),function=_bhsed_sed,sampling_type='particle',units="erg/s",particle_type=True)
             else:
                 print('No black holes found (length of BH_Mass field is 0)')
         except:

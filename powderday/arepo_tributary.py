@@ -8,12 +8,10 @@ mpl.use('Agg')
 import powderday.config as cfg
 
 from powderday.grid_construction import arepo_vornoi_grid_generate
-
-
 from hyperion.dust import SphericalDust
 
 from powderday.helpers import energy_density_absorbed_by_CMB
-
+from powderday.tributary_dust_add import active_dust_add
 
 
 def arepo_m_gen(fname,field_add):
@@ -33,14 +31,14 @@ def arepo_m_gen(fname,field_add):
 
     m = Model()
     
-    if cfg.par.FORCE_RANDOM_SEED == True: m.set_seed(cfg.par.seed)
+
 
     #because we boost the stars to a [0,0,0] coordinate center, we
     #want to make sure our vornoi tesslation is created in the same manner.
     
-    particle_x = reg["gascoordinates"][:,0].to('cm')
-    particle_y = reg["gascoordinates"][:,1].to('cm')
-    particle_z = reg["gascoordinates"][:,2].to('cm')
+    particle_x = reg["gas","coordinates"][:,0].to('cm')
+    particle_y = reg["gas","coordinates"][:,1].to('cm')
+    particle_z = reg["gas","coordinates"][:,2].to('cm')
 
 
     #just for the sake of symmetry, pass on a dx,dy,dz since it can be
@@ -68,28 +66,46 @@ def arepo_m_gen(fname,field_add):
     energy_density_absorbed=energy_density_absorbed_by_CMB()
     specific_energy = np.repeat(energy_density_absorbed.value,dustdens.shape)
 
-    if cfg.par.PAH == True:
+    if cfg.par.otf_extinction==False:
+
+        if cfg.par.PAH == True:
         
-        # load PAH fractions for usg, vsg, and big (grain sizes)
-        frac = cfg.par.PAH_frac
+            # load PAH fractions for usg, vsg, and big (grain sizes)
+            frac = cfg.par.PAH_frac
 
-        # Normalize to 1
-        total = np.sum(list(frac.values()))
-        frac = {k: v / total for k, v in frac.items()}
+            # Normalize to 1
+            total = np.sum(list(frac.values()))
+            frac = {k: v / total for k, v in frac.items()}
 
-        for size in frac.keys():
-            d = SphericalDust(cfg.par.dustdir+'%s.hdf5'%size)
+            for size in frac.keys():
+                d = SphericalDust(cfg.par.dustdir+'%s.hdf5'%size)
+                if cfg.par.SUBLIMATION == True:
+                    d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
+                    #m.add_density_grid(dustdens * frac[size], cfg.par.dustdir+'%s.hdf5' % size)
+                m.add_density_grid(dustdens*frac[size],d,specific_energy=specific_energy)
+            m.set_enforce_energy_range(cfg.par.enforce_energy_range)
+        else:
+            d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
             if cfg.par.SUBLIMATION == True:
                 d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
-            #m.add_density_grid(dustdens * frac[size], cfg.par.dustdir+'%s.hdf5' % size)
-            m.add_density_grid(dustdens*frac[size],d,specific_energy=specific_energy)
-        m.set_enforce_energy_range(cfg.par.enforce_energy_range)
-    else:
-        d = SphericalDust(cfg.par.dustdir+cfg.par.dustfile)
-        if cfg.par.SUBLIMATION == True:
-            d.set_sublimation_temperature('fast',temperature=cfg.par.SUBLIMATION_TEMPERATURE)
-        m.add_density_grid(dustdens,d,specific_energy=specific_energy)
+            m.add_density_grid(dustdens,d,specific_energy=specific_energy)
         #m.add_density_grid(dustdens,cfg.par.dustdir+cfg.par.dustfile)  
+
+    else: #instead of using a constant extinction law across the
+          #entire galaxy, we'll compute it on a cell-by-cell bassis by
+          #using information about the grain size distribution from
+          #the simulation itself.
+
+        ad = ds.all_data()
+        nsizes = reg['PartType0','NumGrains'].shape[1]
+        try:
+            assert(np.sum(ad['PartType0','NumGrains']) > 0)
+        except AssertionError:
+            raise AssertionError("[arepo_tributary:] There are no dust grains in this simulation.  This can sometimes happen in an early snapshot of a simulation where the dust has not yet had time to form.")
+        grid_of_sizes = reg['PartType0','NumGrains']
+        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy)
+
+
     m.set_specific_energy_type('additional')
 
 
