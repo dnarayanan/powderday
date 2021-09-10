@@ -75,6 +75,36 @@ m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 sp = fsps.StellarPopulation()
 
+#overwriting solar metallicity value based on isochrone
+#values assigned to cfg.par.solar taken from fsps/src/sps_vars 
+isochrone = str(sp.libraries[0])
+
+print(f'\n----------------------------------------------\nOverwriting cfg.par.solar (currently {cfg.par.solar})') 
+if 'mist' in isochrone:
+    print('isochrone = mist')
+    cfg.par.solar = 0.0142
+    print(f'new solar metallicity = {cfg.par.solar}')
+elif 'bsti' in isochrone:
+    print('isochrone = basti')
+    cfg.par.solar = 0.020
+    print(f'new solar metallicity = {cfg.par.solar}')
+elif 'gnva' in isochrone:
+    print('isochrone = geneva')
+    cfg.par.solar = 0.020
+    print(f'new solar metallicity = {cfg.par.solar}')
+elif 'prsc' in isochrone:
+    print('isochrone = parsec')
+    cfg.par.solar = 0.01524
+    print(f'new solar metallicity = {cfg.par.solar}')
+elif 'pdva' in isochrone:
+    print('isochrone = padova')
+    cfg.par.solar = 0.019
+    print(f'new solar metallicity = {cfg.par.solar}')
+elif 'bpss' in isochrone:
+    print('isochrone = bpass')
+    cfg.par.solar = 0.020
+    print(f'new solar metallicity = {cfg.par.solar}')
+print('----------------------------------------------')
 
 # Get dust wavelengths. This needs to preceed the generation of sources
 # for hyperion since the wavelengths of the SEDs need to fit in the
