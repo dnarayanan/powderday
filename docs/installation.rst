@@ -25,7 +25,7 @@ Overview of Requirements
 	  * powderday <https://github.com/dnarayanan/powderday.git>
 	  * yt <http://yt-project.org>
 	  * FSPS <https://code.google.com/p/fsps/source/checkout>
-	  * python-fsps <http://dan.iel.fm/python-fsps/current/>
+	  * python-fsps <https://dfm.io/python-fsps/current/>
 	  * Hyperion <http://www.hyperion-rt.org/>
 	  * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
 
@@ -260,7 +260,7 @@ Finally, the SPS_HOME variable must be set in your environment to point to the F
 python-fsps
 --------------
 
-`python-fsps <https://github.com/dfm/python-fsps>`_  will be installed automatically by the `powderday` setup.py script.
+`python-fsps <https://dfm.io/python-fsps/current/>`_  will be installed automatically by the `powderday` setup.py script.
   
 You can test the installation by opening python and typing::
 
@@ -281,11 +281,11 @@ python-fsps installation issues
 --------------
 
 1.  `python-fsps
-<http://dan.iel.fm/python-fsps/current/installation/>`_ can't find f2py
+<https://dfm.io/python-fsps/current/>`_ can't find f2py
    
    f2py is a numpy package that is sometimes named f2py2.7 by numpy.
    At the same time, `python-fsps
-   <http://dan.iel.fm/python-fsps/current/installation/>`_ expects it
+   <https://dfm.io/python-fsps/current/>`_ expects it
    to be called f2py (as it sometimes is; for example in Anaconda).
    So, you might need to locate f2py (it ships with `yt
    <http://yt-project.org>`_, so if you for example use the `yt
@@ -304,14 +304,14 @@ python-fsps installation issues
 
 
 2. Issues with 'f2py' in the  `python-fsps
-   <http://dan.iel.fm/python-fsps/current/installation/>`_ installation:
+   <https://dfm.io/python-fsps/current/>`_ installation:
 
    Numpy has made some changes to f2py in the 1.10.x version of numpy.
    The easiest fix is to use a non 1.10.* version of numpy (thanks to
    Ben Johnson for finding this).
 
 3.  `python-fsps
-<http://dan.iel.fm/python-fsps/current/installation/>`_ has mysterious
+<https://dfm.io/python-fsps/current/>`_ has mysterious
 installation failures.  Often this has to do with a bad `FSPS
 <https://github.com/cconroy20/fsps>`_ compilation. Even if it seems
 like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it may
