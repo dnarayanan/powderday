@@ -69,6 +69,10 @@ FORCE_BINNED = True               # If True, force all star particles to be binn
                                   # If False, all star particles below max_age_direct (next parameter) are added 
                                   # directly without binning for calculating SED
 max_age_direct  = 1.e-2           # Age (in Gyr) below which stars will be directly added without binning (works only if FORCE_BINNED is False)
+                                  # To force all the star particles to be added without binning set this to an age greater than the maximum 
+                                  # stellar age of the galaxy (say 16 Gyr for example)
+
+
 
 imf_type = 2 # FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 imf1 = 1.3 # Logarithmic slope of the IMF over the range 0.08 < M < 0.5. Only used if imf_type=2. (Default: 1.3)

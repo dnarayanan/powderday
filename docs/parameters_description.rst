@@ -228,6 +228,9 @@ Stellar SEDs Info
 :max_age_direct:
    
    Age (in Gyr) below which star particles will not be binned for getting stellar SEDs (works only if FORCE_BINNED is False) 
+   To force all the star particles to be added without binning set this to an age greater than the maximum stellar age 
+   of the galaxy (say 16 Gyr for example)
+
 
 :imf_type:
 

@@ -176,7 +176,10 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
             minimum_age = cfg.par.max_age_direct + 0.001
 
     delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
-    
+
+    if delta_age <= 0: # If max age for direct adding stars is greater than the max age of stars in the galaxy then 
+        return m       # exit the function since there are no stars left for binning
+
     # define the metallicity bins: we do this by saying that they are the number of metallicity bins in FSPS
 
     fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
