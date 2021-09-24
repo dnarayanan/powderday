@@ -69,8 +69,8 @@ FORCE_BINNED = True               # If True, force all star particles to be binn
                                   # If False, all star particles below max_age_direct (next parameter) are added 
                                   # directly without binning for calculating SED
 max_age_direct  = 1.e-2           # Age (in Gyr) below which stars will be directly added without binning (works only if FORCE_BINNED is False)
-                                  # To force all the stars to be added without binning set to an age greater than the maximum stellar age of the galaxy
-                                  # (say 16 Gyr for example)
+                                  # To force all the star particles to be added without binning set this to an age greater than the maximum 
+                                  # stellar age of the galaxy (say 16 Gyr for example)
 
 
 
