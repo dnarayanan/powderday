@@ -324,7 +324,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     ad = ds.all_data()
     if ('PartType4', 'Metallicity_00') in ds.derived_field_list:
         try:
-            ds.add_field(('star","metals'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('star','metals'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
             ds.add_field(('star','metals_He'), function=_starmetals_00, sampling_type='particle', units="code_metallicity", particle_type=True)
             ds.add_field(('star','metals_C'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
             ds.add_field(('star','metals_N'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
