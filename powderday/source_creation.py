@@ -20,7 +20,6 @@ class Sed_Bins:
         self.fsps_zmet = fsps_zmet
         self.all_metals = all_metals
 
-
 def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmoflag, m, sp):
 
     print("--------------------------------\n")
@@ -43,7 +42,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
     else:
         print ("Number of unbinned stars to added: ", nstars)
     
-    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(unbinned_stars_list, cosmoflag, sp)
+    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, mfrac = sg.allstars_sed_gen(unbinned_stars_list, cosmoflag, sp)
 
     for i in range(nstars):
         nu = stellar_nu[:]
@@ -54,7 +53,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         nu = nu[::-1]
         fnu = fnu[::-1]
         
-        lum = np.absolute(np.trapz(fnu, x=nu))*unbinned_stars_list[i].mass/constants.M_sun.cgs.value 
+        lum = np.absolute(np.trapz(fnu, x=nu))*unbinned_stars_list[i].mass/constants.M_sun.cgs.value/mfrac[i]
         lum *= constants.L_sun.cgs.value
 
         pos = unbinned_stars_list[i].positions
@@ -191,6 +190,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
 
     # define the age bins in log space so that we maximise resolution around young stars
     age_bins = 10.**(np.linspace(np.log10(minimum_age),np.log10(maximum_age),cfg.par.N_STELLAR_AGE_BINS))
+    #edit to define age bins linearly as binning with max resolution around young stars may lead to errors in binned SED
+    #age_bins = np.linspace(minimum_age,maximum_age,cfg.par.N_STELLAR_AGE_BINS)
     #tack on the maximum age bin
     age_bins = np.append(age_bins,age_bins[-1]+delta_age)
 
@@ -265,8 +266,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     print ('Running SPS for Binned SEDs')
     print ('calculating the SEDs for ',len(sed_bins_list_has_stellar_mass),' bins')
     
-    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,cosmoflag,sp)
-    
+    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu,mfrac = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,cosmoflag,sp)
+
     #since the binned_stellar_fnu_has_stellar_mass is now
     #[len(sed_bins_list_has_stellar_mass),nlam)] big, we need to
     #transform it back to the a larger array.  this is an ugly loop
@@ -274,6 +275,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     #order of magnitude in time in SED gen.  
     nlam = binned_stellar_nu.shape[0]
     binned_stellar_fnu = np.zeros([len(sed_bins_list),nlam])
+    binned_mfrac = np.zeros([len(sed_bins_list)])
 
     counter = 0
     counter_has_stellar_mass = 0
@@ -281,12 +283,12 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
         for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
             for wm in range(cfg.par.N_MASS_BINS+1):
                 if has_stellar_mass[wz,wa,wm] == True:
+                    binned_mfrac[counter] = mfrac[counter_has_stellar_mass]
                     binned_stellar_fnu[counter,:] = binned_stellar_fnu_has_stellar_mass[counter_has_stellar_mass,:]
                     counter_has_stellar_mass += 1 
                 counter+=1
 
-
-
+    print(f'after selecting for ones with stellar mass: {np.shape(binned_stellar_fnu)}')
 
 
     
@@ -312,7 +314,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
 
     totallum = 0 
     totalmass = 0 
-
     counter=0
     for wz in range(N_METAL_BINS):
         for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
@@ -333,7 +334,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
 
                     
                     #source luminosities
-                    lum = np.array([stars_list[i].mass/constants.M_sun.cgs.value*constants.L_sun.cgs.value for i in stars_in_bin[(wz,wa,wm)]])
+                    lum = np.array([stars_list[i].mass/constants.M_sun.cgs.value*constants.L_sun.cgs.value/binned_mfrac[counter] for i in stars_in_bin[(wz,wa,wm)]])
                     lum *= np.absolute(np.trapz(fnu,x=nu))
                     source.luminosity = lum
                     
