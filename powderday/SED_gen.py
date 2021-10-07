@@ -25,7 +25,7 @@ from powderday.nebular_emission.cloudy_model import get_nebular
 #garbage collected.
 import gc
 gc.set_threshold(0)
-print('imported everything?')
+
 # Lazily initialize FSPS
 sp = None
 
@@ -210,7 +210,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     sp.params["add_neb_emission"] = cfg.par.add_neb_emission
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
     sp.params['gas_logu'] = cfg.par.gas_logu
-    print(f'[SED gen/allstars_sed_gen]: {cfg.par.solar}')
+
     if cfg.par.FORCE_gas_logz == False:
         sp.params['gas_logz'] = np.log10(stars_list[0].metals/cfg.par.solar)
     else:
