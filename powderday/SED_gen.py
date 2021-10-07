@@ -30,8 +30,9 @@ gc.set_threshold(0)
 sp = None
 
 class Stars:
-    def __init__(self,mass,metals,positions,age,sed_bin=[-1,-1,-1],lum=-1,fsps_zmet=20,all_metals=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
+    def __init__(self,mass,fsps_current_mass,metals,positions,age,sed_bin=[-1,-1,-1],lum=-1,fsps_zmet=20,all_metals=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
         self.mass = mass
+        self.fsps_current_mass = fsps_current_mass
         self.metals = metals
         self.positions = positions
         self.age = age
@@ -41,7 +42,7 @@ class Stars:
         self.all_metals = all_metals
 
     def info(self):
-        return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
+        return(self.mass,self.fsps_current_mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
 
 def star_list_gen(boost,dx,dy,dz,reg,ds):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
@@ -96,10 +97,10 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
     
     if metals.ndim > 1:
         for i in range(nstars):
-            stars_list.append(Stars(mass[i],metals_tot[i],positions[i],age[i],fsps_zmet=zmet[i],all_metals = metals[i]))
+            stars_list.append(Stars(mass[i],-1,metals_tot[i],positions[i],age[i],fsps_zmet=zmet[i],all_metals = metals[i]))
     else:
         for i in range(nstars):
-            stars_list.append(Stars(mass[i],metals_tot[i],positions[i],age[i],fsps_zmet=zmet[i]))
+            stars_list.append(Stars(mass[i],-1,metals_tot[i],positions[i],age[i],fsps_zmet=zmet[i]))
     
     #boost stellar positions to grid center
     print ('boosting new stars to coordinate center')
@@ -135,7 +136,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
      
             #create the disk_list full of DiskStars objects
             for i in range(nstars_disk):
-                diskstars_list.append(Stars(disk_masses[i],cfg.par.solar,disk_positions[i],cfg.par.disk_stars_age))
+                diskstars_list.append(Stars(disk_masses[i],-1,cfg.par.solar,disk_positions[i],cfg.par.disk_stars_age))
 
             print ('boosting disk stars to coordinate center')    
             diskstars_list = stars_coordinate_boost(diskstars_list,boost)
@@ -154,7 +155,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
             #create the bulge_list full of BulgeStars objects
             
             for i in range(nstars_bulge):
-                bulgestars_list.append(Stars(bulge_masses[i],cfg.par.solar,bulge_positions[i],cfg.par.bulge_stars_age))
+                bulgestars_list.append(Stars(bulge_masses[i],-1,cfg.par.solar,bulge_positions[i],cfg.par.bulge_stars_age))
                 
 
             print ('boosting bulge stars to coordinate center')
@@ -194,7 +195,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
 def allstars_sed_gen(stars_list,cosmoflag,sp):
 
 
-    #NOTE this part is just for the gadget simulations - this will
+    #NOTE this part is just for idealized gadget-oid simulations - this will
     #eventually become obviated as it gets passed into a function to
     #populate the stars_list with objects as we start to feed in new
     #types of simulation results.
@@ -210,6 +211,10 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     sp.params["add_neb_emission"] = cfg.par.add_neb_emission
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
     sp.params['gas_logu'] = cfg.par.gas_logu
+
+    for i in range(len(stars_list)):
+        stars_list[i].fsps_current_mass = sp.stellar_mass
+
     if cfg.par.FORCE_gas_logz == False:
         sp.params['gas_logz'] = np.log10(stars_list[0].metals/cfg.par.solar)
     else:
@@ -279,7 +284,6 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     p.terminate()
     p.join()
 
-
     stellar_nu = nu
 
 
@@ -320,7 +324,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
             sp.params['gas_logz'] = cfg.par.gas_logz
 
         spec = sp.get_spectrum(tage=cfg.par.disk_stars_age,zmet=cfg.par.disk_stars_metals)
-        disk_fnu = spec[1]
+        disk_fnu = spec[1]/sp.stellar_mass #renormalizing by the *current* stellar mass after having evolved from cfg.par.disk_stars_age
         
         #calculate the SED for bulge stars
         sp.params["tage"] = cfg.par.bulge_stars_age
@@ -341,7 +345,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
 
 
         spec = sp.get_spectrum(tage=cfg.par.bulge_stars_age,zmet=cfg.par.bulge_stars_metals)
-        bulge_fnu = spec[1]
+        bulge_fnu = spec[1]/sp.stellar_mass #renormalizing by the *current* stellar mass after having evolved from cfg.par.bulge_stars_age
     
 
     else: #we have a cosmological simulation
@@ -357,6 +361,15 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     print ('[SED_gen: ] total_lum_in_sed_gen = ',total_lum_in_sed_gen)
 
     #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
+
+    #just before returning, we re-scale the stellar_fnu by the
+    #fsps_current_mass.  we will later in source_creation scale by the
+    #total stellar mass, but this normalization accounts for the fact
+    #that the current mass is not the initial 1 solar mass formed in
+    #fsps.  we do this here to avoid complexities in binning later.
+    for i in range(nstars):
+        stellar_fnu[i] /= stars_list[i].fsps_current_mass
+
     return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
 
 
@@ -412,6 +425,8 @@ def newstars_gen(stars_list):
         sp.params["add_neb_emission"] = False
         sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
 
+        #update the stars_list with the current stellar mass from fsps
+        stars_list[i].fsps_current_mass = sp.stellar_mass
         if cfg.par.CF_on == True:
             sp.params["dust_type"] = 0
             sp.params["dust1"] = 1
@@ -584,14 +599,22 @@ def newstars_gen(stars_list):
                     line_em = line_em + line_lum*weight
         
             if cfg.par.add_neb_emission and cfg.par.dump_emlines:
-                #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
-                line_em = line_em * ((stars_list[i].mass*u.g).to(u.Msun).value) * (3.839e33)  # Units: ergs/s
+                #the stellar population returns the calculation in units of Lsun/1 Msun formed: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
+                line_em = line_em * ((stars_list[i].mass*u.g).to(u.Msun).value)/stars_list[i].fsps_current_mass * (3.839e33)  # Units: ergs/s
                 line_em = np.append(line_em, stars_list[i].age)
                 dump_emlines(wave_line, line_em, id_val)
 
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f
 
+    
+    #just before returning, we re-scale the stellar_fnu by the
+    #fsps_current_mass.  we will later in source_creation scale by the
+    #total stellar mass, but this normalization accounts for the fact
+    #that the current mass is not the initial 1 solar mass formed in
+    #fsps. we do this here to avoid complexities in binning later.
+    for i in range(len(stars_list)):
+        stellar_fnu[i] /= stars_list[i].fsps_current_mass
     return stellar_fnu
 
 

@@ -54,7 +54,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         nu = nu[::-1]
         fnu = fnu[::-1]
         
-        lum = np.absolute(np.trapz(fnu, x=nu))*unbinned_stars_list[i].mass/constants.M_sun.cgs.value 
+        lum = np.absolute(np.trapz(fnu, x=nu))*(unbinned_stars_list[i].mass)/constants.M_sun.cgs.value 
         lum *= constants.L_sun.cgs.value
 
         pos = unbinned_stars_list[i].positions
@@ -104,7 +104,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
         disksource = m.add_point_source_collection()
             
         
-        disk_lum = np.absolute(np.trapz(fnu,x=nu))*diskstars_list[0].mass/constants.M_sun.cgs.value
+        disk_lum = np.absolute(np.trapz(fnu,x=nu))*(diskstars_list[0].mass)/constants.M_sun.cgs.value
         #since stellar masses are in cgs, and we need them to be in msun - we
         #multiply by mass to get the *total* luminosity of the stellar
         #cluster since int(nu,fnu) is just the luminosity of a 1 Msun single star
@@ -132,7 +132,7 @@ def add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,stars_l
 
         print ('adding bulge stars to the grid: adding as a point source collection')
         bulgesource = m.add_point_source_collection()
-        bulge_lum = np.absolute(np.trapz(fnu,x=nu))*bulgestars_list[0].mass/constants.M_sun.cgs.value
+        bulge_lum = np.absolute(np.trapz(fnu,x=nu))*(bulgestars_list[0].mass)/constants.M_sun.cgs.value
         bulge_lum *= constants.L_sun.cgs.value
         bulgesource.luminosity = np.repeat(bulge_lum,nstars_bulge)
         
@@ -333,7 +333,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
 
                     
                     #source luminosities
-                    lum = np.array([stars_list[i].mass/constants.M_sun.cgs.value*constants.L_sun.cgs.value for i in stars_in_bin[(wz,wa,wm)]])
+                    lum = np.array([(stars_list[i].mass)/constants.M_sun.cgs.value*constants.L_sun.cgs.value for i in stars_in_bin[(wz,wa,wm)]])
+                    
                     lum *= np.absolute(np.trapz(fnu,x=nu))
                     source.luminosity = lum
                     
