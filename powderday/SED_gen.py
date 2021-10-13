@@ -42,7 +42,7 @@ class Stars:
 
     def info(self):
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
-
+        
 def star_list_gen(boost,dx,dy,dz,reg,ds):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
     mass = reg["star","masses"].value
@@ -210,6 +210,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     sp.params["add_neb_emission"] = cfg.par.add_neb_emission
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
     sp.params['gas_logu'] = cfg.par.gas_logu
+
     if cfg.par.FORCE_gas_logz == False:
         sp.params['gas_logz'] = np.log10(stars_list[0].metals/cfg.par.solar)
     else:
@@ -265,14 +266,17 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
 
     
     stellar_fnu = np.zeros([nstars,nlam])
+    mfrac = np.zeros(nstars)
+    # see newstars_gen() for info on mfrac
     star_counter=0
     for i in range(nchunks):
-        fnu_list = chunk_sol[i] #this is a list of the stellar_fnu's returned by that chunk
+        fnu_list = chunk_sol[i][0] #this is a list of the stellar_fnu's returned by that chunk
+        #chunk_sol now returns two things for each star/star bin: the spectrum and the associated surviving stellar mass fraction for that SSP 
+        mfrac_list = chunk_sol[i][1]
         for j in range(len(fnu_list)):
+            mfrac[star_counter] = mfrac_list[j] 
             stellar_fnu[star_counter,:] = fnu_list[j,:]
             star_counter+=1
-
-
 
 
     p.close()
@@ -357,7 +361,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     print ('[SED_gen: ] total_lum_in_sed_gen = ',total_lum_in_sed_gen)
 
     #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
-    return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
+    return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu, mfrac
 
 
 def newstars_gen(stars_list):
@@ -386,7 +390,7 @@ def newstars_gen(stars_list):
 
     stellar_nu = np.zeros([nlam])
     stellar_fnu = np.zeros([len(stars_list),nlam])
-    
+    mfrac = np.zeros([len(stars_list)])
   
     minage = 13 #Gyr
     for i in range(len(stars_list)): 
@@ -420,6 +424,12 @@ def newstars_gen(stars_list):
 
         spec_noneb = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
         f = spec_noneb[1]
+        #NOTE: FSPS SSP/CSP spectra are scaled by *formed* mass, not current mass. i.e., the SFHs of the SSP/CSP are normalized such that 1 solar mass
+        #is formed over the history. This means that the stellar spectra are normalized by the integral of the SFH =/= current 
+        #(surviving, observed, etc.) stellar mass. In simulations, we only know the current star particle mass. To get the formed mass for an SSP,
+        #we generate the surviving mass fraction (sp.stellar_mass) to extrapolate the initial mass from the current mass, metallicity, and age
+        #this 'mfrac' is used to scale the FSPS SSP luminosities in source_creation
+        mfrac[i] = sp.stellar_mass
 
         pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= stars_list[i].age <= cfg.par.PAGB_max_age
         young_star = cfg.par.add_young_stars and cfg.par.HII_min_age <= stars_list[i].age <= cfg.par.HII_max_age
@@ -591,8 +601,7 @@ def newstars_gen(stars_list):
 
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f
-
-    return stellar_fnu
+    return stellar_fnu, mfrac
 
 
 def get_gas_metals(ngas):
