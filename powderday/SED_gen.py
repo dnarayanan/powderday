@@ -267,9 +267,11 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     
     stellar_fnu = np.zeros([nstars,nlam])
     mfrac = np.zeros(nstars)
+    # see newstars_gen() for info on mfrac
     star_counter=0
     for i in range(nchunks):
         fnu_list = chunk_sol[i][0] #this is a list of the stellar_fnu's returned by that chunk
+        #chunk_sol now returns two things for each star/star bin: the spectrum and the associated surviving stellar mass fraction for that SSP 
         mfrac_list = chunk_sol[i][1]
         for j in range(len(fnu_list)):
             mfrac[star_counter] = mfrac_list[j] 
@@ -422,7 +424,11 @@ def newstars_gen(stars_list):
 
         spec_noneb = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
         f = spec_noneb[1]
-        #for later mass normalization of spectrum
+        #NOTE: FSPS SSP/CSP spectra are scaled by *formed* mass, not current mass. i.e., the SFHs of the SSP/CSP are normalized such that 1 solar mass
+        #is formed over the history. This means that the stellar spectra are normalized by the integral of the SFH =/= current 
+        #(surviving, observed, etc.) stellar mass. In simulations, we only know the current star particle mass. To get the formed mass for an SSP,
+        #we generate the surviving mass fraction (sp.stellar_mass) to extrapolate the initial mass from the current mass, metallicity, and age
+        #this 'mfrac' is used to scale the FSPS SSP luminosities in source_creation
         mfrac[i] = sp.stellar_mass
 
         pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= stars_list[i].age <= cfg.par.PAGB_max_age

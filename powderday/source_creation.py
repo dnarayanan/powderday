@@ -43,7 +43,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         print ("Number of unbinned stars to added: ", nstars)
     
     stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, mfrac = sg.allstars_sed_gen(unbinned_stars_list, cosmoflag, sp)
-
+    #SED_gen now returns an additional parameter, mfrac, to properly scale the FSPS SSP spectra, which are in units of formed mass, not current stellar mass
     for i in range(nstars):
         nu = stellar_nu[:]
         fnu = stellar_fnu[i, :]
@@ -333,6 +333,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
 
                     
                     #source luminosities
+                    #here, each (wz, wa, wm) bin will have an associated mfrac that corresponds to the fnu generated for this bin
+                    #while each star particle in the bin has a distinct mass, they all share mfrac as this value depends only on the age and Z of the star
+                    #thus, there are 'counter' number of binned_mfrac values (to match the number of fnu arrays)
                     lum = np.array([stars_list[i].mass/constants.M_sun.cgs.value*constants.L_sun.cgs.value/binned_mfrac[counter] for i in stars_in_bin[(wz,wa,wm)]])
                     lum *= np.absolute(np.trapz(fnu,x=nu))
                     source.luminosity = lum
