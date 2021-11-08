@@ -226,7 +226,7 @@ def logu_diagnostic(logQ, LogU, LogZ, Rin, cluster_mass, num_cluster, age, appen
 
 
 # Dumps emission lines
-def dump_emlines(line_wav, line_em, id_val, append=True):
+def dump_emlines(line_wav, line_em, append=True):
     if hasattr(cfg.model, 'galaxy_num_str'):
         outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy" + cfg.model.galaxy_num_str + ".txt"
     else:
