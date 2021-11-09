@@ -181,7 +181,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
 
     # define the metallicity bins: we do this by saying that they are the number of metallicity bins in FSPS
 
-    fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+    fsps_metals = np.array(sp.zlegend)
     N_METAL_BINS = len(fsps_metals)
 
     # note the bins are NOT metallicity, but rather the zmet keys in

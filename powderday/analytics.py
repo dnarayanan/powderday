@@ -114,7 +114,7 @@ def dump_data(reg,model):
     np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass)#,tdust = tdust)
 
 
-def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
+def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,sp,hsml_in_pc = 10):
     
     #the work flow for this function is: for all dataset types, we
     #dump stars in the same manner (since we don't allow for mappings
@@ -150,7 +150,7 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
     spos_z = np.concatenate((spos_z, disk_z, bulge_z))
     smasses = np.concatenate((smasses, diskmasses, bulgemasses))
 
-    fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+    fsps_metals = np.array(sp.zlegend)
     
     if ds.cosmological_simulation:
         dmet = [0.]*len(diskmasses)

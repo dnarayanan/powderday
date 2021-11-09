@@ -43,7 +43,7 @@ class Stars:
     def info(self):
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
         
-def star_list_gen(boost,dx,dy,dz,reg,ds):
+def star_list_gen(boost,dx,dy,dz,reg,ds,sp):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
     mass = reg["star","masses"].value
     positions = reg["star","coordinates"].value
@@ -86,7 +86,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
 
 
 
-    zmet = fsps_metallicity_interpolate(metals_tot)
+    zmet = fsps_metallicity_interpolate(metals_tot, sp)
     #mwd(zmet,mass,'zmet_distribution.png')
 
     #print '[SED_gen/star_list_gen: ] fsps zmet codes:',zmet
@@ -305,7 +305,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
         #dust_tesc is an absolute value (not relative to min star age) as the ages of these stars are input by the user
 
         # Load in the metallicity legend
-        fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+        fsps_metals = np.array(sp.zlegend)
 
         sp.params["tage"] = cfg.par.disk_stars_age
         sp.params["imf_type"] = cfg.par.imf_type
@@ -767,26 +767,12 @@ def dig_sed(factor, cell_width, metal):
     return spec
 
 
-def fsps_metallicity_interpolate(metals):
+def fsps_metallicity_interpolate(metals, sp):
 
     # takes a list of metallicities for star particles, and returns a
     # list of interpolated metallicities
 
-    isochrone = str(sp.libraries[0])
-    try:
-        fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
-    except ValueError:
-        if 'mist' in isochrone:
-            fsps_metals = []
-            fsps_metals_temp = np.loadtxt('zlegend.dat', dtype='str')
-            for fsps_met in fsps_metals_temp:
-                if fsps_met[0] == 'm':
-                    met = float(fsps_met[1:]) * (-1.0)
-                else:
-                    met = float(fsps_met[1:])
-                fsps_metals.append(10**(met) * cfg.par.solar)
-
-        fsps_metals = np.array(fsps_metals)
+    fsps_metals = np.array(sp.zlegend)
 
     nstars = len(metals)
     
