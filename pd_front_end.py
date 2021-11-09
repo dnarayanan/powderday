@@ -117,17 +117,17 @@ df.close()
 
 
 # add sources to hyperion
-stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds)
+stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds, sp)
 nstars = len(stars_list)
 
 # figure out N_METAL_BINS:
-fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+fsps_metals = np.array(sp.zlegend)
 N_METAL_BINS = len(fsps_metals)
 
 
 #initializing the nebular diagnostic file newly
 if cfg.par.add_neb_emission and cfg.par.NEB_DEBUG: logu_diagnostic(None,None,None,None,None,None,None,append=False)
-if cfg.par.add_neb_emission and cfg.par.dump_emlines: dump_emlines(None,None,None,append=False)
+if cfg.par.add_neb_emission and cfg.par.dump_emlines: dump_emlines(None,None,append=False)
 
 if cfg.par.BH_SED == True:
     BH_source_add(m, reg, df_nu, boost)
@@ -155,7 +155,7 @@ if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
     stellar_sed_write(m)
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
-    SKIRT_data_dump(reg, ds, m, stars_list, ds_type)
+    SKIRT_data_dump(reg, ds, m, stars_list, ds_type, sp)
 
 
 nstars = len(stars_list)
