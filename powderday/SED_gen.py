@@ -599,7 +599,7 @@ def newstars_gen(stars_list):
                 #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
                 line_em = line_em * (stars_list[i].mass * u.g).to(u.Msun).value * 3.839e33  # Units: ergs/s
                 line_em = np.append(line_em, stars_list[i].age)
-                dump_emlines(wave_line, line_em, id_val)
+                dump_emlines(wave_line, line_em)
 
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f
@@ -719,7 +719,7 @@ def agn_sed(agn_id, nu, fnu, metals_avg):
             line_em = line_lum * 3.839e33  # Units: ergs/s
             # The last column in dump_emlines is reserved for age of the star particle. For AGN we just set it to -1 as a place holder.
             line_em = np.append(line_em, -1.0)
-            dump_emlines(wave_line, line_em, id_val)
+            dump_emlines(wave_line, line_em)
 
     else:
         spec = fnu
@@ -764,7 +764,7 @@ def dig_sed(factor, cell_width, metal):
         line_em = line_lum * 3.839e33  # Units: ergs/s
         # The last column in dump_emlines is reserved for age of the star particle. For DIG we just set it to -1 as a place holder.
         line_em = np.append(line_em, -1.0)
-        dump_emlines(wave_line, line_em, id_val)
+        dump_emlines(wave_line, line_em)
         
     return spec
 
