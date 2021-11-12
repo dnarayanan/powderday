@@ -12,7 +12,7 @@ From cloudyfsps written by Nell Byler.
 """
 
 
-def calc_LogQ(nuin0, specin0, efrac=0.0, mstar=1.0):
+def calc_LogQ(nuin0, specin0, efrac=0.0, mstar=1.0, mfrac=1.0):
     '''
     Claculates the number of lyman ionizing photons (Q) for given a spectrum
     Q = int(Lnu/hnu dnu, nu_0, inf)
@@ -35,7 +35,7 @@ def calc_LogQ(nuin0, specin0, efrac=0.0, mstar=1.0):
     nu = hlam[::-1]
     f_nu = hflu[::-1]
     integrand = f_nu / (h * nu)
-    logQ = np.log10(integrate.simps(integrand, x=nu)*mstar*(1-efrac))
+    logQ = np.log10(integrate.simps(integrand, x=nu)*(mstar/mfrac)*(1-efrac))
     return logQ
 
    

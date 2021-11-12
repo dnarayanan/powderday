@@ -506,9 +506,11 @@ def newstars_gen(stars_list):
                             sp1.params["dust_tesc"] = tesc_age
 
                         spec = sp1.get_spectrum(tage=stars_list[i].age)
+                        mfrac_neb = sp1.stellar_mass
 
                     else:
                         spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+                        mfrac_neb = sp.stellar_mass
 
                     alpha = 2.5e-13 # Recombination Rate (assuming T = 10^4 K)
 
@@ -524,7 +526,7 @@ def newstars_gen(stars_list):
 
                     else:
                         LogQ = calc_LogQ(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value
-                                , efrac=escape_fraction, mstar=10**cluster_mass[j])   
+                                , efrac=escape_fraction, mstar=10**cluster_mass[j], mfrac=mfrac_neb)   
                         Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
                         LogU = np.log10((10**LogQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
                         LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*nh))
