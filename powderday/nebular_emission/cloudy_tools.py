@@ -2,6 +2,7 @@ from astropy import constants
 import itertools
 import numpy as np
 from scipy import integrate, spatial
+import powderday.config as cfg
 
 """
 ----------------------------------------------------------------------------------------------------------------
@@ -168,8 +169,8 @@ def age_dist(Num, tavg, witdth=5, gamma=-0.65, bins=6, tries=100, tolerance = 0.
     # break them down since there are not enough particles to relaiably sample the
     # distribution
 
-    if Num < bins * 3:
-        return np.array([Num]), np.array([tavg])
+    #if Num < bins * 3:
+    #    return np.array([Num]), np.array([tavg])
 
     # Solving for the limits of the age distribution (dN/dt is proportional to gamma) such that the
     # width (end - start age) is equal to the width parameter and the average age of the distribution is

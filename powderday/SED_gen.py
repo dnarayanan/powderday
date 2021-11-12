@@ -457,12 +457,12 @@ def newstars_gen(stars_list):
                     num_clusters = []
                     cluster_mass = []
                     age_clusters = []
-                    for k in range(len(cluster_mass)):
+                    for k in range(len(cluster_mass_cmdf)):
                         num, t = age_dist(num_clusters_cmdf[k], stars_list[i].age)
                         for l in range(len(num)):
                             num_clusters.append(num[l])
                             cluster_mass.append(cluster_mass_cmdf[k])
-                            age_clusters.append(t[k])
+                            age_clusters.append(t[l])
 
                 cluster_mass = np.array(cluster_mass)
                 num_clusters = np.array(num_clusters)
