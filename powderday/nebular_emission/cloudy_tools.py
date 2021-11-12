@@ -164,13 +164,15 @@ def get_nearest(particle_list, particle_central, num=32):
     return np.array(arg[0][mask]), np.array(arg[1][mask])
 
 
-def age_dist(Num, tavg, witdth=5, gamma=-0.65, bins=6, tries=100, tolerance = 0.1):
+def age_dist(Num, tavg, witdth=5, gamma=-0.65, bins=4, tries=100, tolerance = 0.1):
     # If number of star particles are less than 3 times the number of bins then do not
     # break them down since there are not enough particles to relaiably sample the
     # distribution
+    
+    tavg = tavg*1e3
 
-    #if Num < bins * 3:
-    #    return np.array([Num]), np.array([tavg])
+    if Num <= bins:
+        return np.array([Num]), np.array([tavg])
 
     # Solving for the limits of the age distribution (dN/dt is proportional to gamma) such that the
     # width (end - start age) is equal to the width parameter and the average age of the distribution is
@@ -181,7 +183,7 @@ def age_dist(Num, tavg, witdth=5, gamma=-0.65, bins=6, tries=100, tolerance = 0.
     # not met then the particle is not broken down
 
     for i in range(tries):
-        ti_temp = np.arange(1, cfg.par.HII_max_age, 0.1)
+        ti_temp = np.arange(1, cfg.par.HII_max_age*1e3, 0.1)
         x = (ti_temp + witdth) ** (gamma + 2) + ti_temp ** (gamma + 2) - 2 * (tavg ** (gamma + 2))
         index = np.argmin(np.abs(x))
         ti = ti_temp[index]
@@ -201,4 +203,4 @@ def age_dist(Num, tavg, witdth=5, gamma=-0.65, bins=6, tries=100, tolerance = 0.
         else:
             witdth = witdth - 0.2
 
-    return N, t
+    return N, t*1e-3
