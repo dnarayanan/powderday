@@ -465,7 +465,7 @@ def newstars_gen(stars_list):
                             if num[l] == 0:
                                 continue
                             num_clusters.append(num[l])
-                            cluster_mass.append(cluster_mass_cmdf[k]*rescale)
+                            cluster_mass.append(np.log10((10**cluster_mass_cmdf[k])*rescale))
                             age_clusters.append(t[l])
 
                 cluster_mass = np.array(cluster_mass)
