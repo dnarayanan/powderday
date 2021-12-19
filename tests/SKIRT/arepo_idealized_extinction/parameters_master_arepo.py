@@ -82,11 +82,6 @@ pagb = 1 # weight given to post agb stars# 1 is the default
 
 add_agb_dust_model = False    # add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
 
-use_cmdf = False     # If True, star particles that fit the criteria for nebular emission (see next section) are broken down 
-                     # using a cluster mass distribution function (cmdf) even if nebular emission is turned off (add_nebular_emission = False). 
-                     # This allows for one to one comparison of models with and without nebular emission. The cmdf is set by the following 
-                     # parameters defined under nebular emission info (next section): cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
-
 #===============================================
 #NEBULAR EMISSION INFO
 #===============================================
@@ -96,17 +91,33 @@ use_cloudy_tables = True    			    # If True, CLOUDY look up tables (dev. by Nel
                             			    # nebular emission. If False, CLOUDY models are generated individually 
                             			    # for each young star particle (under active development). 
                             			    # Note:  The lookup tables work only for stars particles below 10 Myr.  (Default: True)
+                            			    
+use_cmdf = False                            # If True, star particles that have mass greater than cmdf_mas_mass (defined below) are broken down using a 
+											# cluster mass distribution function (cmdf) of the form dN/dM goes as M^(beta). This works irrespecitve of whether 
+											# nebular emission is turned on or not.  The cmdf is set by the following parameters defined below: 
+											# cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
 
-cmdf_min_mass = 3.5                         # While calulating nebular emission from young stars and PAGB stars one star particle is broken down 
-                                            # into smaller star cluster by assuming a cluster mass distribution function of the form dN/dM goes as M^(beta). 
-                                            # This parameter sets the minimum mass of the star clusters in units of log(Msun). Note this value 
-                                            # should not be set lower than 3.5. (Default = 3.5)
+cmdf_min_mass = 3.5                         # Minimum mass of the star clusters in units of log(Msun). Note: Results might be inconsistent if
+                                            # set lower than 3.5. (See Chandar et al.2014 for more info) (Default = 3.5)
 
-cmdf_max_mass = 5.0                         # Minimum mass of the star clusters in units of log(Msun). (Default = 5.0)
+cmdf_max_mass = 5.0                         # Maximum mass of the star clusters in units of log(Msun). (Default = 5.0). Note: Only star particles that
+                                            # have a mass greater than this parameter are broken down. 
 
 cmdf_bins = 6                               # The number of bins used for calulating the cluster mass distribution function (Default = 6.0)
 
 cmdf_beta = -2.0                            # Beta (power law exponent) for calculating CMDF (dN/dM goes as M^(beta)) 
+
+use_age_distribution = False                # Setting this to True, divides the star particles with ages between age_dist_min and age_dist_max (next parameters) into 
+                                            # an ensemble of particles all of whom have the same properties except their age which is picked from a power law age 
+                                            # distribution of the form dN/dt is proportional to t^-0.65. 
+                                            # Note: The function has a bunch of tunable parameters that can be changed though we feel that their default values
+                                            # should be good enough for most cases. The function is located in cloudy_tools.py file under powderday/nebular_emission.
+
+age_dist_min = 3e-3                         # Star particle above this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 3.e-3)
+
+age_dist_max = 1e-2                         # Star particles below this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 1.e-2)
 
 
 #**********************
