@@ -107,10 +107,19 @@ cmdf_bins = 6                               # The number of bins used for calula
 
 cmdf_beta = -2.0                            # Beta (power law exponent) for calculating CMDF (dN/dM goes as M^(beta)) 
 
-cmdf_rescale = True                         # Rescale cluster masses to initial mass
+use_age_distribution = False                # Setting this to True, divides the star particles with ages between age_dist_min and age_dist_max (next parameters) into 
+                                            # an ensemble of particles all of whom have the same properties except their age which is picked from a power law age 
+                                            # distribution of the form dN/dt is proportional to t^-0.65. 
+                                            # Note: The function has a bunch of tunable parameters that can be changed though we feel that their default values
+                                            # should be good enough for most cases. The function is located in cloudy_tools.py file under powderday/nebular_emission.
 
+age_dist_min = 3e-3                         # Star particle above this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 3.e-3)
 
-#**********************
+age_dist_max = 1e-2                         # Star particles below this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 1.e-2)
+
+#***********************
 # COMMON PARAMETERS
 #***********************
 # NOTE: These parmeters take either three or four values as an input. 

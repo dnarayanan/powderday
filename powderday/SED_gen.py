@@ -791,7 +791,7 @@ def dig_sed(factor, cell_width, metal):
         line_em = line_lum * 3.839e33  # Units: ergs/s
         # The last column in dump_emlines is reserved for age of the star particle. For DIG we just set it to -1 as a place holder.
         line_em = np.append(line_em, -1.0)
-        dump_emlines(wave_line, line_em, id_val)
+        dump_emlines(wave_line, line_em)
         
     return spec
 
