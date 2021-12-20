@@ -445,8 +445,7 @@ def newstars_gen(stars_list):
             if stars_list[i].mass / constants.M_sun.cgs.value > 10 ** cfg.par.cmdf_max_mass and cfg.par.use_cmdf:
                 cluster_mass, num_clusters = cmdf(stars_list[i].mass / constants.M_sun.cgs.value,
                                                   int(cfg.par.cmdf_bins), cfg.par.cmdf_min_mass,
-                                                  cfg.par.cmdf_max_mass, cfg.par.cmdf_beta,
-                                                  rescale_masses=cfg.par.cmdf_rescale)
+                                                  cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
                 age_clusters = []
                 for k in range(len(cluster_mass)):
                     age_clusters.append(stars_list[i].age)
