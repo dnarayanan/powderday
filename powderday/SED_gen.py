@@ -16,7 +16,7 @@ from functools import partial
 from itertools import repeat
 from scipy.integrate import simps
 
-from powderday.nebular_emission.cloudy_tools import calc_LogQ, cmdf, get_nearest,convert_metals
+from powderday.nebular_emission.cloudy_tools import calc_LogQ, age_dist, cmdf, get_nearest,convert_metals
 from powderday.analytics import logu_diagnostic,dump_emlines
 from powderday.nebular_emission.cloudy_model import get_nebular
 
@@ -436,22 +436,55 @@ def newstars_gen(stars_list):
 
         if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (young_star or pagb):
 
-            # Cluster Mass Distribution Funtion is used only when the star particle's mass is gretaer than the maximum cluster mass and use_cmdf is True. 
-
-            if stars_list[i].mass/constants.M_sun.cgs.value > 10**cfg.par.cmdf_max_mass and cfg.par.use_cmdf:
-                cluster_mass, num_clusters = cmdf(stars_list[i].mass/constants.M_sun.cgs.value,int(cfg.par.cmdf_bins),cfg.par.cmdf_min_mass,
-                        cfg.par.cmdf_max_mass, cfg.par.cmdf_beta, rescale_masses=cfg.par.cmdf_rescale)
+            # For each star particle we break it into a collection or cluster of star particles which have the same property as the parent star particle
+            # but their masses and ages follow a power-law distribution if use_cmdf and use_age_distribution are set to True respectively and it falls 
+            # under the constraints set in parameters_master. To do so we create 1D arrays that store the masses of each cluster (cluster_mass), num of particles 
+            # in that cluster (num_cluster), and age of that cluster (age_cluster). So for example (assuming default values), a 1e6 solar mass particle 
+            # will first be broken down into 6 particles with different masses ranging from 10^3.5 Msun to 10^5 Msun. Each of these particles will be further 
+            # broken down into 5 particles with their ages are distributed as per the age distribution. Thus in total, this one particle will be broken 
+            # down into 30 particles and these arrays will store the properties of all the 30 particles. This allows us to consider these as 30 individual 
+            # particles rest of the calculation and their fluxes are combined in end to get the final result for this one particle. 
             
-            else:
-                cluster_mass = [np.log10(stars_list[i].mass/constants.M_sun.cgs.value)]
-                num_clusters = [1]
+            cluster_mass = [np.log10(stars_list[i].mass / constants.M_sun.cgs.value)]
+            num_clusters = [1]
+            age_clusters = [stars_list[i].age]
 
+            if stars_list[i].mass / constants.M_sun.cgs.value > 10 ** cfg.par.cmdf_max_mass and cfg.par.use_cmdf:
+                cluster_mass, num_clusters = cmdf(stars_list[i].mass / constants.M_sun.cgs.value,
+                                                  int(cfg.par.cmdf_bins), cfg.par.cmdf_min_mass,
+                                                  cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
+                age_clusters = []
+                for k in range(len(cluster_mass)):
+                    age_clusters.append(stars_list[i].age)
+
+                if cfg.par.use_age_distribution:
+                    num_clusters_cmdf = num_clusters
+                    cluster_mass_cmdf = cluster_mass
+                    num_clusters = []
+                    cluster_mass = []
+                    age_clusters = []
+                    for k in range(len(cluster_mass_cmdf)):
+                        num, t = age_dist(num_clusters_cmdf[k], stars_list[i].age)
+                        rescale = np.sum(num_clusters_cmdf[k])/np.sum(num)
+                        
+                        for l in range(len(num)):
+                            if num[l] == 0:
+                                continue
+                            num_clusters.append(num[l])
+                            cluster_mass.append(np.log10((10**cluster_mass_cmdf[k])*rescale))
+                            age_clusters.append(t[l])
+
+                cluster_mass = np.array(cluster_mass)
+                num_clusters = np.array(num_clusters)
+                age_clusters = np.array(age_clusters)
+            
             f = np.zeros(nlam)
             cloudy_nlam = len(np.genfromtxt(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat", delimiter=','))
             line_em = np.zeros([cloudy_nlam])
-            
+
             for j in range(len(cluster_mass)):
                 num_HII_clusters = num_clusters[j]
+                age = age_clusters[j]
                 neb_file_output = cfg.par.NEB_DEBUG
 
                 sp.params["add_neb_emission"] = False
@@ -487,7 +520,7 @@ def newstars_gen(stars_list):
                         Logzsol = np.log10(FeH/FeH_sol)
                         
                         sp1 = fsps.StellarPopulation(zcontinuous=1)
-                        sp1.params["tage"] = stars_list[i].age
+                        sp1.params["tage"] = age
                         sp1.params["imf_type"] = cfg.par.imf_type
                         sp1.params["imf1"] = cfg.par.imf1
                         sp1.params["imf2"] = cfg.par.imf2
@@ -505,11 +538,11 @@ def newstars_gen(stars_list):
                             sp1.params["dust2"] = 0
                             sp1.params["dust_tesc"] = tesc_age
 
-                        spec = sp1.get_spectrum(tage=stars_list[i].age)
+                        spec = sp1.get_spectrum(tage=age)
                         mfrac_neb = sp1.stellar_mass
 
                     else:
-                        spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+                        spec = sp.get_spectrum(tage=age,zmet=stars_list[i].fsps_zmet)
                         mfrac_neb = sp.stellar_mass
 
                     alpha = 2.5e-13 # Recombination Rate (assuming T = 10^4 K)
@@ -554,14 +587,14 @@ def newstars_gen(stars_list):
                         
                         LogU = np.log10((10**LogQ)/(4*np.pi*Rin*Rin*nh*constants.c.cgs.value))
 
-                        logu_diagnostic(LogQ, LogU, LogZ, Rs, 10**cluster_mass[j], num_HII_clusters, stars_list[i].age, append=True)
+                        logu_diagnostic(LogQ, LogU, LogZ, Rs, 10**cluster_mass[j], num_HII_clusters, age, append=True)
                         neb_file_output = False
 
                     sp.params['gas_logu'] = LogU
                     sp.params['gas_logz'] = LogZ
                     sp.params["add_neb_emission"] = True  
                     if cfg.par.use_cloudy_tables:
-                        lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+                        lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
                         line_lum = sp.emline_luminosity
                         wave_line = sp.emline_wavelengths
                     else:
@@ -579,7 +612,7 @@ def newstars_gen(stars_list):
                             if  young_star:
                                 print ("WARNING: Switching to using lookup tables pre-packed with FSPS to calculate nebular emission for this particle.") 
                                 print ("WARNING: The emission line fluxes repoted may not be accurate if the particle lies outside the range of the lookup table paramters.")
-                                lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+                                lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
                                 line_lum = sp.emline_luminosity
                                 wave_line = sp.emline_wavelengths
                             else:
@@ -588,7 +621,7 @@ def newstars_gen(stars_list):
                                 raise ValueError('CLOUDY run was unsucessful')
                 
                 else:
-                    lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+                    lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
 
                 weight = num_HII_clusters*(10**cluster_mass[j])/(stars_list[i].mass/constants.M_sun.cgs.value)    
                 f = f + spec_neb*weight
@@ -598,7 +631,7 @@ def newstars_gen(stars_list):
             if cfg.par.add_neb_emission and cfg.par.dump_emlines:
                 #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
                 line_em = line_em * (stars_list[i].mass * u.g).to(u.Msun).value * 3.839e33  # Units: ergs/s
-                line_em = np.append(line_em, stars_list[i].age)
+                line_em = np.append(line_em, age)
                 dump_emlines(wave_line, line_em)
 
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]

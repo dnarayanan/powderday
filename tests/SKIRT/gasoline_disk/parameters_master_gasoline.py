@@ -36,6 +36,11 @@ seed = -12345 # has to be an int, and negative.
 #===============================================
 #DUST INFORMATION 
 #===============================================
+
+#----------------
+#DUST EXTINCTION
+#----------------
+
 dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = False
@@ -48,6 +53,16 @@ SUBLIMATION = True  # do we automatically kill dust grains above the
                     # sublimation temperature; right now is set to fast
                     # mode 
 SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
+
+#---------------------------------------------------------------
+#Experimental Dust -- Note, these features are not fully vetted
+#---------------------------------------------------------------
+
+otf_extinction = True #flag for on the fly extinction.  If set, then we
+                                    #ignore the dustdir/dustfile extinction information above. if
+                                    #false, all otf_extinction* quantities are meaningless
+otf_extinction_log_min_size = -3 #micron; must match what is set in the hydro simulation
+otf_extinction_log_max_size = 0 #micron; must match what is set in the hydro simulation
 
 #===============================================
 #STELLAR SEDS INFO
@@ -81,18 +96,32 @@ use_cloudy_tables = True    			    # If True, CLOUDY look up tables (dev. by Nel
                             			    # for each young star particle (under active development). 
                             			    # Note:  The lookup tables work only for stars particles below 10 Myr.  (Default: True)
 
-cmdf_min_mass = 3.5                         # While calulating nebular emission from young stars and PAGB stars one star particle is broken down 
-                                            # into smaller star cluster by assuming a cluster mass distribution function of the form dN/dM goes as M^(beta). 
-                                            # This parameter sets the minimum mass of the star clusters in units of log(Msun). Note this value 
-                                            # should not be set lower than 3.5. (Default = 3.5)
+use_cmdf = False                            # If True, star particles that have mass greater than cmdf_mas_mass (defined below) are broken down using a 
+                                            # cluster mass distribution function (cmdf) of the form dN/dM goes as M^(beta). This works irrespecitve of whether
+                                            # nebular emission is turned on or not.  The cmdf is set by the following parameters defined below: 
+                                            # cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
 
-cmdf_max_mass = 5.0                         # Minimum mass of the star clusters in units of log(Msun). (Default = 5.0)
+cmdf_min_mass = 3.5                         # Minimum mass of the star clusters in units of log(Msun). Note: Results might be inconsistent if
+                                            # set lower than 3.5. (See Chandar et al.2014 for more info) (Default = 3.5)
+
+cmdf_max_mass = 5.0                         # Maximum mass of the star clusters in units of log(Msun). (Default = 5.0). Note: Only star particles that
+                                            # have a mass greater than this parameter are broken down. 
 
 cmdf_bins = 6                               # The number of bins used for calulating the cluster mass distribution function (Default = 6.0)
 
 cmdf_beta = -2.0                            # Beta (power law exponent) for calculating CMDF (dN/dM goes as M^(beta)) 
 
+use_age_distribution = False                # Setting this to True, divides the star particles with ages between age_dist_min and age_dist_max (next parameters) into 
+                                            # an ensemble of particles all of whom have the same properties except their age which is picked from a power law age 
+                                            # distribution of the form dN/dt is proportional to t^-0.65 (Imp: This can only be used if use_cmdf is also set to True). 
+                                            # Note: The function has a bunch of tunable parameters that can be changed though we feel that their default values
+                                            # should be good enough for most cases. The function is located in cloudy_tools.py file under powderday/nebular_emission.
 
+age_dist_min = 3e-3                         # Star particle above this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 3.e-3)
+
+age_dist_max = 1e-2                         # Star particles below this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 1.e-2)
 #**********************
 # COMMON PARAMETERS
 #***********************
