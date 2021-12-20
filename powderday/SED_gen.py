@@ -436,8 +436,15 @@ def newstars_gen(stars_list):
 
         if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (young_star or pagb):
 
-            # Cluster Mass Distribution Funtion is used only when the star particle's mass is gretaer than the maximum cluster mass and use_cmdf is True. 
-
+            # For each star particle we break it into a collection or cluster of star particles which have the same property as the parent star particle
+            # but their masses and ages follow a power-law distribution if use_cmdf and use_age_distribution are set to True respectively and it falls 
+            # under the constraints set in parameters_master. To do so we create 1D arrays that store the masses of each cluster (cluster_mass), num of particles 
+            # in that cluster (num_cluster), and age of that cluster (age_cluster). So for example (assuming default values), a 1e6 solar mass particle 
+            # will first be broken down into 6 particles with different masses ranging from 10^3.5 Msun to 10^5 Msun. Each of these particles will be further 
+            # broken down into 5 particles with their ages are distributed as per the age distribution. Thus in total, this one particle will be broken 
+            # down into 30 particles and these arrays will store the properties of all the 30 particles. This allows us to consider these as 30 individual 
+            # particles rest of the calculation and their fluxes are combined in end to get the final result for this one particle. 
+            
             cluster_mass = [np.log10(stars_list[i].mass / constants.M_sun.cgs.value)]
             num_clusters = [1]
             age_clusters = [stars_list[i].age]

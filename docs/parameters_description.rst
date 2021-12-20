@@ -305,7 +305,7 @@ Nebular Emission Info
     
     If True, star particles with ages between age_dist_min and age_dist_max (next parameters) into divided into
     an ensemble of particles all of whom have the same properties except their age which is picked from a power law age 
-    distribution of the form dN/dt is proportional to t^-0.65. 
+    distribution of the form dN/dt is proportional to t^-0.65 (Imp: This can only be used if use_cmdf is also set to True).
     Note: The function has a bunch of tunable parameters that can be changed though we feel that their default values
     should be good enough for most cases. The function is located in cloudy_tools.py file under powderday/nebular_emission.
 
