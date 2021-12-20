@@ -2,6 +2,7 @@ from astropy import constants
 import itertools
 import numpy as np
 from scipy import integrate, spatial
+import powderday.config as cfg
 
 """
 ----------------------------------------------------------------------------------------------------------------
@@ -161,4 +162,43 @@ def get_nearest(particle_list, particle_central, num=32):
     mask = np.where(arg[1]<len(all_particles))[0]
     
     return np.array(arg[0][mask]), np.array(arg[1][mask])
+
+
+def age_dist(Num, tavg, width=5, gamma=-0.65, bins=4, tries=100, tolerance = 0.1):
+    # If the number of star particles is less than the number of bins or if the age is not within
+    # the limits set in paramters_master then do not break the particle down
     
+    tavg = tavg*1e3
+
+    if Num <= bins or tavg <= cfg.par.age_dist_min or tavg >= cfg.par.age_dist_max:
+        return np.array([Num]), np.array([tavg])
+
+    # Solving for the limits of the age distribution (dN/dt is proportional to t^gamma) such that the
+    # the average age of the distribution is as close to the age of the parent star particle. 
+    # If the difference between the average age and the age of the parent star particle is above the threshold 
+    # then the width (difference between start and end age of the distribution) is decreased at each step
+    # until the threshold is met (This is done at most x times where is determined by the variable "tries". 
+    # If the max number of tries is reached and the threshold is not met then the particle is not broken down.
+
+    for i in range(tries):
+        ti_temp = np.arange(1, cfg.par.HII_max_age*1e3, 0.1)
+        x = (ti_temp + witdth) ** (gamma + 2) + ti_temp ** (gamma + 2) - 2 * (tavg ** (gamma + 2))
+        index = np.argmin(np.abs(x))
+        ti = ti_temp[index]
+        tf = ti_temp[index] + width
+
+        t = np.linspace(ti, tf, bins)
+        A = Num / (np.sum(t ** (gamma + 1)))
+        N = [int(k) for k in A * t ** (gamma + 1)]
+        t_avg = np.sum(N * t) / np.sum(N)
+
+        if np.round(width, 1) < 0:
+            return np.array([Num]), np.array([tavg])
+
+        elif np.abs(t_avg - tavg) <= tolerance:
+            break
+
+        else:
+            width = width - 0.2
+
+    return N, t*1e-3

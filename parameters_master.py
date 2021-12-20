@@ -92,10 +92,11 @@ use_cloudy_tables = True    			    # If True, CLOUDY look up tables (dev. by Nel
                             			    # nebular emission. If False, CLOUDY models are generated individually 
                             			    # for each young star particle (under active development). 
                             			    # Note:  The lookup tables work only for stars particles below 10 Myr.  (Default: True)
-    
-use_cmdf = False                            # If True, star particles that have mass greater than cmdf_mas_mass (defined below) are broken down using a cluster mass distribution function (cmdf) of the form 
-                                            # dN/dM goes as M^(beta). This works irrespecitve of whether nebular emission is turned on or not. 
-                                            # The cmdf is set by the following parameters defined below: cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
+
+use_cmdf = False                            # If True, star particles that have mass greater than cmdf_mas_mass (defined below) are broken down using a 
+                                            # cluster mass distribution function (cmdf) of the form dN/dM goes as M^(beta). This works irrespecitve of whether
+                                            # nebular emission is turned on or not.  The cmdf is set by the following parameters defined below: 
+                                            # cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
 
 cmdf_min_mass = 3.5                         # Minimum mass of the star clusters in units of log(Msun). Note: Results might be inconsistent if
                                             # set lower than 3.5. (See Chandar et al.2014 for more info) (Default = 3.5)
@@ -107,10 +108,19 @@ cmdf_bins = 6                               # The number of bins used for calula
 
 cmdf_beta = -2.0                            # Beta (power law exponent) for calculating CMDF (dN/dM goes as M^(beta)) 
 
-cmdf_rescale = True                         # Rescale cluster masses to initial mass
+use_age_distribution = False                # Setting this to True, divides the star particles with ages between age_dist_min and age_dist_max (next parameters) into 
+                                            # an ensemble of particles all of whom have the same properties except their age which is picked from a power law age 
+                                            # distribution of the form dN/dt is proportional to t^-0.65. 
+                                            # Note: The function has a bunch of tunable parameters that can be changed though we feel that their default values
+                                            # should be good enough for most cases. The function is located in cloudy_tools.py file under powderday/nebular_emission.
 
+age_dist_min = 3e-3                         # Star particle above this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 3.e-3)
 
-#**********************
+age_dist_max = 1e-2                         # Star particles below this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 1.e-2)
+
+#***********************
 # COMMON PARAMETERS
 #***********************
 # NOTE: These parmeters take either three or four values as an input. 
