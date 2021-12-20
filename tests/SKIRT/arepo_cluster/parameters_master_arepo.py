@@ -77,10 +77,10 @@ use_cloudy_tables = True    			    # If True, CLOUDY look up tables (dev. by Nel
                             			    # Note:  The lookup tables work only for stars particles below 10 Myr.  (Default: True)
 
 use_cmdf = False                            # If True, star particles that have mass greater than cmdf_mas_mass (defined below) are broken down using a 
-											# cluster mass distribution function (cmdf) of the form dN/dM goes as M^(beta). This works irrespecitve of whether 
-											# nebular emission is turned on or not.  The cmdf is set by the following parameters defined below: 
-											# cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
-
+                                            # cluster mass distribution function (cmdf) of the form dN/dM goes as M^(beta). This works irrespecitve of whether
+                                            # nebular emission is turned on or not.  The cmdf is set by the following parameters defined below: 
+                                            # cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
+                                            
 cmdf_min_mass = 3.5                         # Minimum mass of the star clusters in units of log(Msun). Note: Results might be inconsistent if
                                             # set lower than 3.5. (See Chandar et al.2014 for more info) (Default = 3.5)
 
