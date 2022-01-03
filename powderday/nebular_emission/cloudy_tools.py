@@ -167,11 +167,11 @@ def get_nearest(particle_list, particle_central, num=32):
 def age_dist(Num, tavg, width=5, gamma=-0.65, bins=4, tries=100, tolerance = 0.1):
     # If the number of star particles is less than the number of bins or if the age is not within
     # the limits set in paramters_master then do not break the particle down
-    
-    tavg = tavg*1e3
 
     if Num <= bins or tavg <= cfg.par.age_dist_min or tavg >= cfg.par.age_dist_max:
         return np.array([Num]), np.array([tavg])
+
+    tavg = tavg*1e3
 
     # Solving for the limits of the age distribution (dN/dt is proportional to t^gamma) such that the
     # the average age of the distribution is as close to the age of the parent star particle. 
@@ -182,7 +182,7 @@ def age_dist(Num, tavg, width=5, gamma=-0.65, bins=4, tries=100, tolerance = 0.1
 
     for i in range(tries):
         ti_temp = np.arange(1, cfg.par.HII_max_age*1e3, 0.1)
-        x = (ti_temp + witdth) ** (gamma + 2) + ti_temp ** (gamma + 2) - 2 * (tavg ** (gamma + 2))
+        x = (ti_temp + width) ** (gamma + 2) + ti_temp ** (gamma + 2) - 2 * (tavg ** (gamma + 2))
         index = np.argmin(np.abs(x))
         ti = ti_temp[index]
         tf = ti_temp[index] + width
