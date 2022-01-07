@@ -155,7 +155,7 @@ def dump_data(reg,model):
     np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass,grid_dustmass=grid_dustmass,grid_PAH_luminosity = grid_PAH_luminosity,PAH_lam=PAH_lam,total_PAH_luminosity = total_PAH_luminosity,integrated_grid_PAH_luminosity = integrated_grid_PAH_luminosity,q_pah=q_pah,particle_mass_weighted_gsd = particle_mass_weighted_gsd,grid_mass_weighted_gsd = grid_mass_weighted_gsd,simulation_sizes=simulation_sizes)#,tdust = tdust)
 
 
-def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
+def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,sp,hsml_in_pc = 10):
     
     #the work flow for this function is: for all dataset types, we
     #dump stars in the same manner (since we don't allow for mappings
@@ -191,7 +191,7 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
     spos_z = np.concatenate((spos_z, disk_z, bulge_z))
     smasses = np.concatenate((smasses, diskmasses, bulgemasses))
 
-    fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+    fsps_metals = np.array(sp.zlegend)
     
     if ds.cosmological_simulation:
         dmet = [0.]*len(diskmasses)
@@ -267,7 +267,7 @@ def logu_diagnostic(logQ, LogU, LogZ, Rin, cluster_mass, num_cluster, age, appen
 
 
 # Dumps emission lines
-def dump_emlines(line_wav, line_em, id_val, append=True):
+def dump_emlines(line_wav, line_em, append=True):
     if hasattr(cfg.model, 'galaxy_num_str'):
         outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy" + cfg.model.galaxy_num_str + ".txt"
     else:

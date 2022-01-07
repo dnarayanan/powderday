@@ -228,6 +228,9 @@ Stellar SEDs Info
 :max_age_direct:
    
    Age (in Gyr) below which star particles will not be binned for getting stellar SEDs (works only if FORCE_BINNED is False) 
+   To force all the star particles to be added without binning set this to an age greater than the maximum stellar age 
+   of the galaxy (say 16 Gyr for example)
+
 
 :imf_type:
 
@@ -298,6 +301,24 @@ Nebular Emission Info
     
     The power law exponent (beta) for calculating CMDF (dN/dM goes as M^(beta))
 
+:use_age_distribution:
+    
+    If True, star particles with ages between age_dist_min and age_dist_max (next parameters) into divided into
+    an ensemble of particles all of whom have the same properties except their age which is picked from a power law age 
+    distribution of the form dN/dt is proportional to t^-0.65 (Imp: This can only be used if use_cmdf is also set to True).
+    Note: The function has a bunch of tunable parameters that can be changed though we feel that their default values
+    should be good enough for most cases. The function is located in cloudy_tools.py file under powderday/nebular_emission.
+
+:age_dist_min: 
+    
+    Star particle above this age are sub-divided into an age distribution if use_age_distribution is set to True
+    (Units: Gyr, Default = 3.e-3)
+    
+:age_dist_max:
+    
+    Star particles below this age are sub-divided into an age distribution if use_age_distribution is set to True
+    (Units: Gyr, Default = 1.e-2)
+    
 COMMON PARAMETERS
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -601,34 +622,6 @@ Stellar Ages and Metallicities
    
    Number of bins to bin the stellar ages in (boundaries are the
    oldest and youngest star particles; linear bins in log(age)).
-
-:metallicity_legend:
-
-   String.  Location of the metallicity maps in FSPS for the stellar
-   libraries you use.  Currently Padova2007 is the default (hard coded
-   into `powderday <https://github.com/dnarayanan/powderday.git>`_).
-   Unfortunately in this particular parameter case, the default is
-   actually an exception.  
-
-   By default, we use the same stellar isochrones as FSPS (which are
-   the `MIST
-   <https://ui.adsabs.harvard.edu/abs/2016ApJ...823..102C/abstract>`_
-   Isochrones).  The metallicity legend that ships with FSPS isn't
-   compatible with `powderday
-   <https://github.com/dnarayanan/powderday.git>`_, so we have
-   provided a modified version in pd/fsps_files/zlegend.mist.dat which
-   the default parameters_master file points to.  (In case you want to know the conversion it's: 
-
-   pd_zlegend = 10**(orig_zlegend) * 0.0142 where in the original file p
-   denotes plus, m denotes minus.  Example: m2.5 : 10**(-2.5)*0.0142 =
-   0.000041 p0.25 : 10**(0.25)*0.0142 = 0.023118)
-
-   If, however, you want to use a non MIST isochrone, you first need
-   to make sure to select the isochrone you want in FSPS, recompile
-   FSPS and python-fsps, and then point directly to the zlegend file in the FSPS software package in your `powderday
-   <https://github.com/dnarayanan/powderday.git>`_ parameters_master file (i.e. something like:
-   "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat".)
-   
 
 Black Holes
 ------------

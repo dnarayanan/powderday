@@ -53,7 +53,7 @@ eh.file_exist(par.dustdir+par.dustfile)
 # =========================================================
 # Enforce Backwards Compatibility for Non-Critical Variables
 # =========================================================
-cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_BINNED, cfg.par.max_age_direct, cfg.par.imf1, cfg.par.imf2, cfg.par.imf3, cfg.par.use_cmdf, cfg.par.use_cloudy_tables, cfg.par.cmdf_min_mass, cfg.par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.par.cmdf_beta, cfg.par.cmdf_resample, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logu_init, cfg.par.FORCE_gas_logz, cfg.par.gas_logz, cfg.par.FORCE_logq, cfg.par.source_logq, cfg.par.FORCE_inner_radius, cfg.par.inner_radius, cfg.par.FORCE_N_O_Pilyugin, cfg.par.FORCE_N_O_ratio, cfg.par.N_O_ratio, cfg.par.neb_abund, cfg.par.add_young_stars, cfg.par.HII_Rinner_per_Rs, cfg.par.HII_nh, cfg.par.HII_min_age, cfg.par.HII_max_age, cfg.par.HII_escape_fraction, cfg.par.HII_alpha_enhance, cfg.par.add_pagb_stars, cfg.par.PAGB_min_age, cfg.par.PAGB_max_age, cfg.par.PAGB_N_enhancement, cfg.par.PAGB_C_enhancement, cfg.par.PAGB_Rinner_per_Rs, cfg.par.PAGB_nh, cfg.par.PAGB_escape_fraction, cfg.par.add_AGN_neb, cfg.par.AGN_nh, cfg.par.AGN_num_gas, cfg.par.dump_emlines, cfg.par.cloudy_cleanup, cfg.par.BH_SED, cfg.par.IMAGING, cfg.par.SED, cfg.par.IMAGING_TRANSMISSION_FILTER, cfg.par.SED_MONOCHROMATIC, cfg.par.SKIP_RT, cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS, cfg.par.n_MPI_processes, cfg.par.SOURCES_RANDOM_POSITIONS, cfg.par.SUBLIMATION, cfg.par.SUBLIMATION_TEMPERATURE, cfg.model.TCMB, cfg.model.THETA, cfg.model.PHI, cfg.par.MANUAL_ORIENTATION, cfg.par.solar, cfg.par.dust_grid_type, cfg.par.BH_model, cfg.par.BH_modelfile, cfg.par.BH_var, cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE, cfg.par.FORCE_STELLAR_METALLICITIES, cfg.par.FORCE_STELLAR_METALLICITIES_VALUE, cfg.par.NEB_DEBUG, cfg.par.filterdir, cfg.par.filterfiles,  cfg.par.PAH_frac, cfg.par.otf_extinction, cfg.par.explicit_pah, cfg.par.add_DIG_neb, cfg.par.DIG_nh, cfg.par.DIG_min_factor, cfg.par.DIFF_DIG_SED = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_BINNED, cfg.par.max_age_direct, cfg.par.imf1, cfg.par.imf2, cfg.par.imf3, cfg.par.use_cmdf, cfg.par.use_cloudy_tables, cfg.par.cmdf_min_mass, cfg.par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.par.cmdf_beta, cfg.par.use_age_distribution, cfg.par.age_dist_min, cfg.par.age_dist_max, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logu_init, cfg.par.FORCE_gas_logz, cfg.par.gas_logz, cfg.par.FORCE_logq, cfg.par.source_logq, cfg.par.FORCE_inner_radius, cfg.par.inner_radius, cfg.par.FORCE_N_O_Pilyugin, cfg.par.FORCE_N_O_ratio, cfg.par.N_O_ratio, cfg.par.neb_abund, cfg.par.add_young_stars, cfg.par.HII_Rinner_per_Rs, cfg.par.HII_nh, cfg.par.HII_min_age, cfg.par.HII_max_age, cfg.par.HII_escape_fraction, cfg.par.HII_alpha_enhance, cfg.par.add_pagb_stars, cfg.par.PAGB_min_age, cfg.par.PAGB_max_age, cfg.par.PAGB_N_enhancement, cfg.par.PAGB_C_enhancement, cfg.par.PAGB_Rinner_per_Rs, cfg.par.PAGB_nh, cfg.par.PAGB_escape_fraction, cfg.par.add_AGN_neb, cfg.par.AGN_nh, cfg.par.AGN_num_gas, cfg.par.dump_emlines, cfg.par.cloudy_cleanup, cfg.par.BH_SED, cfg.par.IMAGING, cfg.par.SED, cfg.par.IMAGING_TRANSMISSION_FILTER, cfg.par.SED_MONOCHROMATIC, cfg.par.SKIP_RT, cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS, cfg.par.n_MPI_processes, cfg.par.SOURCES_RANDOM_POSITIONS, cfg.par.SUBLIMATION, cfg.par.SUBLIMATION_TEMPERATURE, cfg.model.TCMB, cfg.model.THETA, cfg.model.PHI, cfg.par.MANUAL_ORIENTATION, cfg.par.dust_grid_type, cfg.par.BH_model, cfg.par.BH_modelfile, cfg.par.BH_var, cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE, cfg.par.FORCE_STELLAR_METALLICITIES, cfg.par.FORCE_STELLAR_METALLICITIES_VALUE, cfg.par.NEB_DEBUG, cfg.par.filterdir, cfg.par.filterfiles,  cfg.par.PAH_frac, cfg.par.otf_extinction, cfg.par.explicit_pah, cfg.par.add_DIG_neb, cfg.par.DIG_nh, cfg.par.DIG_min_factor, cfg.par.DIFF_DIG_SED = bc.variable_set()
 # =========================================================
 # GRIDDING
 # =========================================================
@@ -79,31 +79,59 @@ if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
 
 sp = fsps.StellarPopulation()
 
+#setting solar metallicity value based on isochrone
+#values assigned to cfg.par.solar taken from fsps/src/sps_vars 
+isochrone = str(sp.libraries[0])
+
+print(f'\n----------------------------------------------\nSetting solar metallicity value')
+if 'mist' in isochrone:
+    print('isochrone = mist')
+    cfg.par.solar = 0.0142
+    print(f'solar metallicity = {cfg.par.solar}')
+elif 'bsti' in isochrone:
+    print('isochrone = basti')
+    cfg.par.solar = 0.020
+    print(f'solar metallicity = {cfg.par.solar}')
+elif 'gnva' in isochrone:
+    print('isochrone = geneva')
+    cfg.par.solar = 0.020
+    print(f'solar metallicity = {cfg.par.solar}')
+elif 'prsc' in isochrone:
+    print('isochrone = parsec')
+    cfg.par.solar = 0.01524
+    print(f'solar metallicity = {cfg.par.solar}')
+elif 'pdva' in isochrone:
+    print('isochrone = padova')
+    cfg.par.solar = 0.019
+    print(f'solar metallicity = {cfg.par.solar}')
+elif 'bpss' in isochrone:
+    print('isochrone = bpass')
+    cfg.par.solar = 0.020
+    print(f'solar metallicity = {cfg.par.solar}')
+print('----------------------------------------------')
 
 # Get dust wavelengths. This needs to preceed the generation of sources
 # for hyperion since the wavelengths of the SEDs need to fit in the
 # dust opacities.
-
 df = h5py.File(cfg.par.dustdir+cfg.par.dustfile, 'r')
 o = df['optical_properties']
 df_nu = o['nu']
 df_chi = o['chi']
-
 df.close()
 
 
 # add sources to hyperion
-stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds)
+stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds, sp)
 nstars = len(stars_list)
 
 # figure out N_METAL_BINS:
-fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+fsps_metals = np.array(sp.zlegend)
 N_METAL_BINS = len(fsps_metals)
 
 
 #initializing the nebular diagnostic file newly
 if cfg.par.add_neb_emission and cfg.par.NEB_DEBUG: logu_diagnostic(None,None,None,None,None,None,None,append=False)
-if cfg.par.add_neb_emission and cfg.par.dump_emlines: dump_emlines(None,None,None,append=False)
+if cfg.par.add_neb_emission and cfg.par.dump_emlines: dump_emlines(None,None,append=False)
 
 if cfg.par.BH_SED == True:
     BH_source_add(m, reg, df_nu, boost)
@@ -131,7 +159,7 @@ if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED) and not (par.draine21_pa
     stellar_sed_write(m)
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
-    SKIRT_data_dump(reg, ds, m, stars_list, ds_type)
+    SKIRT_data_dump(reg, ds, m, stars_list, ds_type, sp)
 
 
 nstars = len(stars_list)
