@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import yt
-from yt.fields.particle_fields import add_volume_weighted_smoothed_field
+#from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
 from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 #from yt.data_objects.particle_filters import add_particle_filter

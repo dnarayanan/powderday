@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import yt
-from yt.fields.particle_fields import add_volume_weighted_smoothed_field
+#from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
 from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
@@ -366,9 +366,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.add_field(('metal','dens'), function=_metaldens, sampling_type='particle',units="g/cm**3", particle_type=True)
         ds.add_field(('PartType0', 'metalmass'), function=_metalmass, sampling_type='particle',units="g", particle_type=True)
 
-    metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
-                                                 "SmoothingLength", "Density", "metalmass",
-                                                 ds.field_info)
+    #this line is deprecated and no longer used (and will throw an error in sufficiently new yt hashes)
+    #metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
+    #                                             "SmoothingLength", "Density", "metalmass",
+    #                                             ds.field_info)
 
     if add_smoothed_quantities == True: ds.add_field(('metal','smoothedmasses'), function=_metalsmoothedmasses, sampling_type='particle',units='code_metallicity', particle_type=True)
 
