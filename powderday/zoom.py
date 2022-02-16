@@ -82,7 +82,7 @@ def octree_zoom_bbox_filter(fname,ds,bbox0,field_add):
         #inefficiency as we have to load the entire dataset a *second*
         #time.
         ds = field_add(fname,bounding_box = bbox1,ds=ds,add_smoothed_quantities=True)
-        ds.periodicity = (False,False,False)
+        #ds.periodicity = (False,False,False)
         reg = ds.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
 
         #ds1 = reg.ds
@@ -169,7 +169,7 @@ def arepo_zoom(fname,ds,bbox0,field_add):
     #inefficiency as we have to load the entire dataset a *second*
     #time.
     ds = field_add(fname,bounding_box = bbox1,ds=ds)
-    ds.periodicity = (False,False,False)
+    #ds.periodicity = (False,False,False)
     reg = ds.region(center=center,left_edge = np.asarray(center)-bbox_lim,right_edge = np.asarray(center)+bbox_lim)
 
 
