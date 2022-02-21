@@ -76,7 +76,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
 
 
     def _li_ml_dustmass(field,data):
-        li_ml_dgr = dgr_ert(data["gasmetals"],data["PartType0","StarFormationRate"],data["PartType0","Masses"])
+        li_ml_dgr = dgr_ert(data["PartType0","GFM_Metallicity"],data["PartType0","StarFormationRate"],data["PartType0","Masses"])
         li_ml_dustmass = ((10.**li_ml_dgr)*data["PartType0","Masses"]).in_units('code_mass')
         
         #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
@@ -90,16 +90,16 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         alpha = 2.02
         x_sun = 8.69
 
-        x = 12.+np.log10(data["gasmetals"]/cfg.par.solar * 10.**(x_sun-12.) )
+        x = 12.+np.log10(data["PartType0","GFM_Metallicity"]/cfg.par.solar * 10.**(x_sun-12.) )
         y = a + alpha*(x_sun-np.asarray(x))
         gas_to_dust_ratio = 10.**(y)
         dust_to_gas_ratio = 1./gas_to_dust_ratio
-        return dust_to_gas_ratio * data["gasmasses"]
+        return dust_to_gas_ratio * data["PartType0","Masses"]
 
     def _dustmass_li_bestfit(field,data):
-        log_dust_to_gas_ratio = (2.445*np.log10(data["gasmetals"]/cfg.par.solar))-(2.029)
+        log_dust_to_gas_ratio = (2.445*np.log10(data["PartType0","GFM_Metallicity"]/cfg.par.solar))-(2.029)
         dust_to_gas_ratio = 10.**(log_dust_to_gas_ratio)
-        return dust_to_gas_ratio * data["gasmasses"]
+        return dust_to_gas_ratio * data["PartType0","Masses"]
 
 
 
@@ -248,9 +248,9 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
 
 
     if cfg.par.dust_grid_type == 'rr':
-        ds.add_field(("dust','mass"),function=_dustmass_rr, sampling_type='particle', units='code_mass',particle_type=True)
+        ds.add_field(("dust","mass"),function=_dustmass_rr, sampling_type='particle', units='code_mass',particle_type=True)
     if cfg.par.dust_grid_type == 'li_bestfit':
-        ds.add_field(("dust','mass"),function=_dustmass_li_bestfit, sampling_type='particle', units='code_mass',particle_type=True)
+        ds.add_field(("dust","mass"),function=_dustmass_li_bestfit, sampling_type='particle', units='code_mass',particle_type=True)
 
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
