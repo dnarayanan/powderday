@@ -265,7 +265,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     ds.add_field(('metal','dens'), function=_metaldens,  sampling_type='particle',units="g/cm**3", particle_type=True)
     ds.add_field(('PartType0', 'metalmass'), function=_metalmass,  sampling_type='particle', units="g", particle_type=True)
 
-    
+    ds.add_field(('gas','density'), function=_gasdensity, sampling_type='particle', units='g',particle_type=True)
     ds.add_field(('gas','masses'), function=_gasmasses,  sampling_type='particle', units='g', particle_type=True)
     ds.add_field(('gas','fh2'), function=_gasfh2,  sampling_type='particle', units='dimensionless', particle_type=True)
     ds.add_field(('gas','sfr'), function=_gassfr,  sampling_type='particle', units='g/s', particle_type=True)

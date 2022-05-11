@@ -66,6 +66,20 @@ def arepo_m_gen(fname,field_add):
     energy_density_absorbed=energy_density_absorbed_by_CMB()
     specific_energy = np.repeat(energy_density_absorbed.value,dustdens.shape)
 
+    #save some information that can be used in the PAH model compute
+    #an effective 'size' of a cell by density = mass/volume and assume
+    #spherical geometry 
+    mass = reg['PartType0','Masses']
+    density = reg['PartType0','Density']
+    rad_dens = (mass*3/(4.*np.pi*density))**(1./3)
+    rad_dens = rad_dens.in_units('cm')
+
+    try: 
+        reg.parameters['cell_size'] = rad_dens*2 #so that we return a diameter 
+    except:
+        reg.parameters = {}
+        reg.parameters['cell_size'] = rad_dens*2 #so that we return a diameter
+
     if cfg.par.otf_extinction==False:
 
         if cfg.par.PAH == True:
@@ -98,6 +112,7 @@ def arepo_m_gen(fname,field_add):
 
         ad = ds.all_data()
         nsizes = reg['PartType0','NumGrains'].shape[1]
+        
         try:
             assert(np.sum(ad['PartType0','NumGrains']) > 0)
         except AssertionError:
