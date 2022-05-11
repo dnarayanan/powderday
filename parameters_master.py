@@ -256,7 +256,7 @@ add_DIG_neb = False                         # If set, Contribution from DIG is i
 
 DIG_nh = 1.e1                               # Gas hydrogen density for calcualting nebular emission in units of cm^-3. (Default: 10)
 
-DIG_min_factor = 1                          # For DIG CLOUDY calculations we use Black (1987) SED as a template. The normalization of the SED is 
+DIG_min_LogU = -5.0                         # For DIG CLOUDY calculations we use Black (1987) SED as a template. The normalization of the SED is 
                                             # set by a parameter called  "Factor". It is the ratio of total energy dumped in a cell to the total 
                                             # energy of the Black (1987) SED, which we use as the template for setting the SED shape for calculating 
                                             # DIG emission. This parameter sets the minimum factor that the code uses for calculation. For example, 
@@ -265,6 +265,11 @@ DIG_min_factor = 1                          # For DIG CLOUDY calculations we use
                                             # Black (1987) SED (Default: 1).
 
 
+stars_max_dist = 1                          # Dist in Kpc
+
+max_stars_num  = 20
+
+use_black_sed = False
 #*************************
 # DEBUGGING AND CLEAN UP
 #*************************

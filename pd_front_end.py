@@ -127,7 +127,7 @@ N_METAL_BINS = len(fsps_metals)
 
 #initializing the nebular diagnostic file newly
 if cfg.par.add_neb_emission and cfg.par.NEB_DEBUG: logu_diagnostic(None,None,None,None,None,None,None,append=False)
-if cfg.par.add_neb_emission and cfg.par.dump_emlines: dump_emlines(None,None,append=False)
+if cfg.par.add_neb_emission and cfg.par.dump_emlines: dump_emlines(None,append=False)
 
 if cfg.par.BH_SED == True:
     BH_source_add(m, reg, df_nu, boost)
@@ -154,7 +154,7 @@ else:
 if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
     stellar_sed_write(m)
 
-if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
+if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5'] and cfg.par.SKIRT_DATA_DUMP:
     SKIRT_data_dump(reg, ds, m, stars_list, ds_type, sp)
 
 
@@ -218,15 +218,15 @@ if cfg.par.SED:
     make_SED(m, par, model)
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
-        dump_data(reg, model)
+    dump_data(reg, model)
 
 if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
-    DIG_source_add(m, reg, df_nu)
+    DIG_source_add(m, reg, df_nu,boost)
     
-    if cfg.par.DIFF_DIG_SED:
-        make_SED(m, par, model, DIG=True)
-    else:
-        make_SED(m, par, model)
+#    if cfg.par.DIFF_DIG_SED:
+#        make_SED(m, par, model, DIG=True)
+#    else:
+#        make_SED(m, par, model)
 
 
 if cfg.par.IMAGING:

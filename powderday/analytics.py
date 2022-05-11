@@ -93,7 +93,8 @@ def dump_data(reg,model):
         abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
         for i in abund_el:
             grid_gas_metallicity.append(reg["gas","smoothedmetals_"+str(i)].value)
-
+    
+        print (grid_gas_metallicity)
     except: grid_gas_metallicity = -1
 
     try: grid_star_mass = reg["star","smoothedmasses"]
@@ -226,7 +227,7 @@ def logu_diagnostic(logQ, LogU, LogZ, Rin, cluster_mass, num_cluster, age, appen
 
 
 # Dumps emission lines
-def dump_emlines(line_wav, line_em, append=True):
+def dump_emlines(line_em, append=True):
     if hasattr(cfg.model, 'galaxy_num_str'):
         outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy" + cfg.model.galaxy_num_str + ".txt"
     else:
@@ -237,9 +238,9 @@ def dump_emlines(line_wav, line_em, append=True):
         f.close()
     else:
         f = open(outfile_lines,'a+')
-        if os.stat(outfile_lines).st_size == 0:
-            np.savetxt(f,np.expand_dims(line_wav,axis=0))
-        
+        #if os.stat(outfile_lines).st_size == 0:
+        #    np.savetxt(f,np.expand_dims(line_wav,axis=0))
+
         np.savetxt(f,np.expand_dims(line_em,axis=0))
         
         f.close()

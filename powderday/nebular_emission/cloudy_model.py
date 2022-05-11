@@ -23,7 +23,7 @@ and FSPS written by Charlie Conroy
 """
 
 
-def write_input_sed(wav, spec, id_val):
+def write_input_sed(wav, spec):
     """
     ---------------------------------------------------------------------
     Writes a input SED file for CLOUDY to use
@@ -35,10 +35,7 @@ def write_input_sed(wav, spec, id_val):
         ascii_file = str(uuid.uuid4().hex) + ".ascii"
     
     # For DIG do not have to write the imput SED since we are using Black (1985) SED. 
-    # We ascii file name to get the model name
-    if id_val == 3:
-        return ascii_file
-    
+    # We ascii file name to get the model name    
     logging.info("Executing write ascii sequence...")
     logging.info("Writing.....")
     WriteASCII(ascii_file, wav, spec, nx=len(wav), nmod=1, par1_val=1.e6)
@@ -72,12 +69,11 @@ def write_cloudy_input(**kwargs):
             "r_inner": 1.e19,  # inner radius of cloud
             "r_in_pc": False,
             "dust": False,
-            "efrac": -1.0,
+            "efrac": 0.0,
             "geometry": "sphere",
             "abundance": "dopita",
             "id_val": 1,
-            "metals": [-1., -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.],
-            "factor": 1
+            "metals": [-1., -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.]
             }
     for key, value in list(kwargs.items()):
         pars[key] = value
@@ -108,13 +104,15 @@ def write_cloudy_input(**kwargs):
     this_print('set punch prefix "{0}"'.format(pars["model_name"]))
     this_print('print line precision 6')
     
+    cloudy_mod = "{}.mod".format(pars["model_name"])
+    this_print('table star "{0}" {1}={2:.2e}'.format(cloudy_mod, "age", pars['age']))
+    
     if _id == 3:
-         this_print('table ism factor {0:.3f}'.format(pars['factor']))
+        this_print('ionization parameter = {0:.3f} log'.format(pars['logU']))
     else:
-        cloudy_mod = "{}.mod".format(pars["model_name"])
-        this_print('table star "{0}" {1}={2:.2e}'.format(cloudy_mod, "age", pars['age']))
         this_print('Q(H) = {0:.3f} log'.format(pars['logQ']))
-
+    
+    print ("DUST: ", pars['dust'])
     if pars['dust']:
         this_print('grains orion {0:.2f} log no qheat'.format(pars['gas_logZ']))
 
@@ -191,10 +189,13 @@ def write_cloudy_input(**kwargs):
         for line in abunds.elem_strs:
             this_print(line)
     
+    cf = 1 - pars['efrac']
+
     if _id != 3:
         this_print('radius {0:.3f} log'.format(r_out))
         this_print('{}'.format(pars['geometry']))
-        
+        this_print('Covering factor {0:.3f}'.format(cf))
+    
     this_print('hden {0:.3f} log'.format(np.log10(pars['dens'])))
     this_print('cosmic ray background')
     this_print('iterate to convergence max=5')
@@ -223,7 +224,7 @@ def get_output(model_name, dir_, qq, fsps_lam, cell_width, id_val):
     wl = wl[sinds]
      
     if id_val == 3:
-        datflu = (datflu[sinds]*cell_width**2) / lsun
+        datflu = (datflu[sinds]*6*cell_width**2) / lsun 
 
     else:
         datflu = datflu[sinds] / lsun / qq
@@ -237,7 +238,7 @@ def get_output(model_name, dir_, qq, fsps_lam, cell_width, id_val):
     diffuse_y = interp1d(ang_v, diffuse_in, fill_value=0.0, bounds_error=False)(fsps_lam)
     
     if id_val == 3:
-        diffuse_out = (diffuse_y*cell_width**2) / nu / lsun
+        diffuse_out = (diffuse_y*6*cell_width**2) / nu / lsun 
     else:
         diffuse_out = diffuse_y / nu / lsun / qq
     
@@ -261,16 +262,20 @@ def clean_files(dir_, model_name, id_val, error=False):
         os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".out"))
 
 
-def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu = 0.0, logz = 0.0, logq_1=0.0, Factor=1, 
-        Cell_width=1, Dust=False, abund="dopita", clean_up=True, index=1):
+def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu = 0.0, logz = 0.0, logq_1=0.0, 
+        Cell_width=1, Dust=False, abund="dopita", clean_up=True, index=1, efrac=0.0):
+    
+    if index == 3:
+        logq = 0.0
+        logq_1 = 0.0
     
     nspec = len(spec_lambda)
-    frac_obrun = 0.0
+    frac_obrun = efrac
     clight = constants.c.cgs.value*1.e8
     nebular_smooth_init = 0
 
     logging.info("Writing the input SED file")
-    filename = write_input_sed(spec_lambda, sspi, index)
+    filename = write_input_sed(spec_lambda, sspi)
     model_name = filename.split(".")[0]
     print (model_name)
 
@@ -288,8 +293,8 @@ def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu 
                        abundance = abund,
                        dust = Dust,
                        id_val = index,
-                       metals = Metals,
-                       factor = Factor)
+                       efrac = frac_obrun,
+                       metals = Metals)
 
     logging.info("Input SED file written")
     logging.info("Running CLOUDY")
