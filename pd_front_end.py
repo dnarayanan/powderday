@@ -49,6 +49,12 @@ cfg.model = model
 eh.file_exist(model.hydro_dir+model.snapshot_name)
 eh.file_exist(par.dustdir+par.dustfile)
 
+# =========================================================
+# CHECK FOR COMPATIBLE PARAMETERS
+# =========================================================
+eh.check_parameter_compatibility()
+
+
 
 # =========================================================
 # Enforce Backwards Compatibility for Non-Critical Variables
