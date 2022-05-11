@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import yt
-from yt.fields.particle_fields import add_volume_weighted_smoothed_field
+#from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
 from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
@@ -163,16 +163,16 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         alpha = 2.02
         x_sun = 8.69
         
-        x = 12.+np.log10(data["gasmetals"]/cfg.par.solar * 10.**(x_sun-12.) )
+        x = 12.+np.log10(data["PartType0","Metallicity_00"]/cfg.par.solar * 10.**(x_sun-12.) )
         y = a + alpha*(x_sun-np.asarray(x))
         gas_to_dust_ratio = 10.**(y)
         dust_to_gas_ratio = 1./gas_to_dust_ratio
-        return dust_to_gas_ratio * data["gasmasses"]
+        return dust_to_gas_ratio * data["PartType0","Masses"]
 
     def _dustmass_li_bestfit(field,data):
-        log_dust_to_gas_ratio = (2.445*np.log10(data["gasmetals"]/cfg.par.solar))-(2.029)
+        log_dust_to_gas_ratio = (2.445*np.log10(data["PartType0","Metallicity_00"]/cfg.par.solar))-(2.029)
         dust_to_gas_ratio = 10.**(log_dust_to_gas_ratio)
-        return dust_to_gas_ratio * data["gasmasses"]
+        return dust_to_gas_ratio * data["PartType0","Masses"]
 
     def _dustsmoothedmasses(field, data):
         if float(yt.__version__[0:3]) >= 4:
@@ -379,9 +379,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.add_field(('metal','dens'), function=_metaldens, sampling_type='particle',units="g/cm**3", particle_type=True)
         ds.add_field(('PartType0', 'metalmass'), function=_metalmass, sampling_type='particle',units="g", particle_type=True)
 
-    metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
-                                                 "SmoothingLength", "Density", "metalmass",
-                                                 ds.field_info)
+    #this line is deprecated and no longer used (and will throw an error in sufficiently new yt hashes)
+    #metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
+    #                                             "SmoothingLength", "Density", "metalmass",
+    #                                             ds.field_info)
 
     if add_smoothed_quantities == True: ds.add_field(('metal','smoothedmasses'), function=_metalsmoothedmasses, sampling_type='particle',units='code_metallicity', particle_type=True)
 
@@ -410,9 +411,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         if add_smoothed_quantities == True: ds.add_field(('dust','smoothedmasses'), function=_dustsmoothedmasses, sampling_type='particle',units='code_mass', particle_type=True)
             
     if cfg.par.dust_grid_type == 'rr':
-        ds.add_field(("dust','mass"),function=_dustmass_rr,sampling_type='particle',units='code_mass',particle_type=True)
+        #ds.add_field(("dust','mass"),function=_dustmass_rr,sampling_type='particle',units='code_mass',particle_type=True)
+        ds.add_field(('dust','mass'), function=_dustmass_rr,sampling_type='particle',units='code_mass',particle_type=True)
     if cfg.par.dust_grid_type == 'li_bestfit':
-        ds.add_field(("dust','mass"),function=_dustmass_li_bestfit,sampling_type='particle',units='code_mass',particle_type=True)
+        ds.add_field(('dust','mass'),function=_dustmass_li_bestfit,sampling_type='particle',units='code_mass',particle_type=True)
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
     #dust model in place, create a field for these so that
