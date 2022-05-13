@@ -9,7 +9,8 @@ import astropy.units as units
 import astropy.constants as constants
 from powderday.helpers import find_nearest
 from powderday.analytics import dump_AGN_SEDs
-
+from hyperion.model import ModelOutput
+from hyperion.grid.yt3_wrappers import find_order
 
 class Sed_Bins:
     def __init__(self,mass,metals,age,fsps_zmet,all_metals=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
@@ -18,7 +19,6 @@ class Sed_Bins:
         self.age = age
         self.fsps_zmet = fsps_zmet
         self.all_metals = all_metals
-
 
 def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmoflag, m, sp):
 
@@ -42,8 +42,8 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
     else:
         print ("Number of unbinned stars to added: ", nstars)
     
-    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu = sg.allstars_sed_gen(unbinned_stars_list, cosmoflag, sp)
-
+    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, mfrac = sg.allstars_sed_gen(unbinned_stars_list, cosmoflag, sp)
+    #SED_gen now returns an additional parameter, mfrac, to properly scale the FSPS SSP spectra, which are in units of formed mass, not current stellar mass
     for i in range(nstars):
         nu = stellar_nu[:]
         fnu = stellar_fnu[i, :]
@@ -53,7 +53,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         nu = nu[::-1]
         fnu = fnu[::-1]
         
-        lum = np.absolute(np.trapz(fnu, x=nu))*stars_list[i].mass/constants.M_sun.cgs.value 
+        lum = np.absolute(np.trapz(fnu, x=nu))*unbinned_stars_list[i].mass/constants.M_sun.cgs.value/mfrac[i]
         lum *= constants.L_sun.cgs.value
 
         pos = unbinned_stars_list[i].positions
@@ -175,10 +175,13 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
             minimum_age = cfg.par.max_age_direct + 0.001
 
     delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
-    
+
+    if delta_age <= 0: # If max age for direct adding stars is greater than the max age of stars in the galaxy then 
+        return m       # exit the function since there are no stars left for binning
+
     # define the metallicity bins: we do this by saying that they are the number of metallicity bins in FSPS
 
-    fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+    fsps_metals = np.array(sp.zlegend)
     N_METAL_BINS = len(fsps_metals)
 
     # note the bins are NOT metallicity, but rather the zmet keys in
@@ -186,22 +189,19 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     metal_bins = np.arange(N_METAL_BINS)+1
 
     # define the age bins in log space so that we maximise resolution around young stars
-    # Setting minimum age to be 10 Myr since we do not want to bins young stars if nebular emission is turned on
-    
     age_bins = 10.**(np.linspace(np.log10(minimum_age),np.log10(maximum_age),cfg.par.N_STELLAR_AGE_BINS))
+
     #tack on the maximum age bin
     age_bins = np.append(age_bins,age_bins[-1]+delta_age)
 
    
     #define the mass bins (log)
     #note - for some codes, all star particles have the same mass.  in this case, we have to have a trap:
-    if minimum_mass == maximum_mass: 
+    if minimum_mass == maximum_mass or cfg.par.N_MASS_BINS == 0: 
         mass_bins = np.zeros(cfg.par.N_MASS_BINS+1)+minimum_mass
     else:
         delta_mass = (np.log10(maximum_mass)-np.log10(minimum_mass))/cfg.par.N_MASS_BINS
-        mass_bins = np.arange(np.log10(minimum_mass),
-                              np.log10(maximum_mass),
-                              delta_mass)
+        mass_bins = np.arange(np.log10(minimum_mass),np.log10(maximum_mass),delta_mass)
         mass_bins = np.append(mass_bins,mass_bins[-1]+delta_mass)
         mass_bins = 10.**mass_bins
         
@@ -248,9 +248,14 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
             for wm in range(cfg.par.N_MASS_BINS+1):
                 sed_bins_list.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz]))
                 if has_stellar_mass[wz,wa,wm] == True:
-                    sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz]))
+                    stars_metals = []
+                    for star in stars_in_bin[(wz,wa,wm)]:
+                        stars_metals.append(stars_list[star].all_metals)
+                    stars_metals = np.array(stars_metals)
+                    stars_metals = np.mean(stars_metals,axis=0)
+                    #print(stars_metals, metal_bins[wz], fsps_metals[wz])
+                    sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz],stars_metals))
    
-
     #sed_bins_list is a list of Sed_Bins objects that have the
     #information about what mass bin, metal bin and age bin they
     #correspond to.  It is unnecessary, and heavy computational work
@@ -260,8 +265,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     print ('Running SPS for Binned SEDs')
     print ('calculating the SEDs for ',len(sed_bins_list_has_stellar_mass),' bins')
     
-    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,cosmoflag,sp)
-    
+    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu,mfrac = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,cosmoflag,sp)
+
     #since the binned_stellar_fnu_has_stellar_mass is now
     #[len(sed_bins_list_has_stellar_mass),nlam)] big, we need to
     #transform it back to the a larger array.  this is an ugly loop
@@ -269,6 +274,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     #order of magnitude in time in SED gen.  
     nlam = binned_stellar_nu.shape[0]
     binned_stellar_fnu = np.zeros([len(sed_bins_list),nlam])
+    binned_mfrac = np.zeros([len(sed_bins_list)])
 
     counter = 0
     counter_has_stellar_mass = 0
@@ -276,12 +282,12 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
         for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
             for wm in range(cfg.par.N_MASS_BINS+1):
                 if has_stellar_mass[wz,wa,wm] == True:
+                    binned_mfrac[counter] = mfrac[counter_has_stellar_mass]
                     binned_stellar_fnu[counter,:] = binned_stellar_fnu_has_stellar_mass[counter_has_stellar_mass,:]
                     counter_has_stellar_mass += 1 
                 counter+=1
 
-
-
+    print(f'after selecting for ones with stellar mass: {np.shape(binned_stellar_fnu)}')
 
 
     
@@ -307,7 +313,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
 
     totallum = 0 
     totalmass = 0 
-
     counter=0
     for wz in range(N_METAL_BINS):
         for wa in range(cfg.par.N_STELLAR_AGE_BINS+1):
@@ -328,7 +333,10 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
 
                     
                     #source luminosities
-                    lum = np.array([stars_list[i].mass/constants.M_sun.cgs.value*constants.L_sun.cgs.value for i in stars_in_bin[(wz,wa,wm)]])
+                    #here, each (wz, wa, wm) bin will have an associated mfrac that corresponds to the fnu generated for this bin
+                    #while each star particle in the bin has a distinct mass, they all share mfrac as this value depends only on the age and Z of the star
+                    #thus, there are 'counter' number of binned_mfrac values (to match the number of fnu arrays)
+                    lum = np.array([stars_list[i].mass/constants.M_sun.cgs.value*constants.L_sun.cgs.value/binned_mfrac[counter] for i in stars_in_bin[(wz,wa,wm)]])
                     lum *= np.absolute(np.trapz(fnu,x=nu))
                     source.luminosity = lum
                     
@@ -373,8 +381,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     return m
 
 
-
-
 def wavelength_compress(nu,fnu,df_nu):
     
     nu_inrange = np.logical_and(nu >= min(df_nu),nu <= max(df_nu))
@@ -383,18 +389,17 @@ def wavelength_compress(nu,fnu,df_nu):
     compressed_nu = nu[nu_inrange]
     compressed_fnu = np.asarray(fnu)[nu_inrange]
     
-  
     #get rid of all wavelengths below lyman limit
     dum_nu = compressed_nu*units.Hz
     dum_lam = constants.c.cgs/dum_nu
     dum_lam = dum_lam.to(units.angstrom)
 
     wll = np.where(dum_lam.value >= 912)[0] #where are lambda is above the lyman limit
-    nu = nu[wll]
-    fnu = fnu[wll]
-   
+    compressed_nu = compressed_nu[wll] 
+    compressed_fnu = compressed_fnu[wll]
+    
     return compressed_nu, compressed_fnu
-
+    
 
 def BH_source_add(m,reg,df_nu,boost):
 
@@ -403,65 +408,140 @@ def BH_source_add(m,reg,df_nu,boost):
     print("--------------------------------\n")
  
     try:
-        nholes = reg["bhsed"].shape[0]
+        nholes = reg["bh","sed"].shape[0]
 
     except: 
-        print('BH source creation failed.')
+        print('BH source creation failed. No BH found')
         nholes = 0
 
-    if nholes > 0:
+
+    if nholes == 0:
+        print('BH source creation failed. No BH found')
+    
+    else:
         #temporary wavelength compress just to get the length of the
         #compressed nu for a master array
-        dumnu,dumfnu = wavelength_compress(reg["bhnu"].value,reg["bhsed"][0,:].value,df_nu)
+        dumnu,dumfnu = wavelength_compress(reg["bh","nu"].value,reg["bh","sed"][0,:].value,df_nu)
         master_bh_fnu = np.zeros([nholes,len(dumnu)])
-        
-        holecounter = 0
-        for i in range(nholes):  
+         
+        width = reg.right_edge-reg.left_edge
 
-            #don't create a BH luminsoity source if there's no luminosity since the SED will be nans/infs
-            if reg["bhluminosity"][i].value > 0 :
-                
-                nu = reg["bhnu"].value
-                fnu = reg["bhsed"][i,:].value/nu#.tolist()
-                nu,fnu = wavelength_compress(nu,fnu,df_nu)
+        agn_ids = []
+
+        for i in range(nholes):  
+            #since the BH was added in a front end, we don't know
+            #if the hole is in the actual cut out region of the yt
+            #dataset.  so we need to filter out any holes that
+            #might not be in the simulation domain or have no luminosity.
+
+            if ((reg["bh","coordinates"][i,0].in_units('kpc') <  (reg.center[0].in_units('kpc')+(0.5*width[0].in_units('kpc'))))
+            and
+            (reg["bh","coordinates"][i,0].in_units('kpc') >  (reg.center[0].in_units('kpc')-(0.5*width[0].in_units('kpc'))))
+            and
+            (reg["bh","coordinates"][i,1].in_units('kpc') <  (reg.center[1].in_units('kpc')+(0.5*width[1].in_units('kpc'))))
+            and
+            (reg["bh","coordinates"][i,1].in_units('kpc') >  (reg.center[1].in_units('kpc')-(0.5*width[1].in_units('kpc'))))
+            and
+            (reg["bh","coordinates"][i,2].in_units('kpc') <  (reg.center[2].in_units('kpc')+(0.5*width[2].in_units('kpc'))))
+            and
+            (reg["bh","coordinates"][i,2].in_units('kpc') >  (reg.center[2].in_units('kpc')-(0.5*width[2].in_units('kpc'))))
+            and 
+            (reg["bh","luminosity"][i].value > 0)):
+
+                agn_ids.append(i)
+
+
+        print ('Number AGNs in the cutout with non zero luminositites: ', len(agn_ids))
+
+        fnu_arr = sg.get_agn_seds(agn_ids, reg)
+        nu = reg["bh","nu"].value
+
+        for j in range(len(agn_ids)):
+                i = agn_ids[j]
+                fnu = fnu_arr[j,:]
+                nu, fnu = wavelength_compress(nu,fnu,df_nu)
 
                 master_bh_fnu[i,:] = fnu
-                
-                if holecounter == 0:
-                    fnu_compressed = np.zeros([nholes,len(nu)])
-                fnu_compressed[i,:] = fnu
 
-                #since the BH was added in a front end, we don't know
-                #if the hole is in the actual cut out region of the yt
-                #dataset.  so we need to filter out any holes that
-                #might not be in the simulation domain.
-                width = reg.right_edge-reg.left_edge
-
-                if ((reg["bhcoordinates"][i,0].in_units('kpc') <  (reg.center[0].in_units('kpc')+(0.5*width[0].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,0].in_units('kpc') >  (reg.center[0].in_units('kpc')-(0.5*width[0].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,1].in_units('kpc') <  (reg.center[1].in_units('kpc')+(0.5*width[1].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,1].in_units('kpc') >  (reg.center[1].in_units('kpc')-(0.5*width[1].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,2].in_units('kpc') <  (reg.center[2].in_units('kpc')+(0.5*width[2].in_units('kpc'))))
-                    and
-                    (reg["bhcoordinates"][i,2].in_units('kpc') >  (reg.center[2].in_units('kpc')-(0.5*width[2].in_units('kpc'))))
-                ):
-
-                    print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
+                print('Boosting BH Coordinates and adding BH #%d to the source list now'%i)
                 #the tolist gets rid of the array brackets
-                    bh = m.add_point_source(luminosity = reg["bhluminosity"][i].value.tolist(), 
-                                            spectrum = (nu,fnu),
-                                            position = (reg["bhcoordinates"][i,:].in_units('cm').value-boost).tolist())
-                else:
-                    print('black hole #%d is not in the domain: rejecting adding it to the source list'%i)
+                bh = m.add_point_source(luminosity = reg["bh","luminosity"][i].value.tolist(), 
+                                        spectrum = (nu,fnu),
+                                        position = (reg["bh","coordinates"][i,:].in_units('cm').value-boost).tolist())
 
-                holecounter += 1
-        dump_AGN_SEDs(nu,master_bh_fnu,reg["bhluminosity"].value)
+        dump_AGN_SEDs(nu,master_bh_fnu,reg["bh","luminosity"].value)
 
 
-    #savefile = cfg.model.PD_output_dir+"/bh_sed.npz"
-    #np.savez(savefile,nu = nu,fnu = master_bh_fnu,luminosity = ad["bhluminosity"].value)
+def DIG_source_add(m,reg,df_nu):
+
+    print("--------------------------------\n")
+    print("Adding DIG to Source List in source_creation\n")
+    print("--------------------------------\n")
+
+    print ("Getting specific energy dumped in each grid cell")
+
+    try:
+        rtout = cfg.model.outputfile + '.sed'
+        try: 
+            grid_properties = np.load(cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".npz")
+        except:
+            grid_properties = np.load(cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+".npz")
+
+        cell_info = np.load(cfg.model.PD_output_dir+"/cell_info."+cfg.model.snapnum_str+"_"+cfg.model.galaxy_num_str+".npz")
+    except:
+        print ("ERROR: Can't proceed with DIG nebular emission calculation. Code is unable to find the required files.") 
+        print ("Make sure you have the rtout.sed, grid_physical_properties.npz and cell_info.npz for the corresponding galaxy.")
+
+        return 
+
+    m_out = ModelOutput(rtout)
+    oct = m_out.get_quantities()
+    grid = oct
+    order = find_order(grid.refined)
+    refined = grid.refined[order]
+    quantities = {}
+    for field in grid.quantities:
+        quantities[('gas', field)] = grid.quantities[field][0][order][~refined]
+
+    cell_width = cell_info["fw1"][:,0]
+    mass = (quantities['gas','density']*units.g/units.cm**3).value * (cell_width**3)
+    met = grid_properties["grid_gas_metallicity"]
+    specific_energy = (quantities['gas','specific_energy']*units.erg/units.s/units.g).value
+    specific_energy = (specific_energy * mass) # in ergs/s
+
+    # Black 1987 curve has a integrated ergs/s/cm2 of 0.0278 so the factor we need to multiply it by is given by this value
+    factor = specific_energy/(cell_width**2)/(0.0278) 
+
+    mask1 = np.where(mass != 0 )[0]
+    mask = np.where((mass != 0 ) & (factor >= cfg.par.DIG_min_factor))[0] # Masking out all grid cells that have no gas mass and where the specific emergy is too low
+    print (len(factor), len(mask1), len(mask))
     
+    factor = factor[mask]
+    cell_width = cell_width[mask]
+    cell_x = (cell_info["xmax"] - cell_info["xmin"])[mask]
+    cell_y = (cell_info["ymax"] - cell_info["ymin"])[mask]
+    cell_z = (cell_info["zmax"] - cell_info["zmin"])[mask]
+    pos = np.vstack([cell_x, cell_y, cell_z]).transpose()
+
+    met = grid_properties["grid_gas_metallicity"][:, mask]
+    met = np.transpose(met)
+    
+    fnu_arr = sg.get_dig_seds(factor, cell_width, met)
+    
+    dat = np.load(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/black_1987.npz")
+    spec_lam = dat["lam"]
+    nu = 1.e8 * constants.c.cgs.value / spec_lam 
+
+    for i in range(len(factor)):
+        fnu = fnu_arr[i,:]
+        nu, fnu = wavelength_compress(nu,fnu,df_nu)
+        
+        nu = nu[::-1]
+        fnu = fnu[::-1]
+        
+        lum = np.absolute(np.trapz(fnu,x=nu))*constants.L_sun.cgs.value
+        
+        source = m.add_point_source()
+        source.luminosity = lum # [ergs/s]
+        source.spectrum = (nu,fnu)
+        source.position = pos[i] # [cm]

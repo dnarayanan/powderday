@@ -1,7 +1,8 @@
 from astropy import constants
 import itertools
 import numpy as np
-from scipy import integrate
+from scipy import integrate, spatial
+import powderday.config as cfg
 
 """
 ----------------------------------------------------------------------------------------------------------------
@@ -12,19 +13,19 @@ From cloudyfsps written by Nell Byler.
 """
 
 
-def calc_LogU(nuin0, specin0, nh, T, efrac, mstar=1.0):
+def calc_LogQ(nuin0, specin0, efrac=0.0, mstar=1.0, mfrac=1.0):
     '''
-    Claculates the number of lyman ionizing photons for given a spectrum
-    Input spectrum must be in ergs/s/Hz!!
-    Q = int(Lnu/hnu dnu, nu_0, inf) , number of hydrogen ionizing photons
-    mstar is in units of solar mass
-    Rin is in units of cm-3
-    nh is in units of cm-3
+    Claculates the number of lyman ionizing photons (Q) for given a spectrum
+    Q = int(Lnu/hnu dnu, nu_0, inf)
+    Here:
+        specin0: Input spectrum must be in ergs/s/Hz
+        nuin0: Freq of the input spectrum must be in Hz
+        mstar: Mass of the particle in units of Msun
+        efrac: The escape fraction of H-ionizing photons
     '''
 
     c = constants.c.cgs.value  # cm/s
     h = constants.h.cgs.value  # erg/s
-    alpha = 2.5e-13*((T/(10**4))**(-0.85)) # cm3/s
     lam_0 = 911.6 * 1e-8  # Halpha wavelength in cm
 
     nuin = np.asarray(nuin0)
@@ -35,12 +36,10 @@ def calc_LogU(nuin0, specin0, nh, T, efrac, mstar=1.0):
     nu = hlam[::-1]
     f_nu = hflu[::-1]
     integrand = f_nu / (h * nu)
-    logQ = np.log10(integrate.simps(integrand, x=nu)*mstar*(1-efrac)) 
-    Rin = (3 * (10 ** logQ) / (4 * np.pi * nh * nh * alpha)) ** (1. / 3.)
-    logU = np.log10((10**logQ)/(4*np.pi*Rin*Rin*nh*c))
-    return logQ, Rin, logU
+    logQ = np.log10(integrate.simps(integrand, x=nu)*(mstar/mfrac)*(1-efrac))
+    return logQ
 
-
+   
 def air_to_vac(inpt, no_uv_conv=True):
     """
     from morton 1991
@@ -106,7 +105,7 @@ def grouper(n, iterable):
         yield chunk
 
 
-def cmdf(stellar_mass, nbins, min_mass, max_mass, beta):
+def cmdf(stellar_mass, nbins, min_mass, max_mass, beta, rescale_masses=True):
     """
     Calculates the number of clusters per mass interval assuming a cluster
     mass distribution function of the form dN/dM goes as M^(-beta)
@@ -123,7 +122,14 @@ def cmdf(stellar_mass, nbins, min_mass, max_mass, beta):
 
     for i in range(nbins):
         N = A*((10**mass[i])**(1. + beta))
-        num.append(round(N))
+        num.append(int(round(N)))
+
+    ## rescale masses so that they sum to initial mass
+    if rescale_masses:
+        _mass = 10**np.array(mass)
+        _scale = stellar_mass / np.sum(_mass * num)
+        mass = np.log10(_mass * _scale)
+
     return mass, num
 
 
@@ -132,15 +138,67 @@ def convert_metals(metals):
     Converts metalicity from units of percentage by mass (SIMBA) 
     to atom per hydrogen atoms (CLOUDY)
     """
+    per_H = 0.7381 # Photospheric mass fraction from Asplund et al. 2009
     # mass of elements in unified atomic mass units
     # [He, C, N, O, Ne, Mg, Si, S, Ca, Fe]
-    per_H = 0.7314
     mass_H = 1.008
-    mass = [4.002602, 12.001, 14.007, 15.999, 20.1797, 
+    mass = [4.002602, 12.001, 14.007, 15.999, 20.1797,
             24.305, 28.085, 32.06, 40.078, 55.845]
     metals_conv = np.zeros(len(metals))
+    # Converting from mass fraction to atomic fraction
     for i in range(len(metals)):
         metals_conv[i] = np.log10((metals[i]/per_H)*(mass_H/mass[i]))
 
     return metals_conv
 
+
+def get_nearest(particle_list, particle_central, num=32):
+    
+    all_particles = particle_list.copy()
+    all_particles = np.array(all_particles)
+    tree = spatial.KDTree(all_particles)
+    arg = (tree.query(particle_central, k=num))
+    # Removing
+    mask = np.where(arg[1]<len(all_particles))[0]
+    
+    return np.array(arg[0][mask]), np.array(arg[1][mask])
+
+
+def age_dist(Num, tavg, width=5, gamma=-0.65, bins=4, tries=100, tolerance = 0.1):
+    # If the number of star particles is less than the number of bins or if the age is not within
+    # the limits set in paramters_master then do not break the particle down
+
+    if Num <= bins or tavg <= cfg.par.age_dist_min or tavg >= cfg.par.age_dist_max:
+        return np.array([Num]), np.array([tavg])
+
+    tavg = tavg*1e3
+
+    # Solving for the limits of the age distribution (dN/dt is proportional to t^gamma) such that the
+    # the average age of the distribution is as close to the age of the parent star particle. 
+    # If the difference between the average age and the age of the parent star particle is above the threshold 
+    # then the width (difference between start and end age of the distribution) is decreased at each step
+    # until the threshold is met (This is done at most x times where is determined by the variable "tries". 
+    # If the max number of tries is reached and the threshold is not met then the particle is not broken down.
+
+    for i in range(tries):
+        ti_temp = np.arange(1, cfg.par.HII_max_age*1e3, 0.1)
+        x = (ti_temp + width) ** (gamma + 2) + ti_temp ** (gamma + 2) - 2 * (tavg ** (gamma + 2))
+        index = np.argmin(np.abs(x))
+        ti = ti_temp[index]
+        tf = ti_temp[index] + width
+
+        t = np.linspace(ti, tf, bins)
+        A = Num / (np.sum(t ** (gamma + 1)))
+        N = [int(k) for k in A * t ** (gamma + 1)]
+        t_avg = np.sum(N * t) / np.sum(N)
+
+        if np.round(width, 1) < 0:
+            return np.array([Num]), np.array([tavg])
+
+        elif np.abs(t_avg - tavg) <= tolerance:
+            break
+
+        else:
+            width = width - 0.2
+
+    return N, t*1e-3

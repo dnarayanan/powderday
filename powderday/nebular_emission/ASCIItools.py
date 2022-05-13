@@ -24,7 +24,9 @@ retrieved in October 2019)
 --------------------------------------------------------------------------------------
 """
 
-if (cfg.par.add_neb_emission) and (not cfg.par.use_cloudy_tables):
+
+if (cfg.par.add_neb_emission) and (not cfg.par.use_cloudy_tables or cfg.par.add_pagb_stars or cfg.par.add_AGN_neb or cfg.par.add_DIG_neb):
+
     try:
         CLOUDY_EXE = os.environ['CLOUDY_EXE']
     except KeyError:
@@ -36,7 +38,6 @@ if (cfg.par.add_neb_emission) and (not cfg.par.use_cloudy_tables):
     except KeyError:
         print('Cloudy data path not set. Assuming standard cloudy structure')
         CLOUDY_DATA_PATH = '/'.join(CLOUDY_EXE.split('/')[:-2])+'/data'
-
 
 class WriteASCII(object):
     """

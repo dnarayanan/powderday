@@ -12,8 +12,8 @@ import h5py
 import fsps
 
 #SKIRT STUFF
-sedfile = '/ufrc/narayanan/desika.narayanan/SKIRT/run/tipsy_test/changa_test.dust_i90_sed.dat'
-run = '/ufrc/narayanan/desika.narayanan/pd_git/tests/SKIRT/changa_disk/pd_skirt_comparison.changa.rtout.sed'
+sedfile = '/home/desika.narayanan/SKIRT8/run/gasoline_test/gasoline_test.dust_i90_sed.dat'#changa_test.dust_i90_sed.dat'
+run = '/home/desika.narayanan/pd_git/tests/SKIRT/gasoline_disk/pd_skirt_comparison.gasoline.rtout.sed'#pd_skirt_comparison.changa.rtout.sed'
 
 data = np.loadtxt(sedfile)
 skirt_lam = data[:,0]
