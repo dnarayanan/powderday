@@ -70,7 +70,6 @@ def write_cloudy_input(**kwargs):
             "r_in_pc": False,
             "dust": False,
             "efrac": 0.0,
-            "geometry": "sphere",
             "abundance": "dopita",
             "id_val": 1,
             "metals": [-1., -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.]
@@ -92,10 +91,6 @@ def write_cloudy_input(**kwargs):
 
     # -----------------------------------------------------
     _id = int(pars["id_val"])
-    if _id == 1:
-        Pagb = True
-    else:
-        Pagb = False
 
     pars["gas_logZ"] = pars["logZ"]
     this_print('////////////////////////////////////')
@@ -107,21 +102,24 @@ def write_cloudy_input(**kwargs):
     cloudy_mod = "{}.mod".format(pars["model_name"])
     this_print('table star "{0}" {1}={2:.2e}'.format(cloudy_mod, "age", pars['age']))
     
+    # If DIG (id = 3) then use the ionization parameter else use the rate of ionizing photons
     if _id == 3:
         this_print('ionization parameter = {0:.3f} log'.format(pars['logU']))
     else:
         this_print('Q(H) = {0:.3f} log'.format(pars['logQ']))
     
-    print ("DUST: ", pars['dust'])
+    
     if pars['dust']:
         this_print('grains orion {0:.2f} log no qheat'.format(pars['gas_logZ']))
 
+    
     if pars['r_in_pc']:
         pc_to_cm = 3.08568e18
         r_out = np.log10(pars['r_inner'] * pc_to_cm)
     else:
         r_out = np.log10(pars['r_inner'])
 
+    
     linefile = "cloudyLines.dat"
 
     # Check to see if there was an error in getting metallicities from the simulation
@@ -177,7 +175,7 @@ def write_cloudy_input(**kwargs):
             abund_N = cfg.par.N_O_ratio[_id] + abund_O
 
         # Enhancing abundances for post-AGB stars
-        if Pagb:
+        if _id == 1:
             abund_C += cfg.par.PAGB_C_enhancement
             abund_N += cfg.par.PAGB_N_enhancement
 
@@ -191,9 +189,12 @@ def write_cloudy_input(**kwargs):
     
     cf = 1 - pars['efrac']
 
+    # For DIG since we are making use of the ionization parameter we do need
+    # to set the inner radius, the geometry is plane parallel and not spherical
+    # and we are considering the covering factor to be 1. 
     if _id != 3:
         this_print('radius {0:.3f} log'.format(r_out))
-        this_print('{}'.format(pars['geometry']))
+        this_print('sphere')
         this_print('Covering factor {0:.3f}'.format(cf))
     
     this_print('hden {0:.3f} log'.format(np.log10(pars['dens'])))
@@ -223,6 +224,8 @@ def get_output(model_name, dir_, qq, fsps_lam, cell_width, id_val):
     sinds = np.argsort(wl)
     wl = wl[sinds]
      
+    # For DIG we are making use of the ionization parameter (intensity case, see CLOUDY docs (Hazy 1))
+    # We need to multiply the output by the area of the cloud -- 6 sides of the cell in this case
     if id_val == 3:
         datflu = (datflu[sinds]*6*cell_width**2) / lsun 
 
@@ -265,6 +268,8 @@ def clean_files(dir_, model_name, id_val, error=False):
 def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu = 0.0, logz = 0.0, logq_1=0.0, 
         Cell_width=1, Dust=False, abund="dopita", clean_up=True, index=1, efrac=0.0):
     
+    # Since we don't need the logQs for DIG as we are using 
+    # the ionization parmeter instead. Set them to 0 just as a place holder 
     if index == 3:
         logq = 0.0
         logq_1 = 0.0

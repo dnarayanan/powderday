@@ -234,13 +234,16 @@ def dump_emlines(line_em, append=True):
         outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy.txt"
 
     if append == False:
+        refline_file = cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat"
         f = open(outfile_lines,'w')
+        wdat = np.genfromtxt(refline_file, delimiter=',')
+        wl = np.array([dat[0] for dat in wdat])
+        sinds = np.argsort(wl)
+        line_wav = wl[sinds]  
+        np.savetxt(f,np.expand_dims(line_wav,axis=0))
         f.close()
     else:
         f = open(outfile_lines,'a+')
-        #if os.stat(outfile_lines).st_size == 0:
-        #    np.savetxt(f,np.expand_dims(line_wav,axis=0))
-
         np.savetxt(f,np.expand_dims(line_em,axis=0))
         
         f.close()
@@ -255,6 +258,38 @@ def dump_AGN_SEDs(nu,fnu,luminosity):
 
     np.savez(outfile_bh,nu = nu,fnu = fnu, luminosity = luminosity)
                       
+
+def dump_NEB_SEDs(fnu_arr, pos_arr, nu_arr, append=True):
+    
+    if hasattr(cfg.model,'galaxy_num_str'):
+        outfile = cfg.model.PD_output_dir+"/neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
+    else:
+        outfile = cfg.model.PD_output_dir+"/neb_seds.npz"
+
+    # If append is False then just save an empty npz file.
+    if not append:
+        np.savez(outfile)
+        return
+
+    data = np.load(outfile)
+    
+    # If the npz file is not empty then the new data is appeneded 
+    # to the previous arrays
+    if (len(list(dat.keys())) == 0):
+        fnu_arr_tot = np.atleast_2d(data["fnu"])
+        pos_arr_tot = np.atleast_2d(data["positions"])
+        
+    else:
+        fnu_old = np.atleast_2d(data["fnu"])
+        pos_old = np.atleast_2d(data["positions"])
+        pos_arr = np.atleast_2d(pos_arr)
+        fnu_arr = np.atleast_2d(fnu_arr)
+        fnu_arr_tot = np.append(fnu_old, fnu_arr, axis=0)
+        pos_arr_tot = np.append(pos_old, pos_arr, axis=0)
+
+    np.savez(outfile, nu=nu_arr, fnu=fnu_arr_tot, positions=pos_arr_tot)
+
+
 
 '''
 #def dump_emline(emline_wavelengths,emline_luminosity,append=True):

@@ -8,7 +8,7 @@ from datetime import datetime
 import astropy.units as units
 import astropy.constants as constants
 from powderday.helpers import find_nearest
-from powderday.analytics import dump_AGN_SEDs
+from powderday.analytics import dump_AGN_SEDs,dump_NEB_SEDs
 from hyperion.model import ModelOutput
 from hyperion.grid.yt3_wrappers import find_order
 from powderday.nebular_emission.cloudy_tools import get_DIG_sed_shape, get_DIG_logU
@@ -61,8 +61,9 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         lum *= constants.L_sun.cgs.value
         
         young_star = cfg.par.add_young_stars and cfg.par.HII_min_age <= unbinned_stars_list[i].age <= cfg.par.HII_max_age
+        pagb = pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= unbinned_stars_list[i].age <= cfg.par.PAGB_max_age
 
-        if young_star:
+        if young_star or pagb:
             pos = unbinned_stars_list[i].positions
             pos_arr.append(pos)
             fnu_arr.append(fnu)
@@ -75,9 +76,8 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
 
     print('[source_creation/add_unbinned_newstars:] totallum_newstars = ', totallum_newstars)
     
-    if cfg.par.SAVE_NEB_SEDS or add_DIG_neb:
-        outfile = cfg.model.PD_output_dir+"neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
-        np.savez(outfile, nu=stellar_nu, fnu=stellar_fnu, positions=pos_arr)
+    if cfg.par.add_neb_emission and (cfg.par.SAVE_NEB_SEDS or add_DIG_neb) and (len(pos_arr) != 0):
+        dump_NEB_SEDs(stellar_nu, fnu_arr, pos_arr)
 
     if cosmoflag == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,unbinned_stars_list,diskstars_list,bulgestars_list,m)
    
@@ -393,24 +393,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
                 counter+=1
     
     
-    if cfg.par.SAVE_NEB_SEDS or add_DIG_neb:
-        # Adding the binned nebular seds to the unbinned nebular seds npz file saved earlier
-        outfile = cfg.model.PD_output_dir+"neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
-        try:
-            data = np.load(outfile)        
-            fnu_unbinned = np.atleast_2d(data["fnu"])
-            pos_unbinned = np.atleast_2d(data["positions"])
-            pos_arr = np.atleast_2d(pos_arr)
-            fnu_arr = np.atleast_2d(fnu_arr)
-            fnu_arr_tot = np.append(fnu_unbinned, fnu_arr, axis=0)
-            pos_arr_tot = np.append(pos_unbinned, pos_arr, axis=0)
-        
-        except:
-            nu_arr_tot = np.atleast_2d(data["fnu"])
-            pos_arr_tot = np.atleast_2d(data["positions"])
-                        
-        
-        np.savez(outfile, nu=binned_stellar_nu, fnu=fnu_arr_tot, positions=pos_arr_tot)
+    if cfg.par.add_neb_emission and (cfg.par.SAVE_NEB_SEDS or add_DIG_neb) and (len(pos_arr) != 0):
+        dump_NEB_SEDs(binned_stellar_nu, fnu_arr, pos_arr)
 
     if cosmoflag == False: add_bulge_disk_stars(df_nu,binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
 
@@ -574,7 +558,7 @@ def DIG_source_add(m,reg,df_nu,boost):
             continue
         
         # Calulating the ionization parameter by extrapolating the specfic energy beyind the lyman limit 
-        # for the spectrum shape calculated above
+        # for the input spectrum shape calculated above
         logU = get_DIG_logU(lam, fnu, specific_energy[i], cell_width[i])
 
         lam_arr.append(lam)

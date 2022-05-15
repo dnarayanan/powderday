@@ -204,14 +204,16 @@ def age_dist(Num, tavg, width=5, gamma=-0.65, bins=4, tries=100, tolerance = 0.1
     return N, t*1e-3
 
 def get_DIG_logU(lam, sed, luminosity, cell_width):
-    '''
-    lam: Wavelemgth in Angstrom
-    sed: SED in Lsun/Hz
-    luminosity: Luminosity in ergs/s
-    cell_width: width of the cell in cm
-    nH: Hydrogen density in cm^-3
-    '''
+    """
+    This function calculates the ionization parameter (logU) for a spectrum 
+    where the luminosity above the lyman limit (lam < 911.5 Angstrom) is known
 
+    1. lam: Wavelemgth in Angstrom
+    2. sed: SED in Lsun/Hz
+    3. luminosity: Luminosity in ergs/s
+    4. cell_width: width of the cell in cm
+    """
+    
     c = constants.c.cgs.value  # cm/s
     h = constants.h.cgs.value  # erg/s
     lam_0 = 911.6e-8  # Halpha wavelength in cm
@@ -221,17 +223,22 @@ def get_DIG_logU(lam, sed, luminosity, cell_width):
     sed = np.asarray(sed * constants.L_sun.cgs.value) 
     nu_0 = c / lam_0
 
+    # Normalizing the spectrum such that the luminosity above the lyman limit
+    # is equal to the given luminosity
     inds, = np.where(nu <= nu_0)
     sed_lum = integrate.simps(sed[inds][::-1], x=nu[inds][::-1])
     fac = luminosity / sed_lum
     sed = sed * fac
-
+    
+    # Getting the rate of ionizing photons from the normalized spectrum
     inds, = np.where(nu >= nu_0)
     sed_in = sed[inds][::-1]
     nu_in = nu[inds][::-1]
     integrand = sed_in / (h * nu_in)
-
     Q = integrate.simps(integrand, x=nu_in)
+    
+    # We consider that the ionizing photons are striking the cell from all 6 sides
+    # thus to get the rate of ionizing photons per unit area we divide by 6*cell_width**2
     phi = Q / (6*cell_width ** 2)
     logU = np.log10(phi / (nH * c))
 
@@ -239,6 +246,23 @@ def get_DIG_logU(lam, sed, luminosity, cell_width):
 
 
 def get_DIG_sed_shape(gas_coordinates, cell_width, sed_file):
+    """
+    This function gets the shape of the imput spectrum for DIG calculation
+    
+    There are two options:
+    
+    1. We assume that the shape is given by the ISRF from Black et al. 1987
+
+    2. We calulate the SED shape by taking the distance weighted average of
+    the CLOUDY ouput SEDs of all stars that contributed to nebular emission and
+    that lie with a given distance (stars_max_dist) from the gas cell
+    
+    Input parameters:
+    1. gas_coordinates: coordinate of the gas cell in cm
+    2. cell_width: width of the cell in cm
+    3. sed_file: npz file with the CLOUDY ouput spectrum of all the stars 
+    that contributed to nebular emission
+    """
 
     if cfg.par.use_black_sed:
         dat = np.load(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/black_1987.npz")
@@ -246,14 +270,12 @@ def get_DIG_sed_shape(gas_coordinates, cell_width, sed_file):
         fnu = dat["sed"]*(cell_width**2) # Lsun/Hz
 
     else:
-        #sed_file = cfg.model.PD_output_dir+"neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
         data = np.load(sed_file)
         nu = data['nu']
         stars_fnu = data["fnu"]
         star_coordinates = data["positions"]
 
         _dist = cfg.par.stars_max_dist * 3.085e21
-        #print (star_coordinates, gas_coordinates)
         dist,_id = get_nearest(star_coordinates, gas_coordinates, dist=_dist, num=cfg.par.max_stars_num)
         _sum = 0.
         for j in range(len(_id)):

@@ -7,7 +7,7 @@
 from __future__ import print_function
 from powderday.front_end_tools import make_SED, make_image
 from powderday.source_creation import direct_add_stars, add_binned_seds, BH_source_add, DIG_source_add
-from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump, logu_diagnostic,dump_emlines
+from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump, logu_diagnostic,dump_emlines,dump_NEB_SEDs
 from astropy import constants
 import fsps
 from powderday.image_processing import add_transmission_filters, convolve
@@ -134,6 +134,7 @@ N_METAL_BINS = len(fsps_metals)
 #initializing the nebular diagnostic file newly
 if cfg.par.add_neb_emission and cfg.par.NEB_DEBUG: logu_diagnostic(None,None,None,None,None,None,None,append=False)
 if cfg.par.add_neb_emission and cfg.par.dump_emlines: dump_emlines(None,append=False)
+if cfg.par.add_neb_emission and (cfg.par.SAVE_NEB_SEDS or add_DIG_neb): dump_NEB_SEDs(None, None, None, append=False):
 
 if cfg.par.BH_SED == True:
     BH_source_add(m, reg, df_nu, boost)
