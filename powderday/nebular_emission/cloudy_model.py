@@ -126,7 +126,9 @@ def write_cloudy_input(**kwargs):
     # If so code revert back to using "dopita" abundances in place of "direct"
     if (any(q <= -1.0 for q in pars["metals"][1:]) and pars["abundance"] == "direct"):
         pars["abundance"] = "dopita"
-        print ("Warning: Unable to get metallicities from the simulation. Using abundances from \"dopita et al. 2001\" instead")
+        print ("Warning: Unable to get metallicities from the simulation. This can be because you are binning the stars.\n \
+                Make sure that FORCE BINNED is set to False and set the max_age_direct appropriately to use this feature.\n \
+                Reverting to using abundances from \"dopita et al. 2001\"")
 
     if pars["abundance"] == "direct":
         abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
