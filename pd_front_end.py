@@ -5,7 +5,7 @@
 # IMPORT STATEMENTS
 # =========================================================
 from __future__ import print_function
-from powderday.front_end_tools import make_SED, make_image
+from powderday.front_end_tools import make_SED, make_image, make_DIG_SED
 from powderday.source_creation import direct_add_stars, add_binned_seds, BH_source_add, DIG_source_add
 from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump, logu_diagnostic,dump_emlines,dump_NEB_SEDs
 from astropy import constants
@@ -134,7 +134,7 @@ N_METAL_BINS = len(fsps_metals)
 #initializing the nebular diagnostic file newly
 if cfg.par.add_neb_emission and cfg.par.NEB_DEBUG: logu_diagnostic(None,None,None,None,None,None,None,append=False)
 if cfg.par.add_neb_emission and cfg.par.dump_emlines: dump_emlines(None,append=False)
-if cfg.par.add_neb_emission and (cfg.par.SAVE_NEB_SEDS or add_DIG_neb): dump_NEB_SEDs(None, None, None, append=False):
+if cfg.par.add_neb_emission and (cfg.par.SAVE_NEB_SEDS or cfg.par.add_DIG_neb): dump_NEB_SEDs(None, None, None, append=False)
 
 if cfg.par.BH_SED == True:
     BH_source_add(m, reg, df_nu, boost)
@@ -221,20 +221,15 @@ print('Setting up Model')
 m_imaging = copy.deepcopy(m)
 m.conf.output.output_specific_energy = 'last'
 
+if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
+    make_DIG_SED(m, par, model)
+    DIG_source_add(m, reg, df_nu,boost)
+
 if cfg.par.SED:
     make_SED(m, par, model)
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
     dump_data(reg, model)
-
-if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
-    DIG_source_add(m, reg, df_nu,boost)
-    
-#    if cfg.par.DIFF_DIG_SED:
-#        make_SED(m, par, model, DIG=True)
-#    else:
-#        make_SED(m, par, model)
-
 
 if cfg.par.IMAGING:
     make_image(m_imaging, par, model, dx, dy, dz)

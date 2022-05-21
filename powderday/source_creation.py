@@ -66,7 +66,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         if young_star or pagb:
             pos = unbinned_stars_list[i].positions
             pos_arr.append(pos)
-            fnu_arr.append(fnu)
+            fnu_arr.append(stellar_fnu[i, :])
 
         # add new stars
         totallum_newstars += lum
@@ -76,7 +76,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
 
     print('[source_creation/add_unbinned_newstars:] totallum_newstars = ', totallum_newstars)
     
-    if cfg.par.add_neb_emission and (cfg.par.SAVE_NEB_SEDS or add_DIG_neb) and (len(pos_arr) != 0):
+    if cfg.par.add_neb_emission and (cfg.par.SAVE_NEB_SEDS or cfg.par.add_DIG_neb) and (len(pos_arr) != 0):
         dump_NEB_SEDs(stellar_nu, fnu_arr, pos_arr)
 
     if cosmoflag == False: add_bulge_disk_stars(df_nu,stellar_nu,stellar_fnu,disk_fnu,bulge_fnu,unbinned_stars_list,diskstars_list,bulgestars_list,m)
@@ -236,6 +236,9 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     #speed up adding sources.
     
     for i in range(nstars):
+        if not cfg.par.FORCE_BINNED:
+            if stars_list[i].age <= cfg.par.max_age_direct:
+                continue
         wz = find_nearest(metal_bins,stars_list[i].fsps_zmet)
         wa = find_nearest(age_bins,stars_list[i].age)
         wm = find_nearest(mass_bins,stars_list[i].mass)
@@ -393,7 +396,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
                 counter+=1
     
     
-    if cfg.par.add_neb_emission and (cfg.par.SAVE_NEB_SEDS or add_DIG_neb) and (len(pos_arr) != 0):
+    if cfg.par.add_neb_emission and (cfg.par.SAVE_NEB_SEDS or cfg.par.add_DIG_neb) and (len(pos_arr) != 0):
         dump_NEB_SEDs(binned_stellar_nu, fnu_arr, pos_arr)
 
     if cosmoflag == False: add_bulge_disk_stars(df_nu,binned_stellar_nu,binned_stellar_fnu,disk_fnu,bulge_fnu,stars_list,diskstars_list,bulgestars_list,m)
@@ -531,7 +534,6 @@ def DIG_source_add(m,reg,df_nu,boost):
 
     cell_width = cell_info["fw1"][:,0]
     mass = (quantities['gas','density']*units.g/units.cm**3).value * (cell_width**3)
-    met = grid_properties["grid_gas_metallicity"]
     specific_energy = (quantities['gas','specific_energy']*units.erg/units.s/units.g).value
     specific_energy = (specific_energy * mass) # in ergs/s
 
@@ -584,12 +586,11 @@ def DIG_source_add(m,reg,df_nu,boost):
     if (len(mask)) == 0:
         print ("No gas particles fit the criteria for calculating DIG. Skipping DIG calculation")
         return
-    
 
     print("----------------------------------------------------------------------------------")
-    print ("Calculating nebular emission from Diffused Ionized Gas for " + str(len(mask) + " gas cells")
+    print("Calculating nebular emission from Diffused Ionized Gas for " + str(len(mask)) + " gas cells")
     print("----------------------------------------------------------------------------------")
-    
+
     fnu_arr_neb = sg.get_dig_seds(lam_arr, fnu_arr, logU, cell_width, met)
     
     nu = 1.e8 * constants.c.cgs.value / lam

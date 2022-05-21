@@ -143,7 +143,7 @@ def write_cloudy_input(**kwargs):
             abund_metal[2] = cfg.par.N_O_ratio[_id] + abund_metal[3]
 
         # Enhancing abundances for post-AGB stars
-        if Pagb:
+        if _id == 1:
             abund_metal[1] += cfg.par.PAGB_C_enhancement
             abund_metal[2] += cfg.par.PAGB_N_enhancement
 

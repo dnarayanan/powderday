@@ -29,6 +29,7 @@ n_photons_initial = 1.e6
 n_photons_imaging = 1.e6
 n_photons_raytracing_sources = 1.e6
 n_photons_raytracing_dust = 1.e6
+n_photons_DIG = 1.e8 
 
 FORCE_RANDOM_SEED = False
 seed = -12345 # has to be an int, and negative.
@@ -205,7 +206,7 @@ HII_escape_fraction = 0.0   			    # Fraction of H-ionizaing photons that escape
 HII_alpha_enhacement = False                # If set to True then the metallicity of star particles to [Fe/H] rather than the total metals. 
                                             # Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
                                             # hardening of the radiation field due to alpha-enhancement. (Default: False)
-
+HII_dust = False
 #****************
 # Post-AGB STARS
 #****************
@@ -256,7 +257,7 @@ add_DIG_neb = False                         # If set, Contribution from DIG is i
 
 DIG_nh = 1.e1                               # Gas hydrogen density for calcualting nebular emission in units of cm^-3. (Default: 10)
 
-DIG_min_LogU = -5.0                         # For DIG CLOUDY calculations we use Black (1987) SED as a template. The normalization of the SED is 
+DIG_min_logU = -5.0                         # For DIG CLOUDY calculations we use Black (1987) SED as a template. The normalization of the SED is 
                                             # set by a parameter called  "Factor". It is the ratio of total energy dumped in a cell to the total 
                                             # energy of the Black (1987) SED, which we use as the template for setting the SED shape for calculating 
                                             # DIG emission. This parameter sets the minimum factor that the code uses for calculation. For example, 
@@ -425,8 +426,9 @@ FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
 
 FORCE_STELLAR_METALLICITIES = False
 FORCE_STELLAR_METALLICITIES_VALUE = 0.013 # absolute values (so 0.013 ~ solar) 
+SKIRT_DATA_DUMP = True
 NEB_DEBUG = False # Dumps parameters related to nebular line emission in a file for debugging.
                   # The file includes the ionization parameter, number of ionizing photons, 
                   # metallicity, inner radius, stellar mass and age for each particle.
                   # Naming convention: nebular_properties_galaxy*.txt where * is the galaxy number
-DIFF_DIG_SED = False # If set, SEDs with DIG nebular emission are saved separately with "_DIG" appended to the rtout files
+SAVE_NEB_SEDS = False # If set, the CLOUDY output SEDs are saved in a file 

@@ -259,7 +259,7 @@ def dump_AGN_SEDs(nu,fnu,luminosity):
     np.savez(outfile_bh,nu = nu,fnu = fnu, luminosity = luminosity)
                       
 
-def dump_NEB_SEDs(fnu_arr, pos_arr, nu_arr, append=True):
+def dump_NEB_SEDs(nu_arr, fnu_arr, pos_arr, append=True):
     
     if hasattr(cfg.model,'galaxy_num_str'):
         outfile = cfg.model.PD_output_dir+"/neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
@@ -275,9 +275,9 @@ def dump_NEB_SEDs(fnu_arr, pos_arr, nu_arr, append=True):
     
     # If the npz file is not empty then the new data is appeneded 
     # to the previous arrays
-    if (len(list(dat.keys())) == 0):
-        fnu_arr_tot = np.atleast_2d(data["fnu"])
-        pos_arr_tot = np.atleast_2d(data["positions"])
+    if (len(list(data.keys())) == 0):
+        fnu_arr_tot = np.atleast_2d(fnu_arr)
+        pos_arr_tot = np.atleast_2d(pos_arr)
         
     else:
         fnu_old = np.atleast_2d(data["fnu"])
