@@ -15,7 +15,7 @@ from powderday.tributary_dust_add import active_dust_add
 
 
 def arepo_m_gen(fname,field_add):
-    
+
     reg,ds,dustdens = arepo_vornoi_grid_generate(fname,field_add)
 
     xcent = ds.quan(cfg.model.x_cent,'code_length').to('cm') #proper cm
@@ -31,6 +31,8 @@ def arepo_m_gen(fname,field_add):
 
     m = Model()
     
+    #save in the m__dict__ that we're in a voronoi geometry
+    m.__dict__['grid_type']='vor'
 
 
     #because we boost the stars to a [0,0,0] coordinate center, we

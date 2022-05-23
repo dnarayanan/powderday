@@ -103,6 +103,10 @@ def enzo_m_gen(fname,field_add):
 
     m = Model()
 
+    #save in the m__dict__ that we're in an amr geometry
+    m.__dict__['grid_type']='amr'
+
+
     m.set_amr_grid(amr)
     
     #CMB DISABLED -- UNCOMMENT THIS TO FIX THIS.  The main issue is
