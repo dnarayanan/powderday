@@ -291,7 +291,7 @@ def dtm_amr(ds):
     
     def _dust_density_dtm_amr(field, data):
         return data[('gas', 'metal_density')].in_units("g/cm**3")*cfg.par.dusttometals_ratio
-    ds.add_field(('gas', 'dust_density'), function=_dust_density_dtm_amr, units = 'g/cm**3')
+    ds.add_field(('gas', 'dust_density'), function=_dust_density_dtm_amr, units = 'g/cm**3', sampling_type='cell')
 
 
 def remy_ruyer_amr(ds):
@@ -331,7 +331,7 @@ def remy_ruyer_amr(ds):
 
         return dust_density
 
-    ds.add_field(('gas', 'dust_density'), function=_dust_density_rr_amr, units = 'g/cm**3')
+    ds.add_field(('gas', 'dust_density'), function=_dust_density_rr_amr, units = 'g/cm**3', sampling_type='cell')
     
     
 
@@ -352,7 +352,7 @@ def li_bestfit_amr(ds):
     
         return dust_density
 
-    ds.add_field(('gas', 'dust_density'), function=_dust_density_li_bestfit_amr, units = 'g/cm**3')
+    ds.add_field(('gas', 'dust_density'), function=_dust_density_li_bestfit_amr, units = 'g/cm**3', sampling_type='cell')
 
 def li_ml_amr(ds):
 
