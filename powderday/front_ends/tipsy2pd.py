@@ -135,7 +135,7 @@ def tipsy_field_add(fname,bounding_box = None ,ds=None,add_smoothed_quantities=T
         except: massform = max(data[("newstars", "Mass")])
         SFposs = np.where((data[("Gas","Temperature")]<tempcut) & (data[("Gas","Density")]>denscut))
         try: cstar = cstarfac*data[("Gas","H2")][SFposs] # SF efficiency with molecular hydrogen
-        except: cstar = cstarfac*ds.data.arr(np.ones(len(data[("Gas","Mass")][SFposs])),"dimensionless")
+        except: cstar = cstarfac*data[("Gas","Mass")][SFposs]/data[("Gas","Mass")][SFposs]
         dynt = 1.0/np.sqrt(data[("Gas","Density")][SFposs]*4.0*np.pi*G)
         SFeff = 1.0 - np.e**(-1.0*cstar*deltat/dynt)
         instsfr[SFposs] = (data[("Gas","Mass")][SFposs]/massform)*SFeff
