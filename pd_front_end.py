@@ -65,11 +65,10 @@ cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_BINNED, cfg.par.max_age_direct, cfg.par
 # =========================================================
 
 fname = cfg.model.hydro_dir+cfg.model.snapshot_name
-field_add, ds = stream(fname)
+field_add, ds, ds_type = stream(fname)
 
 # figure out which tributary we're going to
 
-ds_type = ds.dataset_type
 # define the options dictionary
 options = {'gadget_hdf5': m_control_sph,
            'tipsy': m_control_sph,
@@ -78,6 +77,9 @@ options = {'gadget_hdf5': m_control_sph,
 
 m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
+from powderday.pah.pah_source_create import pah_source_add
+if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
+
 
 sp = fsps.StellarPopulation()
 
@@ -159,6 +161,7 @@ else:
 # stars and black holes can't both be in the sim and write stellar SEDs to a file becuase they have different wavelength sizes
 if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED) and not (par.draine21_pah_model):
     stellar_sed_write(m)
+
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
     SKIRT_data_dump(reg, ds, m, stars_list, bulgestars_list, diskstars_list, ds_type, sp)
