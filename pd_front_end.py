@@ -79,7 +79,6 @@ options = {'gadget_hdf5': m_control_sph,
 m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
-
 sp = fsps.StellarPopulation()
 
 #setting solar metallicity value based on isochrone
@@ -124,7 +123,7 @@ df.close()
 
 
 # add sources to hyperion
-stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds, sp)
+stars_list, diskstars_list, bulgestars_list, reg = sg.star_list_gen(boost, dx, dy, dz, reg, ds, sp, m)
 nstars = len(stars_list)
 
 # figure out N_METAL_BINS:
@@ -162,7 +161,7 @@ if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED) and not (par.draine21_pa
     stellar_sed_write(m)
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
-    SKIRT_data_dump(reg, ds, m, stars_list, ds_type, sp)
+    SKIRT_data_dump(reg, ds, m, stars_list, bulgestars_list, diskstars_list, ds_type, sp)
 
 
 nstars = len(stars_list)
