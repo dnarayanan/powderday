@@ -1,3 +1,22 @@
+#FIELD NOMENCLATURE
+
+#For the arepo front end, we only pull in particle information.  This
+#is because in arepo_tributary, we end up re-building the Voronoi
+#tesslation via the built in voro++ calls in Hyperion.  As a result,
+#there's (for example) only one field nomenclature that looks like
+#[('dust','mass')] which represents the particle information.
+
+#Note - there is one side rule to this: if we have PartType3 dust
+#particles in the simulations, then those particles may be given the
+#specific name ('particle_dust','mass').  The reason for this is that
+#Arepo active dust models (i.e., those that employ PartType3) also
+#smooth that information onto the PartType0 particles.  This means
+#that there are two types of dust particles -- the original active
+#PartType3, and PartType0.  Both are used in powderday in some
+#instances.  The dust fields in PartType0 are used to create the
+#Voronoi mesh while the dust in PartType3 can be used (sometimes) for
+#very specific calculations (for example, related to PAHs).
+
 from __future__ import print_function
 import numpy as np
 import yt
@@ -74,6 +93,9 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     def _dustmass_dtm(field,data):
         return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
 
+    def _dust_numgrains(field,data):
+        return (data[('PartType0', 'NumGrains')])
+
 
     def _li_ml_dustmass(field,data):
         li_ml_dgr = dgr_ert(data["PartType0","GFM_Metallicity"],data["PartType0","StarFormationRate"],data["PartType0","Masses"])
@@ -102,8 +124,21 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         return dust_to_gas_ratio * data["PartType0","Masses"]
 
 
+    def _particle_dust_carbon_fraction(field,data):
+        ad = data.ds.all_data()
+        return (ad['PartType3','Dust_MetalFractions'][:,2])
 
+    def _particle_dust_numgrains(field,data):
+        ad = data.ds.all_data()
+        return (ad['PartType3','Dust_NumGrains'])
 
+    def _particle_dust_mass(field,data):
+        ad = data.ds.all_data()
+        return (ad['PartType3','Masses'])
+
+    def _particle_dust_coordinates(field,data):
+        ad = data.ds.all_data()
+        return (ad['PartType3','Coordinates'])
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
@@ -230,7 +265,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     ds.add_field(('metal','dens'), function=_metaldens,  sampling_type='particle',units="g/cm**3", particle_type=True)
     ds.add_field(('PartType0', 'metalmass'), function=_metalmass,  sampling_type='particle', units="g", particle_type=True)
 
-    
+    ds.add_field(('gas','density'), function=_gasdensity, sampling_type='particle', units='g',particle_type=True)
     ds.add_field(('gas','masses'), function=_gasmasses,  sampling_type='particle', units='g', particle_type=True)
     ds.add_field(('gas','fh2'), function=_gasfh2,  sampling_type='particle', units='dimensionless', particle_type=True)
     ds.add_field(('gas','sfr'), function=_gassfr,  sampling_type='particle', units='g/s', particle_type=True)
@@ -265,6 +300,15 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
         #ds.add_field(('li_ml_dustmass'),function=_li_ml_dustmass, sampling_type='particle', units='code_mass',particle_type=True)
         ds.add_field(("dust","mass"),function=_li_ml_dustmass, sampling_type='particle', units='code_mass',particle_type=True)
+
+
+    #add the numgrains (in case we're in OTF extinction mode)
+    if cfg.par.otf_extinction:
+        ds.add_field(('dust','numgrains'),function=_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
+        ds.add_field(('particle_dust','carbon_fraction'),function=_particle_dust_carbon_fraction,units='dimensionless',sampling_type='particle',particle_type=True)
+        ds.add_field(('particle_dust','numgrains'),function=_particle_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
+        ds.add_field(('particle_dust','mass'),function=_particle_dust_mass,units='code_mass',sampling_type='particle',particle_type=True)
+        ds.add_field(('particle_dust','coordinates'),function=_particle_dust_coordinates,units='code_length',sampling_type='particle',particle_type=True)
 
     ds.add_field(('star','masses'), function=_starmasses,  sampling_type='particle', units='g', particle_type=True)
     ds.add_field(('star','coordinates'), function=_starcoordinates,  sampling_type='particle', units='cm', particle_type=True)
