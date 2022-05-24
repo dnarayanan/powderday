@@ -67,6 +67,19 @@ cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_BINNED, cfg.par.max_age_direct, cfg.par
 fname = cfg.model.hydro_dir+cfg.model.snapshot_name
 field_add, ds = stream(fname)
 
+
+# figure out which tributary we're going to
+
+ds_type = ds.dataset_type
+# define the options dictionary
+options = {'gadget_hdf5': m_control_sph,
+           'tipsy': m_control_sph,
+           'enzo_packed_3d': m_control_enzo,
+           'arepo_hdf5': m_control_arepo}
+
+m_gen = options[ds_type]()
+m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
+
 sp = fsps.StellarPopulation()
 
 #setting solar metallicity value based on isochrone
@@ -161,7 +174,8 @@ if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
     stellar_sed_write(m)
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
-    SKIRT_data_dump(reg, ds, m, stars_list, ds_type, bulgestars_list, diskstars_list, sp)
+    SKIRT_data_dump(reg, ds, m, stars_list, bulgestars_list, diskstars_list, ds_type, sp)
+
 
 
 nstars = len(stars_list)

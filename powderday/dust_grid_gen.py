@@ -182,14 +182,22 @@ def dtm_particle_mesh(reg):
 
 
 def manual_particle_mesh(reg):
+
     #calculates the dust based on the DTM ratio for either particles
     #directly (i.e. arepo quantities) or a mesh (i.e AMR simulations)
-
-    if ('PartType0','DustDensity') in reg.ds.derived_field_list:
-        dustdens = reg.ds.arr(reg["PartType0","DustDensity"].value,'code_mass/code_length**3')
-        dustdens = dustdens.to('g/cm**3').value
+    if cfg.par.otf_extinction == False:
+        if ('PartType0','DustDensity') in reg.ds.derived_field_list:
+            dustdens = reg.ds.arr(reg["PartType0","DustDensity"].value,'code_mass/code_length**3')
+            dustdens = dustdens.to('g/cm**3').value
+        else:
+            raise ValueError('It looks like we cant find PartType0,DustDensity in your Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml].  Alternatively, edit [dust_grid_gen/manual_particle_mesh] to change the value of the field assigned to dustdens')
     else:
-        raise ValueError('It looks like we cant find PartType0,DustDensity in your Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml].  Alternatively, edit [dust_grid_gen/manual_particle_mesh] to change the value of the field assigned to dustdens')
+        if ('PartType3','Dust_DustDensity') in reg.ds.derived_field_list:
+            dustdens = reg.ds.arr(reg["PartType3","Dust_DustDensity"].value,'code_mass/code_length**3')
+            dustdens = dustdens.to('g/cm**3').value
+        else:
+            raise ValueError('It looks like we cant find PartType3,Dust_DustDensity in your Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml].  Alternatively, edit [dust_grid_gen/manual_particle_mesh] to change the value of the field assigned to dustdens')
+
 
     return dustdens
 
