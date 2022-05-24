@@ -37,11 +37,17 @@ def arepo_m_gen(fname,field_add):
 
     #because we boost the stars to a [0,0,0] coordinate center, we
     #want to make sure our vornoi tesslation is created in the same manner.
-    
-    particle_x = reg["gas","coordinates"][:,0].to('cm')
-    particle_y = reg["gas","coordinates"][:,1].to('cm')
-    particle_z = reg["gas","coordinates"][:,2].to('cm')
 
+    if cfg.par.otf_extinction==False:
+        print("Computing Voronoi Tessellation on gas particles")
+        particle_x = reg["gas","coordinates"][:,0].to('cm')
+        particle_y = reg["gas","coordinates"][:,1].to('cm')
+        particle_z = reg["gas","coordinates"][:,2].to('cm')
+    else:
+        print("Computing Voronoi Tessellation on PartType3 dust particles")
+        particle_x = reg["dust","coordinates"][:,0].to('cm')
+        particle_y = reg["dust","coordinates"][:,1].to('cm')
+        particle_z = reg["dust","coordinates"][:,2].to('cm')
 
     #just for the sake of symmetry, pass on a dx,dy,dz since it can be
     #used optionally downstream in other functions.
@@ -99,12 +105,12 @@ def arepo_m_gen(fname,field_add):
           #the simulation itself.
 
         ad = ds.all_data()
-        nsizes = reg['PartType0','NumGrains'].shape[1]
+        nsizes = reg['PartType3','Dust_NumGrains'].shape[1]
         try:
-            assert(np.sum(ad['PartType0','NumGrains']) > 0)
+            assert(np.sum(ad['PartType3','Dust_NumGrains']) > 0)
         except AssertionError:
             raise AssertionError("[arepo_tributary:] There are no dust grains in this simulation.  This can sometimes happen in an early snapshot of a simulation where the dust has not yet had time to form.")
-        grid_of_sizes = reg['PartType0','NumGrains']
+        grid_of_sizes = reg['PartType3','Dust_NumGrains']
         active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy)
 
 

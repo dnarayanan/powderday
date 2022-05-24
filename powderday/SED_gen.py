@@ -865,6 +865,7 @@ def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
     total_mass = 0
     mass_removed = 0
 
+
     for i in range(len(stars_list)):
         if (stars_list[i].positions[0] > xmax) or \
            (stars_list[i].positions[0] < xmin) or \
@@ -875,7 +876,7 @@ def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
            
             star_idx_to_remove.append(i)
             mass_removed += stars_list[i].mass
-            stars_list.pop(i)
+
 
 
         if (len(bulgestars_list) > 0):
@@ -888,7 +889,7 @@ def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
 
                 bulge_idx_to_remove.append(i)
                 mass_removed += bulgestars_list[i].mass
-                bulgestars_list.pop(i)
+
         
         if (len(diskstars_list) > 0):
             if (diskstars_list[i].positions[0] > xmax) or \
@@ -900,11 +901,23 @@ def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
             
                 disk_idx_to_remove.append(i)
                 mass_removed += diskstars_list[i].mass
-                diskstars_list.pop(i)
+
 
 
         total_mass += stars_list[i].mass
     
+
+    #now that we've figured out which stars to remove, actually remove them from the lists
+    for idx in star_idx_to_remove:
+        stars_list.pop(idx)
+
+    for idx in bulge_idx_to_remove:
+        bulgestars_list.pop(idx)
+
+    for idx in disk_idx_to_remove:
+        diskstars_list.pop(idx)
+    
+
     number_of_removed_stars = len(star_idx_to_remove) + len(bulge_idx_to_remove) + len(disk_idx_to_remove)
     mass_fraction_removed = mass_removed/total_mass
     print("[SED_gen/remove_stars_outside_grid:] removing %f stars because they are outside the dust grid" % number_of_removed_stars)
