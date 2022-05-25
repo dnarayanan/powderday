@@ -9,19 +9,28 @@ from tqdm import tqdm
 
 #to do:
 
+#0 DONE---- treat the PAH emission spectra as sources and add them as such to pd so that they attenuate accordingly
+
 #1. speed up the convolution with grain size distribution -- currently
 #takes ~2 hours per galaxy. Assume the slow part is the np.dot product.
 
-#2. think about how to handle the thermal re-radiation in the FIR so
-#that it is self consistent with absorption and re-radiation of the
-#metagalactic field via hyperion.
+#to do this:
+
+#a. first, we need to have all the PAH filenames and SEDs on disk.
+
+#b. then we need to figure out how to make those SEDs a basis
+#function, and how to break up one of our ISRFs into a combination of
+#those basis functions.
+
+#c. after this, we can compute the contribution to the PAH spectrum from each radiation field for each cell
+
 
 #3. put in the radiation fields and appropriate filename per cell
 
 #4. put in the ionization fraction and appropriate file name per cell.
 
 
-filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/iout_graD16emtPAHib_mmpisrf_1.00'
+filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/dataverse_files/mMMP/iout_graD16emtPAHib_mmpisrf_1.00'
 #filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/BC03_Z0.02_10Myr/iout_graD16emtPAHib_bc03_z0.02_1e7_1.00'
 #filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/BC03_Z0.0004_10Myr/iout_graD16emtPAHib_bc03_z0.0004_1e7_1.50'
 #iout_DH20Ad_P0.20_0.00_bc03_z0.02_1e7_1.00'
@@ -35,7 +44,12 @@ def pah_source_add(ds,reg,m,boost):
 
     simulation_sizes = (ds.parameters['grain_sizes_in_micron']*u.micron).to(u.cm).value
 
-    #determine q_PAH for analysis and save it to parameters for writing out
+    #determine q_PAH for analysis and save it to parameters for
+    #writing out DEBUG - WE SHOULD CHANGE THIS TO INCLUDE A FEW
+    #DIFFRENT POSSIBILITIES, IUNCLUDING (A) COMPUTING QPAH AS IS, AND
+    #(B) COMPUTING QPAH DIRECTLY FROM THE SIMULATION IN THE POSSIBLE
+    #CASE THAT IT EXPLICITLY MODELS AROMATIC GRAPHITES
+
     ad = ds.all_data()
 
     idx_pah = np.where(simulation_sizes <= 3.e-7)[0]
@@ -122,8 +136,7 @@ def pah_source_add(ds,reg,m,boost):
 
 
 
-    import pdb
-    pdb.set_trace()
+
     for i in range(particle_PAH_luminosity.shape[0]):
         #lum = np.trapz(draine_lam[wpah_lam].cgs.value,flam[i,wpah_lam]).value
         fnu_reverse = fnu[i,:][::-1]
