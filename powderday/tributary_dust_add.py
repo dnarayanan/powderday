@@ -155,12 +155,17 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
                         #cell with the most grains in that bin).
                         for i in range(nbins):
                                 frac_grid[:,i] = np.log10(grid_of_sizes[:,dust_file_to_grain_size_mapping_idx[i]])/np.max(np.log10(grid_of_sizes[:,dust_file_to_grain_size_mapping_idx[i]]))*frac[i]
-
+                                
+                #we can get cases where the denominator in the
+                #frac_grid assignment is the log10(1) which causes infs/nans that propagate throughout
+                frac_grid[np.isinf(frac_grid)] = 0
+                frac_grid[np.isnan(frac_grid)] = 0
 
                 #now add the dust grids to hyperion
                 for bin in range(nbins):
                         file = dust_filenames[bin]
                         d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
+
                         m.add_density_grid(dustdens*frac_grid[:,bin],d,specific_energy=specific_energy)
                         #m.add_density_grid(dustdens*frac[bin],d,specific_energy=specific_energy)
 

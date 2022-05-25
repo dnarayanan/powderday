@@ -67,6 +67,7 @@ cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_BINNED, cfg.par.max_age_direct, cfg.par
 fname = cfg.model.hydro_dir+cfg.model.snapshot_name
 field_add, ds, ds_type = stream(fname)
 
+
 # figure out which tributary we're going to
 
 # define the options dictionary
@@ -77,6 +78,7 @@ options = {'gadget_hdf5': m_control_sph,
 
 m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
+
 from powderday.pah.pah_source_create import pah_source_add
 if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
 
@@ -84,7 +86,7 @@ if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
 sp = fsps.StellarPopulation()
 
 #setting solar metallicity value based on isochrone
-#values assigned to cfg.par.solar taken from fsps/src/sps_vars 
+#values assigned to cfg.par.solar taken from fsps/src/sps_vars
 isochrone = str(sp.libraries[0])
 
 print(f'\n----------------------------------------------\nSetting solar metallicity value')
@@ -113,6 +115,18 @@ elif 'bpss' in isochrone:
     cfg.par.solar = 0.020
     print(f'solar metallicity = {cfg.par.solar}')
 print('----------------------------------------------')
+
+# figure out which tributary we're going to
+
+ds_type = ds.dataset_type
+# define the options dictionary
+options = {'gadget_hdf5': m_control_sph,
+           'tipsy': m_control_sph,
+           'enzo_packed_3d': m_control_enzo,
+           'arepo_hdf5': m_control_arepo}
+
+m_gen = options[ds_type]()
+m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 # Get dust wavelengths. This needs to preceed the generation of sources
 # for hyperion since the wavelengths of the SEDs need to fit in the
@@ -167,6 +181,7 @@ if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
     SKIRT_data_dump(reg, ds, m, stars_list, bulgestars_list, diskstars_list, ds_type, sp)
 
 
+
 nstars = len(stars_list)
 nstars_disk = len(diskstars_list)
 nstars_bulge = len(bulgestars_list)
@@ -181,7 +196,6 @@ if par.SOURCES_IN_CENTER == True:
         bulgestars_list[i].positions[:] =  np.array([xcent,ycent,zcent])
     for i in range(nstars_disk):
         diskstars_list[i].positions[:] = np.array([xcent,ycent,zcent])
-
 if par.SOURCES_RANDOM_POSITIONS == True:
     print "================================"
     print "SETTING SOURCES TO RANDOM POSITIONS"
@@ -240,4 +254,3 @@ if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
 
 if cfg.par.IMAGING:
     make_image(m_imaging, par, model, dx, dy, dz)
-
