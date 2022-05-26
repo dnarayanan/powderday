@@ -170,9 +170,8 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
         if stars_list[i].age > maximum_age: maximum_age = stars_list[i].age
 
     # If Flag is set we do not bin stars younger than the age set by max_age_unbinned_stars
-    if not cfg.par.FORCE_BINNED:
-        if cfg.par.max_age_direct > minimum_age:
-            minimum_age = cfg.par.max_age_direct + 0.001
+    if not cfg.par.FORCE_BINNED and cfg.par.max_age_direct > minimum_age:
+        minimum_age = cfg.par.max_age_direct + 0.001
 
     delta_age = (maximum_age-minimum_age)/cfg.par.N_STELLAR_AGE_BINS
 
@@ -223,6 +222,10 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     #speed up adding sources.
     
     for i in range(nstars):
+        # If a particle was directly added using direct_add_stars() then it is skipped over.
+        if not cfg.par.FORCE_BINNED and stars_list[i].age <= cfg.par.max_age_direct:
+            continue
+
         wz = find_nearest(metal_bins,stars_list[i].fsps_zmet)
         wa = find_nearest(age_bins,stars_list[i].age)
         wm = find_nearest(mass_bins,stars_list[i].mass)
