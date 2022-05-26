@@ -90,7 +90,7 @@ def get_beta_nnls(draine_data_dir='/blue/narayanan/desika.narayanan/powderday_fi
     #get the wavelengths of the simulation ISRF DEBUG DEBUG DEBUG this
     #will eventually, like the above GSD, get read in via a function call.
     #this is just for testing.
-    f = h5py.File('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/pd_skirt_comparison.027.otf_manual.rtout.sed')
+    f = h5py.File('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/pd_skirt_comparison.027.otf_dtm.rtout.sed')
 
     #DEBUG WE WILL NEED TO PUT IN SOMETHING AUTOMATED HERE TO GRAB THE LAST ITERATION
     dset = f['iteration_00007']

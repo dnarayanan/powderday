@@ -77,8 +77,14 @@ def arepo_m_gen(fname,field_add):
     #save some information that can be used in the PAH model compute
     #an effective 'size' of a cell by density = mass/volume and assume
     #spherical geometry 
-    mass = reg['PartType0','Masses']
-    density = reg['PartType0','Density']
+
+    if cfg.par.otf_extinction == False:
+        mass = reg['PartType0','Masses']
+        density = reg['PartType0','Density']
+    else:
+        mass = reg['PartType3','Masses']
+        density = ds.arr(reg['PartType3','Dust_DustDensity'],'code_mass/code_length**3')
+ 
     rad_dens = (mass*3/(4.*np.pi*density))**(1./3)
     rad_dens = rad_dens.in_units('cm')
 

@@ -65,11 +65,12 @@ cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_BINNED, cfg.par.max_age_direct, cfg.par
 # =========================================================
 
 fname = cfg.model.hydro_dir+cfg.model.snapshot_name
-field_add, ds, ds_type = stream(fname)
+field_add, ds = stream(fname)
 
 
 # figure out which tributary we're going to
 
+ds_type = ds.dataset_type
 # define the options dictionary
 options = {'gadget_hdf5': m_control_sph,
            'tipsy': m_control_sph,
@@ -79,8 +80,8 @@ options = {'gadget_hdf5': m_control_sph,
 m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
-from powderday.pah.pah_source_create import pah_source_add
-if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
+#from powderday.pah.pah_source_create import pah_source_add
+#if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
 
 
 sp = fsps.StellarPopulation()
@@ -236,6 +237,8 @@ m.set_specific_energy_type('additional')
 print('Setting up Model')
 m_imaging = copy.deepcopy(m)
 m.conf.output.output_specific_energy = 'last'
+
+m.compute_isrf(True)
 
 if cfg.par.SED:
     make_SED(m, par, model)

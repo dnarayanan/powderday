@@ -94,8 +94,8 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     def _dustmass_dtm(field,data):
         return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
 
-    def _dust_numgrains(field,data):
-        return (data[('PartType0', 'NumGrains')])
+    #def _dust_numgrains(field,data):
+    #    return (data[('PartType0', 'NumGrains')])
 
 
     def _li_ml_dustmass(field,data):
@@ -307,7 +307,7 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     #add the numgrains (in case we're in OTF extinction mode)
     if cfg.par.otf_extinction:
         ds.add_field(("dust","coordinates"),function=_dustcoordinates, sampling_type='particle',units='code_length',particle_type=True)
-        ds.add_field(('dust','numgrains'),function=_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
+        #ds.add_field(('dust','numgrains'),function=_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
         ds.add_field(('particle_dust','carbon_fraction'),function=_particle_dust_carbon_fraction,units='dimensionless',sampling_type='particle',particle_type=True)
         ds.add_field(('particle_dust','numgrains'),function=_particle_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
         ds.add_field(('particle_dust','mass'),function=_particle_dust_mass,units='code_mass',sampling_type='particle',particle_type=True)
