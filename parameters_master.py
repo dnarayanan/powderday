@@ -437,7 +437,7 @@ FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
 FORCE_STELLAR_METALLICITIES = False
 FORCE_STELLAR_METALLICITIES_VALUE = 0.013 # absolute values (so 0.013 ~ solar) 
 
-SKIRT_DATA_DUMP = True # if set, this dumps data files that can be used with SKIRT
+SKIRT_DATA_DUMP = True # if set, various data files useful for running SKIRT are saved.
 
 NEB_DEBUG = False # Dumps parameters related to nebular line emission in a file for debugging.
                   # The file includes the ionization parameter, number of ionizing photons, 

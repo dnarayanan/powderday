@@ -461,7 +461,7 @@ def variable_set():
     try:
         cfg.par.SKIRT_DATA_DUMP
     except:
-        cdg.par.SKIRT_DATA_DUMP = True
+        cfg.par.SKIRT_DATA_DUMP = True
 
     try:
         cfg.par.SAVE_NEB_SEDS
