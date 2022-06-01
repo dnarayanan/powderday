@@ -31,7 +31,7 @@ def _size_with_units(field,data):
     return data.ds.parameters['size']
 
 def sph_m_gen(fname,field_add):
-    
+
     refined,dustdens,fc1,fw1,reg,ds = yt_octree_generate(fname,field_add)
     
     if float(yt.__version__[0:3]) >= 4:
@@ -111,7 +111,8 @@ def sph_m_gen(fname,field_add):
 
     m = Model()
     
-
+    #save in the m__dict__ that we're in an oct geometry
+    m.__dict__['grid_type']='oct'
 
     print ('Setting Octree Grid with Parameters: ')
 

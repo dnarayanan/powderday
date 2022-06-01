@@ -74,7 +74,10 @@ Simply clone the latest and greatest from the repo::
 
   >git clone https://github.com/dnarayanan/powderday.git
 
-To install, `cd` into the cloned repository and run the usual `python setup.py install`.
+To install, `cd` into the cloned repository and run the usual::
+
+  >python setup.py install
+
 
 .. _yt:
 
@@ -103,26 +106,38 @@ https://github.com/hyperion-rt/hyperion/issues/219.  This said, at the
 time of the last update of these docs (July 10th, 2020), this has not translated to the conda installation, meaning you will need to manually update all of the files listed here:
 
 https://github.com/hyperion-rt/hyperion/issues/219#issuecomment-600036854  by replacing::
+
   >#from astropy.extern import six
   >import six
 
 (for example, the files might be located in a location like:)::
+
   >home/desika.narayanan/miniconda3/envs/pd_test/lib/python3.6/site-packages/hyperion/filter/filter.py
   
 The second and manual way to install `Hyperion
 <http://www.hyperion-rt.org>`_ follows (note, for the manual installation you don't have to worry about the six replacement above):
-1. First clone the main repository.::
+
+
+#. First clone the main repository.::
 
      >git clone https://github.com/hyperion-rt/hyperion.git
+
+#. Make sure that you have the correct modules loaded on your cluster.
+   This will require a compiler, openmpi and HDF5.  For example, on
+   the University of Florida HiPerGator supercomputing system, I would
+   have::
+
+   >module load intel/2018.1.163 openmpi/4.0.3 hdf5/1.10.1
      
-2. Install the python module::
+#. Install the python module::
 
    >cd hyperion
-   >pip install .
+   >python setup.py install
 
 
-3. Ensure that if you type::
-     >hyperion
+#. Ensure that if you type::
+
+   >hyperion
 
 it returns a sensible output.  It should return something along the lines of::
 
@@ -132,17 +147,18 @@ it returns a sensible output.  It should return something along the lines of::
 If it can't find `Hyperion <http://www.hyperion-rt.org>`_, check the
 the path that is near one of the last lines of the setup.py
 installation (that is something associated with the number 755) and
-make sure it's in your path.  Ir's most likely to be a python binaries
+make sure it's in your path.  It's most likely to be a python binaries
 directory.
 
-4. Install the submodules manually::
+#. Install the submodules manually::
 
    >git submodule init
    >git submodule update
 
-5. Install the Fortran binaries::
+#. Install the Fortran binaries::
 
      > ./configure
+
 or::
 
   >./configure --prefix=$HOME/local
@@ -159,14 +175,13 @@ of course please be careful of mixing and matching compilers, and
 ensuring that you have the same compilers loaded for all
 installations.
   
-6. Compile the code::
+#. Compile the code::
 
    > make
    > make install
    
 
-
-Make sure this works by typing at the command line::
+Note this will take a while!  Make sure this works by typing at the command line::
 
   >hyperion_sph
 
@@ -207,30 +222,17 @@ and we encourage the user of these PAH files to read this paper,
 especially section 3.4.2.
 
 
-yt-4.x configuration 
+yt
 --------------------
 
-`yt <http://yt-project.org>`_ has recently (June 22nd, 2020)
-transitioned from 3.x to 4.x. The latter offers a number of advantages
-including a demeshed handling of particle datasets, as well as an
-`arepo <https://www.h-its.org/2014/10/28/arepo/>`_ front end.  We are
-happy to announce that as of December 31st, 2019 via hash
-`59315f311535b5f2309c705f5a71519148aa4f29
-<https://github.com/dnarayanan/powderday/commit/59315f311535b5f2309c705f5a71519148aa4f29>`_,
-`powderday <https://github.com/dnarayanan/powderday.git>`_ is now `yt
-<http://yt-project.org>`_ 4.x compliant.   Note, all front ends except arepo should work with either  `yt 3.x <http://yt-project.org>`_ or  `yt 4.x <http://yt-project.org>`_ ; arepo requires the latter. 
+Next we need `yt <http://yt-project.org>`_ - to install this, clone the source and install::
 
-Thanks to the hard work of Ashley Kelly, `yt <http://yt-project.org>`_
-4.x supports octrees for particle-based codes, as of commit `7431b4d5a72e75c6e6782f19a234869895deb650 <https://github.com/yt-project/yt/commit/7431b4d5a72e75c6e6782f19a234869895deb650>`_.  What this means is that installing the main line branch of `yt <http://yt-project.org>`_ as normal should work with `powderday <https://github.com/dnarayanan/powderday.git>`_.
+  >git clone https://github.com/yt-project/yt
+  >cd yt
+  >pip install -e .
 
-Note, it is important to install this *after*  `Hyperion <http://www.hyperion-rt.org>`_.  This is because  `Hyperion <http://www.hyperion-rt.org>`_ ships with `yt <http://yt-project.org>`_ 3.x and it is therefore necessary to install `yt <http://yt-project.org>`_ 4.x subsequently in order to overwrite the `yt <http://yt-project.org>`_ installation that ships with `Hyperion <http://www.hyperion-rt.org>`_ .   To check that everything worked, make sure the output of the following 
-commands look something like this::
+Note, it is important to install this *after*  `Hyperion <http://www.hyperion-rt.org>`_.  This is because  if you used the conda installation of `Hyperion <http://www.hyperion-rt.org>`_ , then `yt <http://yt-project.org>`_ 3.x ships with it and auto-installs. However, powderday is no longer compatible with `yt <http://yt-project.org>`_ 3.x.
 
-    > ipython
-    In [1]: import yt
-    In [2]: yt.__version__
-    Out[2]: '4.0.dev0'
-  
 
 
 .. _fsps:
@@ -253,12 +255,21 @@ Finally, the SPS_HOME variable must be set in your environment to point to the F
    
   >export SPS_HOME=/Users/desika/fsps/
 
+Note that the same compilers used for `Hyperion
+<http://www.hyperion-rt.org>`_ and `yt <http://yt-project.org>`_ need
+to be used here.  An easy way to do this is in the Makefile to set F90=$(FC)
 
 
 .. _python-fsps:
 
 python-fsps
 --------------
+
+To install::
+
+  >git clone --recursive https://github.com/dfm/python-fsps.git
+  >cd python-fsps
+  >python setup.py install
 
 `python-fsps <https://dfm.io/python-fsps/current/>`_  will be installed automatically by the `powderday` setup.py script.
   
@@ -275,13 +286,25 @@ You can test the installation by opening python and typing::
 Troubleshooting your Installation
 ============
 
+  .. _fsps installation issues:
+
+fsps Installation Issues
+---------------
+* One possibility can be that there are issues in compiling
+   src/autosps.f90.  One solution is to replace RETURN with STOP in
+   line 21.
+
+
+
   .. _python-fsps installation issues:
 
 python-fsps installation issues
 --------------
+* With intel compilers (e.g., on the University of Florida HiPerGator system) you should try::
+     
+   >CC=icc F90=ifort python setup.py install
 
-1.  `python-fsps
-<https://dfm.io/python-fsps/current/>`_ can't find f2py
+*  `python-fsps <https://dfm.io/python-fsps/current/>`_ can't find f2py
    
    f2py is a numpy package that is sometimes named f2py2.7 by numpy.
    At the same time, `python-fsps
@@ -303,53 +326,150 @@ python-fsps installation issues
    This should hopefully fix it.
 
 
-2. Issues with 'f2py' in the  `python-fsps
+* Issues with 'f2py' in the  `python-fsps
    <https://dfm.io/python-fsps/current/>`_ installation:
 
    Numpy has made some changes to f2py in the 1.10.x version of numpy.
    The easiest fix is to use a non 1.10.* version of numpy (thanks to
    Ben Johnson for finding this).
 
-3.  `python-fsps
-<https://dfm.io/python-fsps/current/>`_ has mysterious
+*  `python-fsps <https://dfm.io/python-fsps/current/>`_ has mysterious
 installation failures.  Often this has to do with a bad `FSPS
 <https://github.com/cconroy20/fsps>`_ compilation. Even if it seems
 like `FSPS <https://github.com/cconroy20/fsps>`_ has compiled, it may
 not actually execute properly if the correct compilers aren't set in
 the MakeFile.  Thanks to Ena Choi for pointing this one out.
 
-4. `Hyperion <http://www.hyperion-rt.org>`_ does not run with MPI
-   support.  Some users have found that when manually installing
-   `Hyperion <http://www.hyperion-rt.org>`_ (as opposed to using the
-   conda installation) that MPI will then work.
-
-5. On the HiPerGator supercomputing cluster, `Hyperion
-   <http://www.hyperion-rt.org>`_ will not install manually, complaining about mismatches with gcc and HDF5.  The solution to this is to use the intel compilers.  The following is a known pacakge combination that works::
-
-  >module load git/2.14.1  intel/2018.1.163  openmpi/3.1.0  libz/1.2.8 hdf5/1.10.1
+  .. _hyperion installation issues:
 
 
 Hyperion Installation Issues
 ---------------
 
-1. Manual installations seem to not be fully updated from the
-   `Hyperion <http://www.hyperion-rt.org>`_ website.  The following
-   issues are known (uncovered by Katarina Kraljic)
+  .. _yt installation issues:
 
-   a. Hyperion-0.9.10 does not contain the /deps/fortran directory. It
-      will be necesary to take this from version 0.9.9
-
-   b. /deps/fortran/install.py hardcodes some links that do not exist
-      anymore.  The URLs should be updated as:
-
-      ZLIB_URL = "http://zlib.net/zlib-1.2.11.tar.gz"  
-      HDF5_URL = 'http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.tar.gz'
-
-   c. Hyperions configure file doesn't have an option for an MPI
-    compiler that is mpif90.openmpi.  One option is to add this to the configure file around line 1940::
-
-      if test "$mpi_compiler" == mpif90.openmpi
-         then
-            mpi_compiler=`basename $(mpif90 -show | awk {'print $1'})`
-      fi
    
+yt Installation Issues
+---------------
+
+* If you have trouble with this installation, you may want to unload
+your openmpi module that you previously had loaded for the `Hyperion
+<http://www.hyperion-rt.org>`_ install.
+
+
+
+* Another common trick to help the installation is to install with::
+
+   >LDSHARED="icc -shared" CC=icc pip install -e .
+
+
+System Specific Installation Notes
+============
+
+HiPerGator at the University of Florida
+--------------
+
+[1] The first set of instructions for the University of Florida
+HiPerGator3.0 facility is to employ intel compilers, and to compile
+everything manually.  This allows the greatest flexibility, as well as
+the ability to use private forks of individual codes.
+
+First, load up the compilers that we'll use throughout::
+
+  >module load intel/2018.1.163
+  >module load openmpi/4.0.3
+  >module load hdf5/1.10.1
+  >module load git
+
+yt::
+
+  >cd $HOME
+  >git clone https://github.com/yt-project/yt
+  >cd yt
+  >pip install -e .
+
+
+fsps::
+
+  >cd $HOME
+  >git clone https://github.con/cconroy20/fsps
+
+in the Makefile set F90=$(FC) and this will ensure that the compilers
+`fsps <https://code.google.com/p/fsps/source/checkout>`_ uses are what
+you have module loaded.::
+  
+  >make clean
+  >make
+
+then in your .bashrc set the analog to::
+  
+  >export SPS_HOME=/Users/desika/fsps
+
+
+python fsps::
+
+  >cd $HOME
+  >git clone --recursive https://github.com/dfm/python-fsps.git
+  >cd python-fsps
+  >CC=icc F90=ifort python setup.py install
+
+
+hyperion::
+
+  >cd $HOME
+  >git clone https://github.com/hyperion-rt/hyperion.git
+  >cd hyperion
+  >python setup.py install
+  >git submodule init
+  >git submodule update
+  >./configure --prefix=$HOME/local
+  >make
+  >make install
+
+hyperion dust::
+
+  >cd $HOME
+  >wget http://pypi.python.org/packages/source/h/hyperion-dust/hyperion-dust-0.1.0.tar.gz
+  >tar -xzvf hyperion-dust-0.1.0.tar.gz
+  >cd hyperion-dust-0.1.0
+  >python setup.py build_dust
+  
+powderday::
+
+  >git clone https://github.com/dnarayanan/powderday.git
+  >cd powderday
+  >python setup.py install
+
+
+[2] The second set of instructions use gcc, and the conda installation
+of `Hyperion <http://www.hyperion-rt.org>`_.  Thanks to Paul Torrey
+for these.::
+
+  >module load openmpi/4.1.1 libz/1.2.11 hdf5/1.10.1 conda/4.12.0 git/2.30.1 gcc
+  >conda install -c conda-forge hyperion
+  >python -c "import hyperion" (just to ensure no errors thrown)
+  >hyperion (just to ensure command is found)
+  >python -m pip install fsps
+  >[set $SPS_HOME variable in .bashrc)
+  >cd $HOME
+  >git clone https://github.com/dnarayanan/powderday.git
+  >cd powderday
+  >python setup.py install
+
+then fix import six line in the equivalent of all of these::
+
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/model/model.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/util/validator.py 
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/conf/conf_files.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/filter/filter.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/dust/dust_type.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/model/model_output.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/densities/flared_disk.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/densities/alpha_disk.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/densities/bipolar_cavity.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/densities/ulrich_envelope.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/densities/power_law_envelope.py 
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/densities/ambient_medium.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/model/sed.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/model/image.py
+  >vi /home/paul.torrey/.conda/envs/pd_gcc/lib/python3.8/site-packages/hyperion/grid/yt3_wrappers.py

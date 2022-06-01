@@ -43,7 +43,7 @@ class Stars:
     def info(self):
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
         
-def star_list_gen(boost,dx,dy,dz,reg,ds,sp):
+def star_list_gen(boost,dx,dy,dz,reg,ds,sp,m):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
     mass = reg["star","masses"].value
     positions = reg["star","coordinates"].value
@@ -104,7 +104,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds,sp):
     #boost stellar positions to grid center
     print ('boosting new stars to coordinate center')
     stars_list = stars_coordinate_boost(stars_list,boost)
-
+    
     #orig_stars_list_len = len(stars_list)
     
     #ASSIGN DISK AND BULGE STARS - note, if these don't exist, it will
@@ -159,6 +159,11 @@ def star_list_gen(boost,dx,dy,dz,reg,ds,sp):
 
             print ('boosting bulge stars to coordinate center')
             bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
+
+    
+    #remove stars that are outside the grid 
+    stars_list,bulgestars_list,diskstars_list = remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m)
+
 
 
     #EXPERIMENTAL FEATURES
@@ -835,3 +840,98 @@ def find_nearest_zmet(array,value):
     idx = (np.abs(array-value)).argmin()
     
     return idx+1      
+
+
+
+def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
+    
+    #first get grid limits.  how we do this will depend on the type of
+    #grid it is because hyperion stores this information differently
+    #in the model object depending on the grid type.
+
+    print("[SED_gen/remove_stars_outside_grid]: Searching to see if any stars are outside the dust grid, which will cause a crash in the radiative transfer modules")
+
+    if m.__dict__['grid_type'] == 'vor':
+        xmax = m.grid.xmax
+        xmin = m.grid.xmin
+        ymax = m.grid.ymax
+        ymin = m.grid.ymin
+        zmax = m.grid.zmax
+        zmin = m.grid.zmin
+
+    elif m.__dict__['grid_type'] == 'oct':
+        xmax = m.grid.dx
+        xmin = xmax*-1
+        ymax = m.grid.dy
+        ymin = ymax*-1
+        zmax = m.grid.dz
+        zmin = zmax*-1
+
+    star_idx_to_remove = []
+    bulge_idx_to_remove = []
+    disk_idx_to_remove = []
+
+    total_mass = 0
+    mass_removed = 0
+
+
+    for i in range(len(stars_list)):
+        if (stars_list[i].positions[0] > xmax) or \
+           (stars_list[i].positions[0] < xmin) or \
+           (stars_list[i].positions[1] > ymax) or \
+           (stars_list[i].positions[1] < ymin) or \
+           (stars_list[i].positions[2] > zmax) or \
+           (stars_list[i].positions[2] < zmin):
+           
+            star_idx_to_remove.append(i)
+            mass_removed += stars_list[i].mass
+
+
+
+        if (len(bulgestars_list) > 0):
+            if (bulgestars_list[i].positions[0] > xmax) or \
+               (bulgestars_list[i].positions[0] < xmin) or \
+               (bulgestars_list[i].positions[1] > ymax) or \
+               (bulgestars_list[i].positions[1] < ymin) or \
+               (bulgestars_list[i].positions[2] > zmax) or \
+               (bulgestars_list[i].positions[2] < zmin):
+
+                bulge_idx_to_remove.append(i)
+                mass_removed += bulgestars_list[i].mass
+
+        
+        if (len(diskstars_list) > 0):
+            if (diskstars_list[i].positions[0] > xmax) or \
+               (diskstars_list[i].positions[0] < xmin) or \
+               (diskstars_list[i].positions[1] > ymax) or \
+               (diskstars_list[i].positions[1] < ymin) or \
+               (diskstars_list[i].positions[2] > zmax) or \
+               (diskstars_list[i].positions[2] < zmin):
+            
+                disk_idx_to_remove.append(i)
+                mass_removed += diskstars_list[i].mass
+
+
+
+        total_mass += stars_list[i].mass
+    
+
+    #now that we've figured out which stars to remove, actually remove them from the lists
+    for idx in star_idx_to_remove:
+        stars_list.pop(idx)
+
+    for idx in bulge_idx_to_remove:
+        bulgestars_list.pop(idx)
+
+    for idx in disk_idx_to_remove:
+        diskstars_list.pop(idx)
+    
+
+    number_of_removed_stars = len(star_idx_to_remove) + len(bulge_idx_to_remove) + len(disk_idx_to_remove)
+    mass_fraction_removed = mass_removed/total_mass
+    print("[SED_gen/remove_stars_outside_grid:] removing %f stars because they are outside the dust grid" % number_of_removed_stars)
+    print("[SED_gen/remove_stars_outside_grid:] this corresponds to %f of the total stellar mass in the volume " % mass_fraction_removed)
+
+    return stars_list,bulgestars_list,diskstars_list
+        
+    

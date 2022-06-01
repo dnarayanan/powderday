@@ -115,7 +115,7 @@ def dump_data(reg,model):
     np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass)#,tdust = tdust)
 
 
-def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,sp,hsml_in_pc = 10):
+def SKIRT_data_dump(reg,ds,m,stars_list,bulgestars_list,diskstars_list,ds_type,sp,hsml_in_pc = 10):
     
     #the work flow for this function is: for all dataset types, we
     #dump stars in the same manner (since we don't allow for mappings
@@ -125,26 +125,29 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,sp,hsml_in_pc = 10):
 
     #create stars file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 
-    spos_x = reg["star","coordinates"][:,0].in_units('pc').value
-    spos_y = reg["star","coordinates"][:,1].in_units('pc').value
-    spos_z = reg["star","coordinates"][:,2].in_units('pc').value
-    smasses = reg["star","masses"].in_units('Msun').value
+    spos_x = ([stars.positions[0] for stars in stars_list]*u.cm).to(u.pc).value
+    spos_y = ([stars.positions[1] for stars in stars_list]*u.cm).to(u.pc).value
+    spos_z = ([stars.positions[2] for stars in stars_list]*u.cm).to(u.pc).value
+    smasses = ([stars.mass for stars in stars_list]*u.g).to(u.Msun).value
 
     try:
-        disk_x = reg["diskstar","coordinates"][:,0].in_units('pc').value
-        disk_y = reg["diskstar","coordinates"][:,1].in_units('pc').value
-        disk_z = reg["diskstar","coordinates"][:,2].in_units('pc').value
-        diskmasses = reg["diskstar","masses"].in_units('Msun').value
-    except:
+        disk_x = ([diskstars.positions[0] for diskstars in diskstars_list]*u.cm).to(u.pc).value
+        disk_y = ([diskstars.positions[1] for diskstars in diskstars_list]*u.cm).to(u.pc).value
+        disk_z = ([diskstars.positions[2] for diskstars in diskstars_list]*u.cm).to(u.pc).value
+        diskmasses = ([diskstars.mass for diskstars in diskstars_list]*u.g).to(u.Msun).value
+
+    except: 
         disk_x, disk_y, disk_z, diskmasses = (np.array([]),)*4
 
     try:
-        bulge_x = reg["bulgestar","coordinates"][:,0].in_units('pc').value
-        bulge_y = reg["bulgestar","coordinates"][:,1].in_units('pc').value
-        bulge_z = reg["bulgestar","coordinates"][:,2].in_units('pc').value
-        bulgemasses = reg["bulgestar","masses"].in_units('Msun').value
+        bulge_x = ([bulgestars.positions[0] for bulgestars in bulgestars_list]*u.cm).to(u.pc).value
+        bulge_y = ([bulgestars.positions[1] for bulgestars in bulgestars_list]*u.cm).to(u.pc).value
+        bulge_z = ([bulgestars.positions[2] for bulgestars in bulgestars_list]*u.cm).to(u.pc).value
+        bulgemasses = ([bulgestars.mass for bulgstars in bulgestars_list]*u.g).to(u.Msun).value
     except:
         bulge_x, bulge_y, bulge_z, bulgemasses = (np.array([]),)*4
+
+
 
     spos_x = np.concatenate((spos_x, disk_x, bulge_x))
     spos_y = np.concatenate((spos_y, disk_y, bulge_y))
