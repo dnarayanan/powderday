@@ -23,7 +23,7 @@ and FSPS written by Charlie Conroy
 """
 
 
-def write_input_sed(wav, spec, id_val):
+def write_input_sed(wav, spec):
     """
     ---------------------------------------------------------------------
     Writes a input SED file for CLOUDY to use
@@ -35,10 +35,7 @@ def write_input_sed(wav, spec, id_val):
         ascii_file = str(uuid.uuid4().hex) + ".ascii"
     
     # For DIG do not have to write the imput SED since we are using Black (1985) SED. 
-    # We ascii file name to get the model name
-    if id_val == 3:
-        return ascii_file
-    
+    # We ascii file name to get the model name    
     logging.info("Executing write ascii sequence...")
     logging.info("Writing.....")
     WriteASCII(ascii_file, wav, spec, nx=len(wav), nmod=1, par1_val=1.e6)
@@ -72,12 +69,10 @@ def write_cloudy_input(**kwargs):
             "r_inner": 1.e19,  # inner radius of cloud
             "r_in_pc": False,
             "dust": False,
-            "efrac": -1.0,
-            "geometry": "sphere",
+            "efrac": 0.0,
             "abundance": "dopita",
             "id_val": 1,
-            "metals": [-1., -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.],
-            "factor": 1
+            "metals": [-1., -1., -1., -1., -1., -1., -1., -1., -1., -1., -1.]
             }
     for key, value in list(kwargs.items()):
         pars[key] = value
@@ -96,10 +91,6 @@ def write_cloudy_input(**kwargs):
 
     # -----------------------------------------------------
     _id = int(pars["id_val"])
-    if _id == 1:
-        Pagb = True
-    else:
-        Pagb = False
 
     pars["gas_logZ"] = pars["logZ"]
     this_print('////////////////////////////////////')
@@ -108,29 +99,36 @@ def write_cloudy_input(**kwargs):
     this_print('set punch prefix "{0}"'.format(pars["model_name"]))
     this_print('print line precision 6')
     
+    cloudy_mod = "{}.mod".format(pars["model_name"])
+    this_print('table star "{0}" {1}={2:.2e}'.format(cloudy_mod, "age", pars['age']))
+    
+    # If DIG (id = 3) then use the ionization parameter else use the rate of ionizing photons
     if _id == 3:
-         this_print('table ism factor {0:.3f}'.format(pars['factor']))
+        this_print('ionization parameter = {0:.3f} log'.format(pars['logU']))
     else:
-        cloudy_mod = "{}.mod".format(pars["model_name"])
-        this_print('table star "{0}" {1}={2:.2e}'.format(cloudy_mod, "age", pars['age']))
         this_print('Q(H) = {0:.3f} log'.format(pars['logQ']))
-
+    
+    
     if pars['dust']:
         this_print('grains orion {0:.2f} log no qheat'.format(pars['gas_logZ']))
 
+    
     if pars['r_in_pc']:
         pc_to_cm = 3.08568e18
         r_out = np.log10(pars['r_inner'] * pc_to_cm)
     else:
         r_out = np.log10(pars['r_inner'])
 
+    
     linefile = "cloudyLines.dat"
 
     # Check to see if there was an error in getting metallicities from the simulation
     # If so code revert back to using "dopita" abundances in place of "direct"
     if (any(q <= -1.0 for q in pars["metals"][1:]) and pars["abundance"] == "direct"):
         pars["abundance"] = "dopita"
-        print ("Warning: Unable to get metallicities from the simulation. Using abundances from \"dopita et al. 2001\" instead")
+        print ("Warning: Unable to get metallicities from the simulation. This can be because you are binning the stars.\n \
+                Make sure that FORCE BINNED is set to False and set the max_age_direct appropriately to use this feature.\n \
+                Reverting to using abundances from \"dopita et al. 2001\"")
 
     if pars["abundance"] == "direct":
         abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
@@ -147,7 +145,7 @@ def write_cloudy_input(**kwargs):
             abund_metal[2] = cfg.par.N_O_ratio[_id] + abund_metal[3]
 
         # Enhancing abundances for post-AGB stars
-        if Pagb:
+        if _id == 1:
             abund_metal[1] += cfg.par.PAGB_C_enhancement
             abund_metal[2] += cfg.par.PAGB_N_enhancement
 
@@ -179,7 +177,7 @@ def write_cloudy_input(**kwargs):
             abund_N = cfg.par.N_O_ratio[_id] + abund_O
 
         # Enhancing abundances for post-AGB stars
-        if Pagb:
+        if _id == 1:
             abund_C += cfg.par.PAGB_C_enhancement
             abund_N += cfg.par.PAGB_N_enhancement
 
@@ -191,10 +189,16 @@ def write_cloudy_input(**kwargs):
         for line in abunds.elem_strs:
             this_print(line)
     
+    cf = 1 - pars['efrac']
+
+    # For DIG since we are making use of the ionization parameter we do need
+    # to set the inner radius, the geometry is plane parallel and not spherical
+    # and we are considering the covering factor to be 1. 
     if _id != 3:
         this_print('radius {0:.3f} log'.format(r_out))
-        this_print('{}'.format(pars['geometry']))
-        
+        this_print('sphere')
+        this_print('Covering factor {0:.3f}'.format(cf))
+    
     this_print('hden {0:.3f} log'.format(np.log10(pars['dens'])))
     this_print('cosmic ray background')
     this_print('iterate to convergence max=5')
@@ -222,8 +226,10 @@ def get_output(model_name, dir_, qq, fsps_lam, cell_width, id_val):
     sinds = np.argsort(wl)
     wl = wl[sinds]
      
+    # For DIG we are making use of the ionization parameter (intensity case, see CLOUDY docs (Hazy 1))
+    # We need to multiply the output by the area of the cloud -- 6 sides of the cell in this case
     if id_val == 3:
-        datflu = (datflu[sinds]*cell_width**2) / lsun
+        datflu = (datflu[sinds]*6*cell_width**2) / lsun 
 
     else:
         datflu = datflu[sinds] / lsun / qq
@@ -237,7 +243,7 @@ def get_output(model_name, dir_, qq, fsps_lam, cell_width, id_val):
     diffuse_y = interp1d(ang_v, diffuse_in, fill_value=0.0, bounds_error=False)(fsps_lam)
     
     if id_val == 3:
-        diffuse_out = (diffuse_y*cell_width**2) / nu / lsun
+        diffuse_out = (diffuse_y*6*cell_width**2) / nu / lsun 
     else:
         diffuse_out = diffuse_y / nu / lsun / qq
     
@@ -261,16 +267,22 @@ def clean_files(dir_, model_name, id_val, error=False):
         os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".out"))
 
 
-def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu = 0.0, logz = 0.0, logq_1=0.0, Factor=1, 
-        Cell_width=1, Dust=False, abund="dopita", clean_up=True, index=1):
+def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu = 0.0, logz = 0.0, logq_1=0.0, 
+        Cell_width=1, Dust=False, abund="dopita", clean_up=True, index=1, efrac=0.0):
+    
+    # Since we don't need the logQs for DIG as we are using 
+    # the ionization parmeter instead. Set them to 0 just as a place holder 
+    if index == 3:
+        logq = 0.0
+        logq_1 = 0.0
     
     nspec = len(spec_lambda)
-    frac_obrun = 0.0
+    frac_obrun = efrac
     clight = constants.c.cgs.value*1.e8
     nebular_smooth_init = 0
 
     logging.info("Writing the input SED file")
-    filename = write_input_sed(spec_lambda, sspi, index)
+    filename = write_input_sed(spec_lambda, sspi)
     model_name = filename.split(".")[0]
     print (model_name)
 
@@ -288,8 +300,8 @@ def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu 
                        abundance = abund,
                        dust = Dust,
                        id_val = index,
-                       metals = Metals,
-                       factor = Factor)
+                       efrac = frac_obrun,
+                       metals = Metals)
 
     logging.info("Input SED file written")
     logging.info("Running CLOUDY")

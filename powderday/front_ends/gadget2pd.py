@@ -100,14 +100,25 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             
     def _gassmoothedmetals(field, data):
         if float(yt.__version__[0:3]) >= 4:
-            return data.ds.parameters['octree'][('PartType0', 'metallicity')]
+            try:
+                el_str = field.name[1]
+                if '_' in el_str:
+                    el_name = field.name[1][field.name[1].find('_')+1:]+"_"
+                else:
+                    el_name = ""
+                return data.ds.parameters['octree'][('PartType0', el_name+'metallicity')]
+            except:
+                return data.ds.parameters['octree'][('PartType0', 'metallicity')]
         else:
-            el_str = field.name[1]
-            if '_' in el_str:
-                el_name = field.name[1][field.name[1].find('_')+1:]+"_"
-            else:
-                el_name = ""
-            return data[("deposit","PartType0_smoothed_"+el_name+"metallicity")]
+            try:
+                el_str = field.name[1]
+                if '_' in el_str:
+                    el_name = field.name[1][field.name[1].find('_')+1:]+"_"
+                else:
+                    el_name = ""
+                return data[("deposit","PartType0_smoothed_"+el_name+"metallicity")]
+            except:
+                return data[("deposit","PartType0_smoothed_metallicity")]
 
     def _gassmoothedmasses(field, data):
         if float(yt.__version__[0:3]) >= 4:
@@ -319,6 +330,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         #octree = ds.octree(left, right, over_refine_factor=cfg.par.oref, n_ref=cfg.par.n_ref, force_build=True)
         octree = ds.octree(left,right,n_ref=cfg.par.n_ref)
         ds.parameters['octree'] = octree
+
+    print ('BOUNDING BOX:', bounding_box, 'LEFT: ', left, 'RIGHT: ', right)
 
     # for the metal fields have a few options since gadget can have different nomenclatures
     ad = ds.all_data()
