@@ -102,6 +102,11 @@ convergence properties of your simulation.
 
    Similar to n_photons_raytracing_sources but for dust emission.
 
+:n_photons_DIG:
+    
+    Number of photons to use to calculate non-monochromatic SED to get the energy 
+    dumped in each gas cell for DIG calculation
+   
 :FORCE_RANDOM_SEED:
 
     Boolean. True means the seed specified below will be used for random number
@@ -445,6 +450,14 @@ Young Stars
     Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
     hardening of the radiaiton field due to alpha-enhancement. (Default: False)
 
+:HII_dust:
+    
+    If set, then dust grains are included in the CLOUDY model. We use grains orion command to add
+    dust grains which specifies graphitic and silicate grains with a size distribution and abundance
+    appropriate for those along the line of sight to the Trapezium stars in Orion (see CLOUDY documentation
+    Hazy 1 for more info). (Default: False)
+                                                                                                                            
+
 Post-AGB stars
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -524,13 +537,26 @@ DIG
 
     Gas hydrogen density for calcualting nebular emission in units of cm^-3. (Default: 10)
 
-:DIG_min_factor:
+:DIG_min_logU:
 
-    For DIG CLOUDY calculations we use Black (1987) SED as a template. The normalization of the SED is set by a parameter called  "Factor". 
-    It is the ratio of total energy dumped in a cell to the total energy of the Black (1987) SED, which we use as the template for setting 
-    the SED shape for calculating DIG emission. This parameter sets the minimum factor that the code uses for calculation. 
-    For example, setting this parameter to 1 causes the code to ignore all the cells that have a factor < 1 or in other words ignore all the 
-    cells where the total energy dumped is less than the integrated energy of the Black (1987) SED. (Default: 1)
+    Only gas cells with ionization parameter greater than this are considered for DIG calculation. 
+    This is done so as to speed up the calculation by ignoring the cells that do not have enough energy 
+    to produce any substantial emission.  (Defualt: -6.0)
+
+:use_black_sed:
+
+    If set, Black (1987) ISRF is used as the input SED shape for DIG CLOUDY calculations 
+    else, the input SED shape is calulated by by taking a distance weighted average of the CLOUDY 
+    output spectrum of nearby young stars. The normalization of the SED is set by the total energy above the 
+    lyman limit dumped in each cell. (Default: False)
+
+:stars_max_dist:
+
+    Only stars within this distance (Units: Kpc) are considered for getting the input spectrum shape. (Default = 1)
+
+:max_stars_num:
+
+     This sets the upper limit on the number of stars that are used for calculating the input spectrum shape.
 
 DEBUGGING AND CLEAN UP
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -542,10 +568,11 @@ DEBUGGING AND CLEAN UP
     computed emission line strengths, and are calculated for all lines
     cloudy calculates (i.e. not just those undergoing radiative
     transfer).  The format for the output is a wavelength array,
-    followed by a (nlam+1) list for each HII-region bearing particle.
-    The +1 in the (nlam+1) list is the stellar age of that particle.
-    There is a convenience package in /convenience to help read in
-    this file.
+    followed by a (nlam+2) list for each nebular emission bearing particle.
+    The +2 in the (nlam+2) list are the O/H ratio and the id of that particle.
+    Where id = 0 , 1, 2 and 3 corresponds to young stars, PAGB stars, AGN 
+    and DIG respectively.There is a convenience package in /convenience to help 
+    read in this file.
 
     This can be used as a fast way getting emission lines for the
     purpose of debugging the code.  Naming convention:

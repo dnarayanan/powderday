@@ -551,24 +551,24 @@ def DIG_source_add(m,reg,df_nu,boost):
     
     for i in range(len(cell_width)):
         
-        # Getting shape of the incident spectrum buy taking a distance weighted average of the CLOUDY output spectrum of nearby young stars
+        # Getting shape of the incident spectrum by taking a distance weighted average of the CLOUDY output spectrum of nearby young stars.
         sed_file_name = cfg.model.PD_output_dir+"neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
         lam, fnu = get_DIG_sed_shape(pos[i], cell_width[i], sed_file=sed_file_name) # Returns input SED shape, lam in Angstrom, fnu in Lsun/Hz
 
-        # If the cell has no young stars within a specified distance () then skip it.
+        # If the gas cell has no young stars within a specified distance (stars_max_dist) then skip it.
         if len(np.atleast_1d(fnu)) == 1:
             continue
         
         # Calulating the ionization parameter by extrapolating the specfic energy beyind the lyman limit 
-        # for the input spectrum shape calculated above
+        # using the SED shape calculated above.
         logU = get_DIG_logU(lam, fnu, specific_energy[i], cell_width[i])
 
         lam_arr.append(lam)
         fnu_arr.append(fnu)
         
-        # Only cells with ionization parameter the parameter DIG_min_logU above are considered 
-        # for the calculation. This speeds up the calculation by ignoring the cells that do not 
-        # have enough energy to prduce any substantial nebular emission
+        # Only cells with ionization parameter greater than the parameter DIG_min_logU are considered 
+        # for nebular emission calculation. This is done so as to speed up the calculation by ignoring 
+        # the cells that do not have enough energy to prduce any substantial emission
         if logU > cfg.par.DIG_min_logU:
             mask.append(i)
             lam_arr.append(lam)
