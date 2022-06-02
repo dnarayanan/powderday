@@ -108,11 +108,6 @@ def write_cloudy_input(**kwargs):
     else:
         this_print('Q(H) = {0:.3f} log'.format(pars['logQ']))
     
-    
-    if pars['dust']:
-        this_print('grains orion {0:.2f} log no qheat'.format(pars['gas_logZ']))
-
-    
     if pars['r_in_pc']:
         pc_to_cm = 3.08568e18
         r_out = np.log10(pars['r_inner'] * pc_to_cm)
@@ -131,6 +126,9 @@ def write_cloudy_input(**kwargs):
                 Reverting to using abundances from \"dopita et al. 2001\"")
 
     if pars["abundance"] == "direct":
+        if pars['dust']:
+            this_print('grains orion {0:.2f} log no qheat'.format(pars['gas_logZ']))
+
         abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
         abund_metal = convert_metals(pars["metals"][1:])
         abund_str = "abundances "

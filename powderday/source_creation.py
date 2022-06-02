@@ -510,7 +510,7 @@ def DIG_source_add(m,reg,df_nu,boost):
     print ("Getting the specific energy dumped in each grid cell")
 
     try:
-        rtout = cfg.model.outputfile + '.sed'
+        rtout = cfg.model.outputfile + '_DIG_energy_dumped.sed'
         try: 
             grid_properties = np.load(cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".npz")
         except:

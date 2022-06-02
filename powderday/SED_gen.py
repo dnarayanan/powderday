@@ -439,8 +439,7 @@ def newstars_gen(stars_list):
         pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= stars_list[i].age <= cfg.par.PAGB_max_age
         young_star = cfg.par.add_young_stars and cfg.par.HII_min_age <= stars_list[i].age <= cfg.par.HII_max_age
 
-        if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (young_star or pagb):
-                
+        if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (young_star or pagb): 
             # For each star particle we break it into a collection or cluster of star particles which have the same property as the parent star particle
             # but their masses and ages follow a power-law distribution if use_cmdf and use_age_distribution are set to True respectively and it falls 
             # under the constraints set in parameters_master. To do so we create 1D arrays that store the masses of each cluster (cluster_mass), num of particles 

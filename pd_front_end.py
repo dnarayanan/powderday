@@ -25,6 +25,7 @@ import numpy as np
 import sys
 import gc
 import random
+import os
 
 gc.set_threshold(0)
 
@@ -233,6 +234,8 @@ m.conf.output.output_specific_energy = 'last'
 if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
     make_DIG_SED(m, par, model)
     DIG_source_add(m, reg, df_nu,boost)
+    # Removing the DIG input SED file
+    os.remove(cfg.model.inputfile + '_DIG_energy_dumped.sed')
 
 if cfg.par.SED:
     make_SED(m, par, model)
