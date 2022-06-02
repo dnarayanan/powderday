@@ -266,15 +266,15 @@ DIG_min_logU = -6.0                         # Only gas cells with ionization par
                                             # This is done so as to speed up the calculation by ignoring the cells that do not have enough energy 
                                             # to produce any substantial emission. (Defualt: -6.0)
 
-use_black_sed = False                       # If set, Black (1987) ISRF is used as the input SED shape for DIG CLOUDY calculations 
+use_black_sed = False                       # If set, Black et al.(1987) ISRF is used as the input SED shape for DIG CLOUDY calculations 
                                             # else, the input SED shape is calulated by by taking a distance weighted average of the CLOUDY 
-                                            # output spectrum of nearby young stars. The normalization of the SED is set by the total energy 
+                                            # output spectrum of nearby stars. The normalization of the SED is set by the total energy 
                                             # above the lyman limit dumped in each cell. (Default: False)
 
 stars_max_dist = 1                          # Only stars within this distance are considered for getting the input spectrum shape. (Units: Kpc)
                                             # This is used only when use_black_sed = False (Default = 1)
 
-max_stars_num  = 20                         # This sets the upper limit on number of stars that are used for calculating the input spectrum shape.
+max_stars_num  = 20                         # This sets the upper limit on the number of stars that are used for calculating the input spectrum shape.
                                             # This is used only when use_black_sed = False (Default = 20)
 #*************************
 # DEBUGGING AND CLEAN UP
