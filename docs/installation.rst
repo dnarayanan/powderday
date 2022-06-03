@@ -411,7 +411,9 @@ hyperion::
   >git submodule init
   >git submodule update
   >./configure --prefix=$HOME/anaconda3/
-or ::
+
+or::
+
   >./configure --prefix=$HOME/anaconda3/envs/$ENV_NAME
   >make
   >make install
