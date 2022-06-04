@@ -16,7 +16,7 @@ from functools import partial
 from itertools import repeat
 from scipy.integrate import simps
 
-from powderday.nebular_emission.cloudy_tools import calc_LogQ, cmdf, get_nearest,convert_metals
+from powderday.nebular_emission.cloudy_tools import calc_LogQ, age_dist, cmdf, get_nearest,convert_metals
 from powderday.analytics import logu_diagnostic,dump_emlines
 from powderday.nebular_emission.cloudy_model import get_nebular
 
@@ -42,8 +42,8 @@ class Stars:
 
     def info(self):
         return(self.mass,self.metals,self.positions,self.age,self.sed_bin,self.lum,self.fsps_zmet)
-
-def star_list_gen(boost,dx,dy,dz,reg,ds):
+        
+def star_list_gen(boost,dx,dy,dz,reg,ds,sp,m):
     print ('[SED_gen/star_list_gen]: reading in stars particles for SPS calculation')
     mass = reg["star","masses"].value
     positions = reg["star","coordinates"].value
@@ -86,7 +86,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
 
 
 
-    zmet = fsps_metallicity_interpolate(metals_tot)
+    zmet = fsps_metallicity_interpolate(metals_tot, sp)
     #mwd(zmet,mass,'zmet_distribution.png')
 
     #print '[SED_gen/star_list_gen: ] fsps zmet codes:',zmet
@@ -104,7 +104,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
     #boost stellar positions to grid center
     print ('boosting new stars to coordinate center')
     stars_list = stars_coordinate_boost(stars_list,boost)
-
+    
     #orig_stars_list_len = len(stars_list)
     
     #ASSIGN DISK AND BULGE STARS - note, if these don't exist, it will
@@ -160,6 +160,11 @@ def star_list_gen(boost,dx,dy,dz,reg,ds):
             print ('boosting bulge stars to coordinate center')
             bulgestars_list = stars_coordinate_boost(bulgestars_list,boost)
 
+    
+    #remove stars that are outside the grid 
+    stars_list,bulgestars_list,diskstars_list = remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m)
+
+
 
     #EXPERIMENTAL FEATURES
     if cfg.par.SOURCES_IN_CENTER == True:
@@ -210,6 +215,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     sp.params["add_neb_emission"] = cfg.par.add_neb_emission
     sp.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
     sp.params['gas_logu'] = cfg.par.gas_logu
+
     if cfg.par.FORCE_gas_logz == False:
         sp.params['gas_logz'] = np.log10(stars_list[0].metals/cfg.par.solar)
     else:
@@ -265,14 +271,17 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
 
     
     stellar_fnu = np.zeros([nstars,nlam])
+    mfrac = np.zeros(nstars)
+    # see newstars_gen() for info on mfrac
     star_counter=0
     for i in range(nchunks):
-        fnu_list = chunk_sol[i] #this is a list of the stellar_fnu's returned by that chunk
+        fnu_list = chunk_sol[i][0] #this is a list of the stellar_fnu's returned by that chunk
+        #chunk_sol now returns two things for each star/star bin: the spectrum and the associated surviving stellar mass fraction for that SSP 
+        mfrac_list = chunk_sol[i][1]
         for j in range(len(fnu_list)):
+            mfrac[star_counter] = mfrac_list[j] 
             stellar_fnu[star_counter,:] = fnu_list[j,:]
             star_counter+=1
-
-
 
 
     p.close()
@@ -301,7 +310,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
         #dust_tesc is an absolute value (not relative to min star age) as the ages of these stars are input by the user
 
         # Load in the metallicity legend
-        fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+        fsps_metals = np.array(sp.zlegend)
 
         sp.params["tage"] = cfg.par.disk_stars_age
         sp.params["imf_type"] = cfg.par.imf_type
@@ -357,7 +366,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     print ('[SED_gen: ] total_lum_in_sed_gen = ',total_lum_in_sed_gen)
 
     #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
-    return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu
+    return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu, mfrac
 
 
 def newstars_gen(stars_list):
@@ -386,7 +395,7 @@ def newstars_gen(stars_list):
 
     stellar_nu = np.zeros([nlam])
     stellar_fnu = np.zeros([len(stars_list),nlam])
-    
+    mfrac = np.zeros([len(stars_list)])
   
     minage = 13 #Gyr
     for i in range(len(stars_list)): 
@@ -420,28 +429,66 @@ def newstars_gen(stars_list):
 
         spec_noneb = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
         f = spec_noneb[1]
+        #NOTE: FSPS SSP/CSP spectra are scaled by *formed* mass, not current mass. i.e., the SFHs of the SSP/CSP are normalized such that 1 solar mass
+        #is formed over the history. This means that the stellar spectra are normalized by the integral of the SFH =/= current 
+        #(surviving, observed, etc.) stellar mass. In simulations, we only know the current star particle mass. To get the formed mass for an SSP,
+        #we generate the surviving mass fraction (sp.stellar_mass) to extrapolate the initial mass from the current mass, metallicity, and age
+        #this 'mfrac' is used to scale the FSPS SSP luminosities in source_creation
+        mfrac[i] = sp.stellar_mass
 
         pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= stars_list[i].age <= cfg.par.PAGB_max_age
         young_star = cfg.par.add_young_stars and cfg.par.HII_min_age <= stars_list[i].age <= cfg.par.HII_max_age
 
-        if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (young_star or pagb):
-
-            # Cluster Mass Distribution Funtion is used only when the star particle's mass is gretaer than the maximum cluster mass and use_cmdf is True. 
-
-            if stars_list[i].mass/constants.M_sun.cgs.value > 10**cfg.par.cmdf_max_mass and cfg.par.use_cmdf:
-                cluster_mass, num_clusters = cmdf(stars_list[i].mass/constants.M_sun.cgs.value,int(cfg.par.cmdf_bins),cfg.par.cmdf_min_mass,
-                        cfg.par.cmdf_max_mass, cfg.par.cmdf_beta, rescale_masses=cfg.par.cmdf_rescale)
+        if (cfg.par.add_neb_emission or cfg.par.use_cmdf) and (young_star or pagb): 
+            # For each star particle we break it into a collection or cluster of star particles which have the same property as the parent star particle
+            # but their masses and ages follow a power-law distribution if use_cmdf and use_age_distribution are set to True respectively and it falls 
+            # under the constraints set in parameters_master. To do so we create 1D arrays that store the masses of each cluster (cluster_mass), num of particles 
+            # in that cluster (num_cluster), and age of that cluster (age_cluster). So for example (assuming default values), a 1e6 solar mass particle 
+            # will first be broken down into 6 particles with different masses ranging from 10^3.5 Msun to 10^5 Msun. Each of these particles will be further 
+            # broken down into 5 particles with their ages are distributed as per the age distribution. Thus in total, this one particle will be broken 
+            # down into 30 particles and these arrays will store the properties of all the 30 particles. This allows us to consider these as 30 individual 
+            # particles rest of the calculation and their fluxes are combined in end to get the final result for this one particle. 
             
-            else:
-                cluster_mass = [np.log10(stars_list[i].mass/constants.M_sun.cgs.value)]
-                num_clusters = [1]
+            cluster_mass = [np.log10(stars_list[i].mass / constants.M_sun.cgs.value)]
+            num_clusters = [1]
+            age_clusters = [stars_list[i].age]
 
+            if stars_list[i].mass / constants.M_sun.cgs.value > 10 ** cfg.par.cmdf_max_mass and cfg.par.use_cmdf:
+                cluster_mass, num_clusters = cmdf(stars_list[i].mass / constants.M_sun.cgs.value,
+                                                  int(cfg.par.cmdf_bins), cfg.par.cmdf_min_mass,
+                                                  cfg.par.cmdf_max_mass, cfg.par.cmdf_beta)
+                age_clusters = []
+                for k in range(len(cluster_mass)):
+                    age_clusters.append(stars_list[i].age)
+
+                if cfg.par.use_age_distribution:
+                    num_clusters_cmdf = num_clusters
+                    cluster_mass_cmdf = cluster_mass
+                    num_clusters = []
+                    cluster_mass = []
+                    age_clusters = []
+                    for k in range(len(cluster_mass_cmdf)):
+                        num, t = age_dist(num_clusters_cmdf[k], stars_list[i].age)
+                        rescale = np.sum(num_clusters_cmdf[k])/np.sum(num)
+                        
+                        for l in range(len(num)):
+                            if num[l] == 0:
+                                continue
+                            num_clusters.append(num[l])
+                            cluster_mass.append(np.log10((10**cluster_mass_cmdf[k])*rescale))
+                            age_clusters.append(t[l])
+
+                cluster_mass = np.array(cluster_mass)
+                num_clusters = np.array(num_clusters)
+                age_clusters = np.array(age_clusters)
+            
             f = np.zeros(nlam)
             cloudy_nlam = len(np.genfromtxt(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat", delimiter=','))
             line_em = np.zeros([cloudy_nlam])
-            
+
             for j in range(len(cluster_mass)):
                 num_HII_clusters = num_clusters[j]
+                age = age_clusters[j]
                 neb_file_output = cfg.par.NEB_DEBUG
 
                 sp.params["add_neb_emission"] = False
@@ -477,7 +524,7 @@ def newstars_gen(stars_list):
                         Logzsol = np.log10(FeH/FeH_sol)
                         
                         sp1 = fsps.StellarPopulation(zcontinuous=1)
-                        sp1.params["tage"] = stars_list[i].age
+                        sp1.params["tage"] = age
                         sp1.params["imf_type"] = cfg.par.imf_type
                         sp1.params["imf1"] = cfg.par.imf1
                         sp1.params["imf2"] = cfg.par.imf2
@@ -495,10 +542,12 @@ def newstars_gen(stars_list):
                             sp1.params["dust2"] = 0
                             sp1.params["dust_tesc"] = tesc_age
 
-                        spec = sp1.get_spectrum(tage=stars_list[i].age)
+                        spec = sp1.get_spectrum(tage=age)
+                        mfrac_neb = sp1.stellar_mass
 
                     else:
-                        spec = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+                        spec = sp.get_spectrum(tage=age,zmet=stars_list[i].fsps_zmet)
+                        mfrac_neb = sp.stellar_mass
 
                     alpha = 2.5e-13 # Recombination Rate (assuming T = 10^4 K)
 
@@ -514,7 +563,7 @@ def newstars_gen(stars_list):
 
                     else:
                         LogQ = calc_LogQ(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value
-                                , efrac=escape_fraction, mstar=10**cluster_mass[j])   
+                                , efrac=escape_fraction, mstar=10**cluster_mass[j], mfrac=mfrac_neb)   
                         Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
                         LogU = np.log10((10**LogQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
                         LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*nh))
@@ -542,32 +591,32 @@ def newstars_gen(stars_list):
                         
                         LogU = np.log10((10**LogQ)/(4*np.pi*Rin*Rin*nh*constants.c.cgs.value))
 
-                        logu_diagnostic(LogQ, LogU, LogZ, Rs, 10**cluster_mass[j], num_HII_clusters, stars_list[i].age, append=True)
+                        logu_diagnostic(LogQ, LogU, LogZ, Rs, 10**cluster_mass[j], num_HII_clusters, age, append=True)
                         neb_file_output = False
 
                     sp.params['gas_logu'] = LogU
                     sp.params['gas_logz'] = LogZ
                     sp.params["add_neb_emission"] = True  
                     if cfg.par.use_cloudy_tables:
-                        lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+                        lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
                         line_lum = sp.emline_luminosity
                         wave_line = sp.emline_wavelengths
                     else:
-                        try:
+                        try:            
                             # Calculating ionizing photons again but for 1 Msun in order to scale the output for FSPS
                             LogQ_1 = calc_LogQ(1.e8 * constants.c.cgs.value / spec[0], spec[1] * constants.L_sun.cgs.value,
                                     efrac=escape_fraction) 
                             #LogQ_1 = LogQ_1 + cfg.par.gas_logu_init[id_val]
                                
                             spec_neb, wave_line, line_lum = get_nebular(spec[0], spec[1], nh, stars_list[i].all_metals, logq = LogQ, radius = Rin, 
-                                                    logu = LogU, logz = LogZ, logq_1 = LogQ_1, Dust=False, abund=cfg.par.neb_abund[id_val], 
-                                                    clean_up = cfg.par.cloudy_cleanup, index=id_val)
+                                                    logu = LogU, logz = LogZ, logq_1 = LogQ_1, Dust=cfg.par.HII_dust, abund=cfg.par.neb_abund[id_val], 
+                                                    clean_up = cfg.par.cloudy_cleanup, index=id_val, efrac=escape_fraction)
                         except ValueError as err:
                             # If the CLOUDY run crashes we switch to using lookup tables for young stars but throw an error for post-AGB stars.
                             if  young_star:
                                 print ("WARNING: Switching to using lookup tables pre-packed with FSPS to calculate nebular emission for this particle.") 
                                 print ("WARNING: The emission line fluxes repoted may not be accurate if the particle lies outside the range of the lookup table paramters.")
-                                lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+                                lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
                                 line_lum = sp.emline_luminosity
                                 wave_line = sp.emline_wavelengths
                             else:
@@ -576,7 +625,7 @@ def newstars_gen(stars_list):
                                 raise ValueError('CLOUDY run was unsucessful')
                 
                 else:
-                    lam_neb, spec_neb = sp.get_spectrum(tage=stars_list[i].age, zmet=stars_list[i].fsps_zmet)
+                    lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
 
                 weight = num_HII_clusters*(10**cluster_mass[j])/(stars_list[i].mass/constants.M_sun.cgs.value)    
                 f = f + spec_neb*weight
@@ -585,20 +634,26 @@ def newstars_gen(stars_list):
         
             if cfg.par.add_neb_emission and cfg.par.dump_emlines:
                 #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
-                line_em = line_em * ((stars_list[i].mass*u.g).to(u.Msun).value) * (3.839e33)  # Units: ergs/s
-                line_em = np.append(line_em, stars_list[i].age)
-                dump_emlines(wave_line, line_em, id_val)
+                line_em = line_em * (stars_list[i].mass * u.g).to(u.Msun).value * 3.839e33  # Units: ergs/s
+                OH = stars_list[i].all_metals[4]
+                line_em = np.append(line_em, OH)
+
+                if young_star:
+                    line_em = np.append(line_em, 1)
+                else:
+                    line_em = np.append(line_em, 2)
+
+                dump_emlines(line_em)
 
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f
 
-    return stellar_fnu
+    return stellar_fnu, mfrac
 
 
-def get_gas_metals(ngas):
+def get_gas_metals(ngas, reg):
     # This function outputs the metallicity (total as well as all the 10 elements tracked by the simulation)
     # for all the gas particles
-    reg = reg_gl
     el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
     metals = np.zeros((ngas,11))-10.0
     try:
@@ -614,20 +669,16 @@ def get_gas_metals(ngas):
     return metals
 
 
-def get_nearest_gas_metals(all_gas_coordinates, particle_coordinates):
-
-    all_gas_metals = get_gas_metals(len(all_gas_coordinates))
-    
+def get_nearest_gas_metals(all_gas_coordinates, particle_coordinates, all_gas_metals):
     # Getting N nearest gas particles to the AGN where N is defined by cfg.par.AGN_num_gas
     nearest_gas_dist, nearest_gas_id = get_nearest(all_gas_coordinates, particle_coordinates, num=cfg.par.AGN_num_gas)
-    
     metals_avg = []
     
     # We take the distance weighted avearge of the metallicity of nearest N gas particles.
     # This is used as input to the CLOUDY model.
     for q in range(11):
         nearest_gas_metals = np.array(all_gas_metals[:,q][nearest_gas_id])
-        metals_avg.append(np.sum(nearest_gas_metals*nearest_gas_dist)/np.sum(nearest_gas_dist))
+        metals_avg.append(np.sum(nearest_gas_metals*(1/nearest_gas_dist))/np.sum(1/nearest_gas_dist))
 
     return metals_avg
                                                                                                                 
@@ -637,7 +688,7 @@ def get_agn_seds(agn_ids, reg):
     print ('Starting AGN SED generation')
     
     if cfg.par.dump_emlines:
-        dump_emlines(None, None, 2, add_header=True)
+        dump_emlines(None, None)
 
     t1 = datetime.now()
     nprocesses = np.min([cfg.par.n_processes,len(agn_ids)])
@@ -652,7 +703,8 @@ def get_agn_seds(agn_ids, reg):
         nu.append(reg["bh","nu"].in_units("Hz").value)
         all_gas_coordinates = reg["gas","coordinates"].in_units('kpc').value
         agn_coordinates = reg["bh","coordinates"][agn_id].in_units('kpc').value
-        metals_avg.append(get_nearest_gas_metals(all_gas_coordinates, agn_coordinates))
+        all_gas_metals = get_gas_metals(len(all_gas_coordinates), reg)
+        metals_avg.append(get_nearest_gas_metals(all_gas_coordinates, agn_coordinates, all_gas_metals))
 
     z = zip(agn_ids, nu, fnu_in, metals_avg)
     fnu_out = p.starmap(agn_sed, z)
@@ -684,7 +736,7 @@ def agn_sed(agn_id, nu, fnu, metals_avg):
         metals = metals_avg
         
         if cfg.par.FORCE_gas_logz[id_val]:
-            LogZ = gas_logz[id_val]
+            LogZ = cfg.par.gas_logz[id_val]
         
         else:
             LogZ = tot_metals/cfg.par.solar
@@ -711,8 +763,10 @@ def agn_sed(agn_id, nu, fnu, metals_avg):
         # The stellar population returns the calculation in units of Lsun
             line_em = line_lum * 3.839e33  # Units: ergs/s
             # The last column in dump_emlines is reserved for age of the star particle. For AGN we just set it to -1 as a place holder.
-            line_em = np.append(line_em, -1.0)
-            dump_emlines(wave_line, line_em, id_val)
+            OH = metals[4]
+            line_em = np.append(line_em, OH)
+            line_em = np.append(line_em, 4)
+            dump_emlines(line_em)
 
     else:
         spec = fnu
@@ -720,15 +774,17 @@ def agn_sed(agn_id, nu, fnu, metals_avg):
     return spec
 
 
-def get_dig_seds(factors, cell_widths, metals):
+def get_dig_seds(lam ,sed, logU, cell_widths, metals):
 
     print ('Starting DIG SED generation')
     
     t1 = datetime.now()
     nprocesses = np.min([cfg.par.n_processes,len(cell_widths)])
     p = Pool(processes = nprocesses)
+    
+    print (logU)
 
-    z = zip(factors, cell_widths, metals)
+    z = zip(lam, sed, logU, cell_widths, metals)
     fnu_out = p.starmap(dig_sed, z)
     fnu_out = np.atleast_2d(fnu_out)
     
@@ -742,32 +798,30 @@ def get_dig_seds(factors, cell_widths, metals):
     return fnu_out
 
 
-def dig_sed(factor, cell_width, metal):    
-    id_val = 3
-    
-    dat = np.load(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/black_1987.npz")
-    spec_lam = dat["lam"]
-    sspi = dat["sed"]*(cell_width**2)*factor # Lsun/Hz
-    
-    spec, wave_line, line_lum = get_nebular(spec_lam, sspi, cfg.par.DIG_nh, metal, Factor=factor, Cell_width=cell_width, Dust=False,
+def dig_sed(spec_lam, sspi, logU, cell_width, metal):    
+    id_val = 3   
+
+    spec, wave_line, line_lum = get_nebular(spec_lam, sspi, cfg.par.DIG_nh, metal, logu=logU, Cell_width=cell_width, Dust=False,
                                             abund=cfg.par.neb_abund[id_val], clean_up = cfg.par.cloudy_cleanup, index=id_val)
 
     if cfg.par.dump_emlines:
         # The stellar population returns the calculation in units of Lsun
         line_em = line_lum * 3.839e33  # Units: ergs/s
-        # The last column in dump_emlines is reserved for age of the star particle. For DIG we just set it to -1 as a place holder.
-        line_em = np.append(line_em, -1.0)
-        dump_emlines(wave_line, line_em, id_val)
+        OH = metal[4]
+        line_em = np.append(line_em, OH)
+        line_em = np.append(line_em, id_val)
+        dump_emlines(line_em)
         
     return spec
 
 
-def fsps_metallicity_interpolate(metals):
+def fsps_metallicity_interpolate(metals, sp):
 
     # takes a list of metallicities for star particles, and returns a
     # list of interpolated metallicities
-    
-    fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+
+    fsps_metals = np.array(sp.zlegend)
+
     nstars = len(metals)
     
     zmet = []
@@ -785,3 +839,98 @@ def find_nearest_zmet(array,value):
     idx = (np.abs(array-value)).argmin()
     
     return idx+1      
+
+
+
+def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
+    
+    #first get grid limits.  how we do this will depend on the type of
+    #grid it is because hyperion stores this information differently
+    #in the model object depending on the grid type.
+
+    print("[SED_gen/remove_stars_outside_grid]: Searching to see if any stars are outside the dust grid, which will cause a crash in the radiative transfer modules")
+
+    if m.__dict__['grid_type'] == 'vor':
+        xmax = m.grid.xmax
+        xmin = m.grid.xmin
+        ymax = m.grid.ymax
+        ymin = m.grid.ymin
+        zmax = m.grid.zmax
+        zmin = m.grid.zmin
+
+    elif m.__dict__['grid_type'] == 'oct':
+        xmax = m.grid.dx
+        xmin = xmax*-1
+        ymax = m.grid.dy
+        ymin = ymax*-1
+        zmax = m.grid.dz
+        zmin = zmax*-1
+
+    star_idx_to_remove = []
+    bulge_idx_to_remove = []
+    disk_idx_to_remove = []
+
+    total_mass = 0
+    mass_removed = 0
+
+
+    for i in range(len(stars_list)):
+        if (stars_list[i].positions[0] > xmax) or \
+           (stars_list[i].positions[0] < xmin) or \
+           (stars_list[i].positions[1] > ymax) or \
+           (stars_list[i].positions[1] < ymin) or \
+           (stars_list[i].positions[2] > zmax) or \
+           (stars_list[i].positions[2] < zmin):
+           
+            star_idx_to_remove.append(i)
+            mass_removed += stars_list[i].mass
+
+
+
+        if (len(bulgestars_list) > 0):
+            if (bulgestars_list[i].positions[0] > xmax) or \
+               (bulgestars_list[i].positions[0] < xmin) or \
+               (bulgestars_list[i].positions[1] > ymax) or \
+               (bulgestars_list[i].positions[1] < ymin) or \
+               (bulgestars_list[i].positions[2] > zmax) or \
+               (bulgestars_list[i].positions[2] < zmin):
+
+                bulge_idx_to_remove.append(i)
+                mass_removed += bulgestars_list[i].mass
+
+        
+        if (len(diskstars_list) > 0):
+            if (diskstars_list[i].positions[0] > xmax) or \
+               (diskstars_list[i].positions[0] < xmin) or \
+               (diskstars_list[i].positions[1] > ymax) or \
+               (diskstars_list[i].positions[1] < ymin) or \
+               (diskstars_list[i].positions[2] > zmax) or \
+               (diskstars_list[i].positions[2] < zmin):
+            
+                disk_idx_to_remove.append(i)
+                mass_removed += diskstars_list[i].mass
+
+
+
+        total_mass += stars_list[i].mass
+    
+
+    #now that we've figured out which stars to remove, actually remove them from the lists
+    for idx in star_idx_to_remove:
+        stars_list.pop(idx)
+
+    for idx in bulge_idx_to_remove:
+        bulgestars_list.pop(idx)
+
+    for idx in disk_idx_to_remove:
+        diskstars_list.pop(idx)
+    
+
+    number_of_removed_stars = len(star_idx_to_remove) + len(bulge_idx_to_remove) + len(disk_idx_to_remove)
+    mass_fraction_removed = mass_removed/total_mass
+    print("[SED_gen/remove_stars_outside_grid:] removing %f stars because they are outside the dust grid" % number_of_removed_stars)
+    print("[SED_gen/remove_stars_outside_grid:] this corresponds to %f of the total stellar mass in the volume " % mass_fraction_removed)
+
+    return stars_list,bulgestars_list,diskstars_list
+        
+    

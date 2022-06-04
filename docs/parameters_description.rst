@@ -102,6 +102,11 @@ convergence properties of your simulation.
 
    Similar to n_photons_raytracing_sources but for dust emission.
 
+:n_photons_DIG:
+    
+    Number of photons to use to calculate non-monochromatic SED to get the energy 
+    dumped in each gas cell for DIG calculation
+   
 :FORCE_RANDOM_SEED:
 
     Boolean. True means the seed specified below will be used for random number
@@ -301,6 +306,24 @@ Nebular Emission Info
     
     The power law exponent (beta) for calculating CMDF (dN/dM goes as M^(beta))
 
+:use_age_distribution:
+    
+    If True, star particles with ages between age_dist_min and age_dist_max (next parameters) into divided into
+    an ensemble of particles all of whom have the same properties except their age which is picked from a power law age 
+    distribution of the form dN/dt is proportional to t^-0.65 (Imp: This can only be used if use_cmdf is also set to True).
+    Note: The function has a bunch of tunable parameters that can be changed though we feel that their default values
+    should be good enough for most cases. The function is located in cloudy_tools.py file under powderday/nebular_emission.
+
+:age_dist_min: 
+    
+    Star particle above this age are sub-divided into an age distribution if use_age_distribution is set to True
+    (Units: Gyr, Default = 3.e-3)
+    
+:age_dist_max:
+    
+    Star particles below this age are sub-divided into an age distribution if use_age_distribution is set to True
+    (Units: Gyr, Default = 1.e-2)
+    
 COMMON PARAMETERS
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -427,6 +450,14 @@ Young Stars
     Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
     hardening of the radiaiton field due to alpha-enhancement. (Default: False)
 
+:HII_dust:
+    
+    If set, then dust grains are included in the CLOUDY model. We use grains orion command to add
+    dust grains which specifies graphitic and silicate grains with a size distribution and abundance
+    appropriate for those along the line of sight to the Trapezium stars in Orion (see CLOUDY documentation
+    Hazy 1 for more info). (Default: False)
+                                                                                                                            
+
 Post-AGB stars
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -506,13 +537,26 @@ DIG
 
     Gas hydrogen density for calcualting nebular emission in units of cm^-3. (Default: 10)
 
-:DIG_min_factor:
+:DIG_min_logU:
 
-    For DIG CLOUDY calculations we use Black (1987) SED as a template. The normalization of the SED is set by a parameter called  "Factor". 
-    It is the ratio of total energy dumped in a cell to the total energy of the Black (1987) SED, which we use as the template for setting 
-    the SED shape for calculating DIG emission. This parameter sets the minimum factor that the code uses for calculation. 
-    For example, setting this parameter to 1 causes the code to ignore all the cells that have a factor < 1 or in other words ignore all the 
-    cells where the total energy dumped is less than the integrated energy of the Black (1987) SED. (Default: 1)
+    Only gas cells with ionization parameter greater than this are considered for DIG calculation. 
+    This is done so as to speed up the calculation by ignoring the cells that do not have enough energy 
+    to produce any substantial emission.  (Defualt: -6.0)
+
+:use_black_sed:
+
+    If set, Black (1987) ISRF is used as the input SED shape for DIG CLOUDY calculations 
+    else, the input SED shape is calulated by by taking a distance weighted average of the CLOUDY 
+    output spectrum of nearby young stars. The normalization of the SED is set by the total energy above the 
+    lyman limit dumped in each cell. (Default: False)
+
+:stars_max_dist:
+
+    Only stars within this distance (Units: Kpc) are considered for getting the input spectrum shape. (Default = 1)
+
+:max_stars_num:
+
+     This sets the upper limit on the number of stars that are used for calculating the input spectrum shape.
 
 DEBUGGING AND CLEAN UP
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -524,10 +568,11 @@ DEBUGGING AND CLEAN UP
     computed emission line strengths, and are calculated for all lines
     cloudy calculates (i.e. not just those undergoing radiative
     transfer).  The format for the output is a wavelength array,
-    followed by a (nlam+1) list for each HII-region bearing particle.
-    The +1 in the (nlam+1) list is the stellar age of that particle.
-    There is a convenience package in /convenience to help read in
-    this file.
+    followed by a (nlam+2) list for each nebular emission bearing particle.
+    The +2 in the (nlam+2) list are the O/H ratio and the id of that particle.
+    Where id = 0 , 1, 2 and 3 corresponds to young stars, PAGB stars, AGN 
+    and DIG respectively.There is a convenience package in /convenience to help 
+    read in this file.
 
     This can be used as a fast way getting emission lines for the
     purpose of debugging the code.  Naming convention:
@@ -604,34 +649,6 @@ Stellar Ages and Metallicities
    
    Number of bins to bin the stellar ages in (boundaries are the
    oldest and youngest star particles; linear bins in log(age)).
-
-:metallicity_legend:
-
-   String.  Location of the metallicity maps in FSPS for the stellar
-   libraries you use.  Currently Padova2007 is the default (hard coded
-   into `powderday <https://github.com/dnarayanan/powderday.git>`_).
-   Unfortunately in this particular parameter case, the default is
-   actually an exception.  
-
-   By default, we use the same stellar isochrones as FSPS (which are
-   the `MIST
-   <https://ui.adsabs.harvard.edu/abs/2016ApJ...823..102C/abstract>`_
-   Isochrones).  The metallicity legend that ships with FSPS isn't
-   compatible with `powderday
-   <https://github.com/dnarayanan/powderday.git>`_, so we have
-   provided a modified version in pd/fsps_files/zlegend.mist.dat which
-   the default parameters_master file points to.  (In case you want to know the conversion it's: 
-
-   pd_zlegend = 10**(orig_zlegend) * 0.0142 where in the original file p
-   denotes plus, m denotes minus.  Example: m2.5 : 10**(-2.5)*0.0142 =
-   0.000041 p0.25 : 10**(0.25)*0.0142 = 0.023118)
-
-   If, however, you want to use a non MIST isochrone, you first need
-   to make sure to select the isochrone you want in FSPS, recompile
-   FSPS and python-fsps, and then point directly to the zlegend file in the FSPS software package in your `powderday
-   <https://github.com/dnarayanan/powderday.git>`_ parameters_master file (i.e. something like:
-   "/Users/desika/fsps/ISOCHRONES/Padova/Padova2007/zlegend_basel.dat".)
-   
 
 Black Holes
 ------------

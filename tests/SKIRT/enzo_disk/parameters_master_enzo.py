@@ -29,6 +29,7 @@ n_photons_initial = 1.e4
 n_photons_imaging = 1.e4
 n_photons_raytracing_sources = 1.e4
 n_photons_raytracing_dust = 1.e4
+n_photons_DIG = 1.e8 
 
 FORCE_RANDOM_SEED = False
 seed = -12345 # has to be an int, and negative.
@@ -49,6 +50,19 @@ SUBLIMATION = True  # do we automatically kill dust grains above the
                     # mode 
 SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 
+
+#---------------------------------------------------------------
+#Experimental Dust -- Note, these features are not fully vetted
+#---------------------------------------------------------------
+
+otf_extinction = False #flag for on the fly extinction.  If set, then we
+                                    #ignore the dustdir/dustfile extinction information above. if
+                                    #false, all otf_extinction* quantities are meaningless
+otf_extinction_log_min_size = -3 #micron; must match what is set in the hydro simulation
+otf_extinction_log_max_size = 0 #micron; must match what is set in the hydro simulation
+
+
+
 #===============================================
 #STELLAR SEDS INFO
 #===============================================
@@ -56,6 +70,10 @@ FORCE_BINNED = True               # If True, force all star particles to be binn
                                   # If False, all star particles below max_age_direct (next parameter) are added 
                                   # directly without binning for calculating SED
 max_age_direct  = 1.e-2           # Age (in Gyr) below which stars will be directly added without binning (works only if FORCE_BINNED is False)
+                                  # To force all the star particles to be added without binning set this to an age greater than the maximum 
+                                  # stellar age of the galaxy (say 16 Gyr for example)
+
+
 
 imf_type = 2 # FSPS imf types; 0 = salpeter, 1 = chabrier; 2 = kroupa; 3 and 4 (vandokkum/dave) not currently supported
 imf1 = 1.3 # Logarithmic slope of the IMF over the range 0.08 < M < 0.5. Only used if imf_type=2. (Default: 1.3)
@@ -65,11 +83,6 @@ imf3 = 2.3 # Logarithmic slope of the IMF over the range 1.0 < M < 120. Only use
 pagb = 1 # weight given to post agb stars# 1 is the default
 
 add_agb_dust_model = False    # add circumstellar AGB dust model (100%); Villaume, Conroy & Jonson 2015
-
-use_cmdf = False     # If True, star particles that fit the criteria for nebular emission (see next section) are broken down 
-                     # using a cluster mass distribution function (cmdf) even if nebular emission is turned off (add_nebular_emission = False). 
-                     # This allows for one to one comparison of models with and without nebular emission. The cmdf is set by the following 
-                     # parameters defined under nebular emission info (next section): cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
 
 #===============================================
 #NEBULAR EMISSION INFO
@@ -81,22 +94,38 @@ use_cloudy_tables = True    			    # If True, CLOUDY look up tables (dev. by Nel
                             			    # for each young star particle (under active development). 
                             			    # Note:  The lookup tables work only for stars particles below 10 Myr.  (Default: True)
 
-cmdf_min_mass = 3.5                         # While calulating nebular emission from young stars and PAGB stars one star particle is broken down 
-                                            # into smaller star cluster by assuming a cluster mass distribution function of the form dN/dM goes as M^(beta). 
-                                            # This parameter sets the minimum mass of the star clusters in units of log(Msun). Note this value 
-                                            # should not be set lower than 3.5. (Default = 3.5)
+use_cmdf = False                            # If True, star particles that have mass greater than cmdf_mas_mass (defined below) are broken down using a 
+                                            # cluster mass distribution function (cmdf) of the form dN/dM goes as M^(beta). This works irrespecitve of whether
+                                            # nebular emission is turned on or not.  The cmdf is set by the following parameters defined below: 
+                                            # cmdf_min_mass, cmdf_max_mass, cmdf_bins and cmdf_beta.
 
-cmdf_max_mass = 5.0                         # Minimum mass of the star clusters in units of log(Msun). (Default = 5.0)
+cmdf_min_mass = 3.5                         # Minimum mass of the star clusters in units of log(Msun). Note: Results might be inconsistent if
+                                            # set lower than 3.5. (See Chandar et al.2014 for more info) (Default = 3.5)
+
+cmdf_max_mass = 5.0                         # Maximum mass of the star clusters in units of log(Msun). (Default = 5.0). Note: Only star particles that
+                                            # have a mass greater than this parameter are broken down. 
 
 cmdf_bins = 6                               # The number of bins used for calulating the cluster mass distribution function (Default = 6.0)
 
 cmdf_beta = -2.0                            # Beta (power law exponent) for calculating CMDF (dN/dM goes as M^(beta)) 
 
+use_age_distribution = False                # Setting this to True, divides the star particles with ages between age_dist_min and age_dist_max (next parameters) into 
+                                            # an ensemble of particles all of whom have the same properties except their age which is picked from a power law age 
+                                            # distribution of the form dN/dt is proportional to t^-0.65 (Imp: This can only be used if use_cmdf is also set to True). 
+                                            # Note: The function has a bunch of tunable parameters that can be changed though we feel that their default values
+                                            # should be good enough for most cases. The function is located in cloudy_tools.py file under powderday/nebular_emission.
 
-#**********************
+age_dist_min = 3e-3                         # Star particle above this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 3.e-3)
+
+age_dist_max = 1e-2                         # Star particles below this age are sub-divided into an age distribution if use_age_distribution is set to True
+                                            # (Units: Gyr, Default = 1.e-2)
+
+#***********************
 # COMMON PARAMETERS
 #***********************
-# NOTE: These parmeters take three values as an input. They correspond to the value of the pararmeter for young_stars, PAGB stars and AGN respectively.
+# NOTE: These parmeters take either three or four values as an input. 
+# They correspond to the value of the pararmeter for young_stars, PAGB stars, AGN and DIG respectively.
 
 FORCE_gas_logu = [False, False, False] 	    # If set, then we force the ionization parameter (gas_logu) to be 
                             			    # gas_logu (next parameter) else, it is taken to be variable and dependent on ionizing 
@@ -125,18 +154,21 @@ FORCE_inner_radius = [False, False, True]   # If set, then we force the inner ra
     										# For AGN we keep the inner radius fixed at whatever is set by inner_radius (next parameter) 
     										# irrespective of what this parameter is set to. (Default: [False,False,True])
 
+inner_radius = [1.e19, 1.e19, 2.777e+20]   	# This sets the inner radius of the cloud in cm. This is used only when add_neb_emission = True,
+                            		    	# use_cloudy_tables = False and FORCE_inner_radius = True (Default: [1.e19, 1.e19, 2.777e+20], Units = cm)
+
 FORCE_N_O_Pilyugin = [False, False, False, False]  # If set to True, Nitrogen abundances are set according to the N/O vs O/H relation from Pilyugin et al. 2012
-                                            # If FORCE_N_O ratio (next parameter) is set to True then this parameter is ignored.(Default: [False,False,False])
+                                                   # If FORCE_N_O ratio (next parameter) is set to True then this parameter is ignored.(Default: [False,False,False, False])
 
-FORCE_N_O_ratio = [False, False, False, False]  # If set, then we force the log of N/O ratio to be N_O_ratio (next parameter). 
-                            			        # This can be used as a template fix adundance ratio of other elements (Default: False)
+FORCE_N_O_ratio = [False, False, False, False]     # If set, then we force the Nitrogen abundance such that the log of N/O ratio is N_O_ratio (next parameter). 
+                            			           # This can be used as a template fix adundance ratio of other elements (Default:  [False, False, False])
 
-N_O_ratio = [-0.85, -0.85, -0.85, -0.85]        # This sets the log of N/O ratio. This is used only when add_neb_emission = True,
-                            			        # use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = -0.85)
+N_O_ratio = [-0.85, -0.85, -0.85, -0.85]           # This sets the log of N/O ratio. This is used only when add_neb_emission = True,
+                            			           # use_cloudy_tables = False, FORCE_N/O ratio = True and neb_abund = "direct" (Default: = [-0.85, -0.85, -0.85])
 
-neb_abund = ["direct", "direct", "direct", "direct"]  # This sets the HII region elemental abundances for generating CLOUDY models. 
+neb_abund = ["dopita", "dopita", "dopita", "dopita"]  # This sets the HII region elemental abundances for generating CLOUDY models. 
                             			              # Available abundaces are.
-                            			              #    dopita:    Abundabces from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
+                            			              #    dopita:    Abundances from Dopita (2001) with old solar abundances = 0.019 and ISM grains.
                             			              #    newdopita: Abundances from Dopita (2013). Solar Abundances from Grevasse 2010 - z= 0.013
                             			              #               includes smooth polynomial for N/O, C/O relationship functional form for He(z),
                             			              #               new depletion and factors in ISM grains.
@@ -145,13 +177,12 @@ neb_abund = ["direct", "direct", "direct", "direct"]  # This sets the HII region
                             			              #    direct:    Abundances are taken directly from the simulation if possible. Defaults to using "dopita" if there is 
                             			              #               an error. (Note: Works only for AGNs and star particles that are added directly without binning.
                             			              #               Make sure to set FORCE_BINNED to False)
-                            			              # This is used only when add_neb_emission = True and use_cloudy_tables = False. (Default: dopita)
-
+                            			              # This is used only when add_neb_emission = True and use_cloudy_tables = False. (Default: ["dopita", "dopita", "dopita"])
 #***************************
 # YOUNG STARS (HII regions)
 #***************************
 
-add_young_stars = True      			    # If set, the young stars are included when calculating nebular emission (Default: False)
+add_young_stars = True     			        # If set, the young stars are included when calculating nebular emission (Default: True)
 
 
 HII_Rinner_per_Rs = 0.01        		    # Rinner for cloudy calculations is set to this value times the Stromgen Radius. 
@@ -172,9 +203,14 @@ HII_max_age = 1.e-2         			    # Sets the maximum age limit for calculating 
 HII_escape_fraction = 0.0   			    # Fraction of H-ionizaing photons that escape the HII region. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 0.0)
 
-HII_alpha_enhacement = False                # If set to True then the metallicity of star particles to Fe/H rather than the total metals. 
+HII_alpha_enhacement = False                # If set, then the metallicity of star particles is set to [Fe/H] rather than the total metals. 
                                             # Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
-                                            # hardening of the radiaiton field due to alpha-enhancement. (Default: False)
+                                            # hardening of the radiation field due to alpha-enhancement. (Default: False)
+
+HII_dust = False                            # If set, then dust grains are included in the CLOUDY model. We use grains orion command to add
+                                            # dust grains which specifies graphitic and silicate grains with a size distribution and abundance
+                                            #appropriate for those along the line of sight to the Trapezium stars in Orion (see CLOUDY documentation
+                                            # Hazy 1 for more info). (Default: False)
 #****************
 # Post-AGB STARS
 #****************
@@ -215,7 +251,7 @@ AGN_nh = 1.e3					            # Gas hydrogen density for calcualting nebular emi
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e2)
 
 AGN_num_gas = 32							# For CLOUDY calculations we use the distance weighted average metallicity of gas particles around the AGN. 
-											# The number of gas particles used for doing so is set by this parameter. (Default: 32)
+			            					# The number of gas particles used for doing so is set by this parameter. (Default: 32)
 
 #**********************
 # DIffused Ionized Gas (DIG)
@@ -224,22 +260,34 @@ AGN_num_gas = 32							# For CLOUDY calculations we use the distance weighted av
 add_DIG_neb = False                         # If set, Contribution from DIG is included when calculating nebular emission (Default: False)
 
 DIG_nh = 1.e1                               # Gas hydrogen density for calcualting nebular emission in units of cm^-3. (Default: 10)
+                                            
 
-DIG_min_factor = 3500                        # For DIG CLOUDY calculations we use Black (1987) SED as a template. The normalization of the SED is 
-                                            # set by a parameter called  "Factor". It is the ratio of total energy dumped in a cell to the total 
-                                            # energy of the Black (1987) SED, which we use as the template for setting the SED shape for calculating 
-                                            # DIG emission. This parameter sets the minimum factor that the code uses for calculation. For example, 
-                                            # setting this parameter to 1 causes the code to ignore all the cells that have a factor < 1 or in other 
-                                            # words ignore all the cells where the total energy dumped is less than the integrated energy of the 
-                                            # Black (1987) SED (Default: 1).
+DIG_min_logU = -6.0                         # Only gas cells with ionization parameter greater than this are considered for DIG calculation. 
+                                            # This is done so as to speed up the calculation by ignoring the cells that do not have enough energy 
+                                            # to produce any substantial emission. (Defualt: -6.0)
 
+use_black_sed = False                       # If set, Black (1987) ISRF is used as the input SED shape for DIG CLOUDY calculations 
+                                            # else, the input SED shape is calulated by by taking a distance weighted average of the CLOUDY 
+                                            # output spectrum of nearby young stars. The normalization of the SED is set by the total energy 
+                                            # above the lyman limit dumped in each cell. (Default: False)
+
+stars_max_dist = 1                          # Only stars within this distance are considered for getting the input spectrum shape. (Units: Kpc)
+                                            # This is used only when use_black_sed = False (Default = 1)
+
+max_stars_num  = 20                         # This sets the upper limit on number of stars that are used for calculating the input spectrum shape.
+                                            # This is used only when use_black_sed = False (Default = 20)
 #*************************
 # DEBUGGING AND CLEAN UP
 #*************************
 
 dump_emlines = False                        # If True, The emission lines are saved in a file before going through the dust radiative transfer. 
-                                            # This can be used as a fast way getting emission lines for the purpose of debugging the code.
-                                            # Naming convention: emlines.galaxy*.txt where * is the galaxy number 
+                                            # These are the cloudy computed emission line strengths, and are calculated for all lines
+                                            # cloudy calculates (i.e. not just those undergoing radiative transfer). The format for the output 
+                                            # is a wavelength array,followed by a (nlam+2) list for each nebular emission bearing particle. 
+                                            # The +2 in the (nlam+2) list are the O/H ratio and the id of that particle. With id = 0 , 1, 2 and 3 
+                                            # corresponds to young stars, PAGB stars, AGN respectively. There is a convenience package in 
+                                            # /convenience to help read in this file. This can be used as a fast way getting emission lines for the 
+                                            # purpose of debugging the code. Naming convention: emlines.galaxy*.txt where * is the galaxy number. 
                                             # This works only when add_neb_emission = True (Default: False) 
 
 cloudy_cleanup = True                       # If set to True, all the CLOUDY files will be deleted after the source addition is complete. 
@@ -289,9 +337,6 @@ bulge_stars_metals = 19 # in fsps metallicity units
 # reduction of memory load; see manual for details.
 
 N_STELLAR_AGE_BINS = 100
-
-
-metallicity_legend= "/home/desika.narayanan/pd_git/fsps_files/zlegend.mist.dat"
 
 #===============================================
 #BLACK HOLES
@@ -362,7 +407,6 @@ PHI = 0
 #OTHER INFORMATION
 #===============================================
 
-solar = 0.013
 PAH_frac = {'usg': 0.0586, 'vsg': 0.1351, 'big': 0.8063} # values will be normalized to 1
 
 #===============================================
@@ -382,7 +426,7 @@ CONSTANT_DUST_GRID = False # if set, then we don't create a dust grid by
                           # size as the octree with a constant value of
                           # 4e-20
                           
-N_MASS_BINS = 0 # this is really just a place holder that exists in
+N_MASS_BINS = 1 # this is really just a place holder that exists in
                 # some loops to be able to insert some code downstream
                 # for spatially varying IMFs.  right now for speed best
                 # to set to 1 as it doesn't actually do anything.
@@ -392,8 +436,12 @@ FORCE_STELLAR_AGES_VALUE = 0.05# Gyr
 
 FORCE_STELLAR_METALLICITIES = False
 FORCE_STELLAR_METALLICITIES_VALUE = 0.013 # absolute values (so 0.013 ~ solar) 
+
+SKIRT_DATA_DUMP = True # if set, various data files useful for running SKIRT are saved.
+
 NEB_DEBUG = False # Dumps parameters related to nebular line emission in a file for debugging.
                   # The file includes the ionization parameter, number of ionizing photons, 
                   # metallicity, inner radius, stellar mass and age for each particle.
                   # Naming convention: nebular_properties_galaxy*.txt where * is the galaxy number
-DIFF_DIG_SED = False # If set, SEDs with DIG nebular emission are saved separately with "_DIG" appended to the rtout files
+
+SAVE_NEB_SEDS = False # If set, the CLOUDY output SEDs are saved in a file 

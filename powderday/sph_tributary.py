@@ -31,7 +31,7 @@ def _size_with_units(field,data):
     return data.ds.parameters['size']
 
 def sph_m_gen(fname,field_add):
-    
+
     refined,dustdens,fc1,fw1,reg,ds = yt_octree_generate(fname,field_add)
     
     if float(yt.__version__[0:3]) >= 4:
@@ -95,8 +95,12 @@ def sph_m_gen(fname,field_add):
 
 
     pto.test_octree(refined,max_level)
-
-    dump_cell_info(refined,fc1.convert_to_units('cm'),fw1.convert_to_units('cm'),xmin,xmax,ymin,ymax,zmin,zmax)
+    
+    if float(yt.__version__[0:3]) >= 4:
+        dump_cell_info(refined,fc1.to('cm'),fw1.to('cm'),xmin,xmax,ymin,ymax,zmin,zmax)
+    else:
+        dump_cell_info(refined,fc1.convert_to_units('cm'),fw1.convert_to_units('cm'),xmin,xmax,ymin,ymax,zmin,zmax)
+    
     np.save('refined.npy',refined)
     np.save('density.npy',dustdens)
     
@@ -107,7 +111,8 @@ def sph_m_gen(fname,field_add):
 
     m = Model()
     
-
+    #save in the m__dict__ that we're in an oct geometry
+    m.__dict__['grid_type']='oct'
 
     print ('Setting Octree Grid with Parameters: ')
 

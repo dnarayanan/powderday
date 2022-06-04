@@ -182,14 +182,22 @@ def dtm_particle_mesh(reg):
 
 
 def manual_particle_mesh(reg):
+
     #calculates the dust based on the DTM ratio for either particles
     #directly (i.e. arepo quantities) or a mesh (i.e AMR simulations)
-
-    if ('PartType0','DustDensity') in reg.ds.derived_field_list:
-        dustdens = reg.ds.arr(reg["PartType0","DustDensity"].value,'code_mass/code_length**3')
-        dustdens = dustdens.to('g/cm**3').value
+    if cfg.par.otf_extinction == False:
+        if ('PartType0','DustDensity') in reg.ds.derived_field_list:
+            dustdens = reg.ds.arr(reg["PartType0","DustDensity"].value,'code_mass/code_length**3')
+            dustdens = dustdens.to('g/cm**3').value
+        else:
+            raise ValueError('It looks like we cant find PartType0,DustDensity in your Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml].  Alternatively, edit [dust_grid_gen/manual_particle_mesh] to change the value of the field assigned to dustdens')
     else:
-        raise ValueError('It looks like we cant find PartType0,DustDensity in your Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml].  Alternatively, edit [dust_grid_gen/manual_particle_mesh] to change the value of the field assigned to dustdens')
+        if ('PartType3','Dust_DustDensity') in reg.ds.derived_field_list:
+            dustdens = reg.ds.arr(reg["PartType3","Dust_DustDensity"].value,'code_mass/code_length**3')
+            dustdens = dustdens.to('g/cm**3').value
+        else:
+            raise ValueError('It looks like we cant find PartType3,Dust_DustDensity in your Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml].  Alternatively, edit [dust_grid_gen/manual_particle_mesh] to change the value of the field assigned to dustdens')
+
 
     return dustdens
 
@@ -291,7 +299,7 @@ def dtm_amr(ds):
     
     def _dust_density_dtm_amr(field, data):
         return data[('gas', 'metal_density')].in_units("g/cm**3")*cfg.par.dusttometals_ratio
-    ds.add_field(('gas', 'dust_density'), function=_dust_density_dtm_amr, units = 'g/cm**3')
+    ds.add_field(('gas', 'dust_density'), function=_dust_density_dtm_amr, units = 'g/cm**3', sampling_type='cell')
 
 
 def remy_ruyer_amr(ds):
@@ -331,7 +339,7 @@ def remy_ruyer_amr(ds):
 
         return dust_density
 
-    ds.add_field(('gas', 'dust_density'), function=_dust_density_rr_amr, units = 'g/cm**3')
+    ds.add_field(('gas', 'dust_density'), function=_dust_density_rr_amr, units = 'g/cm**3', sampling_type='cell')
     
     
 
@@ -352,7 +360,7 @@ def li_bestfit_amr(ds):
     
         return dust_density
 
-    ds.add_field(('gas', 'dust_density'), function=_dust_density_li_bestfit_amr, units = 'g/cm**3')
+    ds.add_field(('gas', 'dust_density'), function=_dust_density_li_bestfit_amr, units = 'g/cm**3', sampling_type='cell')
 
 def li_ml_amr(ds):
 

@@ -389,18 +389,40 @@ yt::
   >pip install -e .
 
 
+
 fsps and python-fsps
 
 The development version of python-fsps now includes the Fortran FSPS source code. You can get both via::
 
+fsps::
+
   >cd $HOME
-  >git clone --recursive https://github.com/dfm/python-fsps.git
-  >cd python-fsps
+  >git clone https://github.con/cconroy20/fsps
+
+in the Makefile set F90=$(FC) and this will ensure that the compilers
+`fsps <https://code.google.com/p/fsps/source/checkout>`_ uses are what
+you have module loaded.::
+  
+  >make clean
+  >make
+
+then in your .bashrc set the analog to::
+  
+  >export SPS_HOME=/Users/desika/fsps
+
+
+python fsps::
+
+
   >CC=icc F90=ifort F77=ifort python setup.py install
 
 then in your .bashrc set the analog to::
   
   >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
+
+  >CC=icc F90=ifort python setup.py install
+
+
 
 hyperion::
 
@@ -410,11 +432,9 @@ hyperion::
   >python setup.py install
   >git submodule init
   >git submodule update
-  >./configure --prefix=$HOME/anaconda3/
 
-or::
+  >./configure --prefix=$HOME/local
 
-  >./configure --prefix=$HOME/anaconda3/envs/$ENV_NAME
   >make
   >make install
 
@@ -424,7 +444,8 @@ hyperion dust::
   >wget http://pypi.python.org/packages/source/h/hyperion-dust/hyperion-dust-0.1.0.tar.gz
   >tar -xzvf hyperion-dust-0.1.0.tar.gz
   >cd hyperion-dust-0.1.0
-  >pip install -e .
+  >python setup.py build_dust
+
   
 powderday::
 

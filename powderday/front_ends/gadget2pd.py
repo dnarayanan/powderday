@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import yt
-from yt.fields.particle_fields import add_volume_weighted_smoothed_field
+#from yt.fields.particle_fields import add_volume_weighted_smoothed_field
 import powderday.config as cfg
 from powderday.mlt.dgr_extrarandomtree_part import dgr_ert
 
@@ -100,14 +100,25 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             
     def _gassmoothedmetals(field, data):
         if float(yt.__version__[0:3]) >= 4:
-            return data.ds.parameters['octree'][('PartType0', 'metallicity')]
+            try:
+                el_str = field.name[1]
+                if '_' in el_str:
+                    el_name = field.name[1][field.name[1].find('_')+1:]+"_"
+                else:
+                    el_name = ""
+                return data.ds.parameters['octree'][('PartType0', el_name+'metallicity')]
+            except:
+                return data.ds.parameters['octree'][('PartType0', 'metallicity')]
         else:
-            el_str = field.name[1]
-            if '_' in el_str:
-                el_name = field.name[1][field.name[1].find('_')+1:]+"_"
-            else:
-                el_name = ""
-            return data[("deposit","PartType0_smoothed_"+el_name+"metallicity")]
+            try:
+                el_str = field.name[1]
+                if '_' in el_str:
+                    el_name = field.name[1][field.name[1].find('_')+1:]+"_"
+                else:
+                    el_name = ""
+                return data[("deposit","PartType0_smoothed_"+el_name+"metallicity")]
+            except:
+                return data[("deposit","PartType0_smoothed_metallicity")]
 
     def _gassmoothedmasses(field, data):
         if float(yt.__version__[0:3]) >= 4:
@@ -152,16 +163,16 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         alpha = 2.02
         x_sun = 8.69
         
-        x = 12.+np.log10(data["gasmetals"]/cfg.par.solar * 10.**(x_sun-12.) )
+        x = 12.+np.log10(data["PartType0","Metallicity_00"]/cfg.par.solar * 10.**(x_sun-12.) )
         y = a + alpha*(x_sun-np.asarray(x))
         gas_to_dust_ratio = 10.**(y)
         dust_to_gas_ratio = 1./gas_to_dust_ratio
-        return dust_to_gas_ratio * data["gasmasses"]
+        return dust_to_gas_ratio * data["PartType0","Masses"]
 
     def _dustmass_li_bestfit(field,data):
-        log_dust_to_gas_ratio = (2.445*np.log10(data["gasmetals"]/cfg.par.solar))-(2.029)
+        log_dust_to_gas_ratio = (2.445*np.log10(data["PartType0","Metallicity_00"]/cfg.par.solar))-(2.029)
         dust_to_gas_ratio = 10.**(log_dust_to_gas_ratio)
-        return dust_to_gas_ratio * data["gasmasses"]
+        return dust_to_gas_ratio * data["PartType0","Masses"]
 
     def _dustsmoothedmasses(field, data):
         if float(yt.__version__[0:3]) >= 4:
@@ -320,11 +331,13 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         octree = ds.octree(left,right,n_ref=cfg.par.n_ref)
         ds.parameters['octree'] = octree
 
+    print ('BOUNDING BOX:', bounding_box, 'LEFT: ', left, 'RIGHT: ', right)
+
     # for the metal fields have a few options since gadget can have different nomenclatures
     ad = ds.all_data()
     if ('PartType4', 'Metallicity_00') in ds.derived_field_list:
         try:
-            ds.add_field(('star","metals'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
+            ds.add_field(('star','metals'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
             ds.add_field(('star','metals_He'), function=_starmetals_00, sampling_type='particle', units="code_metallicity", particle_type=True)
             ds.add_field(('star','metals_C'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
             ds.add_field(('star','metals_N'), function=_starmetals_00, sampling_type='particle',units="code_metallicity", particle_type=True)
@@ -366,9 +379,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.add_field(('metal','dens'), function=_metaldens, sampling_type='particle',units="g/cm**3", particle_type=True)
         ds.add_field(('PartType0', 'metalmass'), function=_metalmass, sampling_type='particle',units="g", particle_type=True)
 
-    metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
-                                                 "SmoothingLength", "Density", "metalmass",
-                                                 ds.field_info)
+    #this line is deprecated and no longer used (and will throw an error in sufficiently new yt hashes)
+    #metalmass_fn = add_volume_weighted_smoothed_field("PartType0", "Coordinates", "Masses",
+    #                                             "SmoothingLength", "Density", "metalmass",
+    #                                             ds.field_info)
 
     if add_smoothed_quantities == True: ds.add_field(('metal','smoothedmasses'), function=_metalsmoothedmasses, sampling_type='particle',units='code_metallicity', particle_type=True)
 
@@ -397,9 +411,10 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         if add_smoothed_quantities == True: ds.add_field(('dust','smoothedmasses'), function=_dustsmoothedmasses, sampling_type='particle',units='code_mass', particle_type=True)
             
     if cfg.par.dust_grid_type == 'rr':
-        ds.add_field(("dust','mass"),function=_dustmass_rr,sampling_type='particle',units='code_mass',particle_type=True)
+        #ds.add_field(("dust','mass"),function=_dustmass_rr,sampling_type='particle',units='code_mass',particle_type=True)
+        ds.add_field(('dust','mass'), function=_dustmass_rr,sampling_type='particle',units='code_mass',particle_type=True)
     if cfg.par.dust_grid_type == 'li_bestfit':
-        ds.add_field(("dust','mass"),function=_dustmass_li_bestfit,sampling_type='particle',units='code_mass',particle_type=True)
+        ds.add_field(('dust','mass'),function=_dustmass_li_bestfit,sampling_type='particle',units='code_mass',particle_type=True)
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
     #dust model in place, create a field for these so that

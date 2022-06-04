@@ -64,14 +64,14 @@ def enzo_field_add(fname,ds = None, starages = False):
 
 
 
-    ds.add_field(('star','metals'),function=_starmetals,units="code_metallicity",particle_type=True)
-    ds.add_field(('star','coordinates'),function=_starcoordinates,units="cm",particle_type=True)
-    ds.add_field(('stellar','ages'),function=_stellarages,units='Gyr',particle_type=True)
-    ds.add_field(('star','masses'),function=_starmasses,units='g',particle_type=True)
-    ds.add_field(('gas','density'),function=_gasdensity,units='g/cm**3')
-    ds.add_field(('gas','metals'),function=_gasmetals,units="code_metallicity")
-    ds.add_field(('gas','fh2'),function=_gasfh2,units='dimensionless')
-    ds.add_field(('gas','masses'),function=_gasmasses,units='g')
+    ds.add_field(('star','metals'),function=_starmetals,units="code_metallicity",sampling_type='particle')
+    ds.add_field(('star','coordinates'),function=_starcoordinates,units="cm",sampling_type='particle')
+    ds.add_field(('stellar','ages'),function=_stellarages,units='Gyr',sampling_type='particle')
+    ds.add_field(('star','masses'),function=_starmasses,units='g',sampling_type='particle')
+    ds.add_field(('gas','density'),function=_gasdensity,units='g/cm**3',sampling_type='cell')
+    ds.add_field(('gas','metals'),function=_gasmetals,units="code_metallicity",sampling_type='cell')
+    ds.add_field(('gas','fh2'),function=_gasfh2,units='dimensionless',sampling_type='cell')
+    ds.add_field(('gas','masses'),function=_gasmasses,units='g',sampling_type='cell')
     
     ad = ds.all_data()
 
