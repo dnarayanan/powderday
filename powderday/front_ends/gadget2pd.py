@@ -1,3 +1,14 @@
+#FIELD NOMENCLATURE
+
+#For the gadget front end, we have two types of fields: particle, and
+#mesh.  the former is read in, defined, and then deposited onto the
+#octree to create the mesh quantities.  The particle information is
+#given the tuples (e.g.) ('gas','metallicity'), or ('dust','mass'),
+#while the octree is given ('dust','smoothedmasses').  Note - there is
+#one side rule to this: if we have PartType3 dust particles in the
+#simulations, then those particles may be given the specific name
+#('particle_dust','mass').
+
 from __future__ import print_function
 import numpy as np
 import yt
@@ -198,8 +209,8 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         else:
             return (data.ds.arr(data[("deposit", "PartType0_sum_li_ml_dustmass")].value, 'code_mass'))
         
-
-
+    def _return_dust_mass(field,data):
+        return data['dust','mass']
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
@@ -302,6 +313,24 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     def _size_with_units(field,data):
         return data.ds.parameters['size']
     
+    def _particle_dust_numgrains(field,data):
+        return data.ds.arr(data['PartType3','Dust_Size'])
+
+    def _particle_dust_carbon_fraction(field,data):
+        return (data['PartType3','Metallicity_02'])
+
+    def _particle_dust_mass(field,data):
+        #note - this is degenerate with _dustmass_manual.  we repeat
+        #the field addition here in order to simplify PAH computation
+        #downstream with a consistent nomenclature with other
+        #(non-particle-based) front ends.
+        return (data.ds.arr(data[("PartType3", "Masses")].value, 'code_mass'))
+
+    def _particle_dust_coordinates(field,data):
+        ad = data.ds.all_data()
+        return (ad['PartType3','Coordinates'])
+
+
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         if float(yt.__version__[0:3]) >= 4:
@@ -405,8 +434,17 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
             #we need to add this density field so that the masses can be projected onto the octree in _dustsmoothedmasses
             ds.add_field(('PartType3','density'),function=_dust_density,units='code_mass/code_length**3',sampling_type='particle',particle_type=True)
             ds.add_deposited_particle_field(("PartType3", "Masses"), "sum")
+
+            #just adding this so that we have access to it later for analytics
+            ds.add_field(('particle_dust','numgrains'),function=_particle_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
+            ds.add_field(('particle_dust','carbon_fraction'),function=_particle_dust_carbon_fraction,units='dimensionless',sampling_type='particle',particle_type=True)
+            ds.add_field(('particle_dust','mass'),function=_particle_dust_mass,units='code_mass',sampling_type='particle',particle_type=True)
+            ds.add_field(('particle_dust','coordinates'),function=_particle_dust_coordinates,units='code_length',sampling_type='particle',particle_type=True)
+
         else:
             ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
+            #this just saves (redundantly) for passive dust 'manual' models the dust mass in 'particle_dust','mass' tuple.
+            ds.add_field(('particle_dust','mass'),function=_return_dust_mass,units='code_mass',sampling_type='particle',particle_type=True)
     
         if add_smoothed_quantities == True: ds.add_field(('dust','smoothedmasses'), function=_dustsmoothedmasses, sampling_type='particle',units='code_mass', particle_type=True)
             
@@ -433,6 +471,9 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
         ds.add_deposited_particle_field(("PartType0","li_ml_dustmass"),"sum")
         if add_smoothed_quantities == True: 
             ds.add_field(("li_ml_dustsmoothedmasses"), function=_li_ml_dustsmoothedmasses, sampling_type='particle',units='code_mass',particle_type=True)
+
+
+
 
     ds.add_field(('star','masses'), function=_starmasses, sampling_type='particle',units='g', particle_type=True)
     ds.add_field(('star','coordinates'), function=_starcoordinates, sampling_type='particle',units='cm', particle_type=True)
@@ -584,8 +625,6 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
 
             octree_of_sizes[np.isnan(octree_of_sizes)] = 0 #just because the density can be zero in some extreme cases which screws up the particle deposition
             ds.parameters['octree_of_sizes']=octree_of_sizes
-
-
-
+            ds.parameters['octree_carbon_fraction'] = octree['PartType3','Metallicity_02']
 
     return ds
