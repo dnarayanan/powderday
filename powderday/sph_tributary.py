@@ -96,8 +96,13 @@ def sph_m_gen(fname,field_add):
 
     pto.test_octree(refined,max_level)
 
-    reg.parameters['cell_size']=fc1.convert_to_units('cm') #so that we can have a uniform naming scheme for different front ends for saving in analytics/dump_data()
-    dump_cell_info(refined,fc1.convert_to_units('cm'),fw1.convert_to_units('cm'),xmin,xmax,ymin,ymax,zmin,zmax)
+    
+    if float(yt.__version__[0:3]) >= 4:
+        dump_cell_info(refined,fc1.to('cm'),fw1.to('cm'),xmin,xmax,ymin,ymax,zmin,zmax)
+    else:
+        dump_cell_info(refined,fc1.convert_to_units('cm'),fw1.convert_to_units('cm'),xmin,xmax,ymin,ymax,zmin,zmax)
+    reg.parameters['cell_size']=fc1.convert_to_units('cm') #so that we can have a uniform naming scheme for different front ends for saving in analytics/dump_data(
+
     np.save('refined.npy',refined)
     np.save('density.npy',dustdens)
     
