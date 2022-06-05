@@ -270,15 +270,20 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     print ('Execution time for SED generation in Pool.map multiprocessing = '+str(t2-t1))
 
     
+    cloudy_nlam = len(np.genfromtxt(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat", delimiter=','))
     stellar_fnu = np.zeros([nstars,nlam])
     mfrac = np.zeros(nstars)
+    line_em = np.zeros([nstars,cloudy_nlam])
     # see newstars_gen() for info on mfrac
     star_counter=0
     for i in range(nchunks):
         fnu_list = chunk_sol[i][0] #this is a list of the stellar_fnu's returned by that chunk
-        #chunk_sol now returns two things for each star/star bin: the spectrum and the associated surviving stellar mass fraction for that SSP 
+        #chunk_sol now returns three things for each star/star bin: the spectrum,the associated surviving stellar mass fraction for that SSP
+        #and the line luminosities from CLOUDY
         mfrac_list = chunk_sol[i][1]
+        line_em_list = chunk_sol[i][2]
         for j in range(len(fnu_list)):
+            line_em[star_counter,:] = line_em_list[j,:]
             mfrac[star_counter] = mfrac_list[j] 
             stellar_fnu[star_counter,:] = fnu_list[j,:]
             star_counter+=1
@@ -366,7 +371,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     print ('[SED_gen: ] total_lum_in_sed_gen = ',total_lum_in_sed_gen)
 
     #return positions,disk_positions,bulge_positions,mass,stellar_nu,stellar_fnu,disk_masses,disk_fnu,bulge_masses,bulge_fnu
-    return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu, mfrac
+    return stellar_nu,stellar_fnu,disk_fnu,bulge_fnu, mfrac, line_em
 
 
 def newstars_gen(stars_list):
@@ -392,10 +397,12 @@ def newstars_gen(stars_list):
     nu = 1.e8*constants.c.cgs.value/spec[0]
 
     nlam = len(nu)
+    cloudy_nlam = len(np.genfromtxt(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat", delimiter=','))
 
     stellar_nu = np.zeros([nlam])
     stellar_fnu = np.zeros([len(stars_list),nlam])
     mfrac = np.zeros([len(stars_list)])
+    line_em_list = np.zeros([len(stars_list),cloudy_nlam])
   
     minage = 13 #Gyr
     for i in range(len(stars_list)): 
@@ -483,7 +490,6 @@ def newstars_gen(stars_list):
                 age_clusters = np.array(age_clusters)
             
             f = np.zeros(nlam)
-            cloudy_nlam = len(np.genfromtxt(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat", delimiter=','))
             line_em = np.zeros([cloudy_nlam])
 
             for j in range(len(cluster_mass)):
@@ -601,6 +607,7 @@ def newstars_gen(stars_list):
                         lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
                         line_lum = sp.emline_luminosity
                         wave_line = sp.emline_wavelengths
+
                     else:
                         try:            
                             # Calculating ionizing photons again but for 1 Msun in order to scale the output for FSPS
@@ -631,24 +638,13 @@ def newstars_gen(stars_list):
                 f = f + spec_neb*weight
                 if cfg.par.add_neb_emission and cfg.par.dump_emlines:
                     line_em = line_em + line_lum*weight
-        
-            if cfg.par.add_neb_emission and cfg.par.dump_emlines:
-                #the stellar population returns the calculation in units of Lsun/1 Msun: https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
-                line_em = line_em * (stars_list[i].mass * u.g).to(u.Msun).value * 3.839e33  # Units: ergs/s
-                OH = stars_list[i].all_metals[4]
-                line_em = np.append(line_em, OH)
 
-                if young_star:
-                    line_em = np.append(line_em, 1)
-                else:
-                    line_em = np.append(line_em, 2)
-
-                dump_emlines(line_em)
+            line_em_list[i,:] = line_em
 
         stellar_nu[:] = 1.e8*constants.c.cgs.value/spec[0]
         stellar_fnu[i,:] = f
 
-    return stellar_fnu, mfrac
+    return stellar_fnu, mfrac, line_em_list
 
 
 def get_gas_metals(ngas, reg):

@@ -8,7 +8,7 @@ from datetime import datetime
 import astropy.units as units
 import astropy.constants as constants
 from powderday.helpers import find_nearest
-from powderday.analytics import dump_AGN_SEDs,dump_NEB_SEDs
+from powderday.analytics import dump_AGN_SEDs,dump_NEB_SEDs,dump_emlines
 from hyperion.model import ModelOutput
 from hyperion.grid.yt3_wrappers import find_order
 from powderday.nebular_emission.cloudy_tools import get_DIG_sed_shape, get_DIG_logU
@@ -43,7 +43,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
     else:
         print ("Number of unbinned stars to added: ", nstars)
     
-    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, mfrac = sg.allstars_sed_gen(unbinned_stars_list, cosmoflag, sp)
+    stellar_nu, stellar_fnu, disk_fnu, bulge_fnu, mfrac, unbinned_line_em = sg.allstars_sed_gen(unbinned_stars_list, cosmoflag, sp)
     
     #SED_gen now returns an additional parameter, mfrac, to properly scale the FSPS SSP spectra, which are in units of formed mass, not current stellar mass
     pos_arr = []
@@ -51,6 +51,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
     for i in range(nstars):
         nu = stellar_nu[:]
         fnu = stellar_fnu[i, :]
+        pos = unbinned_stars_list[i].positions
 
         nu, fnu = wavelength_compress(nu, fnu, df_nu)
         # reverse the arrays for hyperion
@@ -64,9 +65,24 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         pagb = pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= unbinned_stars_list[i].age <= cfg.par.PAGB_max_age
 
         if young_star or pagb:
-            pos = unbinned_stars_list[i].positions
             pos_arr.append(pos)
             fnu_arr.append(stellar_fnu[i, :])
+
+            line_em = unbinned_line_em[i,:]
+
+            # the stellar population returns the calculation in units of Lsun/1 Msun: 
+            # https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
+            line_em = line_em * (stars_list[i].mass * units.g).to(units.Msun).value * 3.839e33 # Units: ergs/s
+            OH = stars_list[i].all_metals[4]
+            line_em = np.append(line_em, OH)
+            
+            if young_star:
+                line_em = np.append(line_em, 1)
+            elif pagb:
+                line_em = np.append(line_em, 2)
+                
+            dump_emlines(line_em)
+
 
         # add new stars
         totallum_newstars += lum
@@ -281,7 +297,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     print ('Running SPS for Binned SEDs')
     print ('calculating the SEDs for ',len(sed_bins_list_has_stellar_mass),' bins')
     
-    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu,mfrac = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,cosmoflag,sp)
+    binned_stellar_nu,binned_stellar_fnu_has_stellar_mass,disk_fnu,bulge_fnu,mfrac,binned_line_em_has_stellar_mass = sg.allstars_sed_gen(sed_bins_list_has_stellar_mass,cosmoflag,sp)
     
 
     #since the binned_stellar_fnu_has_stellar_mass is now
@@ -290,8 +306,10 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
     #that could probably be prettier...but whatever.  this saves >an
     #order of magnitude in time in SED gen.  
     nlam = binned_stellar_nu.shape[0]
+    cloudy_nlam = len(np.genfromtxt(cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat", delimiter=','))
     binned_stellar_fnu = np.zeros([len(sed_bins_list),nlam])
     binned_mfrac = np.zeros([len(sed_bins_list)])
+    binned_line_em = np.zeros([len(sed_bins_list),cloudy_nlam])
 
     counter = 0
     counter_has_stellar_mass = 0
@@ -301,6 +319,7 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
                 if has_stellar_mass[wz,wa,wm] == True:
                     binned_mfrac[counter] = mfrac[counter_has_stellar_mass]
                     binned_stellar_fnu[counter,:] = binned_stellar_fnu_has_stellar_mass[counter_has_stellar_mass,:]
+                    binned_line_em[counter,:] = binned_line_em_has_stellar_mass[counter_has_stellar_mass,:]
                     counter_has_stellar_mass += 1 
                 counter+=1
 
@@ -367,17 +386,28 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
                     
                     #source positions
                     pos = np.zeros([len(stars_in_bin[(wz,wa,wm)]),3])
-                    #for i in range(len(stars_in_bin[(wz,wa,wm)])): pos[i,:] = stars_list[i].positions
+
                     for i in range(len(stars_in_bin[(wz,wa,wm)])):
                         pos[i,:] = stars_list[stars_in_bin[(wz,wa,wm)][i]].positions
                         age_star = stars_list[stars_in_bin[(wz,wa,wm)][i]].age
-                        
-                        pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= age_star <= cfg.par.PAGB_max_age
-                        young_star = cfg.par.add_young_stars and cfg.par.HII_min_age <= age_star <= cfg.par.HII_max_age
 
                         if (cfg.par.add_neb_emission) and (young_star or pagb):
                             pos_arr.append(pos[i, :])
                             fnu_arr.append(binned_stellar_fnu[counter,:])
+                            line_em = binned_line_em[counter,:]
+                            # the stellar population returns the calculation in units of Lsun/1 Msun: 
+                            # https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
+                            line_em = line_em * (stars_list[stars_in_bin[(wz,wa,wm)][i]].mass * units.g).to(units.Msun).value * 3.839e33 # Units: ergs/s
+                            OH = stars_list[stars_in_bin[(wz,wa,wm)][i]].all_metals[4]
+                            line_em = np.append(line_em, OH)
+
+                            if young_star:
+                                line_em = np.append(line_em, 1)
+                            elif pagb:
+                                line_em = np.append(line_em, 2)
+
+                            dump_emlines(line_em)
+
                             
                     source.position=pos
                     #source spectrum
