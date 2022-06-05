@@ -4,34 +4,34 @@ Getting Started
 Overview of Requirements
 ============
 
-	* **python=3.6**
+* **python=3.6**
 
-	  * numpy (any version except 1.10.*)
-	  * scipy
-	  * astropy (3.2.3)
-	  * h5py
-	  * scikit-learn
-	  * six
+    * numpy (any version except 1.10.*)
+        * scipy
+	    * astropy (3.2.3)
+	        * h5py
+		    * scikit-learn
+		        * six
 
-	* **compilers**
+			  * **compilers**
 
-	  * gcc
-	  * gfortran
+			      * gcc
+				  * gfortran
 
 
-	* **Additional Packages (with Instructions Below)**
+				    * **Additional Packages (with Instructions Below)**
 
-	  * git  <http://git-scm.com/>
-	  * powderday <https://github.com/dnarayanan/powderday.git>
-	  * yt <http://yt-project.org>
-	  * FSPS <https://code.google.com/p/fsps/source/checkout>
-	  * python-fsps <https://dfm.io/python-fsps/current/>
-	  * Hyperion <http://www.hyperion-rt.org/>
-	  * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
+				        * git  <http://git-scm.com/>
+					    * powderday <https://github.com/dnarayanan/powderday.git>
+					        * yt <http://yt-project.org>
+						    * FSPS <https://code.google.com/p/fsps/source/checkout>
+						        * python-fsps <https://dfm.io/python-fsps/current/>
+							    * Hyperion <http://www.hyperion-rt.org/>
+							        * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
 
 Installation
 ============
-	    
+    
 
 
 Manual Installation
@@ -389,6 +389,11 @@ yt::
   >pip install -e .
 
 
+
+fsps and python-fsps
+
+The development version of python-fsps now includes the Fortran FSPS source code. You can get both via::
+
 fsps::
 
   >cd $HOME
@@ -408,10 +413,15 @@ then in your .bashrc set the analog to::
 
 python fsps::
 
-  >cd $HOME
-  >git clone --recursive https://github.com/dfm/python-fsps.git
-  >cd python-fsps
+
+  >CC=icc F90=ifort F77=ifort python setup.py install
+
+then in your .bashrc set the analog to::
+  
+  >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
+
   >CC=icc F90=ifort python setup.py install
+
 
 
 hyperion::
@@ -422,7 +432,9 @@ hyperion::
   >python setup.py install
   >git submodule init
   >git submodule update
+
   >./configure --prefix=$HOME/local
+
   >make
   >make install
 
@@ -433,6 +445,7 @@ hyperion dust::
   >tar -xzvf hyperion-dust-0.1.0.tar.gz
   >cd hyperion-dust-0.1.0
   >python setup.py build_dust
+
   
 powderday::
 
