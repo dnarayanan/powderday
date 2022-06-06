@@ -424,11 +424,14 @@ then in your .bashrc set the analog to::
 
 
 
-hyperion::
+hyperion
+
+As of commit 7cae6d0, a bug has been introduced with the __version__ module. Once cloned, checkout stable commit 4170c6c::
 
   >cd $HOME
   >git clone https://github.com/hyperion-rt/hyperion.git
   >cd hyperion
+  >git checkout 4170c6cc3009893e2b591e133baeb9927122aef1
   >python setup.py install
   >git submodule init
   >git submodule update
