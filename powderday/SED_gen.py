@@ -415,6 +415,7 @@ def newstars_gen(stars_list):
     # Get the number of ionizing photons from SED
 
     #calculate the SEDs for new stars
+    print ("Calculating Spectrum for "+str(len(stars_list)) + " stars")
     for i in range(len(stars_list)):
         
         sp.params["tage"] = stars_list[i].age
@@ -435,6 +436,7 @@ def newstars_gen(stars_list):
             sp.params["dust_tesc"] = tesc_age
 
         spec_noneb = sp.get_spectrum(tage=stars_list[i].age,zmet=stars_list[i].fsps_zmet)
+        print ("Getting Spec (No Neb) for Age: ", str(stars_list[i].age))
         f = spec_noneb[1]
         #NOTE: FSPS SSP/CSP spectra are scaled by *formed* mass, not current mass. i.e., the SFHs of the SSP/CSP are normalized such that 1 solar mass
         #is formed over the history. This means that the stellar spectra are normalized by the integral of the SFH =/= current 
@@ -490,7 +492,7 @@ def newstars_gen(stars_list):
                 age_clusters = np.array(age_clusters)
             
             f = np.zeros(nlam)
-            line_em = np.zeros([cloudy_nlam])
+            line_em = np.zeros(cloudy_nlam)
 
             for j in range(len(cluster_mass)):
                 num_HII_clusters = num_clusters[j]
@@ -619,18 +621,13 @@ def newstars_gen(stars_list):
                                                     logu = LogU, logz = LogZ, logq_1 = LogQ_1, Dust=cfg.par.HII_dust, abund=cfg.par.neb_abund[id_val], 
                                                     clean_up = cfg.par.cloudy_cleanup, index=id_val, efrac=escape_fraction)
                         except ValueError as err:
-                            # If the CLOUDY run crashes we switch to using lookup tables for young stars but throw an error for post-AGB stars.
-                            if  young_star:
-                                print ("WARNING: Switching to using lookup tables pre-packed with FSPS to calculate nebular emission for this particle.") 
-                                print ("WARNING: The emission line fluxes repoted may not be accurate if the particle lies outside the range of the lookup table paramters.")
-                                lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
-                                line_lum = sp.emline_luminosity
-                                wave_line = sp.emline_wavelengths
-                            else:
-                                print ("ERROR: Can't switch to using lookup tables.")
-                                print ("ERROR: Please check the CLOUDY output file to figure out why the run was unsuccessful" )
-                                raise ValueError('CLOUDY run was unsucessful')
-                
+                            # If the CLOUDY run crashes we switch to using FSPS lookup tables.
+                            print ("WARNING: Switching to using lookup tables pre-packed with FSPS to calculate nebular emission for this particle.") 
+                            print ("WARNING: The emission line fluxes repoted may not be accurate if the particle lies outside the range of the lookup table paramters.")
+                            lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
+                            line_lum = sp.emline_luminosity
+                            wave_line = sp.emline_wavelengths
+            
                 else:
                     lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=stars_list[i].fsps_zmet)
 
