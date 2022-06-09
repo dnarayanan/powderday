@@ -79,6 +79,10 @@ options = {'gadget_hdf5': m_control_sph,
 m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
+#from powderday.pah.pah_source_create import pah_source_add
+#if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
+
+
 sp = fsps.StellarPopulation()
 
 #setting solar metallicity value based on isochrone
@@ -170,8 +174,9 @@ else:
 
 # save SEDs
 # stars and black holes can't both be in the sim and write stellar SEDs to a file becuase they have different wavelength sizes
-if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
+if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED) and not (par.draine21_pah_model):
     stellar_sed_write(m)
+
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5'] and cfg.par.SKIRT_DATA_DUMP:
     SKIRT_data_dump(reg, ds, m, stars_list, bulgestars_list, diskstars_list, ds_type, sp)
@@ -231,11 +236,15 @@ print('Setting up Model')
 m_imaging = copy.deepcopy(m)
 m.conf.output.output_specific_energy = 'last'
 
+
 if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
     make_DIG_SED(m, par, model)
     DIG_source_add(m, reg, df_nu,boost)
     # Removing the DIG input SED file
     os.remove(cfg.model.inputfile + '_DIG_energy_dumped.sed')
+
+m.compute_isrf(True)
+
 
 if cfg.par.SED:
     make_SED(m, par, model)
