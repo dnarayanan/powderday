@@ -7,7 +7,7 @@ import powderday.config as cfg
 import pdb
 from tqdm import tqdm
 from powderday.pah.isrf_decompose import get_beta_nnls
-import os
+import os,glob
 #to do:
 
 #0 DONE---- treat the PAH emission spectra as sources and add them as such to pd so that they attenuate accordingly
@@ -40,11 +40,6 @@ import os
 #4. put in the ionization fraction and appropriate file name per cell.
 
 
-filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/dataverse_files/mMMP/iout_graD16emtPAHib_mmpisrf_1.00'
-#filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/BC03_Z0.02_10Myr/iout_graD16emtPAHib_bc03_z0.02_1e7_1.00'
-#filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/BC03_Z0.0004_10Myr/iout_graD16emtPAHib_bc03_z0.0004_1e7_1.50'
-#iout_DH20Ad_P0.20_0.00_bc03_z0.02_1e7_1.00'
-#filename = '/home/desika.narayanan/PAHs/vsg_stat_therm.iout'
 
 def pah_source_add(ds,reg,m,boost):
 
@@ -96,28 +91,50 @@ def pah_source_add(ds,reg,m,boost):
     except:
         grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','mass'],axis=0)
 
-    #second, read the information from the Draine files
-    PAH_list = read_draine_file(filename)
-    print("reading Draine File",filename)
-    draine_sizes = PAH_list[0].size_list
-    draine_lam = PAH_list[0].lam*u.micron
+    #second, read the information from the Draine files. We can do
+    #this just for an arbitrary file in one of the draine_directories
+    #since the size bins and wavelengths are all the same.
+    temp_filename = glob.glob(draine_directories[0]+'/*iout_graD16*nb*_0.00')[0]
+    temp_PAH_list = read_draine_file(temp_filename)
+    draine_sizes = temp_PAH_list[0].size_list
+    draine_lam = temp_PAH_list[0].lam*u.micron
+
+    #now read in the full PAH_list for all logU = 0 files (note, we'll
+    #fill in any logU>>4 PAH spectra on a case by case basis later in
+    #this module. these are relatively rare, and not worth the effort
+    #to carry around all that information otherwise)
+    
+    neutral_logU_iout_files = []
+    ion_logU_iout_files = []
+    for directory in draine_directories:
+        neutral_logU_iout_files.append(glob.glob(directory+'/*iout_graD16*nb*_0.00')[0])
+        ion_logU_iout_files.append(glob.glob(directory+'/*iout_graD16*ib*_0.00')[0])
+
+    neutral_PAH_reference_spectra = np.zeros([len(neutral_logU_iout_files),len(temp_PAH_list)],dtype=object)
+    ion_PAH_reference_spectra = np.zeros([len(ion_logU_iout_files),len(temp_PAH_list)],dtype=object)
+
+    print("[pah/pah_source_create:] building the reference PAH list for neutrals")
+    for counter,neutral_file in tqdm(enumerate(neutral_logU_iout_files)):
+        neutral_PAH_reference_spectra[counter,:] = np.asarray(read_draine_file(neutral_file))
+
+    print("[pah/pah_source_create:] building the reference PAH list for ions")
+    for counter,ion_file in tqdm(enumerate(ion_logU_iout_files)):
+        ion_PAH_reference_spectra[counter,:] = np.asarray(read_draine_file(ion_file))
+
     #third, on a cell-by-cell basis, interpolate the luminosity for
     #each grain size bin, and multiply by the number of grains in that
     #bin
-
-
     ncells = grid_of_sizes.shape[0]
 
     #define the grid that will store the PAH spectra for the entire mesh
-    grid_PAH_luminosity = np.zeros([ncells,len(PAH_list[0].lam)])
-    total_PAH_luminosity = np.zeros(len(PAH_list[0].lam))
+    grid_PAH_luminosity = np.zeros([ncells,len(temp_PAH_list[0].lam)])
+    total_PAH_luminosity = np.zeros(len(temp_PAH_list[0].lam))
 
 
 
     #get the logU and beta_nnls for the local ISRF
     beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
     pdb.set_trace()
-
 
     #find the indices of the Draine sizes that best match those that are in the simulation
     Draine_simulation_idx_left_edge_array = []
@@ -136,6 +153,26 @@ def pah_source_add(ds,reg,m,boost):
     #(i.e. the PAH SED for every draine size for a single draine
     #file).  
 
+
+    #june 13th, 2022: now at this point we want to loop through every
+    #cell: in this loop, we want to multiply the
+    #neutral_PAH_reference_spectra [*DEBUG note - we can later go back
+    #and figure out how to figure out when its an ion and when its a
+    #neutral] by the appropriate beta_nnls to get a pah_grid for every
+    #single cell.  this pah_grid will be, like it is below, an
+    #n_draine_sizes,N_draine_wavelengths SED for every draine size.
+    #we then (as below) dot this into the simulation_sizes and we're
+    #good to go!
+
+    #june 13th, 2022 -- some things to watch out for:
+
+    #a. time...this may take way too long. if so, we'll want to pool.map this. maybe without chunking (ask prerak)
+
+    #b. we need to remember to then go back in after the fact, and for
+    #any cells which have logU>>4, do those manually (i.e. create
+    #reference spectra for those manually, and dot product those manually.
+    
+
     #REMOVE THIS COMMENT WHEN THIS IS DONE: THIS NEEDS TO BE CHANGED
     #IN TWO WAYS: A. CURRENTLY THIS IS (167,2500) WHICH IS
     #N_DRAINE_SIZES,N_DRAINE_WAVELENGTHS.  This has to happen inside a
@@ -147,12 +184,6 @@ def pah_source_add(ds,reg,m,boost):
     #take 30 min, so if we can throw this into a pool.map that'll be
     #the business.
 
-    #B. The key here is that this can't just work for a single Draine
-    #file-- it has to have the beta_nnls from all the draine files
-    #(where the correct draine file is known by the logU of the cell).
-    #in essence, all the magic happens in that convolution.
-
-    #C. how to actually do the dot product over all cells is not yet clear ot me.  it might be worth doing some dummy array testing.  
 
     size_arange = np.arange(len(simulation_sizes))
     pah_grid = np.array([x.lum for x in PAH_list])
@@ -213,10 +244,6 @@ def pah_source_add(ds,reg,m,boost):
 
 
 #    for i_cell in tqdm(range(ncells)):
-        
-        #-----------------------------
-        #THIS IS WHERE WE WILL NEED TO EVENTUALLY GET RID OF *FILENAME* UP TOP, AND DECIDE WHAT RADIATION FIELD WE'RE USING FOR THIS PARTICULAR CELL
-        #-----------------------------
         
         
         #in principle this doesn't need to be done inside the loop for
