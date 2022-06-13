@@ -1,11 +1,10 @@
 import numpy as np
 import os,h5py,pdb
+import powderday.config as cfg
 from astropy import units as u
 from astropy import constants as const
-#DEBUG - CHANGE TO THIS WHEN WE USE IN ACTUAL POWDERDAY CODE from powderday.pah.pah_file_read import read_draine_file
-from pah_file_read import read_draine_file
+from powderday.pah.pah_file_read import read_draine_file
 from scipy.interpolate import interp1d,interp2d
-import pdb
 from scipy.optimize import nnls
 from tqdm import tqdm
 
@@ -15,6 +14,9 @@ def find_nearest(array, value):
 
 def get_Cabs(draine_directories,simulation_sizes,gsd):
     
+    ncells = simulation_sizes.shape[0]
+    n_simulation_sizes = simulation_sizes.shape[1]
+
     for file in os.listdir(draine_directories[0]):
         if file.startswith("iout_graD") and file.endswith("_0.00") and "ib" in file: Cabsfile_cation = draine_directories[0]+'/'+file
         if file.startswith("iout_graD") and file.endswith("_0.00") and "nb" in file: Cabsfile_neutral = draine_directories[0]+'/'+file
@@ -57,39 +59,49 @@ def get_Cabs(draine_directories,simulation_sizes,gsd):
     f_2d_interp_neutral = interp2d(draine_sizes.value,draine_lam.value,Cabs_neutral.T,kind = 'cubic')
     #Cabs_cation_regrid = f_2d_interp_cation(simulation_sizes.value,simulation_isrf_lam.value).T
     #Cabs_neutral_regrid = f_2d_interp_neutral(simulation_sizes.value,simulation_isrf_lam.value).T
-    Cabs_cation_regrid = f_2d_interp_cation(simulation_sizes.value,draine_lam.value).T
-    Cabs_neutral_regrid = f_2d_interp_neutral(simulation_sizes.value,draine_lam.value).T
-    
-    #we now have to get Cabs(nu) -- right now we have Cabs(size,nu).
-    #To do this, we should ensure that the GSD is at the same sizes as the
-    #draine files (and if not, regrid so that it is), and then multiply
-    #Cabs(size,nu) * dN, where dN is the number of grains at a given size.
-    
-    #we normalize the grain size distribution by the integral over the grain sizes so that this is normalized for the dot product into Cabs
-    gsd_normalized = gsd/np.trapz(gsd,simulation_sizes)
 
-    Cabs_cation_regrid = np.dot(gsd_normalized,Cabs_cation_regrid) # now in terms of just wavelength (at simulation_isrf_lam wavelengths)
-    Cabs_neutral_regrid = np.dot(gsd_normalized,Cabs_neutral_regrid)
+
+    #Cabs regrid arrays are (n_sizes,nwavelengths,ncells) big
+    Cabs_cation_regrid_sizes_lam_cells = np.empty([n_simulation_sizes,draine_lam.shape[0],ncells])
+    Cabs_neutral_regrid_sizes_lam_cells = np.empty([n_simulation_sizes,draine_lam.shape[0],ncells])
+    Cabs_cation_regrid_lam_cells = np.empty([draine_lam.shape[0],ncells])
+    Cabs_neutral_regrid_lam_cells = np.empty([draine_lam.shape[0],ncells])
+    gsd_normalized = np.empty([n_simulation_sizes,ncells])
+
+    print("[pah/isrf_decompose]: resampling Cabs from the Draine size arrays to the simulation size arrays")
+
+    for i in tqdm(range(ncells)):
+        Cabs_cation_regrid_sizes_lam_cells[:,:,i] = f_2d_interp_cation(simulation_sizes[i,:],draine_lam.value).T
+        Cabs_neutral_regrid_sizes_lam_cells[:,:,i] = f_2d_interp_neutral(simulation_sizes[i,:],draine_lam.value).T
+    
+        #we now have to get Cabs(nu) -- right now we have Cabs(size,nu).
+        #To do this, we should ensure that the GSD is at the same sizes as the
+        #draine files (and if not, regrid so that it is), and then multiply
+        #Cabs(size,nu) * dN, where dN is the number of grains at a given size.
+        
+        #we normalize the grain size distribution by the integral over the grain sizes so that this is normalized for the dot product into Cabs
+        
+
+        gsd_normalized[:,i] = gsd[i,:]/np.trapz(gsd[i,:],simulation_sizes[i,:])
+
+
+        Cabs_cation_regrid_lam_cells[:,i] = np.dot(gsd_normalized[:,i],Cabs_cation_regrid_sizes_lam_cells[:,:,i]) # now in terms of just wavelength,ncells (at simulation_isrf_lam wavelengths)
+        Cabs_neutral_regrid_lam_cells[:,i] = np.dot(gsd_normalized[:,i],Cabs_neutral_regrid_sizes_lam_cells[:,:,i])
     
     #get the units right since they're not faithfully followed throughout
-    Cabs_cation_regrid = (Cabs_cation_regrid.cgs.value)*u.cm**2
-    Cabs_neutral_regrid = (Cabs_neutral_regrid.cgs.value)*u.cm**2
-
-    return Cabs_cation_regrid,Cabs_neutral_regrid
 
 
+    Cabs_cation_regrid_lam_cells = (Cabs_cation_regrid_lam_cells)*u.cm**2
+    Cabs_neutral_regrid_lam_cells = (Cabs_neutral_regrid_lam_cells)*u.cm**2
 
-def get_beta_nnls(draine_data_dir='/blue/narayanan/desika.narayanan/powderday_files/PAHs/dataverse_files/',cell_size_file ='/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/grid_physical_properties.027_galaxy0.npz'):
+    return Cabs_cation_regrid_lam_cells,Cabs_neutral_regrid_lam_cells
 
-    #DEBUG eventually change to have no input arguments and haave
-    #draine_data_dir part of cfg.master...and to throw an error if it
-    #doesn't exist.  beyond draine_data_dir, we'll need to read in
-    #simulation_sizes in micron to get rid of the GSD debug below
 
+
+def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, cell_size_file ='/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/grid_physical_properties.027_galaxy0.npz'):
 
     #get the wavelengths of the simulation ISRF DEBUG DEBUG DEBUG this
-    #will eventually, like the above GSD, get read in via a function call.
-    #this is just for testing.
+    #will eventually
     f = h5py.File('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/pd_skirt_comparison.027.otf_dtm.rtout.sed')
 
     #DEBUG WE WILL NEED TO PUT IN SOMETHING AUTOMATED HERE TO GRAB THE LAST ITERATION
@@ -100,27 +112,12 @@ def get_beta_nnls(draine_data_dir='/blue/narayanan/desika.narayanan/powderday_fi
 
     simulation_specific_energy_sum = dset['specific_energy_nu']*u.erg/u.s/u.g #is [n_nu, n_dust, n_cells] big  
 
-    #get the simulation_isrf in units of erg/s DEBUG DEBUG DEBUG
-    #eventually we'll want to feed in the dust mass per cell from
-    #powderday itself, instead of this janky reading in npz files
-    data = np.load(cell_size_file)
-    grid_dust_masses = data['grid_dustmass']*u.Msun
+    #get the simulation_isrf in units of erg/s
+    grid_dust_masses = reg['dust','mass'].in_units('g').to_astropy() #getting the dust masses out of yt units and into astropy unist
     simulation_specific_energy_sum *= grid_dust_masses.cgs #now in erg/s
-    
+    ncells = grid_dust_masses.shape[0]
 
-
-
-    #simulation_specific_energy_sum_lam = np.flip(simulation_specific_energy_sum,axis=0) #just ordering in terms of the wavelength grid
-    
-    #first list all the directories we're going to go into to build the table
-    
-    draine_directories = []
-    print('powderday/pah/isrf_decompose/get_beta_nnls]: building a ISRF table from the following directories: ')
-    for it in os.scandir(draine_data_dir):
-        if it.is_dir():
-            print(it.path)
-            draine_directories.append(it.path)
-
+    #we have read in the draine directories explicitly to ensure that the ordering of them is identical from pah_source_create
     isrf_files = []
     for directory in draine_directories:
         for file in os.listdir(directory):
@@ -187,18 +184,17 @@ def get_beta_nnls(draine_data_dir='/blue/narayanan/desika.narayanan/powderday_fi
 
 
 
-    #TEMP get a GSD for Cabs
-    #DEBUG DEBUG DEBUG - we'll want this to be an input from a
-    #function call eventually.  we'll want this function to read in both
-    #the sizes of the GSD and the dN.  this is just for testing for now.
-    data = np.load('extinction_m12n256_MW.npz')
-    gsd = data['a3N_loga'][0,:]
-    simulation_sizes = 10.**(data['loga'])*u.micron
+    simulation_sizes = np.broadcast_to(simulation_sizes,(ncells,simulation_sizes.shape[0]))*u.micron
+    gsd = gsd.value
     Cabs_cation_regrid,Cabs_neutral_regrid = get_Cabs(draine_directories,simulation_sizes,gsd)
 
 
+    #DEBUG CAN WE GET RID OF CELL_SIZE_FILE here -- the answer is yes,
+    #and this is easy, but it requires moving the PAH addition to
+    #after the tributary so that we can just use
+    #reg.parameters['cell_size']
 
-    logU_grid = get_logU(simulation_specific_energy_sum_regrid,Cabs_cation_regrid,Cabs_neutral_regrid,draine_lam,cell_size_file)
+    logU_grid = get_logU(simulation_specific_energy_sum_regrid,Cabs_cation_regrid,Cabs_neutral_regrid,draine_lam,reg)
 
 
 
@@ -261,7 +257,7 @@ def get_beta_nnls(draine_data_dir='/blue/narayanan/desika.narayanan/powderday_fi
     =============================================================
     DEBUG CAN REMOVE THIS ENTIRE BLOCK WHEN I'M DONE DEBUGGING
     =============================================================
-    '''
+
     
     
     import matplotlib.pyplot as plt
@@ -288,7 +284,7 @@ def get_beta_nnls(draine_data_dir='/blue/narayanan/desika.narayanan/powderday_fi
 
 
 
-
+    #DEBUG CAN REMOVE ALL OF THIS WHEN I'M DONE DEBUGGING
     #plotting j ust to check
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -303,21 +299,25 @@ def get_beta_nnls(draine_data_dir='/blue/narayanan/desika.narayanan/powderday_fi
     ax.set_xlim([0.1,10])
     fig.savefig('isrf.png',dpi=300)
     
-    '''
+
     =============================================================
     =============================================================
     '''
 
-    pdb.set_trace()
-    return beta_nnls
+
+    return beta_nnls,logU_grid
 
 
-def get_logU(cell_isrf,Cabs_cation,Cabs_neutral,draine_lam,cell_size_file):
+def get_logU(cell_isrf,Cabs_cation,Cabs_neutral,draine_lam,reg):
     #get the cell sizes since ISRF is not per cm^2 (and it needs to be
     #so that we can convert to erg/cm^3)
     
-    data = np.load(cell_size_file)
-    cell_sizes = data['cell_size']*u.cm
+    
+    #for some reason the units attached in reg.parameters needs to be reattached for it to carry through in the upcoming arithmetic
+    cell_sizes = reg.parameters['cell_size'].value*u.cm
+
+
+    
     cell_isrf = (cell_isrf/(cell_sizes**2.))
     
 
@@ -338,26 +338,29 @@ def get_logU(cell_isrf,Cabs_cation,Cabs_neutral,draine_lam,cell_size_file):
     draine_nu = (const.c/draine_lam).to(u.Hz)
 
     cell_isrf = (cell_isrf.T/draine_nu).T
-
-
+    
     #eq. 5 from Draine et al. 2021, 917, 3, ApJ
     #U = int(d_nu u * c* C_abs)/h_ref
 
-    y = (cell_isrf.T*const.c*Cabs_neutral/h_ref).T
-    U = (np.trapz(y,draine_nu[::-1],axis=0)).decompose()
+    #DEBUG DEBUG DEBUG will need to put this in terms of cations or
+    #neutrals depending on if its an ion or netural
+
+    print('[pah/isrf_decompose/get_logU:] Computing logU for PAH calculation')
     
-    logU = np.log10(U[U>0])
+    #this is where we're' stuck -- IN TRYING TO MULTIPLY THESE ARRAYS QUICKLY WITHOUT A FOR LOop.  adam suggests: 
+    #y = cell_isrf * Cabs_neutral[:,None,:]
+    #but we get nonsensical answers for logU...
 
-
-    import matplotlib.pyplot as plt
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.hist(logU.value,bins=25,log=True,color='indigo')
-    fig.savefig('u_hist.png',dpi=300)
     
 
-     
+    y = cell_isrf * const.c*Cabs_neutral[:,None,:]/h_ref
+    U= (np.trapz(y,draine_nu[::-1],axis=0)).decompose()
+    U = np.average(U,axis=0)
 
-    pdb.set_trace()
+    #just to make any numerical isseues with U<~0 not impact our logU calc
+    U[U<=0] = 1.e-10
+    logU = np.log10(U)
+
+    return logU
 
     

@@ -419,6 +419,11 @@ def variable_set():
         cfg.par.otf_extinction = False
 
     try:
+        cfg.par.explicit_pah
+    except:
+        cfg.par.explicit_pah = False
+
+    try:
         cfg.par.draine21_pah_model
     except:
         cfg.par.draine21_pah_model = False

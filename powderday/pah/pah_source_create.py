@@ -6,7 +6,8 @@ from astropy import constants as constants
 import powderday.config as cfg
 import pdb
 from tqdm import tqdm
-
+from powderday.pah.isrf_decompose import get_beta_nnls
+import os
 #to do:
 
 #0 DONE---- treat the PAH emission spectra as sources and add them as such to pd so that they attenuate accordingly
@@ -16,16 +17,25 @@ from tqdm import tqdm
 
 #to do this:
 
-#a. first, we need to have all the PAH filenames and SEDs on disk.
+#a. DONE --first, we need to have all the PAH filenames and SEDs on disk.
 
-#b. then we need to figure out how to make those SEDs a basis
+#b. DONE --then we need to figure out how to make those SEDs a basis
 #function, and how to break up one of our ISRFs into a combination of
-#those basis functions.
+#those basis functions. -- in get_beta_nnls
 
-#c. after this, we can compute the contribution to the PAH spectrum from each radiation field for each cell
+#c. PAH_list needs to be read in for every PAH_file.  ideally we would
+#have some way of ensuring that the PAH_files are in the same order as
+#the ISRF directories -- perhaps the thing to do here is to read in
+#the directories, and then pass that list into isrf_decompose to
+#ensure that they're the same.
 
-
-#3. put in the radiation fields and appropriate filename per cell
+#c. isrf_decompose/get_beta_nnls takes in (once modified) the ISRF
+#grid for the entire simulation, the GSD for every cell (once
+#modified), and the dust mass, and returns the beta contribution of
+#all the basis vectors, as well as the logU.  so now we need to shape
+#that into place to return that properly here, and then for every
+#cell, get the betas and log Us to combine the PAH emission files
+#right. q
 
 #4. put in the ionization fraction and appropriate file name per cell.
 
@@ -38,11 +48,22 @@ filename = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/dataverse_file
 
 def pah_source_add(ds,reg,m,boost):
 
+    
+    #first - establish where we're working
+    draine_directories = []
+    print('powderday/pah/pah_source_create]: reading from the following Draine PAH directories')
+    for it in os.scandir(cfg.par.draine_data_dir):
+        if it.is_dir():
+            print(it.path)
+            draine_directories.append(it.path)
+
+
     #first establish the grain size distribution and sizes from the
     #hydro simulation
     grid_of_sizes = ds.parameters['reg_grid_of_sizes']
 
-    simulation_sizes = (ds.parameters['grain_sizes_in_micron']*u.micron).to(u.cm).value
+    simulation_sizes = (ds.parameters['grain_sizes_in_micron']*u.micron)
+
 
     #determine q_PAH for analysis and save it to parameters for
     #writing out DEBUG - WE SHOULD CHANGE THIS TO INCLUDE A FEW
@@ -52,7 +73,7 @@ def pah_source_add(ds,reg,m,boost):
 
     ad = ds.all_data()
 
-    idx_pah = np.where(simulation_sizes <= 3.e-7)[0]
+    idx_pah = np.where(simulation_sizes.to(u.cm).value <= 3.e-7)[0]
 
 
     dN_pah = np.sum(reg['particle_dust','numgrains'][:,idx_pah],axis=1)
@@ -61,18 +82,19 @@ def pah_source_add(ds,reg,m,boost):
     q_pah = (dN_pah * reg['particle_dust','mass'])/(dN_total*reg['particle_dust','mass'])
     q_pah = q_pah * reg['particle_dust','carbon_fraction']
 
-    reg.parameters = {}
     reg.parameters['q_pah'] = q_pah
     
 
     #compute the mass weighted grain size distributions for comparison in analytics.py 
-    try: #for mesh based codes or arepo 
-        particle_mass_weighted_gsd = np.average(reg['dust','numgrains'],weights=reg['dust','mass'],axis=0)
-        grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','mass'],axis=0)
-    except:
-        particle_mass_weighted_gsd = np.average(reg['particle_dust','numgrains'],weights=reg['dust','mass'],axis=0)
+    #try: #for mesh based code
+    #particle_mass_weighted_gsd = np.average(reg['dust','numgrains'],weights=reg['dust','mass'],axis=0)
+    #grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','mass'],axis=0)
+    #except:
+    particle_mass_weighted_gsd = np.average(reg['particle_dust','numgrains'],weights=reg['dust','mass'],axis=0)
+    try: #for octree    
         grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','smoothedmasses'],axis=0)
-        
+    except:
+        grid_mass_weighted_gsd = np.average(grid_of_sizes,weights=reg['dust','mass'],axis=0)
 
     #second, read the information from the Draine files
     PAH_list = read_draine_file(filename)
@@ -83,15 +105,23 @@ def pah_source_add(ds,reg,m,boost):
     #each grain size bin, and multiply by the number of grains in that
     #bin
 
+
     ncells = grid_of_sizes.shape[0]
 
     #define the grid that will store the PAH spectra for the entire mesh
     grid_PAH_luminosity = np.zeros([ncells,len(PAH_list[0].lam)])
     total_PAH_luminosity = np.zeros(len(PAH_list[0].lam))
 
+
+
+    #get the logU and beta_nnls for the local ISRF
+    beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
+    pdb.set_trace()
+
+
     #find the indices of the Draine sizes that best match those that are in the simulation
     Draine_simulation_idx_left_edge_array = []
-    for size in simulation_sizes:
+    for size in simulation_sizes.to(u.cm).value:
         idx0 = find_nearest(draine_sizes,size)
         #if draine_sizes[idx0] > size: idx0 -=1
         
@@ -101,17 +131,34 @@ def pah_source_add(ds,reg,m,boost):
         Draine_simulation_idx_left_edge_array.append(idx0)
 
 
+
+    #this pah_grid is a n_draine_sizes length list of PAH SEDs
+    #(i.e. the PAH SED for every draine size for a single draine
+    #file).  
+
+    #REMOVE THIS COMMENT WHEN THIS IS DONE: THIS NEEDS TO BE CHANGED
+    #IN TWO WAYS: A. CURRENTLY THIS IS (167,2500) WHICH IS
+    #N_DRAINE_SIZES,N_DRAINE_WAVELENGTHS.  This has to happen inside a
+    #for(ncells) for loop. The reason for this is that the altnerative
+    #is to dump it all inside an
+    #(ncells,n_draine_sizes,n_draine_wavelengths) array, but this
+    #would take even in small runs something like 50 GB memory.
+    #better to lose some speed here.  a for loop for a small grid will
+    #take 30 min, so if we can throw this into a pool.map that'll be
+    #the business.
+
+    #B. The key here is that this can't just work for a single Draine
+    #file-- it has to have the beta_nnls from all the draine files
+    #(where the correct draine file is known by the logU of the cell).
+    #in essence, all the magic happens in that convolution.
+
+    #C. how to actually do the dot product over all cells is not yet clear ot me.  it might be worth doing some dummy array testing.  
+
     size_arange = np.arange(len(simulation_sizes))
-
-    #in principle, PAH_list will change cell by cell as the radiation
-    #field changes cell by cell.  then, this should all go inside the
-    #coming up commented loop.  however, this takes forever...like 2
-    #hours vs a few sec.  for testing, for now, this is going to
-    #remain out of the loop.
-
-
     pah_grid = np.array([x.lum for x in PAH_list])
     idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
+
+    pdb.set_trace()
 
     #set the PAH luminosity of the cell to be the dot product of
     #the Draine luminosities (i.e., pah_grid[idx,:] which has
@@ -120,6 +167,7 @@ def pah_source_add(ds,reg,m,boost):
     #grid_of_sizes[i_cell,:]). note, we take the transpose of
     #grid_of_sizes to get the dimensions to match up correctly for the dot product
 
+    
     grid_PAH_luminosity = np.dot(pah_grid[idx,:].T, grid_of_sizes.T).T
     particle_PAH_luminosity = np.dot(pah_grid[idx,:].T,reg['particle_dust','numgrains'].T).T
 

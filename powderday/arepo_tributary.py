@@ -94,6 +94,7 @@ def arepo_m_gen(fname,field_add):
         reg.parameters = {}
         reg.parameters['cell_size'] = rad_dens*2 #so that we return a diameter
 
+
     if cfg.par.otf_extinction==False:
 
         if cfg.par.PAH == True:

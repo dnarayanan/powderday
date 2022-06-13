@@ -79,7 +79,8 @@ options = {'gadget_hdf5': m_control_sph,
 m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
-#from powderday.pah.pah_source_create import pah_source_add
+from powderday.pah.pah_source_create import pah_source_add
+pah_source_add(ds,reg,m,boost)
 #if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
 
 
@@ -116,17 +117,6 @@ elif 'bpss' in isochrone:
     print(f'solar metallicity = {cfg.par.solar}')
 print('----------------------------------------------')
 
-# figure out which tributary we're going to
-
-ds_type = ds.dataset_type
-# define the options dictionary
-options = {'gadget_hdf5': m_control_sph,
-           'tipsy': m_control_sph,
-           'enzo_packed_3d': m_control_enzo,
-           'arepo_hdf5': m_control_arepo}
-
-m_gen = options[ds_type]()
-m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 # Get dust wavelengths. This needs to preceed the generation of sources
 # for hyperion since the wavelengths of the SEDs need to fit in the
