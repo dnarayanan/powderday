@@ -8,6 +8,7 @@ import pdb
 from tqdm import tqdm
 from powderday.pah.isrf_decompose import get_beta_nnls
 import os,glob
+from multiprocessing import Pool
 #to do:
 
 #0 DONE---- treat the PAH emission spectra as sources and add them as such to pd so that they attenuate accordingly
@@ -110,16 +111,16 @@ def pah_source_add(ds,reg,m,boost):
         neutral_logU_iout_files.append(glob.glob(directory+'/*iout_graD16*nb*_0.00')[0])
         ion_logU_iout_files.append(glob.glob(directory+'/*iout_graD16*ib*_0.00')[0])
 
-    neutral_PAH_reference_spectra = np.zeros([len(neutral_logU_iout_files),len(temp_PAH_list)],dtype=object)
-    ion_PAH_reference_spectra = np.zeros([len(ion_logU_iout_files),len(temp_PAH_list)],dtype=object)
+    neutral_PAH_reference_objects = np.zeros([len(neutral_logU_iout_files),len(temp_PAH_list)],dtype=object)
+    ion_PAH_reference_objects = np.zeros([len(ion_logU_iout_files),len(temp_PAH_list)],dtype=object)
 
     print("[pah/pah_source_create:] building the reference PAH list for neutrals")
     for counter,neutral_file in tqdm(enumerate(neutral_logU_iout_files)):
-        neutral_PAH_reference_spectra[counter,:] = np.asarray(read_draine_file(neutral_file))
+        neutral_PAH_reference_objects[counter,:] = np.asarray(read_draine_file(neutral_file))
 
     print("[pah/pah_source_create:] building the reference PAH list for ions")
     for counter,ion_file in tqdm(enumerate(ion_logU_iout_files)):
-        ion_PAH_reference_spectra[counter,:] = np.asarray(read_draine_file(ion_file))
+        ion_PAH_reference_objects[counter,:] = np.asarray(read_draine_file(ion_file))
 
     #third, on a cell-by-cell basis, interpolate the luminosity for
     #each grain size bin, and multiply by the number of grains in that
@@ -134,7 +135,6 @@ def pah_source_add(ds,reg,m,boost):
 
     #get the logU and beta_nnls for the local ISRF
     beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
-    pdb.set_trace()
 
     #find the indices of the Draine sizes that best match those that are in the simulation
     Draine_simulation_idx_left_edge_array = []
@@ -148,10 +148,6 @@ def pah_source_add(ds,reg,m,boost):
         Draine_simulation_idx_left_edge_array.append(idx0)
 
 
-
-    #this pah_grid is a n_draine_sizes length list of PAH SEDs
-    #(i.e. the PAH SED for every draine size for a single draine
-    #file).  
 
 
     #june 13th, 2022: now at this point we want to loop through every
@@ -173,24 +169,39 @@ def pah_source_add(ds,reg,m,boost):
     #reference spectra for those manually, and dot product those manually.
     
 
-    #REMOVE THIS COMMENT WHEN THIS IS DONE: THIS NEEDS TO BE CHANGED
-    #IN TWO WAYS: A. CURRENTLY THIS IS (167,2500) WHICH IS
-    #N_DRAINE_SIZES,N_DRAINE_WAVELENGTHS.  This has to happen inside a
-    #for(ncells) for loop. The reason for this is that the altnerative
-    #is to dump it all inside an
-    #(ncells,n_draine_sizes,n_draine_wavelengths) array, but this
-    #would take even in small runs something like 50 GB memory.
-    #better to lose some speed here.  a for loop for a small grid will
-    #take 30 min, so if we can throw this into a pool.map that'll be
-    #the business.
-
-
+    #get the indices for where the Draine size bins match ours 
     size_arange = np.arange(len(simulation_sizes))
-    pah_grid = np.array([x.lum for x in PAH_list])
     idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
 
-    pdb.set_trace()
+    #pah_grid = np.array([x.lum for x in temp_PAH_list])
 
+    #one day some young whippersnapper is going to come along and
+    #totally make these nested for loops all cool and pythonic and
+    #fast.  and i [desika] will buy that whippersnapper a beer if they
+    #PR it into the main branch. 
+
+    grid_PAH_luminosity = np.zeros([ncells,len(draine_lam)])
+    particle_PAH_luminosity = np.zeros([len(reg['particle_dust','numgrains']),len(draine_lam)])
+
+    print("Computing the PAH lumionsities for every cell given its grain size distribution and logU")
+    for i in tqdm(range(500)):#DEBUGDEBUGDEBUG range(ncells)):
+        beta_cell = beta_nnls[:,i]
+        beta_cell = beta_cell/np.max(beta_cell)
+
+        #need to make a PAH_list that is just n_draine_sizes long that is convolved with beta_nnls
+        pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
+        for j in range(len(beta_cell)):
+            PAH_list = neutral_PAH_reference_objects[j]
+            temp_pah_grid = np.array([x.lum for x in PAH_list])
+            temp_pah_grid *= beta_cell[j]
+            pah_grid += temp_pah_grid
+            
+        grid_PAH_luminosity[i,:] = np.dot(pah_grid[idx,:].T, grid_of_sizes.T[:,i])
+        particle_PAH_luminosity[i,:] = np.dot(pah_grid[idx,:].T,reg['particle_dust','numgrains'].T[:,i])
+
+
+    grid_PAH_luminosity[np.isnan(grid_PAH_luminosity)] = 0
+    particle_PAH_luminosity[np.isnan(particle_PAH_luminosity)] = 0
     #set the PAH luminosity of the cell to be the dot product of
     #the Draine luminosities (i.e., pah_grid[idx,:] which has
     #dimensions (simulation_sizes,wavelengths)) with the actual
@@ -198,10 +209,10 @@ def pah_source_add(ds,reg,m,boost):
     #grid_of_sizes[i_cell,:]). note, we take the transpose of
     #grid_of_sizes to get the dimensions to match up correctly for the dot product
 
-    
-    grid_PAH_luminosity = np.dot(pah_grid[idx,:].T, grid_of_sizes.T).T
-    particle_PAH_luminosity = np.dot(pah_grid[idx,:].T,reg['particle_dust','numgrains'].T).T
+    #grid_PAH_luminosity = np.dot(pah_grid[idx,:].T, grid_of_sizes.T).T
+    #particle_PAH_luminosity = np.dot(pah_grid[idx,:].T,reg['particle_dust','numgrains'].T).T
 
+ 
     flam = (np.divide(particle_PAH_luminosity,draine_lam.cgs.value))
     fnu = draine_lam.cgs.value**2/constants.c.cgs.value*flam
     nu = (constants.c/draine_lam).to(u.Hz)
@@ -216,15 +227,15 @@ def pah_source_add(ds,reg,m,boost):
 
 
 
-    for i in range(particle_PAH_luminosity.shape[0]):
+
+    for i in np.arange(500):# DEBUG DEBUG DEBUG THIS IS JUST SMALL LIKE THE LOOP ABOVE THIS NEEDS TO BE FIXED TOT HE FOLLOWING range(particle_PAH_luminosity.shape[0]):
         #lum = np.trapz(draine_lam[wpah_lam].cgs.value,flam[i,wpah_lam]).value
         fnu_reverse = fnu[i,:][::-1]
-
-        lum = np.absolute(np.trapz(nu_reverse[wpah_nu_reverse].cgs.value,fnu_reverse[wpah_nu_reverse])).value.item()
-        #reversing arrays to make nu increasing, and therefore correct for hyperion addition
-        m.add_point_source(luminosity = lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse].value), position = reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
         
-
+        lum = np.absolute(np.trapz(nu_reverse[wpah_nu_reverse].cgs.value,fnu_reverse[wpah_nu_reverse])).item()
+        #reversing arrays to make nu increasing, and therefore correct for hyperion addition
+        m.add_point_source(luminosity = lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse]), position = reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
+        
     if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
     reg.parameters['PAH_lam'] = draine_lam.value
