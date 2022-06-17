@@ -9,41 +9,38 @@ from tqdm import tqdm
 from powderday.pah.isrf_decompose import get_beta_nnls
 import os,glob
 from multiprocessing import Pool
-#to do:
-
-#0 DONE---- treat the PAH emission spectra as sources and add them as such to pd so that they attenuate accordingly
-
-#1. speed up the convolution with grain size distribution -- currently
-#takes ~2 hours per galaxy. Assume the slow part is the np.dot product.
-
-#to do this:
-
-#a. DONE --first, we need to have all the PAH filenames and SEDs on disk.
-
-#b. DONE --then we need to figure out how to make those SEDs a basis
-#function, and how to break up one of our ISRFs into a combination of
-#those basis functions. -- in get_beta_nnls
-
-#c. PAH_list needs to be read in for every PAH_file.  ideally we would
-#have some way of ensuring that the PAH_files are in the same order as
-#the ISRF directories -- perhaps the thing to do here is to read in
-#the directories, and then pass that list into isrf_decompose to
-#ensure that they're the same.
-
-#c. isrf_decompose/get_beta_nnls takes in (once modified) the ISRF
-#grid for the entire simulation, the GSD for every cell (once
-#modified), and the dust mass, and returns the beta contribution of
-#all the basis vectors, as well as the logU.  so now we need to shape
-#that into place to return that properly here, and then for every
-#cell, get the betas and log Us to combine the PAH emission files
-#right. q
-
-#4. put in the ionization fraction and appropriate file name per cell.
 
 
+#1. there are bugs here -- when we run on 1500 sources we either get
+#NaNs in the final flux array, or seg faults.  it's not clear why.
+#putting in a pd.bset_trace() and looking at m.sources (right before
+#SED propagation in front end) to comppare the units and ranges of the
+#different types of sources may help to see if there's a units issue,
+#or a wavelength range issue.
+
+#1a. beyond units check if a point source collection saves us (maybe
+#it's a memory thing given the number of source?)
+
+#1b. maybe we only want to include sources above some percentile in
+#luminosity?  this could be possible given the large number of sources
+#that it takes to seg fault (1500+).
+
+#1c. maybe carefully compare against how the individual point sources
+#are added with AGN to see how this compares -- maybe there's
+#somewhere that i'm making a mistake.
+
+#1d. is it okay that there are pah fluxes that are 0 when considering the entire SED? should we make them a min value
+
+#2. once this is sorted, need to:
+
+#2a. have the code know if its neutral or ion and use that luminosity
+
+#2b. manually add the logU>4 sources
+
+#2c. only compute this for PAHs and not all grains (or even all graphites)
 
 def pah_source_add(ds,reg,m,boost):
-
+    
     
     #first - establish where we're working
     draine_directories = []
@@ -135,6 +132,7 @@ def pah_source_add(ds,reg,m,boost):
 
     #get the logU and beta_nnls for the local ISRF
     beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
+    
 
     #find the indices of the Draine sizes that best match those that are in the simulation
     Draine_simulation_idx_left_edge_array = []
@@ -183,6 +181,7 @@ def pah_source_add(ds,reg,m,boost):
     grid_PAH_luminosity = np.zeros([ncells,len(draine_lam)])
     particle_PAH_luminosity = np.zeros([len(reg['particle_dust','numgrains']),len(draine_lam)])
 
+
     print("Computing the PAH lumionsities for every cell given its grain size distribution and logU")
     for i in tqdm(range(500)):#DEBUGDEBUGDEBUG range(ncells)):
         beta_cell = beta_nnls[:,i]
@@ -213,13 +212,18 @@ def pah_source_add(ds,reg,m,boost):
     #particle_PAH_luminosity = np.dot(pah_grid[idx,:].T,reg['particle_dust','numgrains'].T).T
 
  
-    flam = (np.divide(particle_PAH_luminosity,draine_lam.cgs.value))
-    fnu = draine_lam.cgs.value**2/constants.c.cgs.value*flam
+
     nu = (constants.c/draine_lam).to(u.Hz)
+    #the units here are Lusn/Hz - this is to be consistent with our
+    #stellar fnu addition later. it all gets renormalized by the
+    #luminosity, so the exact units don't matter as long as it's consistent.
+    fnu = np.divide((particle_PAH_luminosity*u.erg/u.s).to(u.Lsun).value,nu.to(u.Hz).value)
 
     #Because the Draine templates include re-emission, but we want to
     #add the PAHs as sources only, we restrict to the PAH range.
     nu_reverse = nu[::-1]
+
+    #DEBUG DEBUG DEBUG DEBUG  THESE WAVELENGTHS
     nu_pah2 = (constants.c/(3*u.micron)).to(u.Hz) #start of the pah range
     nu_pah1 = (constants.c/(20.*u.micron)).to(u.Hz) #end of pah range
     wpah_nu_reverse = np.where( (nu_reverse.value < nu_pah2.value) & (nu_reverse.value > nu_pah1.value))[0]
@@ -231,11 +235,16 @@ def pah_source_add(ds,reg,m,boost):
     for i in np.arange(500):# DEBUG DEBUG DEBUG THIS IS JUST SMALL LIKE THE LOOP ABOVE THIS NEEDS TO BE FIXED TOT HE FOLLOWING range(particle_PAH_luminosity.shape[0]):
         #lum = np.trapz(draine_lam[wpah_lam].cgs.value,flam[i,wpah_lam]).value
         fnu_reverse = fnu[i,:][::-1]
-        
-        lum = np.absolute(np.trapz(nu_reverse[wpah_nu_reverse].cgs.value,fnu_reverse[wpah_nu_reverse])).item()
+        #if np.where(fnu_reverse == 0)[0] > 0:
+        #    fnu_reverse[fnu_reverse ==0 ] = np.min(fnu_reverse[fnu_reverse > 0])
+
+        lum = (np.absolute(np.trapz(nu_reverse[wpah_nu_reverse].cgs.value,fnu_reverse[wpah_nu_reverse])).item()*u.Lsun).to(u.erg/u.s).value
+        print(lum)
         #reversing arrays to make nu increasing, and therefore correct for hyperion addition
-        m.add_point_source(luminosity = lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse]), position = reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
-        
+        #m.add_point_source(luminosity = lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse]), position = reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
+        m.add_point_source(luminosity=lum,spectrum=(nu_reverse.value,fnu_reverse),position=reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
+
+
     if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
     reg.parameters['PAH_lam'] = draine_lam.value
@@ -288,6 +297,3 @@ def pah_source_add(ds,reg,m,boost):
     #ax.set_ylabel(r'$L_\lambda$ (erg/s/$\mu$m)')
     #fig.savefig('/home/desika.narayanan/PAH_sed.png',dpi=300)
     
-
-
-        

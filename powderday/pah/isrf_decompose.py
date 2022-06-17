@@ -101,7 +101,7 @@ def get_Cabs(draine_directories,simulation_sizes,gsd):
 def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, cell_size_file ='/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/grid_physical_properties.027_galaxy0.npz'):
 
     #get the wavelengths of the simulation ISRF DEBUG DEBUG DEBUG this
-    #will eventually
+    #will eventually.  NOTE the way to do this will be to put this *after* the first run of pd where we get the ISRF.
     f = h5py.File('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/pd_skirt_comparison.027.otf_dtm.rtout.sed')
 
     #DEBUG WE WILL NEED TO PUT IN SOMETHING AUTOMATED HERE TO GRAB THE LAST ITERATION
