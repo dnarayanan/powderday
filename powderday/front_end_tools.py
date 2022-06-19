@@ -5,14 +5,9 @@ from astropy import units as u
 import powderday.config as cfg
 import numpy as np
 
-def make_SED(m, par, model, DIG=False):
+def make_SED(m, par, model):
     # set up the SEDs and images
     
-    if DIG:
-        dig_str = "_DIG"
-    else:
-        dig_str = ""
-
     if cfg.par.SED_MONOCHROMATIC == True:
 
         # since all sources have the same spectrum just take the nu
@@ -51,7 +46,7 @@ def make_SED(m, par, model, DIG=False):
 
         if cfg.par.SKIP_RT == False:
             m.write(model.inputfile + '.sed', overwrite=True)
-            m.run(model.outputfile + str(dig_str) + '.sed', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+            m.run(model.outputfile + '.sed', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
 
         print(
             '[pd_front_end]: Beginning RT Stage: Calculating SED using a monochromatic spectrum equal to the input SED')
@@ -84,6 +79,29 @@ def make_SED(m, par, model, DIG=False):
                   n_processes=par.n_MPI_processes, overwrite=True)
 
 
+
+def make_DIG_SED(m, par, model):
+    m.set_raytracing(True)
+    m.set_n_photons(initial=par.n_photons_DIG, imaging=par.n_photons_DIG,
+                    raytracing_sources=par.n_photons_DIG,
+                    raytracing_dust=par.n_photons_DIG)
+    m.set_n_initial_iterations(7)
+    m.set_convergence(True, percentile=99., absolute=1.01, relative=1.01)
+
+    sed = m.add_peeled_images(sed=True, image=False)
+    sed.set_wavelength_range(2500, 0.001, 1000.)
+
+    sed.set_viewing_angles(np.linspace(0, 90, 1).tolist(), np.repeat(np.linspace(0, 90, 1), 1))
+    sed.set_track_origin('basic')
+
+    print('[pd_front_end]: Beginning RT Stage: For DIG calculation')
+
+    # Run the Model
+    m.write(model.inputfile + '_DIG_energy_dumped.sed', overwrite=True)
+    m.run(model.outputfile + '_DIG_energy_dumped.sed', mpi=True,n_processes=par.n_MPI_processes, overwrite=True)
+
+
+    
 def make_image(m_imaging, par, model,dx,dy,dz):
     print("Beginning Monochromatic Imaging RT")
     
