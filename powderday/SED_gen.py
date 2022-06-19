@@ -858,6 +858,28 @@ def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
         zmax = m.grid.dz
         zmin = zmax*-1
 
+    elif m.__dict__['grid_type'] == 'amr':
+        xmax = m.grid.levels[0].grids[0].xmax
+        xmin = m.grid.levels[0].grids[0].xmin
+        ymax = m.grid.levels[0].grids[0].ymax
+        ymin = m.grid.levels[0].grids[0].ymin
+        zmax = m.grid.levels[0].grids[0].zmax
+        zmin = m.grid.levels[0].grids[0].xmin
+        for ilevel, level_ref in enumerate(m.grid.levels):
+            for igrid, grid_ref in enumerate(level_ref.grids):
+                if grid_ref.xmin<xmin:
+                    xmin = grid_ref.xmin
+                if grid_ref.xmax>xmax:
+                    xmax = grid_ref.xmax
+                if grid_ref.ymin<ymin:
+                    ymin = grid_ref.ymin
+                if grid_ref.ymax>ymax:
+                    ymax = grid_ref.ymax
+                if grid_ref.zmin<zmin:
+                    zmin = grid_ref.zmin
+                if grid_ref.zmax>zmax:
+                    zmax = grid_ref.zmax
+
     star_idx_to_remove = []
     bulge_idx_to_remove = []
     disk_idx_to_remove = []
