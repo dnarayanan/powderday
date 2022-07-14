@@ -72,8 +72,9 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
 
             # the stellar population returns the calculation in units of Lsun/1 Msun: 
             # https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
-            line_em = line_em * (stars_list[i].mass * units.g).to(units.Msun).value * 3.839e33 # Units: ergs/s
-            OH = stars_list[i].all_metals[4]
+            line_em = line_em * (unbinned_stars_list[i].mass * units.g).to(units.Msun).value * 3.839e33 # Units: ergs/s
+            OH = unbinned_stars_list[i].all_metals[4]
+            
             line_em = np.append(line_em, OH)
             
             if young_star:
