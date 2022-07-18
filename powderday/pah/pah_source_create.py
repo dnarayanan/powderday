@@ -11,7 +11,7 @@ import os,glob
 from multiprocessing import Pool
 
 
-#FIXED -- WAS ZEROS IN THE LUMINOSITY ARRAY CAUSING NANS 1. there are bugs here -- when we run on 1500 sources we either get
+ #FIXED -- WAS ZEROS IN THE LUMINOSITY ARRAY CAUSING NANS 1. there are bugs here -- when we run on 1500 sources we either get
 #NaNs in the final flux array, or seg faults.  it's not clear why.
 #putting in a pd.bset_trace() and looking at m.sources (right before
 #SED propagation in front end) to comppare the units and ranges of the
