@@ -9,6 +9,14 @@ from tqdm import tqdm
 from powderday.pah.isrf_decompose import get_beta_nnls
 import os,glob
 from multiprocessing import Pool
+from functools import partial
+from datetime import datetime
+#notes - 
+#ncells are at np.arange(100) - fix this
+
+#see if we can get ocmpute_Grid_pah_lumionsity working first without starmp
+
+#then follow preraks example for how to get it in starmp - looks easy enough (i hope!)
 
 
  #FIXED -- WAS ZEROS IN THE LUMINOSITY ARRAY CAUSING NANS 1. there are bugs here -- when we run on 1500 sources we either get
@@ -40,6 +48,36 @@ from multiprocessing import Pool
 #2b. manually add the logU>4 sources
 
 #2c. only compute this for PAHs and not all grains (or even all graphites)
+
+def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,draine_sizes,draine_lam,neutral_PAH_reference_objects,draine_bins_idx):
+
+    for cell in cell_list:
+        print(cell)
+        beta_cell = beta_nnls[:,cell]
+        beta_cell = beta_cell/np.max(beta_cell)
+        
+        #need to make a temporary (for this cell) PAH_list that is
+        #just n_draine_sizes long that is convolved with beta_nnls
+        pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
+        for j in range(len(beta_cell)):
+            PAH_list = neutral_PAH_reference_objects[j]
+            temp_pah_grid = np.array([x.lum for x in PAH_list])
+            temp_pah_grid *= beta_cell[j]
+            pah_grid += temp_pah_grid #this is the running summation of the (n_sizes,n_lam) pah grid for the i-th cell
+            
+            
+        #set the PAH luminosity of the cell to be the dot product of
+        #the Draine luminosities (i.e., pah_grid[draine_bins_idx,:] which has
+        #dimensions (simulation_sizes,wavelengths)) with the actual
+        #grain size distribution in that cell (i.e.,
+        #grid_of_sizes[i_cell,:]). note, we take the transpose of
+        #grid_of_sizes to get the dimensions to match up correctly for the dot product
+        grid_PAH_luminosity = np.dot(pah_grid[draine_bins_idx,:].T, grid_of_sizes.T[:,cell])
+        particle_PAH_luminosity = np.dot(pah_grid[draine_bins_idx,:].T,numgrains.T[:,cell])
+    
+    return grid_PAH_luminosity,particle_PAH_luminosity
+
+
 
 def pah_source_add(ds,reg,m,boost):
     
@@ -132,12 +170,8 @@ def pah_source_add(ds,reg,m,boost):
     #bin
     ncells = grid_of_sizes.shape[0]
 
-    #define the grid that will store the PAH spectra for the entire mesh
-    grid_PAH_luminosity = np.zeros([ncells,len(temp_PAH_list[0].lam)])
     total_PAH_luminosity = np.zeros(len(temp_PAH_list[0].lam))
-
-
-
+    
     #get the logU and beta_nnls for the local ISRF
     beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
 
@@ -176,43 +210,82 @@ def pah_source_add(ds,reg,m,boost):
 
     #get the indices for where the Draine size bins match ours 
     size_arange = np.arange(len(simulation_sizes))
-    idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
+    draine_bins_idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
 
     #pah_grid = np.array([x.lum for x in temp_PAH_list])
 
-    #one day some young whippersnapper is going to come along and
-    #totally make these nested for loops all cool and pythonic and
-    #fast.  and i [desika] will buy that whippersnapper a beer if they
-    #PR it into the main branch.. 
 
-    grid_PAH_luminosity = np.zeros([ncells,len(draine_lam)])
-    particle_PAH_luminosity = np.zeros([len(reg['particle_dust','numgrains']),len(draine_lam)])
+    #initialize the process pool and build the chunks
+    t1 = datetime.now()
+    nprocesses = np.min([cfg.par.n_processes,ncells]) #pool.map will barf in the corner case that we have less cells than cores
+    p = Pool(processes = nprocesses)
+
+    cell_list = np.arange(ncells)
+    #DEBUG DEBUG DEBUG 
+    cell_list = np.arange(1000)
+
+    #chunking
+    nchunks=nprocesses
+    chunk_start_indices = []
+    chunk_start_indices.append(0) #the start index is obviously 0
+    #this should just be int(ncells/nchunks) but in case ncells < nchunks, we need to ensure that this is at least  1
+    delta_chunk_indices = np.max([int(len(cell_list) / nchunks),1])
+    print ('delta_chunk_indices = ',delta_chunk_indices)
+
+    for n in range(1,nchunks):
+        chunk_start_indices.append(chunk_start_indices[n-1]+delta_chunk_indices)
+
+    list_of_chunks = []
+    for n in range(nchunks):
+        cells_list_chunk = cell_list[chunk_start_indices[n]:chunk_start_indices[n]+delta_chunk_indices]
+        #if we're on the last chunk, we might not have the full list included, so need to make sure that we have that here
+        if n == nchunks-1:
+            cells_list_chunk = cell_list[chunk_start_indices[n]::]
+        list_of_chunks.append(cells_list_chunk)
+
+
+
+    print("Computing the PAH luminosities for every cell given its grain size distribution and logU. Entering Pool.map multiprocessing.")
     
+    dum_numgrains = reg['particle_dust','numgrains'].value 
+    '''
+    answer = p.map(partial(compute_grid_PAH_luminosity,
+                           beta_nnls = beta_nnls,
+                           grid_of_sizes = grid_of_sizes.value,
+                           numgrains = dum_numgrains,
+                           draine_sizes = draine_sizes,
+                           draine_lam = draine_lam.value,
+                           neutral_PAH_reference_objects = neutral_PAH_reference_objects,
+                           draine_bins_idx = draine_bins_idx),cell_list)
+    '''
+    
+    answer = p.map(partial(compute_grid_PAH_luminosity,
+                           beta_nnls = beta_nnls,
+                           grid_of_sizes = grid_of_sizes.value,
+                           numgrains = dum_numgrains,
+                           draine_sizes = draine_sizes,
+                           draine_lam = draine_lam.value,
+                           neutral_PAH_reference_objects = neutral_PAH_reference_objects,
+                           draine_bins_idx = draine_bins_idx),[arg for arg in list_of_chunks])
+    
+    t2 = datetime.now()
+    print ('Execution time for PAH dot producting [is that a word?] across the grid = '+str(t2-t1))
+ 
 
-    print("Computing the PAH luminosities for every cell given its grain size distribution and logU")
-    for i in tqdm(range(ncells)):
-        beta_cell = beta_nnls[:,i]
-        beta_cell = beta_cell/np.max(beta_cell)
 
-        #need to make a temporary (for this cell) PAH_list that is
-        #just n_draine_sizes long that is convolved with beta_nnls
-        pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
-        for j in range(len(beta_cell)):
-            PAH_list = neutral_PAH_reference_objects[j]
-            temp_pah_grid = np.array([x.lum for x in PAH_list])
-            temp_pah_grid *= beta_cell[j]
-            pah_grid += temp_pah_grid #this is the running summation of the (n_sizes,n_lam) pah grid for the i-th cell 
-            
 
-        #set the PAH luminosity of the cell to be the dot product of
-        #the Draine luminosities (i.e., pah_grid[idx,:] which has
-        #dimensions (simulation_sizes,wavelengths)) with the actual
-        #grain size distribution in that cell (i.e.,
-        #grid_of_sizes[i_cell,:]). note, we take the transpose of
-        #grid_of_sizes to get the dimensions to match up correctly for the dot product
-        grid_PAH_luminosity[i,:] = np.dot(pah_grid[idx,:].T, grid_of_sizes.T[:,i])
-        particle_PAH_luminosity[i,:] = np.dot(pah_grid[idx,:].T,reg['particle_dust','numgrains'].T[:,i])
+   #z = zip(cell_list,beta_nnls,grid_of_sizes.value,dum_numgrains,draine_sizes,draine_lam.value,neutral_PAH_reference_objects,draine_bins_idx)
+    #answer = p.starmap(compute_grid_PAH_luminosity,z)
+    #p.close()
+    #p.terminate()
+    #p.join()
 
+    #what i need back out is something like this with these dimensions
+    #grid_PAH_luminosity = np.zeros([ncells,len(draine_lam)])
+    #particle_PAH_luminosity = np.zeros([len(numgrains),len(draine_lam)])
+
+    #grid_PAH_luminosity,particle_PAH_luminosity = compute_grid_PAH_luminosity(cell_list,beta_nnls,draine_sizes,draine_lam,neutral_PAH_reference_objects,grid_of_sizes,reg,draine_bins_idx)
+    pdb.set_trace()
 
     grid_PAH_luminosity[np.isnan(grid_PAH_luminosity)] = 0
     particle_PAH_luminosity[np.isnan(particle_PAH_luminosity)] = 0
