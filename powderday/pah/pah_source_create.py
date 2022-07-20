@@ -11,37 +11,20 @@ import os,glob
 from multiprocessing import Pool
 from functools import partial
 from datetime import datetime
-#notes - 
-#ncells are at np.arange(100) - fix this
-
-#see if we can get ocmpute_Grid_pah_lumionsity working first without starmp
-
-#then follow preraks example for how to get it in starmp - looks easy enough (i hope!)
-
-
- #FIXED -- WAS ZEROS IN THE LUMINOSITY ARRAY CAUSING NANS 1. there are bugs here -- when we run on 1500 sources we either get
-#NaNs in the final flux array, or seg faults.  it's not clear why.
-#putting in a pd.bset_trace() and looking at m.sources (right before
-#SED propagation in front end) to comppare the units and ranges of the
-#different types of sources may help to see if there's a units issue,
-#or a wavelength range issue.
-
-#NEEDED IF SEG FAULTS OCCUR 1a. beyond units check if a point source collection saves us (maybe
-#it's a memory thing given the number of source?)
-
-#1b. maybe we only want to include sources above some percentile in
-#luminosity?  this could be possible given the large number of sources
-#that it takes to seg fault (1500+).
-
-#DONE 1c. maybe carefully compare against how the individual point sources
-#are added with AGN to see how this compares -- maybe there's
-#somewhere that i'm making a mistake.
-
-#THIS IS THE BASELINE ISSUE 1d. is it okay that there are pah fluxes that are 0 when considering the entire SED? should we make them a min value
+#notes - if there's seg fault upon crazy memory addition that may
+#happen when we add the pahs, see if a point source collection
+#happens, or if we only want to include sources above some percentile
+#in luminosity
 
 #2. once this is sorted, need to:
 
 #2a0 - pool.map so it's not crazy slow
+
+#2a0.5 get a progres bar 
+
+#2a1 - include particle_pah_luminosities.  easiest would be: if the
+#ds.grid_type or whatever is arepo, then have that = the
+#grid_pah_luminosities; else, it can be a separate loop/pooled process that is now additional called compute_particle_PAH_luminosity.
 
 #2a. have the code know if its neutral or ion and use that luminosity
 
@@ -51,7 +34,13 @@ from datetime import datetime
 
 def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,draine_sizes,draine_lam,neutral_PAH_reference_objects,draine_bins_idx):
 
-    for cell in cell_list:
+    #these are re-defined for each pool thread.  when they're
+    #returned, they'll be packed into a master list with one extra
+    #dimension for the thread number.
+    grid_PAH_luminosity = np.zeros([len(cell_list),len(draine_lam)])
+
+
+    for counter,cell in enumerate(cell_list):
         print(cell)
         beta_cell = beta_nnls[:,cell]
         beta_cell = beta_cell/np.max(beta_cell)
@@ -72,10 +61,11 @@ def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,drai
         #grain size distribution in that cell (i.e.,
         #grid_of_sizes[i_cell,:]). note, we take the transpose of
         #grid_of_sizes to get the dimensions to match up correctly for the dot product
-        grid_PAH_luminosity = np.dot(pah_grid[draine_bins_idx,:].T, grid_of_sizes.T[:,cell])
-        particle_PAH_luminosity = np.dot(pah_grid[draine_bins_idx,:].T,numgrains.T[:,cell])
+        
+        grid_PAH_luminosity[counter,:] = np.dot(pah_grid[draine_bins_idx,:].T, grid_of_sizes.T[:,cell])
+    #particle_PAH_luminosity = np.dot(pah_grid[draine_bins_idx,:].T,numgrains.T[:,cell])
     
-    return grid_PAH_luminosity,particle_PAH_luminosity
+    return grid_PAH_luminosity
 
 
 
@@ -218,13 +208,18 @@ def pah_source_add(ds,reg,m,boost):
     #initialize the process pool and build the chunks
     t1 = datetime.now()
     nprocesses = np.min([cfg.par.n_processes,ncells]) #pool.map will barf in the corner case that we have less cells than cores
+
+
     p = Pool(processes = nprocesses)
 
     cell_list = np.arange(ncells)
-    #DEBUG DEBUG DEBUG 
-    cell_list = np.arange(1000)
 
-    #chunking
+    #DEBUG DEBUG DEBUG
+    cell_list = np.arange(1000) 
+
+    #chunking to speed up multiprocessing: since the processes are so
+    #quick, we can lose a factor of 50% time in just spawning new
+    #threads.  i saves a ton of time to chunk up the work and send it all off once.
     nchunks=nprocesses
     chunk_start_indices = []
     chunk_start_indices.append(0) #the start index is obviously 0
@@ -248,18 +243,8 @@ def pah_source_add(ds,reg,m,boost):
     print("Computing the PAH luminosities for every cell given its grain size distribution and logU. Entering Pool.map multiprocessing.")
     
     dum_numgrains = reg['particle_dust','numgrains'].value 
-    '''
-    answer = p.map(partial(compute_grid_PAH_luminosity,
-                           beta_nnls = beta_nnls,
-                           grid_of_sizes = grid_of_sizes.value,
-                           numgrains = dum_numgrains,
-                           draine_sizes = draine_sizes,
-                           draine_lam = draine_lam.value,
-                           neutral_PAH_reference_objects = neutral_PAH_reference_objects,
-                           draine_bins_idx = draine_bins_idx),cell_list)
-    '''
     
-    answer = p.map(partial(compute_grid_PAH_luminosity,
+    temp_grid_PAH_luminosity = p.map(partial(compute_grid_PAH_luminosity,
                            beta_nnls = beta_nnls,
                            grid_of_sizes = grid_of_sizes.value,
                            numgrains = dum_numgrains,
@@ -268,6 +253,12 @@ def pah_source_add(ds,reg,m,boost):
                            neutral_PAH_reference_objects = neutral_PAH_reference_objects,
                            draine_bins_idx = draine_bins_idx),[arg for arg in list_of_chunks])
     
+    #temp_grid_PAH_luminosity is now nprocesses long.  each index will
+    #reveal a [ncells/nchunks,n_draine_lam] length array.  we hence
+    #conctaenate them to get this to be ncells,ndraine_lam long.
+    temp_grid_PAH_luminosity = np.asarray(temp_grid_PAH_luminosity)
+    grid_PAH_luminosity = np.concatenate((temp_grid_PAH_luminosity),axis=0) 
+
     t2 = datetime.now()
     print ('Execution time for PAH dot producting [is that a word?] across the grid = '+str(t2-t1))
  
