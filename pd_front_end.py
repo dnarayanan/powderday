@@ -5,7 +5,7 @@
 # IMPORT STATEMENTS
 # =========================================================
 from __future__ import print_function
-from powderday.front_end_tools import make_SED, make_image, make_DIG_SED
+from powderday.front_end_tools import make_SED, make_image, make_DIG_SED,compute_ISRF_SED
 from powderday.source_creation import direct_add_stars, add_binned_seds, BH_source_add, DIG_source_add
 from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump, logu_diagnostic,dump_emlines,dump_NEB_SEDs
 from astropy import constants
@@ -80,8 +80,6 @@ m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 from powderday.pah.pah_source_create import pah_source_add
-pah_source_add(ds,reg,m,boost)
-#if cfg.par.draine21_pah_model: pah_source_add(ds,reg,m,boost)
 
 
 sp = fsps.StellarPopulation()
@@ -156,7 +154,7 @@ m = add_binned_seds(df_nu, stars_list, diskstars_list,bulgestars_list, ds.cosmol
 
 
 
-#set the random seets
+#set the random seeds
 if cfg.par.FORCE_RANDOM_SEED == False:
     m.set_seed(random.randrange(0,10000)*-1)
 else:
@@ -201,7 +199,7 @@ if par.SOURCES_RANDOM_POSITIONS == True:
 '''
 
 
-print('Done adding Sources')
+
 
 
 # set up the CMB field -- place holder to put in haardt/madau eventually
@@ -233,8 +231,14 @@ if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
     # Removing the DIG input SED file
     os.remove(cfg.model.inputfile + '_DIG_energy_dumped.sed')
 
-m.compute_isrf(True)
 
+if cfg.par.otf_extinction and cfg.par.draine21_pah_model:
+    m.compute_isrf(True)
+    compute_ISRF_SED(m, par, model)
+    pah_source_add(ds,reg,m,boost)
+
+
+print('Done adding Sources')
 
 if cfg.par.SED:
     make_SED(m, par, model)

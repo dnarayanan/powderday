@@ -102,7 +102,7 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, cell_size_file
 
     #get the wavelengths of the simulation ISRF DEBUG DEBUG DEBUG this
     #will eventually.  NOTE the way to do this will be to put this *after* the first run of pd where we get the ISRF.
-    f = h5py.File('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/pd_skirt_comparison.027.otf_dtm.rtout.sed')
+    f = h5py.File(cfg.model.outputfile + '_isrf.sed')
 
     #DEBUG WE WILL NEED TO PUT IN SOMETHING AUTOMATED HERE TO GRAB THE LAST ITERATION
     dset = f['iteration_00007']
@@ -113,7 +113,7 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, cell_size_file
     simulation_specific_energy_sum = dset['specific_energy_nu']*u.erg/u.s/u.g #is [n_nu, n_dust, n_cells] big  
 
     #get the simulation_isrf in units of erg/s
-    grid_dust_masses = reg['dust','mass'].in_units('g').to_astropy() #getting the dust masses out of yt units and into astropy unist
+    grid_dust_masses = reg['dust','mass'].in_units('g').to_astropy() #getting the dust masses out of yt units and into astropy units
     simulation_specific_energy_sum *= grid_dust_masses.cgs #now in erg/s
     ncells = grid_dust_masses.shape[0]
 
@@ -186,7 +186,12 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, cell_size_file
 
     simulation_sizes = np.broadcast_to(simulation_sizes,(ncells,simulation_sizes.shape[0]))*u.micron
     gsd = gsd.value
-    Cabs_cation_regrid,Cabs_neutral_regrid = get_Cabs(draine_directories,simulation_sizes,gsd)
+
+    #DEBUG DEBUG DEBUG THIS NEEDS TO BE UNCOMMENTED AND DELETE THE READ IN FROM NPZ FILES 3 lines  BECAUSE THAT'S INSANE AND JUST USED FOR DEBUGGING FAST 
+    #Cabs_cation_regrid,Cabs_neutral_regrid = get_Cabs(draine_directories,simulation_sizes,gsd)
+    Cabs_data = np.load('Cabs.npz')
+    Cabs_cation_regrid = Cabs_data['Cabs_cation_regrid']*u.cm**2
+    Cabs_neutral_regrid = Cabs_data['Cabs_neutral_regrid']*u.cm**2
 
 
     #DEBUG CAN WE GET RID OF CELL_SIZE_FILE here -- the answer is yes,
