@@ -43,12 +43,21 @@ def arepo_m_gen(fname,field_add):
         particle_x = reg["gas","coordinates"][:,0].to('cm')
         particle_y = reg["gas","coordinates"][:,1].to('cm')
         particle_z = reg["gas","coordinates"][:,2].to('cm')
+        try: reg.parameters["cell_position"] = reg["gas","coordinates"]
+        except:
+            reg.parameters = {}
+            reg.parameters["cell_position"] = reg["gas","coordinates"]
     else:
         print("Computing Voronoi Tessellation on PartType3 dust particles")
         particle_x = reg["dust","coordinates"][:,0].to('cm')
         particle_y = reg["dust","coordinates"][:,1].to('cm')
         particle_z = reg["dust","coordinates"][:,2].to('cm')
 
+
+        try: reg.parameters["cell_position"] = reg["dust","coordinates"]
+        except:
+            reg.parameters = {}
+            reg.parameters["cell_position"] = reg["dust","coordinates"]
     #just for the sake of symmetry, pass on a dx,dy,dz since it can be
     #used optionally downstream in other functions.
     dx = 2.* ds.quan(cfg.par.zoom_box_len,'kpc').to('cm')
@@ -76,7 +85,7 @@ def arepo_m_gen(fname,field_add):
 
     #save some information that can be used in the PAH model compute
     #an effective 'size' of a cell by density = mass/volume and assume
-    #spherical geometry 
+    #spherical geometry.  similarly, saving the particle location information
 
     if cfg.par.otf_extinction == False:
         mass = reg['PartType0','Masses']
@@ -93,7 +102,6 @@ def arepo_m_gen(fname,field_add):
     except:
         reg.parameters = {}
         reg.parameters['cell_size'] = rad_dens*2 #so that we return a diameter
-
 
     if cfg.par.otf_extinction==False:
 

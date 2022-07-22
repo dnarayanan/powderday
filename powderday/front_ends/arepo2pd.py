@@ -6,17 +6,6 @@
 #there's (for example) only one field nomenclature that looks like
 #[('dust','mass')] which represents the particle information.
 
-#Note - there is one side rule to this: if we have PartType3 dust
-#particles in the simulations, then those particles may be given the
-#specific name ('particle_dust','mass').  The reason for this is that
-#Arepo active dust models (i.e., those that employ PartType3) also
-#smooth that information onto the PartType0 particles.  This means
-#that there are two types of dust particles -- the original active
-#PartType3, and PartType0.  Both are used in powderday in some
-#instances.  The dust fields in PartType0 are used to create the
-#Voronoi mesh while the dust in PartType3 can be used (sometimes) for
-#very specific calculations (for example, related to PAHs).
-
 from __future__ import print_function
 import numpy as np
 import yt

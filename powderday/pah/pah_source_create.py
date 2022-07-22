@@ -11,26 +11,30 @@ import os,glob
 from multiprocessing import Pool
 from functools import partial
 from datetime import datetime
-#notes - if there's seg fault upon crazy memory addition that may
-#happen when we add the pahs, see if a point source collection
-#happens, or if we only want to include sources above some percentile
-#in luminosity
 
-#2. once this is sorted, need to:
 
-#2a0 - pool.map so it's not crazy slow
+#for monday : memory issues...how cna we reduce the number of PAHs
+#we're including?!  code should hopefully get to the cdf function and
+#stop, which i'm still working on to see if we can exclude some number
+#of cells.  it should return the indices of cells that are above the
+#treshold -- we can amend the for loop that adds sources after that to
+#only add sources in those index list.
 
-#2a0.5 get a progres bar 
+#2a0.5 get a progress bar 
 
-#2a1 - include particle_pah_luminosities.  easiest would be: if the
-#ds.grid_type or whatever is arepo, then have that = the
-#grid_pah_luminosities; else, it can be a separate loop/pooled process that is now additional called compute_particle_PAH_luminosity.
+
+#line 324 area need to put in the cell locations
+
+#once this is done, test all the way through and see if we're reasonable total fluxes
+
+#maybew needed to identify pah populations specifically first
+
+#go through isrf_decompose and fix all the debugs of which there are MANY
 
 #2a. have the code know if its neutral or ion and use that luminosity
 
 #2b. manually add the logU>4 sources
 
-#2c. only compute this for PAHs and not all grains (or even all graphites)
 
 def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,draine_sizes,draine_lam,neutral_PAH_reference_objects,draine_bins_idx):
 
@@ -62,11 +66,38 @@ def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,drai
         #grid_of_sizes[i_cell,:]). note, we take the transpose of
         #grid_of_sizes to get the dimensions to match up correctly for the dot product
         
+
         grid_PAH_luminosity[counter,:] = np.dot(pah_grid[draine_bins_idx,:].T, grid_of_sizes.T[:,cell])
     #particle_PAH_luminosity = np.dot(pah_grid[draine_bins_idx,:].T,numgrains.T[:,cell])
     
     return grid_PAH_luminosity
 
+
+def get_PAH_lum_cdf(nu_reverse,fnu,wpah_nu_reverse,grid_PAH_luminosity):
+    lum_list = []
+
+    for i in range(grid_PAH_luminosity.shape[0]): 
+        fnu_reverse = fnu[i,:][::-1]
+        lum = (np.absolute(np.trapz(nu_reverse[wpah_nu_reverse].cgs.value,fnu_reverse[wpah_nu_reverse])).item()*u.Lsun).to(u.erg/u.s).value
+        lum_list.append(lum)
+
+    lum_list = np.asarray(lum_list)
+    lum_list[lum_list == 0] = np.min(lum_list[lum_list > 0])
+
+    #omg this is so janky. but it works.
+    percentile_list = []
+
+    loglum_bins = np.linspace(np.min(np.log10(lum_list)),np.max(np.log10(lum_list)),100)
+    for loglum in loglum_bins:
+        percentile_list.append(np.sum(lum_list[lum_list > 10.**loglum])/np.sum(lum_list))
+        
+    percentile_idx = find_nearest(np.asarray(percentile_list),0.99)
+    lum_to_cut_below = 10.**(loglum_bins[percentile_idx])
+
+    useful_idxs = np.where(lum_list >= lum_to_cut_below)[0]
+
+
+    return useful_idxs
 
 
 def pah_source_add(ds,reg,m,boost):
@@ -178,26 +209,6 @@ def pah_source_add(ds,reg,m,boost):
 
 
 
-
-    #june 13th, 2022: now at this point we want to loop through every
-    #cell: in this loop, we want to multiply the
-    #neutral_PAH_reference_spectra [*DEBUG note - we can later go back
-    #and figure out how to figure out when its an ion and when its a
-    #neutral] by the appropriate beta_nnls to get a pah_grid for every
-    #single cell.  this pah_grid will be, like it is below, an
-    #n_draine_sizes,N_draine_wavelengths SED for every draine size.
-    #we then (as below) dot this into the simulation_sizes and we're
-    #good to go!
-
-    #june 13th, 2022 -- some things to watch out for:
-
-    #a. time...this may take way too long. if so, we'll want to pool.map this. maybe without chunking (ask prerak)
-
-    #b. we need to remember to then go back in after the fact, and for
-    #any cells which have logU>>4, do those manually (i.e. create
-    #reference spectra for those manually, and dot product those manually.
-    
-
     #get the indices for where the Draine size bins match ours 
     size_arange = np.arange(len(simulation_sizes))
     draine_bins_idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
@@ -214,8 +225,6 @@ def pah_source_add(ds,reg,m,boost):
 
     cell_list = np.arange(ncells)
 
-    #DEBUG DEBUG DEBUG
-    cell_list = np.arange(1000) 
 
     #chunking to speed up multiprocessing: since the processes are so
     #quick, we can lose a factor of 50% time in just spawning new
@@ -276,10 +285,10 @@ def pah_source_add(ds,reg,m,boost):
     #particle_PAH_luminosity = np.zeros([len(numgrains),len(draine_lam)])
 
     #grid_PAH_luminosity,particle_PAH_luminosity = compute_grid_PAH_luminosity(cell_list,beta_nnls,draine_sizes,draine_lam,neutral_PAH_reference_objects,grid_of_sizes,reg,draine_bins_idx)
-    pdb.set_trace()
+
 
     grid_PAH_luminosity[np.isnan(grid_PAH_luminosity)] = 0
-    particle_PAH_luminosity[np.isnan(particle_PAH_luminosity)] = 0
+    
 
     nu = (constants.c/draine_lam).to(u.Hz)
     #the units here are Lsun/Hz - this is to be consistent with our
@@ -287,7 +296,7 @@ def pah_source_add(ds,reg,m,boost):
     #end up getting renormalized by the luminosity, so the exact units
     #don't matter as long as they're consistent across all the sources
     #(and types of sources) being added to the grid.
-    fnu = np.divide((particle_PAH_luminosity*u.erg/u.s).to(u.Lsun).value,nu.to(u.Hz).value)
+    fnu = np.divide((grid_PAH_luminosity*u.erg/u.s).to(u.Lsun).value,nu.to(u.Hz).value)
 
     #Because the Draine templates include re-emission, but we want to
     #add the PAHs as sources only, we restrict to the PAH range.
@@ -300,28 +309,39 @@ def pah_source_add(ds,reg,m,boost):
 
 
 
+    #set a fnu floor since the 0's can propagate to NaNs
+    fnu_floor = np.min(fnu[fnu>0])
+    fnu[fnu==0]=fnu_floor
 
-    for i in range(particle_PAH_luminosity.shape[0]): #np.arange(2500)
+    #to reduce memory requirements, we can't really add a PAH source
+    #for every single cell.  so we just do so for cells that are at a
+    #luminosity such that the CDF (sum(L>L_threshold) > 99% of the
+    #total luminosity).  
+ 
+    only_important_PAH_idx = get_PAH_lum_cdf(nu_reverse,fnu,wpah_nu_reverse,grid_PAH_luminosity)
+    
+    for i in only_important_PAH_idx:#range(grid_PAH_luminosity.shape[0]): #np.arange(2500)
         #lum = np.trapz(draine_lam[wpah_lam].cgs.value,flam[i,wpah_lam]).value
         fnu_reverse = fnu[i,:][::-1]
         #if np.where(fnu_reverse == 0)[0] > 0:
         #    fnu_reverse[fnu_reverse ==0 ] = np.min(fnu_reverse[fnu_reverse > 0])
 
         lum = (np.absolute(np.trapz(nu_reverse[wpah_nu_reverse].cgs.value,fnu_reverse[wpah_nu_reverse])).item()*u.Lsun).to(u.erg/u.s).value
-        
+
+
         if lum <= LUM_FLOOR: lum = LUM_FLOOR #just a jamky variable
                                             #defined at the top of
                                             #this function to define a
                                             #lowest luminosity so that
                                             #we don't add PAH cells
                                             #with 0 luminosity
-
-        print(lum)
         #reversing arrays to make nu increasing, and therefore correct for hyperion addition
-        #m.add_point_source(luminosity = lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse]), position = reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
+        m.add_point_source(luminosity=lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse]),position=reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
 
-
-        m.add_point_source(luminosity=lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse]),position=reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
+        print(reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
+        print(reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
+        #reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
+        #reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
 
 
     if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
