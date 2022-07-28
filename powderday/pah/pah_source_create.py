@@ -13,21 +13,26 @@ from functools import partial
 from datetime import datetime
 
 
-#for monday : memory issues...how cna we reduce the number of PAHs
-#we're including?!  code should hopefully get to the cdf function and
-#stop, which i'm still working on to see if we can exclude some number
-#of cells.  it should return the indices of cells that are above the
-#treshold -- we can amend the for loop that adds sources after that to
-#only add sources in those index list.
+
+#why is the SED looking weird?
+
+#0. first thing to fix no matter what is to note that the formatting of the sizes are:
+
+#0:nsizes/3 are silicates
+
+#nsizes/3:2*nsizes/3 are all graphites
+
+#2xnsizes/3:nsizes are aromatics/all graphites
+
+
+#1. if it's not this, then we need to incorproate the new hensley extinction models (in a modular way that allows us to keep the old ones too)
+
+
+
 
 #2a0.5 get a progress bar 
 
-
-#line 324 area need to put in the cell locations
-
 #once this is done, test all the way through and see if we're reasonable total fluxes
-
-#maybew needed to identify pah populations specifically first
 
 #go through isrf_decompose and fix all the debugs of which there are MANY
 
@@ -91,7 +96,8 @@ def get_PAH_lum_cdf(nu_reverse,fnu,wpah_nu_reverse,grid_PAH_luminosity):
     for loglum in loglum_bins:
         percentile_list.append(np.sum(lum_list[lum_list > 10.**loglum])/np.sum(lum_list))
         
-    percentile_idx = find_nearest(np.asarray(percentile_list),0.99)
+    #DEBUG MAKE THIS 0.9 A PARAMETER
+    percentile_idx = find_nearest(np.asarray(percentile_list),0.9)
     lum_to_cut_below = 10.**(loglum_bins[percentile_idx])
 
     useful_idxs = np.where(lum_list >= lum_to_cut_below)[0]
@@ -252,7 +258,11 @@ def pah_source_add(ds,reg,m,boost):
     print("Computing the PAH luminosities for every cell given its grain size distribution and logU. Entering Pool.map multiprocessing.")
     
     dum_numgrains = reg['particle_dust','numgrains'].value 
+
+    pdb.set_trace()
     
+    #DEBUG DEBUG DEBUG UNCOMMENT THIS ENTIRE BLOCK TO GET BACK TO NORMAL PRODUCTION CODE WE JUST HAVE AN NPZ FILE FOR DEBUGGING RN
+    '''
     temp_grid_PAH_luminosity = p.map(partial(compute_grid_PAH_luminosity,
                            beta_nnls = beta_nnls,
                            grid_of_sizes = grid_of_sizes.value,
@@ -267,6 +277,11 @@ def pah_source_add(ds,reg,m,boost):
     #conctaenate them to get this to be ncells,ndraine_lam long.
     temp_grid_PAH_luminosity = np.asarray(temp_grid_PAH_luminosity)
     grid_PAH_luminosity = np.concatenate((temp_grid_PAH_luminosity),axis=0) 
+    '''
+    #DEBUG DEBUG DEBUG REMOVE THE NEXT TWO LINES THEY'RE CRAZY TALK AND JUST FOR DEBUGGING
+    data = np.load('grid_pah_luminosity.npz')
+    grid_PAH_luminosity = data['grid_PAH_luminosity']
+
 
     t2 = datetime.now()
     print ('Execution time for PAH dot producting [is that a word?] across the grid = '+str(t2-t1))
@@ -338,19 +353,20 @@ def pah_source_add(ds,reg,m,boost):
         #reversing arrays to make nu increasing, and therefore correct for hyperion addition
         m.add_point_source(luminosity=lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse]),position=reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
 
-        print(reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
-        print(reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
+
         #reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
         #reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
 
 
     if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
+
     reg.parameters['PAH_lam'] = draine_lam.value
 
     total_PAH_luminosity =np.sum(grid_PAH_luminosity,axis=0)
     reg.parameters['total_PAH_luminosity'] = total_PAH_luminosity
-    
+    reg.parameters['only_important_PAH_idx'] = only_important_PAH_idx
+
     grid_PAH_L_lam = grid_PAH_luminosity/draine_lam.value
     integrated_grid_PAH_luminosity = np.trapz((grid_PAH_luminosity/draine_lam.value),draine_lam.value,axis=1)
     reg.parameters['integrated_grid_PAH_luminosity'] = integrated_grid_PAH_luminosity

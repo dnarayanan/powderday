@@ -98,6 +98,7 @@ def get_Cabs(draine_directories,simulation_sizes,gsd):
 
 
 
+#DEBUG DEBUG DEBUG WE NEED TO GET RID OF THIS CELL SIZE FILE AND ACTUALLY FEED IN THE CELLS
 def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, cell_size_file ='/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/grid_physical_properties.027_galaxy0.npz'):
 
     #get the wavelengths of the simulation ISRF DEBUG DEBUG DEBUG this
