@@ -240,11 +240,11 @@ if cfg.par.otf_extinction and cfg.par.draine21_pah_model:
 
 print('Done adding Sources')
 
-if cfg.par.SED:
-    make_SED(m, par, model)
-
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
     dump_data(reg, model)
+
+if cfg.par.SED:
+    make_SED(m, par, model)
 
 if cfg.par.IMAGING:
     make_image(m_imaging, par, model, dx, dy, dz)
