@@ -937,14 +937,16 @@ def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
         total_mass += stars_list[i].mass
     
 
-    #now that we've figured out which stars to remove, actually remove them from the lists
-    for idx in star_idx_to_remove:
+    #now that we've figured out which stars to remove, actually remove
+    #them from the lists.  remove them in reverse order so that we
+    #don't destroy the indexing as soon as we remove a single star
+    for idx in star_idx_to_remove[::-1]:
         stars_list.pop(idx)
 
-    for idx in bulge_idx_to_remove:
+    for idx in bulge_idx_to_remove[::-1]:
         bulgestars_list.pop(idx)
 
-    for idx in disk_idx_to_remove:
+    for idx in disk_idx_to_remove[::-1]:
         diskstars_list.pop(idx)
     
 
