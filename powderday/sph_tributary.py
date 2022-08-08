@@ -186,8 +186,17 @@ def sph_m_gen(fname,field_add):
         #define the grid of sizes that will be used in tributary_dust_add
         grid_of_sizes = reg.parameters["octree_of_sizes"]
         
-        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined)
+        #for now, we just include these grids as -1 because there's no
+        #gizmo model [that we know of] that delineates different
+        #species.  when this occurs, we should fix this section,
+        #modeled after arepo_tributary.
+        grid_of_sizes_graphite = [-1]
+        grid_of_sizes_silicates = [-1]
+        grid_of_sizes_aromatic_fraction = [-1]
         
+
+
+        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined,grid_of_sizes_graphite,grid_of_sizes_silicates,grid_of_sizes_aromatic_fraction)
 
     m.set_specific_energy_type('additional')
 

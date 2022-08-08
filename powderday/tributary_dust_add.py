@@ -11,10 +11,12 @@ import pdb
 from powderday.helpers import find_nearest
 
 
-def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[False]):
+def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[False],grid_of_sizes_graphite = [-1], grid_of_sizes_silicates = [-1], grid_of_sizes_aromatic_fraction = [-1]):
         #first, save the grid_of_sizes to the ds.paramteters so we can carry it around
         ds.parameters['reg_grid_of_sizes'] = grid_of_sizes #named 'reg_grid_of_sizes' 
-
+        ds.parameters['reg_grid_of_sizes_graphite'] = grid_of_sizes_graphite
+        ds.parameters['reg_grid_of_sizes_silicate'] = grid_of_sizes_silicates
+        ds.parameters['reg_grid_of_sizes_aromatic_fraction'] = grid_of_sizes_aromatic_fraction
 
         #for empty cells, use the median size distribution
         for isize in range(nsizes):
@@ -24,7 +26,6 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
                 grid_of_sizes[wzero,isize] = np.median(grid_of_sizes[wnonzero,isize])
                 
                 print(len(wzero)/len(wnonzero))
-
 
 
         #now load the mapping between grain bin and filename for the lookup table
@@ -141,6 +142,8 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
                 #could be in a voronoi mesh, in which case refined doesn't
                 #mean anything).  this is necessary since for an octree we
                 #don't want to worry about the Trues
+
+
                 if np.sum(refined) > 0:
                         wFalse = np.where(np.asarray(refined) == 0)[0]
                 
@@ -170,8 +173,8 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
                         #m.add_density_grid(dustdens*frac[bin],d,specific_energy=specific_energy)
 
         
-
-        #finally, save the grid_of_sizes and grain sizes to the ds.paramteters so we can carry it around
+                        
+        #finally, re-save the grid_of_sizes and grain sizes to the ds.paramteters so we can carry it around
         ds.parameters['reg_grid_of_sizes'] = grid_of_sizes #named 'reg_grid_of_sizes'
         ds.parameters['grain_sizes_in_micron'] = 10.**(x)
 

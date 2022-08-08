@@ -135,16 +135,31 @@ def arepo_m_gen(fname,field_add):
 
         ad = ds.all_data()
 
-        nsizes = reg['PartType3','Dust_NumGrains'].shape[1]
-
         try:
             assert(np.sum(ad['PartType3','Dust_NumGrains']) > 0)
         except AssertionError:
             raise AssertionError("[arepo_tributary:] There are no dust grains in this simulation.  This can sometimes happen in an early snapshot of a simulation where the dust has not yet had time to form.")
-            
-        grid_of_sizes = reg['PartType3','Dust_NumGrains']
 
-        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy)
+        #we call this total sizes, but thats a weird name thats a misnomer - its really just the total shape of the array, but is 3x the number of size bins!
+        ntotalsizes = reg['PartType3','Dust_NumGrains'].shape[1]
+
+        #the first third are graphites; second third silicates; third third are aromatics/graphites ratio
+        grid_of_sizes = reg['PartType3','Dust_NumGrains'][:,0:int(ntotalsizes/3)] + reg['PartType3','Dust_NumGrains'][:,int(ntotalsizes/3):int(2*ntotalsizes/3)]
+
+        if cfg.par.separate_into_dust_species:
+            grid_of_sizes_graphite = reg['PartType3','Dust_NumGrains'][:,0:int(ntotalsizes/3)]
+            grid_of_sizes_silicates = reg['PartType3','Dust_NumGrains'][:,int(ntotalsizes/3):int(2*ntotalsizes/3)]
+            grid_of_sizes_aromatic_fraction = reg['PartType3','Dust_NumGrains'][:,int(2*ntotalsizes/3)::]
+            nsizes = int(ntotalsizes/3)
+        else:
+            grid_of_sizes_graphite = [-1]
+            grid_of_sizes_silicates = [-1]
+            grid_of_sizes_aromatic_fraction = [-1]
+            nsizes = ntotalsizes
+        
+
+        refined=[False]
+        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined,grid_of_sizes_graphite,grid_of_sizes_silicates,grid_of_sizes_aromatic_fraction)
 
 
     m.set_specific_energy_type('additional')
