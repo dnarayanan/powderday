@@ -98,15 +98,14 @@ def get_Cabs(draine_directories,simulation_sizes,gsd):
 
 
 
-#DEBUG DEBUG DEBUG WE NEED TO GET RID OF THIS CELL SIZE FILE AND ACTUALLY FEED IN THE CELLS
-def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, cell_size_file ='/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/grid_physical_properties.027_galaxy0.npz'):
+def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
 
-    #get the wavelengths of the simulation ISRF DEBUG DEBUG DEBUG this
-    #will eventually.  NOTE the way to do this will be to put this *after* the first run of pd where we get the ISRF.
+    #get the wavelengths of the simulation 
     f = h5py.File(cfg.model.outputfile + '_isrf.sed')
 
-    #DEBUG WE WILL NEED TO PUT IN SOMETHING AUTOMATED HERE TO GRAB THE LAST ITERATION
-    dset = f['iteration_00007']
+    #thiis gives us the list of iterations in the initial ISRF calculation.  
+    iteration_list = [i for i in f.keys() if 'iteration_' in i]
+    dset = f[iteration_list[-1]]
     simulation_isrf_nu = dset['ISRF_frequency_bins'][:] * u.Hz
     simulation_isrf_lam = (const.c/simulation_isrf_nu).to(u.micron)
 
@@ -190,15 +189,11 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, cell_size_file
 
     #DEBUG DEBUG DEBUG THIS NEEDS TO BE UNCOMMENTED AND DELETE THE READ IN FROM NPZ FILES 3 lines  BECAUSE THAT'S INSANE AND JUST USED FOR DEBUGGING FAST 
     #Cabs_cation_regrid,Cabs_neutral_regrid = get_Cabs(draine_directories,simulation_sizes,gsd)
-    Cabs_data = np.load('Cabs.npz')
+    #np.savez('Cabs.npz',Cabs_cation_regrid=Cabs_cation_regrid.value,Cabs_neutral_regrid=Cabs_neutral_regrid.value)
+    Cabs_data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres_pah_sizes/Cabs.npz')
     Cabs_cation_regrid = Cabs_data['Cabs_cation_regrid']*u.cm**2
     Cabs_neutral_regrid = Cabs_data['Cabs_neutral_regrid']*u.cm**2
 
-
-    #DEBUG CAN WE GET RID OF CELL_SIZE_FILE here -- the answer is yes,
-    #and this is easy, but it requires moving the PAH addition to
-    #after the tributary so that we can just use
-    #reg.parameters['cell_size']
 
     logU_grid = get_logU(simulation_specific_energy_sum_regrid,Cabs_cation_regrid,Cabs_neutral_regrid,draine_lam,reg)
 
@@ -231,84 +226,14 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, cell_size_file
     y = y[0:idx,:,:]
     
 
-    #debug just for debugging not needed to keep
-    norm_factor = []
-    isrf_lum_list = []
-    nnls_lum_list = []
+
     
     for i in tqdm(range(ncells)):
         beta_nnls[:,i] = nnls(x.T,y[:,0,i])[0]
         isrf_lum = np.trapz(simulation_specific_energy_sum_regrid[:,0,i]/draine_lam,draine_lam)
         nnls_lum = np.trapz(np.dot(x.T,beta_nnls[:,i])/draine_lam[0:idx],draine_lam[0:idx])
         beta_nnls[:,i]*=isrf_lum.value/nnls_lum.value
-        norm_factor.append(isrf_lum.value/nnls_lum.value)
-        isrf_lum_list.append(isrf_lum)
-        nnls_lum_list.append(nnls_lum)
-
     
-    #6. Finally - go ahead and get logU since the main module
-    #pah_source_add will need this (and it doesn't make sense to call
-    #getlogU from there since we have the
-    #simulation_specific_energy_sum_regrid computed locally here.
-
-    #note - right now this is higher up just to help speed up debugging, but we can move down here later
-
-
-
-
-
-
-
-    '''
-    =============================================================
-    DEBUG CAN REMOVE THIS ENTIRE BLOCK WHEN I'M DONE DEBUGGING
-    =============================================================
-
-    
-    
-    import matplotlib.pyplot as plt
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    #ax.loglog(draine_lam,basis_isrf_vectors[0,:])
-    #ax.loglog(draine_lam,simulation_specific_energy_sum_regrid[:,0,0])
-
-    kernel_size = 20
-    kernel = np.ones(kernel_size)/kernel_size
-    data_convolved= np.zeros(simulation_specific_energy_sum_regrid.shape)
-    for i in range(simulation_specific_energy_sum.shape[1]): #ndust
-        for j in range(simulation_specific_energy_sum.shape[2]): #ncells
-            data_convolved[:,i,j] = np.convolve(simulation_specific_energy_sum_regrid[:,i,j],kernel,mode='same')
-
-    ax.loglog(draine_lam,data_convolved[:,0,1000],label='cell 0, smoothed')
-    ax.loglog(draine_lam,np.sum(data_convolved,axis=2)[:,0],label='total for grid, smoothed')
-    for i in range(14):
-        ax.loglog(draine_lam,basis_isrf_vectors[i,:])
-
-    ax.set_xlim([0.1,5.e2])
-    plt.legend()
-    fig.savefig('isrf_tests.png',dpi=300)
-
-
-
-    #DEBUG CAN REMOVE ALL OF THIS WHEN I'M DONE DEBUGGING
-    #plotting j ust to check
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.loglog(draine_lam[0:idx].value,np.dot(x.T,beta_nnls[:,10000]),label='nnls reconstruction')
-    ax.set_xlim([0.1,10])
-    fig.savefig('nnls.png',dpi=300)
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.loglog(draine_lam,simulation_specific_energy_sum_regrid[:,0,10000],label='ISRF sed')
-    
-    ax.set_xlim([0.1,10])
-    fig.savefig('isrf.png',dpi=300)
-    
-
-    =============================================================
-    =============================================================
-    '''
 
 
     return beta_nnls,logU_grid
@@ -352,11 +277,6 @@ def get_logU(cell_isrf,Cabs_cation,Cabs_neutral,draine_lam,reg):
     #neutrals depending on if its an ion or netural
 
     print('[pah/isrf_decompose/get_logU:] Computing logU for PAH calculation')
-    
-    #this is where we're' stuck -- IN TRYING TO MULTIPLY THESE ARRAYS QUICKLY WITHOUT A FOR LOop.  adam suggests: 
-    #y = cell_isrf * Cabs_neutral[:,None,:]
-    #but we get nonsensical answers for logU...
-
     
 
     y = cell_isrf * const.c*Cabs_neutral[:,None,:]/h_ref

@@ -14,28 +14,6 @@ from datetime import datetime
 
 
 
-#why is the SED looking weird?
-
-#0. first thing to fix no matter what is to note that the formatting of the sizes are:
-
-#0:nsizes/3 are silicates
-
-#nsizes/3:2*nsizes/3 are all graphites
-
-#2xnsizes/3:nsizes are aromatics/all graphites
-
-
-#1. if it's not this, then we need to incorproate the new hensley extinction models (in a modular way that allows us to keep the old ones too)
-
-
-
-
-#2a0.5 get a progress bar 
-
-#once this is done, test all the way through and see if we're reasonable total fluxes
-
-#go through isrf_decompose and fix all the debugs of which there are MANY
-
 #2a. have the code know if its neutral or ion and use that luminosity
 
 #2b. manually add the logU>4 sources
@@ -96,8 +74,7 @@ def get_PAH_lum_cdf(nu_reverse,fnu,wpah_nu_reverse,grid_PAH_luminosity):
     for loglum in loglum_bins:
         percentile_list.append(np.sum(lum_list[lum_list > 10.**loglum])/np.sum(lum_list))
         
-    #DEBUG MAKE THIS 0.9 A PARAMETER
-    percentile_idx = find_nearest(np.asarray(percentile_list),0.9)
+    percentile_idx = find_nearest(np.asarray(percentile_list),cfg.par.percentile_LPAH_to_include)
     lum_to_cut_below = 10.**(loglum_bins[percentile_idx])
 
     useful_idxs = np.where(lum_list >= lum_to_cut_below)[0]
@@ -108,7 +85,7 @@ def get_PAH_lum_cdf(nu_reverse,fnu,wpah_nu_reverse,grid_PAH_luminosity):
 
 def pah_source_add(ds,reg,m,boost):
     
-    LUM_FLOOR = 1.e20 #efg/s -- just some small value compared to the ~few Lsun we typically get in a cell
+    LUM_FLOOR = 1.e20 #erg/s -- just some small value compared to the ~few Lsun we typically get in a cell
 
     
     #first - establish where we're working
@@ -128,11 +105,7 @@ def pah_source_add(ds,reg,m,boost):
 
 
     #determine q_PAH for analysis and save it to parameters for
-    #writing out DEBUG - WE SHOULD CHANGE THIS TO INCLUDE A FEW
-    #DIFFRENT POSSIBILITIES, IUNCLUDING (A) COMPUTING QPAH AS IS, AND
-    #(B) COMPUTING QPAH DIRECTLY FROM THE SIMULATION IN THE POSSIBLE
-    #CASE THAT IT EXPLICITLY MODELS AROMATIC GRAPHITES
-
+    #writing out 
     ad = ds.all_data()
 
     idx_pah = np.where(simulation_sizes.to(u.cm).value <= 3.e-7)[0]
@@ -259,7 +232,7 @@ def pah_source_add(ds,reg,m,boost):
     
     dum_numgrains = reg['particle_dust','numgrains'].value 
 
-    pdb.set_trace()
+
     
     #DEBUG DEBUG DEBUG UNCOMMENT THIS ENTIRE BLOCK TO GET BACK TO NORMAL PRODUCTION CODE WE JUST HAVE AN NPZ FILE FOR DEBUGGING RN
     '''
@@ -279,7 +252,7 @@ def pah_source_add(ds,reg,m,boost):
     grid_PAH_luminosity = np.concatenate((temp_grid_PAH_luminosity),axis=0) 
     '''
     #DEBUG DEBUG DEBUG REMOVE THE NEXT TWO LINES THEY'RE CRAZY TALK AND JUST FOR DEBUGGING
-    data = np.load('grid_pah_luminosity.npz')
+    data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres_pah_sizes/grid_pah_luminosity.npz')
     grid_PAH_luminosity = data['grid_PAH_luminosity']
 
 
@@ -317,8 +290,11 @@ def pah_source_add(ds,reg,m,boost):
     #add the PAHs as sources only, we restrict to the PAH range.
     nu_reverse = nu[::-1]
 
-    nu_pah2 = (constants.c/(3*u.micron)).to(u.Hz) #start of the pah range
-    nu_pah1 = (constants.c/(20.*u.micron)).to(u.Hz) #end of pah range
+    #this is in here to set up the testing/debugging infrastructure
+    #for a scenario where we only want to include certain wavelengths.
+    #We set it to [0.1,1e3] as a default to catch all the emission.
+    nu_pah2 = (constants.c/(0.1*u.micron)).to(u.Hz) #start of the pah range
+    nu_pah1 = (constants.c/(1.e3*u.micron)).to(u.Hz) #end of pah range
     wpah_nu_reverse = np.where( (nu_reverse.value < nu_pah2.value) & (nu_reverse.value > nu_pah1.value))[0]
 
 
