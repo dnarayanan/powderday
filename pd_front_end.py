@@ -237,11 +237,10 @@ if cfg.par.otf_extinction and cfg.par.draine21_pah_model:
     compute_ISRF_SED(m, par, model)
     pah_source_add(ds,reg,m,boost)
 
-
-print('Done adding Sources')
-
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
     dump_data(reg, model)
+
+print('Done adding Sources')
 
 if cfg.par.SED:
     make_SED(m, par, model)

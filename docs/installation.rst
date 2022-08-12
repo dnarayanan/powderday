@@ -454,10 +454,99 @@ powderday::
 
   >git clone https://github.com/dnarayanan/powderday.git
   >cd powderday
+  >conda install numpy scipy cython h5py matplotlib psutil joblib six astropy scikit-learn ipython
+  >python setup.py install
+
+[2] The second set of instructions use gcc, but a manual installation of everything. Thanks to Prerak Garg for these.::
+
+First, load up the compilers that we'll use throughout::
+
+  >module load gcc/9.3.0 openmpi/4.1.1 libz/1.2.11 hdf5/1.10.1 git/2.30.1
+
+  
+yt::
+
+  >cd $HOME
+  >git clone https://github.com/yt-project/yt
+  >cd yt
+  >pip install -e .
+
+
+
+fsps and python-fsps
+
+The development version of python-fsps now includes the Fortran FSPS source code. You can get both via::
+
+fsps::
+
+  >cd $HOME
+  >git clone https://github.con/cconroy20/fsps
+
+in the Makefile set F90=$(FC) and this will ensure that the compilers
+`fsps <https://code.google.com/p/fsps/source/checkout>`_ uses are what
+you have module loaded.::
+  
+  >make clean
+  >make
+
+then in your .bashrc set the analog to::
+  
+  >export SPS_HOME=/Users/desika/fsps
+
+
+python fsps::
+
+
+  >CC=icc F90=ifort F77=ifort python setup.py install
+
+then in your .bashrc set the analog to::
+  
+  >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
+
+  >CC=gcc F90=gfortran F77=gfortran python setup.py install
+
+
+
+hyperion
+
+As of commit 7cae6d0, a bug has been introduced with the __version__ module. Once cloned, checkout stable commit 4170c6c::
+
+  >cd $HOME
+  >git clone https://github.com/hyperion-rt/hyperion.git
+  >cd hyperion
+  >git checkout 4170c6cc3009893e2b591e133baeb9927122aef1
+  >python setup.py install
+  >git submodule init
+  >git submodule update
+
+  >./configure --prefix=$HOME/local
+
+  >make
+  >make install
+
+hyperion dust::
+
+  >cd $HOME
+  >wget http://pypi.python.org/packages/source/h/hyperion-dust/hyperion-dust-0.1.0.tar.gz
+  >tar -xzvf hyperion-dust-0.1.0.tar.gz
+  >cd hyperion-dust-0.1.0
+  >python setup.py build_dust
+
+  
+powderday::
+
+  >git clone https://github.com/dnarayanan/powderday.git
+  >conda install numpy scipy cython h5py matplotlib psutil joblib six astropy scikit-learn ipython
+  >cd powderday
   >python setup.py install
 
 
-[2] The second set of instructions use gcc, and the conda installation
+
+
+  
+  
+
+[3] The third set of instructions use gcc, and the conda installation
 of `Hyperion <http://www.hyperion-rt.org>`_.  Thanks to Paul Torrey
 for these.::
 
