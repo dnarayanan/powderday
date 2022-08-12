@@ -84,6 +84,8 @@ try:
     print(f'solar metallicity = {cfg.par.solar}')
 
 except:
+    print("\nWARNING: Please update your python-fsps to at least commit #329774874cf40c04368ae300677576e3cae2c369 (August 11, 2022)")
+    print("Powderday will no longer work with the older versions of python-fsps in the near future\n")
     Ziso = {'mist': ('mist', 0.0142), 'bsti': ('basti', 0.020),
             'gnva': ('geneva', 0.020), 'prsc': ('parsec', 0.01524),
             'pdva': ('padova', 0.019), 'bpss': ('bpass', 0.20)}
