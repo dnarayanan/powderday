@@ -5,7 +5,7 @@
 # IMPORT STATEMENTS
 # =========================================================
 from __future__ import print_function
-from powderday.front_end_tools import make_SED, make_image, make_DIG_SED
+from powderday.front_end_tools import make_SED, make_image, make_DIG_SED,compute_ISRF_SED
 from powderday.source_creation import direct_add_stars, add_binned_seds, BH_source_add, DIG_source_add
 from powderday.analytics import stellar_sed_write, dump_data, SKIRT_data_dump, logu_diagnostic,dump_emlines,dump_NEB_SEDs
 from astropy import constants
@@ -79,6 +79,9 @@ options = {'gadget_hdf5': m_control_sph,
 m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
+from powderday.pah.pah_source_create import pah_source_add
+
+
 sp = fsps.StellarPopulation()
 
 #setting solar metallicity value based on isochrone
@@ -112,17 +115,6 @@ elif 'bpss' in isochrone:
     print(f'solar metallicity = {cfg.par.solar}')
 print('----------------------------------------------')
 
-# figure out which tributary we're going to
-
-ds_type = ds.dataset_type
-# define the options dictionary
-options = {'gadget_hdf5': m_control_sph,
-           'tipsy': m_control_sph,
-           'enzo_packed_3d': m_control_enzo,
-           'arepo_hdf5': m_control_arepo}
-
-m_gen = options[ds_type]()
-m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 # Get dust wavelengths. This needs to preceed the generation of sources
 # for hyperion since the wavelengths of the SEDs need to fit in the
@@ -162,7 +154,7 @@ m = add_binned_seds(df_nu, stars_list, diskstars_list,bulgestars_list, ds.cosmol
 
 
 
-#set the random seets
+#set the random seeds
 if cfg.par.FORCE_RANDOM_SEED == False:
     m.set_seed(random.randrange(0,10000)*-1)
 else:
@@ -170,8 +162,9 @@ else:
 
 # save SEDs
 # stars and black holes can't both be in the sim and write stellar SEDs to a file becuase they have different wavelength sizes
-if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED):
+if (par.STELLAR_SED_WRITE == True) and not (par.BH_SED) and not (par.draine21_pah_model):
     stellar_sed_write(m)
+
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5'] and cfg.par.SKIRT_DATA_DUMP:
     SKIRT_data_dump(reg, ds, m, stars_list, bulgestars_list, diskstars_list, ds_type, sp)
@@ -206,7 +199,7 @@ if par.SOURCES_RANDOM_POSITIONS == True:
 '''
 
 
-print('Done adding Sources')
+
 
 
 # set up the CMB field -- place holder to put in haardt/madau eventually
@@ -231,14 +224,23 @@ print('Setting up Model')
 m_imaging = copy.deepcopy(m)
 m.conf.output.output_specific_energy = 'last'
 
-if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
-    dump_data(reg, model)
 
 if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
     make_DIG_SED(m, par, model)
     DIG_source_add(m, reg, df_nu,boost)
     # Removing the DIG input SED file
     os.remove(cfg.model.inputfile + '_DIG_energy_dumped.sed')
+
+
+if cfg.par.otf_extinction and cfg.par.draine21_pah_model:
+    m.compute_isrf(True)
+    compute_ISRF_SED(m, par, model)
+    pah_source_add(ds,reg,m,boost)
+
+if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
+    dump_data(reg, model)
+
+print('Done adding Sources')
 
 if cfg.par.SED:
     make_SED(m, par, model)
