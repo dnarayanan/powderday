@@ -66,55 +66,33 @@ eh.check_parameter_compatibility()
 fname = cfg.model.hydro_dir+cfg.model.snapshot_name
 field_add, ds = stream(fname)
 
-
 # figure out which tributary we're going to
-
 ds_type = ds.dataset_type
-# define the options dictionary
-options = {'gadget_hdf5': m_control_sph,
-           'tipsy': m_control_sph,
-           'enzo_packed_3d': m_control_enzo,
-           'arepo_hdf5': m_control_arepo}
-
-m_gen = options[ds_type]()
-m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
 sp = fsps.StellarPopulation()
 
 #setting solar metallicity value based on isochrone
-#values assigned to cfg.par.solar taken from fsps/src/sps_vars
-isochrone = str(sp.libraries[0])
-
 print(f'\n----------------------------------------------\nSetting solar metallicity value')
-if 'mist' in isochrone:
-    print('isochrone = mist')
-    cfg.par.solar = 0.0142
+
+isochrone = str(sp.libraries[0].decode())
+
+# As of commit #329774874cf40c04368ae300677576e3cae2c369 (August 11, 2022, https://github.com/dfm/python-fsps) 
+# isochrone solar metallicity can now be accessed through the 'solar_metallicity' attribute of the sp object.
+try:
+    print('isochrone = ', isochrone)
+    cfg.par.solar = sp.solar_metallicity
     print(f'solar metallicity = {cfg.par.solar}')
-elif 'bsti' in isochrone:
-    print('isochrone = basti')
-    cfg.par.solar = 0.020
-    print(f'solar metallicity = {cfg.par.solar}')
-elif 'gnva' in isochrone:
-    print('isochrone = geneva')
-    cfg.par.solar = 0.020
-    print(f'solar metallicity = {cfg.par.solar}')
-elif 'prsc' in isochrone:
-    print('isochrone = parsec')
-    cfg.par.solar = 0.01524
-    print(f'solar metallicity = {cfg.par.solar}')
-elif 'pdva' in isochrone:
-    print('isochrone = padova')
-    cfg.par.solar = 0.019
-    print(f'solar metallicity = {cfg.par.solar}')
-elif 'bpss' in isochrone:
-    print('isochrone = bpass')
-    cfg.par.solar = 0.020
+
+except:
+    Ziso = {'mist': ('mist', 0.0142), 'bsti': ('basti', 0.020),
+            'gnva': ('geneva', 0.020), 'prsc': ('parsec', 0.01524),
+            'pdva': ('padova', 0.019), 'bpss': ('bpass', 0.20)}
+    iso, Zsun = Ziso[isochrone]
+    print('isochrone = '+ str(iso))
+    cfg.par.solar = Zsun
     print(f'solar metallicity = {cfg.par.solar}')
 print('----------------------------------------------')
 
-# figure out which tributary we're going to
-
-ds_type = ds.dataset_type
 # define the options dictionary
 options = {'gadget_hdf5': m_control_sph,
            'tipsy': m_control_sph,
