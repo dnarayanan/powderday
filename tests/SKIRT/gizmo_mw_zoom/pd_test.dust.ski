@@ -33,7 +33,7 @@
                     </SPHDustDistribution>
                 </dustDistribution>
                 <dustGrid type="DustGrid">
-                    <OctTreeDustGrid writeGrid="true" minX="40183000 pc" maxX="40383000 pc" minY="31824000 pc" maxY="32024000 pc" minZ="40834635 pc" maxZ="41034635.70342197 pc" minLevel="3" maxLevel="14" searchMethod="Neighbor" numSamples="100" maxOpticalDepth="0" maxMassFraction="2e-5" maxDensityDispersion="0" writeTree="false" useBarycentric="false"/>
+                    <OctTreeDustGrid writeGrid="true" minX="40183000 pc" maxX="40384000 pc" minY="31824000 pc" maxY="32025000 pc" minZ="40834635 pc" maxZ="41034636 pc" minLevel="3" maxLevel="14" searchMethod="Neighbor" numSamples="100" maxOpticalDepth="0" maxMassFraction="2e-5" maxDensityDispersion="0" writeTree="false" useBarycentric="false"/>
                 </dustGrid>
                 <dustEmissivity type="DustEmissivity">
                     <GreyBodyDustEmissivity/>

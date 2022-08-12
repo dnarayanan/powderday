@@ -231,6 +231,9 @@ print('Setting up Model')
 m_imaging = copy.deepcopy(m)
 m.conf.output.output_specific_energy = 'last'
 
+if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
+    dump_data(reg, model)
+
 if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
     make_DIG_SED(m, par, model)
     DIG_source_add(m, reg, df_nu,boost)
@@ -239,9 +242,6 @@ if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
 
 if cfg.par.SED:
     make_SED(m, par, model)
-
-if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
-    dump_data(reg, model)
 
 if cfg.par.IMAGING:
     make_image(m_imaging, par, model, dx, dy, dz)

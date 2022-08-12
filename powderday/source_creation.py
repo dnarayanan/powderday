@@ -624,9 +624,8 @@ def DIG_source_add(m,reg,df_nu,boost):
 
     fnu_arr_neb = sg.get_dig_seds(lam_arr, fnu_arr, logU, cell_width, met)
     
-    nu = 1.e8 * constants.c.cgs.value / lam
-
     for i in range(len(logU)):
+        nu = 1.e8 * constants.c.cgs.value / lam
         fnu = fnu_arr_neb[i,:]
         nu, fnu = wavelength_compress(nu,fnu,df_nu)
         
@@ -637,5 +636,5 @@ def DIG_source_add(m,reg,df_nu,boost):
         
         source = m.add_point_source()
         source.luminosity = lum # [ergs/s]
-        source.spectrum = (nu[::-1],fnu[::-1])
+        source.spectrum = (nu,fnu)
         source.position = pos[i] # [cm]
