@@ -15,16 +15,23 @@ from datetime import datetime
 
 
 #2a. have the code know if its neutral or ion and use that luminosity
+#f_ion(a) = 1 - 1/(1 + a/10 A).
+
+#2c. make beta_cell in compute_grid_PAH_luminosity to have it do 
+
+# for j in beta_cell[beta_cell > 0]: print(j)
+
 
 #2b. manually add the logU>4 sources
 
 
-def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,draine_sizes,draine_lam,neutral_PAH_reference_objects,draine_bins_idx):
+def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,draine_sizes,draine_lam,f_ion,neutral_PAH_reference_objects,ion_PAH_reference_objects,draine_bins_idx):
 
     #these are re-defined for each pool thread.  when they're
     #returned, they'll be packed into a master list with one extra
     #dimension for the thread number.
-    grid_PAH_luminosity = np.zeros([len(cell_list),len(draine_lam)])
+    neutral_grid_PAH_luminosity = np.zeros([len(cell_list),len(draine_lam)])
+    ion_grid_PAH_luminosity = np.zeros([len(cell_list),len(draine_lam)])
 
 
     for counter,cell in enumerate(cell_list):
@@ -34,13 +41,21 @@ def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,drai
         
         #need to make a temporary (for this cell) PAH_list that is
         #just n_draine_sizes long that is convolved with beta_nnls
-        pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
-        for j in range(len(beta_cell)):
-            PAH_list = neutral_PAH_reference_objects[j]
-            temp_pah_grid = np.array([x.lum for x in PAH_list])
-            temp_pah_grid *= beta_cell[j]
-            pah_grid += temp_pah_grid #this is the running summation of the (n_sizes,n_lam) pah grid for the i-th cell
+        neutral_pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
+        ion_pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
+
+        for j in np.flatnonzero(beta_cell): #for j in range(len(Beta_cell))
+        #for j in range(len(beta_cell)):
+
+            neutral_PAH_list = neutral_PAH_reference_objects[j]
+            temp_neutral_pah_grid = np.array([x.lum for x in neutral_PAH_list])
+            temp_neutral_pah_grid *= beta_cell[j]
+            neutral_pah_grid += temp_neutral_pah_grid #this is the running summation of the (n_sizes,n_lam) pah grid for the i-th cell
             
+            ion_PAH_list = ion_PAH_reference_objects[j]
+            temp_ion_pah_grid = np.array([x.lum for x in ion_PAH_list])
+            temp_ion_pah_grid *= beta_cell[j]
+            ion_pah_grid += temp_ion_pah_grid #this is the running summation of the (n_sizes,n_lam) pah grid for the i-th cell
             
         #set the PAH luminosity of the cell to be the dot product of
         #the Draine luminosities (i.e., pah_grid[draine_bins_idx,:] which has
@@ -48,12 +63,19 @@ def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,drai
         #grain size distribution in that cell (i.e.,
         #grid_of_sizes[i_cell,:]). note, we take the transpose of
         #grid_of_sizes to get the dimensions to match up correctly for the dot product
-        
 
-        grid_PAH_luminosity[counter,:] = np.dot(pah_grid[draine_bins_idx,:].T, grid_of_sizes.T[:,cell])
+        #note - we're also folding in the ionized fraction 
+        neutral_grid_PAH_luminosity[counter,:] = np.dot(neutral_pah_grid[draine_bins_idx,:].T*(1.-f_ion), grid_of_sizes.T[:,cell])
+        ion_grid_PAH_luminosity[counter,:] = np.dot(ion_pah_grid[draine_bins_idx,:].T*f_ion, grid_of_sizes.T[:,cell])
+        
+        
     #particle_PAH_luminosity = np.dot(pah_grid[draine_bins_idx,:].T,numgrains.T[:,cell])
+
+
+    grid_PAH_luminosity = neutral_grid_PAH_luminosity + ion_grid_PAH_luminosity
     
-    return grid_PAH_luminosity
+
+    return grid_PAH_luminosity,neutral_grid_PAH_luminosity,ion_grid_PAH_luminosity
 
 
 def get_PAH_lum_cdf(nu_reverse,fnu,wpah_nu_reverse,grid_PAH_luminosity):
@@ -102,7 +124,13 @@ def pah_source_add(ds,reg,m,boost):
     grid_of_sizes = ds.parameters['reg_grid_of_sizes']
 
     simulation_sizes = (ds.parameters['grain_sizes_in_micron']*u.micron)
+    
+    #second, use the Hensley & Draine fitting formula to determine
+    #f_ion as a function of size: #f_ion(a) = 1 - 1/(1 + a/10 A)
+    
 
+    f_ion = 1.- 1./(1+(simulation_sizes.to(u.angstrom)/(10.*u.angstrom)))
+    
 
     #determine q_PAH for analysis and save it to parameters for
     #writing out 
@@ -204,7 +232,6 @@ def pah_source_add(ds,reg,m,boost):
 
     cell_list = np.arange(ncells)
 
-
     #chunking to speed up multiprocessing: since the processes are so
     #quick, we can lose a factor of 50% time in just spawning new
     #threads.  i saves a ton of time to chunk up the work and send it all off once.
@@ -235,48 +262,80 @@ def pah_source_add(ds,reg,m,boost):
 
     
     #DEBUG DEBUG DEBUG UNCOMMENT THIS ENTIRE BLOCK TO GET BACK TO NORMAL PRODUCTION CODE WE JUST HAVE AN NPZ FILE FOR DEBUGGING RN
+
     '''
-    temp_grid_PAH_luminosity = p.map(partial(compute_grid_PAH_luminosity,
-                           beta_nnls = beta_nnls,
-                           grid_of_sizes = grid_of_sizes.value,
-                           numgrains = dum_numgrains,
-                           draine_sizes = draine_sizes,
-                           draine_lam = draine_lam.value,
-                           neutral_PAH_reference_objects = neutral_PAH_reference_objects,
-                           draine_bins_idx = draine_bins_idx),[arg for arg in list_of_chunks])
+    dum = compute_grid_PAH_luminosity(cell_list = np.arange(ncells),beta_nnls = beta_nnls,
+                                grid_of_sizes = grid_of_sizes.value,
+                                numgrains = dum_numgrains,
+                                draine_sizes = draine_sizes,
+                                draine_lam = draine_lam.value,
+                                f_ion=f_ion,
+                                neutral_PAH_reference_objects = neutral_PAH_reference_objects,
+                                ion_PAH_reference_objects = ion_PAH_reference_objects,
+                                draine_bins_idx = draine_bins_idx)
+    '''
+
+    '''
+    temp_grid_PAH_luminosity =p.map(partial(compute_grid_PAH_luminosity,
+                                  beta_nnls = beta_nnls,
+                                  grid_of_sizes = grid_of_sizes.value,
+                                  numgrains = dum_numgrains,
+                                  draine_sizes = draine_sizes,
+                                  draine_lam = draine_lam.value,
+                                  f_ion=f_ion,
+                                  neutral_PAH_reference_objects = neutral_PAH_reference_objects,
+                                  ion_PAH_reference_objects = ion_PAH_reference_objects,
+                                  draine_bins_idx = draine_bins_idx),[arg for arg in list_of_chunks])
     
-    #temp_grid_PAH_luminosity is now nprocesses long.  each index will
-    #reveal a [ncells/nchunks,n_draine_lam] length array.  we hence
-    #conctaenate them to get this to be ncells,ndraine_lam long.
-    temp_grid_PAH_luminosity = np.asarray(temp_grid_PAH_luminosity)
-    grid_PAH_luminosity = np.concatenate((temp_grid_PAH_luminosity),axis=0) 
+    temp_grid_neutral_PAH_luminosity = temp_grid_PAH_lumionsity*0
+    temp_grid_ion_PAH_luminosity = temp_grid_PAH_luminosity*0
     '''
-    #DEBUG DEBUG DEBUG REMOVE THE NEXT TWO LINES THEY'RE CRAZY TALK AND JUST FOR DEBUGGING
-    data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres_pah_sizes/grid_pah_luminosity.npz')
-    grid_PAH_luminosity = data['grid_PAH_luminosity']
+
+
+
+    dum  = p.map(partial(compute_grid_PAH_luminosity,
+                         beta_nnls = beta_nnls,
+                         grid_of_sizes = grid_of_sizes.value,
+                         numgrains = dum_numgrains,
+                         draine_sizes = draine_sizes,
+                         draine_lam = draine_lam.value,
+                         f_ion=f_ion,
+                         neutral_PAH_reference_objects = neutral_PAH_reference_objects,
+                         ion_PAH_reference_objects = ion_PAH_reference_objects,
+                         draine_bins_idx = draine_bins_idx),[arg for arg in list_of_chunks])
+
+    #this is some crazy business here, so let me explain.  dum returns
+    #a tuple that is nprocesses big.  each element of this tuple is 3
+    #elements long, each of which is (ncells/nprocessors,n_draine_lam)
+    #long.  the 3 corresponds to [total, neutral, ions]. for exmaple,
+    #the [0][0] element of dum is the first PAH emission spectrum
+    #chunk (ncells/nprocessors , n_wavelengths) for the total PAH
+    #spectrum.  the [0][1] corresponds to the neutrals for the first
+    #chunk, and [0][2] the ions.  hence, the following :does a list
+    #comprehension on all of the chunks [ so that we have a list of
+    #lists, where each sublist is a chunk], nparray's it, and then
+    #concatenates on the 0th axis to make one grand array.  
+
+
+    grid_PAH_luminosity = np.concatenate( np.asarray([dum[i][0] for i in range(len(dum))] ),axis=0)
+    grid_neutral_PAH_luminosity = np.concatenate( np.asarray([dum[i][1] for i in range(len(dum))] ),axis=0)
+    grid_ion_PAH_luminosity = np.concatenate( np.asarray([dum[i][2] for i in range(len(dum))] ),axis=0)
+
 
 
     t2 = datetime.now()
     print ('Execution time for PAH dot producting [is that a word?] across the grid = '+str(t2-t1))
- 
 
 
-
-   #z = zip(cell_list,beta_nnls,grid_of_sizes.value,dum_numgrains,draine_sizes,draine_lam.value,neutral_PAH_reference_objects,draine_bins_idx)
-    #answer = p.starmap(compute_grid_PAH_luminosity,z)
-    #p.close()
-    #p.terminate()
-    #p.join()
-
-    #what i need back out is something like this with these dimensions
-    #grid_PAH_luminosity = np.zeros([ncells,len(draine_lam)])
-    #particle_PAH_luminosity = np.zeros([len(numgrains),len(draine_lam)])
-
-    #grid_PAH_luminosity,particle_PAH_luminosity = compute_grid_PAH_luminosity(cell_list,beta_nnls,draine_sizes,draine_lam,neutral_PAH_reference_objects,grid_of_sizes,reg,draine_bins_idx)
-
+    '''
+    #DEBUG DEBUG DEBUG REMOVE THE NEXT TWO LINES THEY'RE CRAZY TALK AND JUST FOR DEBUGGING
+    data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres_pah_sizes/grid_pah_luminosity.npz')
+    grid_PAH_luminosity = data['grid_PAH_luminosity']
+    '''
 
     grid_PAH_luminosity[np.isnan(grid_PAH_luminosity)] = 0
-    
+    grid_neutral_PAH_luminosity[np.isnan(grid_neutral_PAH_luminosity)] = 0
+    grid_ion_PAH_luminosity[np.isnan(grid_ion_PAH_luminosity)] = 0
 
     nu = (constants.c/draine_lam).to(u.Hz)
     #the units here are Lsun/Hz - this is to be consistent with our
@@ -336,17 +395,31 @@ def pah_source_add(ds,reg,m,boost):
 
     if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
+        reg.parameters['grid_neutral_PAH_luminosity'] = grid_neutral_PAH_luminosity
+        reg.parameters['grid_ion_PAH_luminosity'] = grid_ion_PAH_luminosity
 
     reg.parameters['PAH_lam'] = draine_lam.value
 
     total_PAH_luminosity =np.sum(grid_PAH_luminosity,axis=0)
+    total_neutral_PAH_luminosity = np.sum(grid_neutral_PAH_luminosity,axis=0)
+    total_ion_PAH_luminosity = np.sum(grid_ion_PAH_luminosity,axis=0)
+
     reg.parameters['total_PAH_luminosity'] = total_PAH_luminosity
+    reg.parameters['total_neutral_PAH_luminosity'] = total_neutral_PAH_luminosity
+    reg.parameters['total_ion_PAH_luminosity'] = total_ion_PAH_luminosity
+
     reg.parameters['only_important_PAH_idx'] = only_important_PAH_idx
 
     grid_PAH_L_lam = grid_PAH_luminosity/draine_lam.value
     integrated_grid_PAH_luminosity = np.trapz((grid_PAH_luminosity/draine_lam.value),draine_lam.value,axis=1)
+    integrated_grid_neutral_PAH_luminosity = np.trapz((grid_neutral_PAH_luminosity/draine_lam.value),draine_lam.value,axis=1)
+    integrated_grid_ion_PAH_luminosity = np.trapz((grid_ion_PAH_luminosity/draine_lam.value),draine_lam.value,axis=1)
+
     reg.parameters['integrated_grid_PAH_luminosity'] = integrated_grid_PAH_luminosity
-    
+    reg.parameters['integrated_grid_neutral_PAH_luminosity'] = integrated_grid_neutral_PAH_luminosity
+    reg.parameters['integrated_grid_ion_PAH_luminosity'] = integrated_grid_ion_PAH_luminosity
+
+
     #save some information for dumping into analytics
     reg.parameters['q_pah'] = q_pah
     reg.parameters['particle_mass_weighted_gsd'] = particle_mass_weighted_gsd
@@ -354,37 +427,4 @@ def pah_source_add(ds,reg,m,boost):
     reg.parameters['simulation_sizes'] = simulation_sizes
 
 
-#    for i_cell in tqdm(range(ncells)):
-        
-        
-        #in principle this doesn't need to be done inside the loop for
-        #a constant radiation field. However, for a radiation field
-        #that varies cell by cell, then PAH_list will change as we
-        #have different files that we read in, so we may as well keep it here for now.
-
- #       pah_grid = np.array([x.lum for x in PAH_list])
- #       idx = np.asarray(Draine_simulation_idx_left_edge_array)[size_arange]
-        
-        #set the PAH luminosity of the cell to be the dot product of
-        #the Draine luminosities (i.e., pah_grid[idx,:] which has
-        #dimensions (simulation_sizes,wavelengths)) with the actual
-        #grain size distribution in that cell (i.e.,
-        #grid_of_sizes[i_cell,:]). note, we take the transpose of
-        #grid_of_sizes to get the dimensions to match up correctly for the dot product
-
-  
-  #      grid_PAH_luminosity[i_cell,:] = np.dot(pah_grid[idx,:].T,grid_of_sizes[i_cell,:].T)
-
-  
-
-
-    #import matplotlib.pyplot as plt
-    #fig = plt.figure()
-    #ax = fig.add_subplot(111)
-    #ax.loglog(PAH_list[0].lam,total_PAH_luminosity[:]/PAH_list[0].lam)
-    #ax.set_ylim([1e31,1e45])
-    #ax.set_xlim([1,1000])
-    #ax.set_xlabel(r'$\lambda (\mu $m)')
-    #ax.set_ylabel(r'$L_\lambda$ (erg/s/$\mu$m)')
-    #fig.savefig('/home/desika.narayanan/PAH_sed.png',dpi=300)
     

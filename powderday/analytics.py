@@ -125,16 +125,35 @@ def dump_data(reg,model):
 
     try: grid_star_mass = reg["star","smoothedmasses"]
     except: grid_star_mass = -1
-
+    
     #PAH information
     try: grid_PAH_luminosity = reg.parameters['grid_PAH_luminosity']
     except: grid_PAH_luminosity = -1
+    try: grid_neutral_PAH_luminosity = reg.parameters['grid_neutral_PAH_luminosity']
+    except: grid_neutral_PAH_luminosity = -1
+    try: grid_ion_PAH_luminosity = reg.parameters['grid_ion_PAH_luminosity']
+    except: grid_ion_PAH_luminosity = -1
+
+
     try: PAH_lam = reg.parameters['PAH_lam']
     except: PAH_lam = -1
     try: total_PAH_luminosity = reg.parameters['total_PAH_luminosity']
     except: total_PAH_luminosity = -1
+    try: total_neutral_PAH_luminosity = reg.parameters['total_neutral_PAH_luminosity']
+    except: total_neutral_PAH_luminosity = -1
+    try: total_ion_PAH_luminosity = reg.parameters['total_ion_PAH_luminosity']
+    except: total_ion_PAH_luminosity = -1
+
+
     try: integrated_grid_PAH_luminosity = reg.parameters['integrated_grid_PAH_luminosity']
     except: integrated_grid_PAH_luminosity = -1
+    try: integrated_grid_neutral_PAH_luminosity = reg.parameters['integrated_grid_neutral_PAH_luminosity']
+    except: integrated_grid_neutral_PAH_luminosity = -1
+    try: integrated_grid_ion_PAH_luminosity = reg.parameters['integrated_grid_ion_PAH_luminosity']
+    except: integrated_grid_ion_PAH_luminosity = -1
+
+
+
     try: q_pah = reg.parameters['q_pah']
     except: q_pah = -1
     try: particle_mass_weighted_gsd = reg.parameters['particle_mass_weighted_gsd']
@@ -157,7 +176,7 @@ def dump_data(reg,model):
     except:
         outfile = cfg.model.PD_output_dir+"/grid_physical_properties."+cfg.model.snapnum_str+".npz"
 
-    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass,grid_dustmass=grid_dustmass,grid_PAH_luminosity = grid_PAH_luminosity,PAH_lam=PAH_lam,total_PAH_luminosity = total_PAH_luminosity,integrated_grid_PAH_luminosity = integrated_grid_PAH_luminosity,q_pah=q_pah,particle_mass_weighted_gsd = particle_mass_weighted_gsd,grid_mass_weighted_gsd = grid_mass_weighted_gsd,simulation_sizes=simulation_sizes,cell_size=cell_size)#,tdust = tdust)
+    np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass,grid_dustmass=grid_dustmass,grid_PAH_luminosity = grid_PAH_luminosity,grid_neutral_PAH_luminosity=grid_neutral_PAH_luminosity,grid_ion_PAH_luminosity=grid_ion_PAH_luminosity,PAH_lam=PAH_lam,total_PAH_luminosity = total_PAH_luminosity,total_neutral_PAH_luminosity=total_neutral_PAH_luminosity,total_ion_PAH_luminosity=total_ion_PAH_luminosity,integrated_grid_PAH_luminosity = integrated_grid_PAH_luminosity,integrated_grid_neutral_PAH_luminosity=integrated_grid_neutral_PAH_luminosity,integrated_grid_ion_PAH_luminosity=integrated_grid_ion_PAH_luminosity,q_pah=q_pah,particle_mass_weighted_gsd = particle_mass_weighted_gsd,grid_mass_weighted_gsd = grid_mass_weighted_gsd,simulation_sizes=simulation_sizes,cell_size=cell_size)#,tdust = tdust)
 
 
 def SKIRT_data_dump(reg,ds,m,stars_list,bulgestars_list,diskstars_list,ds_type,sp,hsml_in_pc = 10):

@@ -186,13 +186,13 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
 
     simulation_sizes = np.broadcast_to(simulation_sizes,(ncells,simulation_sizes.shape[0]))*u.micron
     gsd = gsd.value
-
+    
     #DEBUG DEBUG DEBUG THIS NEEDS TO BE UNCOMMENTED AND DELETE THE READ IN FROM NPZ FILES 3 lines  BECAUSE THAT'S INSANE AND JUST USED FOR DEBUGGING FAST 
-    #Cabs_cation_regrid,Cabs_neutral_regrid = get_Cabs(draine_directories,simulation_sizes,gsd)
-    #np.savez('Cabs.npz',Cabs_cation_regrid=Cabs_cation_regrid.value,Cabs_neutral_regrid=Cabs_neutral_regrid.value)
-    Cabs_data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres_pah_sizes/Cabs.npz')
-    Cabs_cation_regrid = Cabs_data['Cabs_cation_regrid']*u.cm**2
-    Cabs_neutral_regrid = Cabs_data['Cabs_neutral_regrid']*u.cm**2
+    Cabs_cation_regrid,Cabs_neutral_regrid = get_Cabs(draine_directories,simulation_sizes,gsd)
+    np.savez('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/Cabs.npz',Cabs_cation_regrid=Cabs_cation_regrid.value,Cabs_neutral_regrid=Cabs_neutral_regrid.value)
+    #Cabs_data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/Cabs.npz')
+    #Cabs_cation_regrid = Cabs_data['Cabs_cation_regrid']*u.cm**2
+    #Cabs_neutral_regrid = Cabs_data['Cabs_neutral_regrid']*u.cm**2
 
 
     logU_grid = get_logU(simulation_specific_energy_sum_regrid,Cabs_cation_regrid,Cabs_neutral_regrid,draine_lam,reg)
