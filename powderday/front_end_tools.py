@@ -34,6 +34,7 @@ def make_SED(m, par, model):
 
         m.set_n_initial_iterations(3)
         m.set_convergence(True, percentile=99., absolute=1.01, relative=1.01)
+        m.set_copy_input(False)
         sed = m.add_peeled_images(sed=True, image=False)
 
         if cfg.par.MANUAL_ORIENTATION == True:
