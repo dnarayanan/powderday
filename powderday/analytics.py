@@ -93,8 +93,7 @@ def dump_data(reg,model):
         abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
         for i in abund_el:
             grid_gas_metallicity.append(reg["gas","smoothedmetals_"+str(i)].value)
-    
-        print (grid_gas_metallicity)
+
     except: grid_gas_metallicity = -1
 
     try: grid_star_mass = reg["star","smoothedmasses"]
@@ -262,13 +261,17 @@ def dump_AGN_SEDs(nu,fnu,luminosity):
     np.savez(outfile_bh,nu = nu,fnu = fnu, luminosity = luminosity)
                       
 
-def dump_NEB_SEDs(nu_arr, fnu_arr, pos_arr, append=True):
+def dump_NEB_SEDs(nu_arr, fnu_arr, pos_arr, append=True, clean_up=False):
     
     if hasattr(cfg.model,'galaxy_num_str'):
         outfile = cfg.model.PD_output_dir+"/neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
     else:
         outfile = cfg.model.PD_output_dir+"/neb_seds.npz"
 
+    if clean_up:
+        os.remove(outfile)
+        return
+    
     # If append is False then just save an empty npz file.
     if not append:
         np.savez(outfile)

@@ -305,7 +305,7 @@ def gadget_field_add(fname, bounding_box=None, ds=None,add_smoothed_quantities=T
     # load the ds (but only if this is our first passthrough and we pass in fname)
     if fname != None:
         if float(yt.__version__[0:3]) >= 4:
-            ds = yt.load(fname)
+            ds = yt.load(fname, bounding_box=bounding_box)
             
             #ds.sph_smoothing_style = "gather"
             ds.index
