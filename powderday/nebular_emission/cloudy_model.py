@@ -282,12 +282,10 @@ def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu 
     logging.info("Writing the input SED file")
     filename = write_input_sed(spec_lambda, sspi)
     model_name = filename.split(".")[0]
-    print (model_name)
 
     logging.info("Writing CLOUDY input file")
     dir_= cfg.par.pd_source_dir + "powderday/nebular_emission"
     dir_base = os.getcwd()
-
     write_cloudy_input(dir_=dir_,
                        model_name = model_name,
                        r_inner = radius,

@@ -12,6 +12,8 @@ from powderday.analytics import dump_AGN_SEDs,dump_NEB_SEDs,dump_emlines
 from hyperion.model import ModelOutput
 from hyperion.grid.yt3_wrappers import find_order
 from powderday.nebular_emission.cloudy_tools import get_DIG_sed_shape, get_DIG_logU
+from tqdm import tqdm
+from scipy import spatial
 
 class Sed_Bins:
     def __init__(self,mass,metals,age,fsps_zmet,all_metals=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]):
@@ -57,7 +59,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         # reverse the arrays for hyperion
         nu = nu[::-1]
         fnu = fnu[::-1]
-        
+
         lum = np.absolute(np.trapz(fnu, x=nu))*unbinned_stars_list[i].mass/constants.M_sun.cgs.value/mfrac[i]
         lum *= constants.L_sun.cgs.value
         
@@ -74,9 +76,8 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
             # https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
             line_em = line_em * (unbinned_stars_list[i].mass * units.g).to(units.Msun).value * 3.839e33 # Units: ergs/s
             OH = unbinned_stars_list[i].all_metals[4]
-            
+
             line_em = np.append(line_em, OH)
-            
             if young_star:
                 line_em = np.append(line_em, 1)
             elif pagb:
@@ -286,7 +287,6 @@ def add_binned_seds(df_nu,stars_list,diskstars_list,bulgestars_list,cosmoflag,m,
                         stars_metals.append(stars_list[star].all_metals)
                     stars_metals = np.array(stars_metals)
                     stars_metals = np.mean(stars_metals,axis=0)
-                    #print(stars_metals, metal_bins[wz], fsps_metals[wz])
                     sed_bins_list_has_stellar_mass.append(Sed_Bins(mass_bins[wm],fsps_metals[wz],age_bins[wa],metal_bins[wz],stars_metals))
    
     #sed_bins_list is a list of Sed_Bins objects that have the
@@ -573,18 +573,32 @@ def DIG_source_add(m,reg,df_nu,boost):
     cell_width = cell_width[mask]
     met = grid_properties["grid_gas_metallicity"][:, mask]
     met = np.transpose(met)
+
     specific_energy = specific_energy[mask]
 
     mask = []
     logU_arr = []
     lam_arr = []
     fnu_arr = []
+  
+    sed_file_name = cfg.model.PD_output_dir+"neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
+    data = np.load(sed_file_name)
+    nu = data['nu']
+    stars_fnu = data["fnu"]
+    star_coordinates = data["positions"]
     
-    for i in range(len(cell_width)):
+    print ("[Source creation (DIG)] Generating KD Tree")
+    tree = spatial.KDTree(star_coordinates)
+    
+    print("----------------------------------------------------------------------------------")
+    print("[Source creation (DIG)] Calculating ionizing spectrum for " + str(len(cell_width))+ " gas cells ")
+    print("----------------------------------------------------------------------------------")
+
+    for i in tqdm(range(len(cell_width))):
         
-        # Getting shape of the incident spectrum by taking a distance weighted average of the CLOUDY output spectrum of nearby young stars.
-        sed_file_name = cfg.model.PD_output_dir+"neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
-        lam, fnu = get_DIG_sed_shape(pos[i], cell_width[i], sed_file=sed_file_name) # Returns input SED shape, lam in Angstrom, fnu in Lsun/Hz
+        # Getting shape of the incident spectrum by taking a distance weighted average of the CLOUDY output spectrum of nearby stars.
+        # lam in Angstrom, fnu in Lsun/Hz
+        lam, fnu = get_DIG_sed_shape(pos[i], cell_width[i], nu, stars_fnu, tree)
 
         # If the gas cell has no young stars within a specified distance (stars_max_dist) then skip it.
         if len(np.atleast_1d(fnu)) == 1:
@@ -600,6 +614,7 @@ def DIG_source_add(m,reg,df_nu,boost):
         # Only cells with ionization parameter greater than the parameter DIG_min_logU are considered 
         # for nebular emission calculation. This is done so as to speed up the calculation by ignoring 
         # the cells that do not have enough energy to prduce any substantial emission
+        
         if logU > cfg.par.DIG_min_logU:
             mask.append(i)
             lam_arr.append(lam)
@@ -619,11 +634,10 @@ def DIG_source_add(m,reg,df_nu,boost):
         return
 
     print("----------------------------------------------------------------------------------")
-    print("Calculating nebular emission from Diffused Ionized Gas for " + str(len(mask)) + " gas cells")
+    print("[Source creation (DIG)] Calculating nebular emission for " + str(len(mask)) + " gas cells that fit the criteria")
     print("----------------------------------------------------------------------------------")
-
-    fnu_arr_neb = sg.get_dig_seds(lam_arr, fnu_arr, logU, cell_width, met)
     
+    fnu_arr_neb = sg.get_dig_seds(lam_arr, fnu_arr, logU, cell_width, met)
     for i in range(len(logU)):
         nu = 1.e8 * constants.c.cgs.value / lam
         fnu = fnu_arr_neb[i,:]
@@ -632,7 +646,7 @@ def DIG_source_add(m,reg,df_nu,boost):
         nu = nu[::-1]
         fnu = fnu[::-1]
 
-        lum = np.absolute(np.trapz(fnu,x=nu))*constants.L_sun.cgs.value
+        lum = np.trapz(fnu,x=nu)*constants.L_sun.cgs.value
         
         source = m.add_point_source()
         source.luminosity = lum # [ergs/s]

@@ -245,7 +245,7 @@ def get_DIG_logU(lam, sed, luminosity, cell_width):
     return logU
 
 
-def get_DIG_sed_shape(gas_coordinates, cell_width, sed_file):
+def get_DIG_sed_shape(gas_coordinates, cell_width, nu, stars_fnu, tree):
     """
     This function gets the shape of the imput spectrum for DIG calculation
     
@@ -270,13 +270,11 @@ def get_DIG_sed_shape(gas_coordinates, cell_width, sed_file):
         fnu = dat["sed"]*(cell_width**2) # Lsun/Hz
 
     else:
-        data = np.load(sed_file)
-        nu = data['nu']
-        stars_fnu = data["fnu"]
-        star_coordinates = data["positions"]
-
         _dist = cfg.par.stars_max_dist * 3.085e21
-        dist,_id = get_nearest(star_coordinates, gas_coordinates, dist=_dist, num=cfg.par.max_stars_num)
+        arg = (tree.query(gas_coordinates, distance_upper_bound=_dist, k=cfg.par.max_stars_num))
+        mask = np.where(arg[0]< np.inf)[0]
+        dist, _id = np.array(arg[0][mask]), np.array(arg[1][mask])
+        
         _sum = 0.
         for j in range(len(_id)):
             _sum += stars_fnu[_id[j]]*(1/dist[j])

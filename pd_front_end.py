@@ -211,16 +211,21 @@ print('Setting up Model')
 m_imaging = copy.deepcopy(m)
 m.conf.output.output_specific_energy = 'last'
 
+print("Dumping grid information")
+
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
     dump_data(reg, model)
 
 if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
     make_DIG_SED(m, par, model)
     DIG_source_add(m, reg, df_nu,boost)
-    # Removing the DIG input SED file
+    print ("Removing the DIG energy dumped input SED file")
     os.remove(cfg.model.inputfile + '_DIG_energy_dumped.sed')
+    os.remove(cfg.model.outputfile + '_DIG_energy_dumped.sed')
+    if not cfg.par.SAVE_NEB_SEDS: dump_NEB_SEDs(None, None, None, append=False, clean_up=True)
 
 if cfg.par.SED:
+    print ("Making SED")
     make_SED(m, par, model)
 
 if cfg.par.IMAGING:
