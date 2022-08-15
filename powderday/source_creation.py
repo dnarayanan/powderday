@@ -64,9 +64,9 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
         lum *= constants.L_sun.cgs.value
         
         young_star = cfg.par.add_young_stars and cfg.par.HII_min_age <= unbinned_stars_list[i].age <= cfg.par.HII_max_age
-        pagb = pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= unbinned_stars_list[i].age <= cfg.par.PAGB_max_age
+        pagb = cfg.par.add_pagb_stars and cfg.par.PAGB_min_age <= unbinned_stars_list[i].age <= cfg.par.PAGB_max_age
 
-        if young_star or pagb:
+        if cfg.par.add_neb_emission and (star or pagb):
             pos_arr.append(pos)
             fnu_arr.append(stellar_fnu[i, :])
 
@@ -76,6 +76,7 @@ def direct_add_stars(df_nu, stars_list, diskstars_list, bulgestars_list, cosmofl
             # https://github.com/dfm/python-fsps/issues/117#issuecomment-546513619
             line_em = line_em * (unbinned_stars_list[i].mass * units.g).to(units.Msun).value * 3.839e33 # Units: ergs/s
             OH = unbinned_stars_list[i].all_metals[4]
+
             line_em = np.append(line_em, OH)
             if young_star:
                 line_em = np.append(line_em, 1)
@@ -637,7 +638,6 @@ def DIG_source_add(m,reg,df_nu,boost):
     print("----------------------------------------------------------------------------------")
     
     fnu_arr_neb = sg.get_dig_seds(lam_arr, fnu_arr, logU, cell_width, met)
-
     for i in range(len(logU)):
         nu = 1.e8 * constants.c.cgs.value / lam
         fnu = fnu_arr_neb[i,:]
