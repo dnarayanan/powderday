@@ -202,6 +202,16 @@ def pah_source_add(ds,reg,m,boost):
     
     #get the logU and beta_nnls for the local ISRF
     beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
+    
+
+    #in regions where the radiation field has been poorly sampled (due
+    #to low photon count) we can have beta_nnls for the whole cell is
+    #0.  then, due to the normalization of beta_nnls in get_beta_nnls,
+    #this means NaNs.  so we take those cells and assume equipartition
+    #in the draine basis functions.
+    beta_nnls[np.isnan(beta_nnls)] = 1./beta_nnls.shape[0]
+
+
 
 
     #find the indices of the Draine sizes that best match those that are in the simulation
@@ -391,7 +401,7 @@ def pah_source_add(ds,reg,m,boost):
 
         #reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
         #reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
-
+        
 
     if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
@@ -409,6 +419,8 @@ def pah_source_add(ds,reg,m,boost):
     reg.parameters['total_ion_PAH_luminosity'] = total_ion_PAH_luminosity
 
     reg.parameters['only_important_PAH_idx'] = only_important_PAH_idx
+
+
 
     grid_PAH_L_lam = grid_PAH_luminosity/draine_lam.value
     integrated_grid_PAH_luminosity = np.trapz((grid_PAH_luminosity/draine_lam.value),draine_lam.value,axis=1)
