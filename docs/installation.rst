@@ -4,30 +4,30 @@ Getting Started
 Overview of Requirements
 ============
 
-* **python=3.6**
+* **python>=3.7**
 
-    * numpy (any version except 1.10.*)
-        * scipy
-	    * astropy (3.2.3)
-	        * h5py
-		    * scikit-learn
-		        * six
+  * numpy (any version except 1.10.*)
+  * scipy
+  * astropy (3.2.3)
+  * h5py
+  * scikit-learn
+  * six
+  
+* **compilers**
+  
+  * gcc
+  * gfortran
+  
 
-			  * **compilers**
-
-			      * gcc
-				  * gfortran
-
-
-				    * **Additional Packages (with Instructions Below)**
-
-				        * git  <http://git-scm.com/>
-					    * powderday <https://github.com/dnarayanan/powderday.git>
-					        * yt <http://yt-project.org>
-						    * FSPS <https://code.google.com/p/fsps/source/checkout>
-						        * python-fsps <https://dfm.io/python-fsps/current/>
-							    * Hyperion <http://www.hyperion-rt.org/>
-							        * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
+* **Additional Packages (with Instructions Below)**
+  
+  * git  <http://git-scm.com/>
+  * powderday <https://github.com/dnarayanan/powderday.git>
+  * yt <http://yt-project.org>
+  * FSPS <https://code.google.com/p/fsps/source/checkout>
+  * python-fsps <https://dfm.io/python-fsps/current/>
+  * Hyperion <http://www.hyperion-rt.org/>
+  * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
 
 Installation
 ============
