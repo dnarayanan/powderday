@@ -33,9 +33,7 @@ def write_input_sed(wav, spec):
     ascii_file = str(uuid.uuid4().hex) + ".ascii"
     while compiled_exists(ascii_file):
         ascii_file = str(uuid.uuid4().hex) + ".ascii"
-    
-    # For DIG do not have to write the imput SED since we are using Black (1985) SED. 
-    # We ascii file name to get the model name    
+      
     logging.info("Executing write ascii sequence...")
     logging.info("Writing.....")
     WriteASCII(ascii_file, wav, spec, nx=len(wav), nmod=1, par1_val=1.e6)
@@ -282,12 +280,10 @@ def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu 
     logging.info("Writing the input SED file")
     filename = write_input_sed(spec_lambda, sspi)
     model_name = filename.split(".")[0]
-    print (model_name)
 
     logging.info("Writing CLOUDY input file")
     dir_= cfg.par.pd_source_dir + "powderday/nebular_emission"
     dir_base = os.getcwd()
-
     write_cloudy_input(dir_=dir_,
                        model_name = model_name,
                        r_inner = radius,
