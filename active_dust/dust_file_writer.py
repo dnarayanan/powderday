@@ -166,7 +166,7 @@ if __name__ == "__main__":
     #scale wiht the loaded up DSF to see if their co-added
     #extinction laws look reasonable or not.
     
-    nbins = 10
+    nbins = 25
     
     #array that holds the left edge, right edge, and edges of bins in between.  we use this to set the left and right edge arrays
     edges = np.linspace(np.min(x),np.max(x),nbins+1) 
