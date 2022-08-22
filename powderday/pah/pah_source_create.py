@@ -144,6 +144,8 @@ def pah_source_add(ds,reg,m,boost):
 
     q_pah = (dN_pah * reg['particle_dust','mass'])/(dN_total*reg['particle_dust','mass'])
     q_pah = q_pah * reg['particle_dust','carbon_fraction']
+    #in case we have an errant cell with no dust information (super rare corner case)
+    q_pah[np.isnan(q_pah)] = np.min(q_pah[~np.isnan(q_pah)])
 
     reg.parameters['q_pah'] = q_pah
     
@@ -271,35 +273,9 @@ def pah_source_add(ds,reg,m,boost):
 
 
     
-    #DEBUG DEBUG DEBUG UNCOMMENT THIS ENTIRE BLOCK TO GET BACK TO NORMAL PRODUCTION CODE WE JUST HAVE AN NPZ FILE FOR DEBUGGING RN
 
-    '''
-    dum = compute_grid_PAH_luminosity(cell_list = np.arange(ncells),beta_nnls = beta_nnls,
-                                grid_of_sizes = grid_of_sizes.value,
-                                numgrains = dum_numgrains,
-                                draine_sizes = draine_sizes,
-                                draine_lam = draine_lam.value,
-                                f_ion=f_ion,
-                                neutral_PAH_reference_objects = neutral_PAH_reference_objects,
-                                ion_PAH_reference_objects = ion_PAH_reference_objects,
-                                draine_bins_idx = draine_bins_idx)
-    '''
 
-    '''
-    temp_grid_PAH_luminosity =p.map(partial(compute_grid_PAH_luminosity,
-                                  beta_nnls = beta_nnls,
-                                  grid_of_sizes = grid_of_sizes.value,
-                                  numgrains = dum_numgrains,
-                                  draine_sizes = draine_sizes,
-                                  draine_lam = draine_lam.value,
-                                  f_ion=f_ion,
-                                  neutral_PAH_reference_objects = neutral_PAH_reference_objects,
-                                  ion_PAH_reference_objects = ion_PAH_reference_objects,
-                                  draine_bins_idx = draine_bins_idx),[arg for arg in list_of_chunks])
-    
-    temp_grid_neutral_PAH_luminosity = temp_grid_PAH_lumionsity*0
-    temp_grid_ion_PAH_luminosity = temp_grid_PAH_luminosity*0
-    '''
+
 
 
 
@@ -331,17 +307,23 @@ def pah_source_add(ds,reg,m,boost):
     grid_neutral_PAH_luminosity = np.concatenate( np.asarray([dum[i][1] for i in range(len(dum))] ),axis=0)
     grid_ion_PAH_luminosity = np.concatenate( np.asarray([dum[i][2] for i in range(len(dum))] ),axis=0)
 
-
+    
+    #DEBUG DEBUG DEBUG REMOVE THIS 
+    #np.savez('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/grid_pah_luminosity.npz',
+    #         grid_PAH_luminosity=grid_PAH_luminosity,
+    #         grid_neutral_PAH_luminosity=grid_neutral_PAH_luminosity,
+    #         grid_ion_PAH_luminosity=grid_ion_PAH_luminosity)
 
     t2 = datetime.now()
     print ('Execution time for PAH dot producting [is that a word?] across the grid = '+str(t2-t1))
 
 
-    '''
+ 
     #DEBUG DEBUG DEBUG REMOVE THE NEXT TWO LINES THEY'RE CRAZY TALK AND JUST FOR DEBUGGING
-    data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres_pah_sizes/grid_pah_luminosity.npz')
-    grid_PAH_luminosity = data['grid_PAH_luminosity']
-    '''
+    #data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/grid_pah_luminosity.npz')
+    #grid_PAH_luminosity = data['grid_PAH_luminosity']
+    #grid_neutral_PAH_luminosity = data['grid_neutral_PAH_luminosity']
+    #grid_ion_PAH_luminosity = data['grid_ion_PAH_lumionsity']
 
     grid_PAH_luminosity[np.isnan(grid_PAH_luminosity)] = 0
     grid_neutral_PAH_luminosity[np.isnan(grid_neutral_PAH_luminosity)] = 0
@@ -381,7 +363,7 @@ def pah_source_add(ds,reg,m,boost):
     only_important_PAH_idx = get_PAH_lum_cdf(nu_reverse,fnu,wpah_nu_reverse,grid_PAH_luminosity)
     
     for i in only_important_PAH_idx:#range(grid_PAH_luminosity.shape[0]): #np.arange(2500)
-        #lum = np.trapz(draine_lam[wpah_lam].cgs.value,flam[i,wpah_lam]).value
+
         fnu_reverse = fnu[i,:][::-1]
         #if np.where(fnu_reverse == 0)[0] > 0:
         #    fnu_reverse[fnu_reverse ==0 ] = np.min(fnu_reverse[fnu_reverse > 0])
@@ -396,6 +378,7 @@ def pah_source_add(ds,reg,m,boost):
                                             #we don't add PAH cells
                                             #with 0 luminosity
         #reversing arrays to make nu increasing, and therefore correct for hyperion addition
+        
         m.add_point_source(luminosity=lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse]),position=reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
 
 
@@ -403,7 +386,7 @@ def pah_source_add(ds,reg,m,boost):
         #reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
         
 
-    if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npz file
+    if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npzfile
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
         reg.parameters['grid_neutral_PAH_luminosity'] = grid_neutral_PAH_luminosity
         reg.parameters['grid_ion_PAH_luminosity'] = grid_ion_PAH_luminosity
