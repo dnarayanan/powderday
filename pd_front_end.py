@@ -104,6 +104,12 @@ options = {'gadget_hdf5': m_control_sph,
 m_gen = options[ds_type]()
 m, xcent, ycent, zcent, dx, dy, dz, reg, ds, boost = m_gen(fname, field_add)
 
+#save the dataset_type for future use in reg
+try: reg.parameters['dataset_type'] = ds.dataset_type
+except AttributeError:
+    reg.parameters={}
+    reg.parameters['dataset_type'] = ds.dataset_type
+
 # Get dust wavelengths. This needs to preceed the generation of sources
 # for hyperion since the wavelengths of the SEDs need to fit in the
 # dust opacities.
@@ -212,6 +218,8 @@ m_imaging = copy.deepcopy(m)
 m.conf.output.output_specific_energy = 'last'
 
 print("Dumping grid information")
+
+
 
 if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
     dump_data(reg, model)

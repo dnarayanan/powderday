@@ -87,14 +87,28 @@ def dump_data(reg,model):
     #these are in try/excepts in case we're not dealing with gadget and yt 3.x
     try: grid_gas_mass = reg["gas","smoothedmasses"]
     except: grid_gas_mass = -1
-    try: 
-        grid_gas_metallicity = []
-        grid_gas_metallicity.append(reg["gas","smoothedmetals"].value)
-        abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
-        for i in abund_el:
-            grid_gas_metallicity.append(reg["gas","smoothedmetals_"+str(i)].value)
-            
-    except: grid_gas_metallicity = -1
+
+    #for sph we have a different nomenclature thanks to the smoothing onto an octree
+    if reg.parameters['dataset_type'] in ['gadget_hdf5','tipsy']:
+
+        try: 
+            grid_gas_metallicity = []
+            grid_gas_metallicity.append(reg["gas","smoothedmetals"].value)
+            abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+            for i in abund_el:
+                grid_gas_metallicity.append(reg["gas","smoothedmetals_"+str(i)].value)
+                
+        except: grid_gas_metallicity = reg["gas","smoothedmetals"].value
+    
+    else:
+        try:
+            grid_gas_metallicity = []
+            grid_gas_metallicity.append(reg["gas","metals"].value)
+            abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+            for i in abund_el:
+                grid_gas_metallicity.append(reg["gas","metals_"+str(i)].value)
+
+        except: grid_gas_metallicity = reg["gas","metals"].value
 
     try: grid_star_mass = reg["star","smoothedmasses"]
     except: grid_star_mass = -1
