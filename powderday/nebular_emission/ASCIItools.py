@@ -103,7 +103,6 @@ def compile_ascii(ascii_file):
     f.write('compile stars "{}"\n'.format(ascii_file))
     f.close()
     to_run = 'cd {} ; {} {}.in'.format(CLOUDY_DATA_PATH, CLOUDY_EXE, fname)
-    print('compiling {}'.format(ascii_file))
     proc = subprocess.Popen(to_run, shell=True)
     proc.communicate()
 

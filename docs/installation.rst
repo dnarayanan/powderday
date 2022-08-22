@@ -12,7 +12,9 @@ Overview of Requirements
   * h5py
   * scikit-learn
   * six
-  
+  * p_tqdm
+
+
 * **compilers**
   
   * gcc
@@ -392,47 +394,26 @@ yt::
 
 fsps and python-fsps
 
-The development version of python-fsps now includes the Fortran FSPS source code. You can get both via::
-
-fsps::
+The development version of python-fsps now includes the Fortran FSPS source code::
 
   >cd $HOME
-  >git clone https://github.con/cconroy20/fsps
-
-in the Makefile set F90=$(FC) and this will ensure that the compilers
-`fsps <https://code.google.com/p/fsps/source/checkout>`_ uses are what
-you have module loaded.::
-  
-  >make clean
-  >make
-
-then in your .bashrc set the analog to::
-  
-  >export SPS_HOME=/Users/desika/fsps
-
-
-python fsps::
-
-
-  >CC=icc F90=ifort F77=ifort python setup.py install
+  >git clone --recursive https://github.com/dfm/python-fsps.git
 
 then in your .bashrc set the analog to::
   
   >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
-
+  
+  >cd python-fsps
   >CC=icc F90=ifort python setup.py install
 
 
 
-hyperion
-
-As of commit 7cae6d0, a bug has been introduced with the __version__ module. Once cloned, checkout stable commit 4170c6c::
+hyperion::
 
   >cd $HOME
   >git clone https://github.com/hyperion-rt/hyperion.git
   >cd hyperion
-  >git checkout 4170c6cc3009893e2b591e133baeb9927122aef1
-  >python setup.py install
+  >pip install .
   >git submodule init
   >git submodule update
 
@@ -472,43 +453,29 @@ yt::
   >pip install -e .
 
 
-
 fsps and python-fsps
 
-The development version of python-fsps now includes the Fortran FSPS source code. You can get both via::
-
-fsps::
+The development version of python-fsps now includes the Fortran FSPS source code::
 
   >cd $HOME
-  >git clone https://github.con/cconroy20/fsps
+  >git clone --recursive https://github.com/dfm/python-fsps.git
 
-in the Makefile set F90=$(FC) and this will ensure that the compilers
-`fsps <https://code.google.com/p/fsps/source/checkout>`_ uses are what
-you have module loaded.::
-  
-  >make clean
-  >make
 
 then in your .bashrc set the analog to::
   
-  >export SPS_HOME=/Users/desika/fsps
-
-
-python fsps::
-
+  >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
+  
+  >cd python-fsps
   >CC=gcc F90=gfortran F77=gfortran python setup.py install
 
 
 
-hyperion
-
-As of commit 7cae6d0, a bug has been introduced with the __version__ module. Once cloned, checkout stable commit 4170c6c::
+hyperion::
 
   >cd $HOME
   >git clone https://github.com/hyperion-rt/hyperion.git
   >cd hyperion
-  >git checkout 4170c6cc3009893e2b591e133baeb9927122aef1
-  >python setup.py install
+  >pip install .
   >git submodule init
   >git submodule update
 

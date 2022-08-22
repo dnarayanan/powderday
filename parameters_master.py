@@ -92,7 +92,7 @@ add_neb_emission = False    			    # add nebular line emission (under active dev
 use_cloudy_tables = True    			    # If True, CLOUDY look up tables (dev. by Nell Byler) will be used to calculate 
                             			    # nebular emission. If False, CLOUDY models are generated individually 
                             			    # for each young star particle (under active development). 
-                            			    # Note:  The lookup tables work only for stars particles below 10 Myr.  (Default: True)
+                            			    # Note: The lookup tables work only for stars particles below 10 Myr.  (Default: True)
 
 use_cmdf = False                            # If True, star particles that have mass greater than cmdf_mas_mass (defined below) are broken down using a 
                                             # cluster mass distribution function (cmdf) of the form dN/dM goes as M^(beta). This works irrespecitve of whether
@@ -215,7 +215,8 @@ HII_dust = False                            # If set, then dust grains are inclu
 # Post-AGB STARS
 #****************
 
-add_pagb_stars = False      			    # If set, the Post-AGB stars are included when calculating nebular emission (Default: False)
+add_pagb_stars = False      			    # If set, the Post-AGB stars are included when calculating nebular emission
+                                            # # This works only when add_neb_emission = True and use_cloudy_tables = False (Default: False)
 
 PAGB_N_enhancement = 0.4    			    # Enhances the Nitrogen abundance Post-AGB stars by increasing the log(N/O) by this value. 
                             			    # This used only when add_neb_emission = True, use_cloudy_tables = False and add_pagb_stars = True (Default = 0.4)  
@@ -245,7 +246,8 @@ PAGB_escape_fraction = 0.0   			    # Fraction of H-ionizaing photons that escap
 # AGN
 #**************
 
-add_AGN_neb = False				            # If set, AGNs are included when calculating nebular emission (Default: False)
+add_AGN_neb = False				            # If set, AGNs are included when calculating nebular emission.
+                                            # # This works only when add_neb_emission = True and use_cloudy_tables = False (Default: False)
 
 AGN_nh = 1.e3					            # Gas hydrogen density for calcualting nebular emission in units if cm^-3. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 1.e2)
@@ -257,7 +259,8 @@ AGN_num_gas = 32							# For CLOUDY calculations we use the distance weighted av
 # DIffused Ionized Gas (DIG)
 #**********************
 
-add_DIG_neb = False                         # If set, Contribution from DIG is included when calculating nebular emission (Default: False)
+add_DIG_neb = False                         # If set, Contribution from DIG is included when calculating nebular emission 
+                                            # This works only when add_neb_emission = True and use_cloudy_tables = False (Default: False)
 
 DIG_nh = 1.e1                               # Gas hydrogen density for calcualting nebular emission in units of cm^-3. (Default: 10)
                                             
@@ -285,7 +288,7 @@ dump_emlines = False                        # If True, The emission lines are sa
                                             # cloudy calculates (i.e. not just those undergoing radiative transfer). The format for the output 
                                             # is a wavelength array,followed by a (nlam+2) list for each nebular emission bearing particle. 
                                             # The +2 in the (nlam+2) list are the O/H ratio and the id of that particle. With id = 0 , 1, 2 and 3 
-                                            # corresponds to young stars, PAGB stars, AGN respectively. There is a convenience package in 
+                                            # corresponds to young stars, PAGB stars, AGN and DIG respectively. There is a convenience package in 
                                             # /convenience to help read in this file. This can be used as a fast way getting emission lines for the 
                                             # purpose of debugging the code. Naming convention: emlines.galaxy*.txt where * is the galaxy number. 
                                             # This works only when add_neb_emission = True (Default: False) 
@@ -445,3 +448,4 @@ NEB_DEBUG = False # Dumps parameters related to nebular line emission in a file 
                   # Naming convention: nebular_properties_galaxy*.txt where * is the galaxy number
 
 SAVE_NEB_SEDS = False # If set, the CLOUDY output SEDs are saved in a file 
+REMOVE_INPUT_SEDS = False # If set, the hyperion input SED file is deleted after RT finishes
