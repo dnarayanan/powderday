@@ -189,13 +189,16 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
     
     #DEBUG DEBUG DEBUG THIS NEEDS TO BE UNCOMMENTED AND DELETE THE READ IN FROM NPZ FILES 3 lines  BECAUSE THAT'S INSANE AND JUST USED FOR DEBUGGING FAST 
     Cabs_cation_regrid,Cabs_neutral_regrid = get_Cabs(draine_directories,simulation_sizes,gsd)
-    np.savez('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/Cabs.npz',Cabs_cation_regrid=Cabs_cation_regrid.value,Cabs_neutral_regrid=Cabs_neutral_regrid.value)
+    #np.savez('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/Cabs.npz',Cabs_cation_regrid=Cabs_cation_regrid.value,Cabs_neutral_regrid=Cabs_neutral_regrid.value)
     #Cabs_data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/Cabs.npz')
     #Cabs_cation_regrid = Cabs_data['Cabs_cation_regrid']*u.cm**2
     #Cabs_neutral_regrid = Cabs_data['Cabs_neutral_regrid']*u.cm**2
 
-
-    logU_grid = get_logU(simulation_specific_energy_sum_regrid,Cabs_cation_regrid,Cabs_neutral_regrid,draine_lam,reg)
+    if cfg.par.SKIP_LOGU_CALC == False:
+        logU_grid = get_logU(simulation_specific_energy_sum_regrid,Cabs_cation_regrid,Cabs_neutral_regrid,draine_lam,reg)
+    else:
+        print("[pah/isrf_decompose:] SKIP_LOGU_CALC is set to True: Assuming logU across the grid is 0")
+        logU_grid = np.zeros(ncells)
 
 
 
@@ -273,11 +276,8 @@ def get_logU(cell_isrf,Cabs_cation,Cabs_neutral,draine_lam,reg):
     #eq. 5 from Draine et al. 2021, 917, 3, ApJ
     #U = int(d_nu u * c* C_abs)/h_ref
 
-    #DEBUG DEBUG DEBUG will need to put this in terms of cations or
-    #neutrals depending on if its an ion or netural
 
     print('[pah/isrf_decompose/get_logU:] Computing logU for PAH calculation')
-    
 
     y = cell_isrf * const.c*Cabs_neutral[:,None,:]/h_ref
     U= (np.trapz(y,draine_nu[::-1],axis=0)).decompose()
