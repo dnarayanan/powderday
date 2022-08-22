@@ -4,28 +4,32 @@ Getting Started
 Overview of Requirements
 ============
 
-* **python=3.6**
-    * numpy (any version except 1.10.*)
-    * scipy
-    * astropy (3.2.3)
-    * h5py
-    * scikit-learn
-    * six
-    * p_tqdm
+* **python>=3.7**
+
+  * numpy (any version except 1.10.*)
+  * scipy
+  * astropy (3.2.3)
+  * h5py
+  * scikit-learn
+  * six
+  * p_tqdm
+
 
 * **compilers**
-    * gcc
-    * gfortran
-
+  
+  * gcc
+  * gfortran
+  
 
 * **Additional Packages (with Instructions Below)**
-    * git  <http://git-scm.com/>
-	* powderday <https://github.com/dnarayanan/powderday.git>
-	* yt <http://yt-project.org>
-	* FSPS <https://code.google.com/p/fsps/source/checkout>
-	* python-fsps <https://dfm.io/python-fsps/current/>
-	* Hyperion <http://www.hyperion-rt.org/>
-	* Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
+  
+  * git  <http://git-scm.com/>
+  * powderday <https://github.com/dnarayanan/powderday.git>
+  * yt <http://yt-project.org>
+  * FSPS <https://code.google.com/p/fsps/source/checkout>
+  * python-fsps <https://dfm.io/python-fsps/current/>
+  * Hyperion <http://www.hyperion-rt.org/>
+  * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
 
 Installation
 ============
@@ -388,23 +392,21 @@ yt::
 
 
 
-fsps and python-fsps::
+fsps and python-fsps
 
-The development version of python-fsps now includes the Fortran FSPS source code. You can get both via::
+The development version of python-fsps now includes the Fortran FSPS source code::
 
-fsps and python-fsps::
-
-The development version of python-fsps now includes the Fortran FSPS source code. You can get both via::
-
-    >cd $HOME
-    >git clone --recursive https://github.com/dfm/python-fsps.git
+  >cd $HOME
+  >git clone --recursive https://github.com/dfm/python-fsps.git
 
 then in your .bashrc set the analog to::
-      
-    >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
+  
+  >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
+  
+  >cd python-fsps
+  >CC=icc F90=ifort python setup.py install
 
-    >cd python-fsps
-    >CC=icc F90=ifort F77=ifort python setup.py install
+
 
 hyperion::
 
@@ -436,13 +438,12 @@ powderday::
   >conda install numpy scipy cython h5py matplotlib psutil joblib six astropy scikit-learn ipython
   >python setup.py install
 
-
-
 [2] The second set of instructions use gcc, but a manual installation of everything. Thanks to Prerak Garg for these.::
 
 First, load up the compilers that we'll use throughout::
 
   >module load gcc/9.3.0 openmpi/4.1.1 libz/1.2.11 hdf5/1.10.1 git/2.30.1
+
   
 yt::
 
@@ -451,19 +452,23 @@ yt::
   >cd yt
   >pip install -e .
 
-fsps and python-fsps::
 
-The development version of python-fsps now includes the Fortran FSPS source code. You can get both via::
+fsps and python-fsps
+
+The development version of python-fsps now includes the Fortran FSPS source code::
 
   >cd $HOME
   >git clone --recursive https://github.com/dfm/python-fsps.git
 
+
 then in your .bashrc set the analog to::
   
   >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
-
+  
   >cd python-fsps
   >CC=gcc F90=gfortran F77=gfortran python setup.py install
+
+
 
 hyperion::
 
@@ -493,9 +498,13 @@ powderday::
   >git clone https://github.com/dnarayanan/powderday.git
   >conda install numpy scipy cython h5py matplotlib psutil joblib six astropy scikit-learn ipython
   >cd powderday
-  >python setup.py install  
-  
+  >python setup.py install
 
+
+
+
+  
+  
 
 [3] The third set of instructions use gcc, and the conda installation
 of `Hyperion <http://www.hyperion-rt.org>`_.  Thanks to Paul Torrey
