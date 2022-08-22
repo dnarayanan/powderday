@@ -101,7 +101,7 @@ def make_DIG_SED(m, par, model):
     m.write(model.inputfile + '_DIG_energy_dumped.sed', overwrite=True)
     m.run(model.outputfile + '_DIG_energy_dumped.sed', mpi=True,n_processes=par.n_MPI_processes, overwrite=True)
     
-    print('[pd_front_end]: RT Stage For DIG calculation Ended')
+    print('[pd_front_end]: RT Stage For DIG calculation has ended')
 
     
 def make_image(m_imaging, par, model,dx,dy,dz):

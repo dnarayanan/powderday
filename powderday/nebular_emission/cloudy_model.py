@@ -33,9 +33,7 @@ def write_input_sed(wav, spec):
     ascii_file = str(uuid.uuid4().hex) + ".ascii"
     while compiled_exists(ascii_file):
         ascii_file = str(uuid.uuid4().hex) + ".ascii"
-    
-    # For DIG do not have to write the imput SED since we are using Black (1985) SED. 
-    # We ascii file name to get the model name    
+      
     logging.info("Executing write ascii sequence...")
     logging.info("Writing.....")
     WriteASCII(ascii_file, wav, spec, nx=len(wav), nmod=1, par1_val=1.e6)

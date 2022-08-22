@@ -617,13 +617,11 @@ def DIG_source_add(m,reg,df_nu,boost):
         
         if logU > cfg.par.DIG_min_logU:
             mask.append(i)
-            lam_arr.append(lam)
             fnu_arr.append(fnu)
             logU_arr.append(logU)
         
     cell_width = cell_width[mask]
     met = met[mask]
-    lam_arr = np.array(lam_arr)
     fnu_arr = np.array(fnu_arr)
     logU = np.array(logU_arr)
     pos = pos[mask]
@@ -637,7 +635,7 @@ def DIG_source_add(m,reg,df_nu,boost):
     print("[Source creation (DIG)] Calculating nebular emission for " + str(len(mask)) + " gas cells that fit the criteria")
     print("----------------------------------------------------------------------------------")
     
-    fnu_arr_neb = sg.get_dig_seds(lam_arr, fnu_arr, logU, cell_width, met)
+    fnu_arr_neb = sg.get_dig_seds(lam, fnu_arr, logU, cell_width, met)
     for i in range(len(logU)):
         nu = 1.e8 * constants.c.cgs.value / lam
         fnu = fnu_arr_neb[i,:]

@@ -20,7 +20,6 @@ from powderday.nebular_emission.cloudy_tools import calc_LogQ, age_dist, cmdf, g
 from powderday.analytics import logu_diagnostic,dump_emlines
 from powderday.nebular_emission.cloudy_model import get_nebular
 from p_tqdm import p_map
-import tqdm
 
 
 #this is required to keep the reg as a strong reference.  for some
@@ -235,8 +234,6 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
     nprocesses = np.min([cfg.par.n_processes,len(stars_list)]) #the pool.map will barf if there are less star bins than process threads
 
     #initialize the process pool and build the chunks
-    #p = Pool(processes = nprocesses) 
-
     t1=datetime.now()
     chunk_sol = p_map(newstars_gen, stars_list, num_cpus=nprocesses)
     t2=datetime.now()
@@ -255,13 +252,7 @@ def allstars_sed_gen(stars_list,cosmoflag,sp):
         mfrac[i] = chunk_sol[i][1]
         line_em[i, :] = chunk_sol[i][2]
 
-    #p.close()
-    #p.terminate()
-    #p.join()
-
-
     stellar_nu = nu
-
 
 
     if cosmoflag == False:
@@ -623,7 +614,6 @@ def get_nearest_gas_metals(all_gas_coordinates, particle_coordinates, all_gas_me
                                                                                                                 
 
 def get_agn_seds(agn_ids, reg):
-  
     print ('Starting AGN SED generation')
     
     if cfg.par.dump_emlines:
@@ -631,7 +621,6 @@ def get_agn_seds(agn_ids, reg):
 
     t1 = datetime.now()
     nprocesses = np.min([cfg.par.n_processes,len(agn_ids)])
-    p = Pool(processes = nprocesses)
 
     # Pre-calculating average metallicity and fluxes for all the BH particles
     nu = []
@@ -645,12 +634,8 @@ def get_agn_seds(agn_ids, reg):
         all_gas_metals = get_gas_metals(len(all_gas_coordinates), reg)
         metals_avg.append(get_nearest_gas_metals(all_gas_coordinates, agn_coordinates, all_gas_metals))
 
-    z = zip(agn_ids, nu, fnu_in, metals_avg)
-    fnu_out = p.starmap(agn_sed, z)
+    fnu_out = p_map(agn_sed, agn_ids, nu, fnu_in, metals_avg, num_cpus=nprocesses)
     fnu_out = np.atleast_2d(fnu_out)
-    p.close()
-    p.terminate()
-    p.join()
     t2 = datetime.now()
 
     print ('Execution time for AGN SED generation = '+str(t2-t1))
@@ -719,16 +704,10 @@ def get_dig_seds(lam ,sed, logU, cell_widths, metals):
     
     t1 = datetime.now()
     nprocesses = np.min([cfg.par.n_processes,len(cell_widths)])
-    p = Pool(processes = nprocesses)
     
-    z = zip(lam, sed, logU, cell_widths, metals)
-    fnu_out = p.starmap(dig_sed, tqdm.tqdm(z, total=len(logU)))
-    #fnu_out = p.starmap(dig_sed, z)
+    fnu_out = p_map(partial(dig_sed, spec_lam=lam), sed, logU, cell_widths, metals, num_cpus=nprocesses)
     fnu_out = np.atleast_2d(fnu_out)
     
-    p.close()
-    p.terminate()
-    p.join()
     t2 = datetime.now()
 
     print ('Execution time for DIG SED generation = '+str(t2-t1))
@@ -736,7 +715,7 @@ def get_dig_seds(lam ,sed, logU, cell_widths, metals):
     return fnu_out
 
 
-def dig_sed(spec_lam, sspi, logU, cell_width, metal):    
+def dig_sed(sspi, logU, cell_width, metal, spec_lam):    
     id_val = 3   
 
     spec, wave_line, line_lum = get_nebular(spec_lam, sspi, cfg.par.DIG_nh, metal, logu=logU, Cell_width=cell_width, Dust=False,
