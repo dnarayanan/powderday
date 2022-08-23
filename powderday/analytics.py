@@ -85,9 +85,16 @@ def dump_data(reg,model):
     particle_dustmass = reg["dust","mass"].in_units('Msun')
 
     #these are in try/excepts in case we're not dealing with gadget and yt 3.x
-    try: grid_gas_mass = reg["gas","smoothedmasses"]
-    except: grid_gas_mass = -1
-
+    
+    if reg.parameters['dataset_type'] in ['gadget_hdf5','tipsy']:
+        try: 
+            grid_gas_mass = reg["gas","smoothedmasses"]
+        except: grid_gas_mass = -1
+    else:
+        try:
+            grid_gas_mass = reg["gas","masses"]
+        except: grid_gas_mass = -1
+        
     #for sph we have a different nomenclature thanks to the smoothing onto an octree
     if reg.parameters['dataset_type'] in ['gadget_hdf5','tipsy']:
 
