@@ -282,11 +282,11 @@ def pah_source_add(ds,reg,m,boost):
 
 
 
-
+    pah_grid_of_sizes = ds.parameters['reg_grid_of_sizes_graphite']*ds.parameters['reg_grid_of_sizes_aromatic_fraction']
 
     dum  = p.map(partial(compute_grid_PAH_luminosity,
                          beta_nnls = beta_nnls,
-                         grid_of_sizes = grid_of_sizes.value,
+                         grid_of_sizes = pah_grid_of_sizes.value,
                          numgrains = dum_numgrains,
                          draine_sizes = draine_sizes,
                          draine_lam = draine_lam.value,
