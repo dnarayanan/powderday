@@ -153,7 +153,7 @@ def pah_source_add(ds,reg,m,boost):
     q_pah[np.isnan(q_pah)] = np.min(q_pah[~np.isnan(q_pah)])
 
     reg.parameters['q_pah'] = q_pah
-    pdb.set_trace()
+
 
     #compute the mass weighted grain size distributions for comparison in analytics.py 
     #try: #for mesh based code
