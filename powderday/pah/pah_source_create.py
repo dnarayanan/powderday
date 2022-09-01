@@ -136,19 +136,24 @@ def pah_source_add(ds,reg,m,boost):
     #writing out 
     ad = ds.all_data()
 
-    idx_pah = np.where(simulation_sizes.to(u.cm).value <= 3.e-7)[0]
 
+    
 
-    dN_pah = np.sum(reg['particle_dust','numgrains'][:,idx_pah],axis=1)
-    dN_total = np.sum(reg['particle_dust','numgrains'],axis=1)
+    dN_pah = np.sum(ds.parameters['reg_grid_of_sizes_graphite']*ds.parameters['reg_grid_of_sizes_aromatic_fraction'],axis=1)
+    dN_total = np.sum(ds.parameters['reg_grid_of_sizes'],axis=1)
 
-    q_pah = (dN_pah * reg['particle_dust','mass'])/(dN_total*reg['particle_dust','mass'])
-    q_pah = q_pah * reg['particle_dust','carbon_fraction']
+    #idx_pah = np.where(simulation_sizes.to(u.cm).value <= 3.e-7)[0]
+    #dN_pah = np.sum(reg['particle_dust','numgrains'][:,idx_pah],axis=1)
+    #dN_total = np.sum(reg['particle_dust','numgrains'],axis=1)
+
+    q_pah = dN_pah/dN_total
+    #q_pah = q_pah * reg['particle_dust','carbon_fraction']
+
     #in case we have an errant cell with no dust information (super rare corner case)
     q_pah[np.isnan(q_pah)] = np.min(q_pah[~np.isnan(q_pah)])
 
     reg.parameters['q_pah'] = q_pah
-    
+    pdb.set_trace()
 
     #compute the mass weighted grain size distributions for comparison in analytics.py 
     #try: #for mesh based code
