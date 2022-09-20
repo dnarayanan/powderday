@@ -50,7 +50,7 @@ def star_list_gen(boost,dx,dy,dz,reg,ds,sp,m):
     mass = reg["star","masses"].value
     positions = reg["star","coordinates"].value
     age = reg["stellar","ages"].value
-    nstars = len(reg["stellar","ages"].value) 
+    nstars = len(mass)
     el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe' ]
 
     try:                                                                                                                                                                
