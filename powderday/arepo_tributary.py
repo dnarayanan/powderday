@@ -147,8 +147,8 @@ def arepo_m_gen(fname,field_add):
         grid_of_sizes = reg['PartType3','Dust_NumGrains'][:,0:int(ntotalsizes/3)] + reg['PartType3','Dust_NumGrains'][:,int(ntotalsizes/3):int(2*ntotalsizes/3)]
 
         if cfg.par.separate_into_dust_species:
-            grid_of_sizes_graphite = reg['PartType3','Dust_NumGrains'][:,0:int(ntotalsizes/3)]
-            grid_of_sizes_silicates = reg['PartType3','Dust_NumGrains'][:,int(ntotalsizes/3):int(2*ntotalsizes/3)]
+            grid_of_sizes_silicates = reg['PartType3','Dust_NumGrains'][:,0:int(ntotalsizes/3)]
+            grid_of_sizes_graphite = reg['PartType3','Dust_NumGrains'][:,int(ntotalsizes/3):int(2*ntotalsizes/3)]
             grid_of_sizes_aromatic_fraction = reg['PartType3','Dust_NumGrains'][:,int(2*ntotalsizes/3)::]
             nsizes = int(ntotalsizes/3)
         else:
