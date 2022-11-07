@@ -62,9 +62,16 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
                 grid_sum = np.zeros(nbins)
 
                 #how DNSF was set up.  not needed other than for testing
-                x=np.linspace(-4,0,41)
+                #x=np.linspace(-4,0,41)
                 #load an example dust size function for testing against
                 dsf = np.loadtxt(cfg.par.pd_source_dir+'active_dust/mrn_dn.txt')#DNSF_example.txt')
+                if dsf.shape[0] != nsizes:
+                        raise Exception("[tributary_dust_add:] You have enabled the experimental feature OTF_EXTINCTION_MRN_FORCE. Here, the MRN distribution that we are assuming does not have the same shape as the grid size distribution which can cause trouble if the Draine PAH model is enabled.  Therefore, please re-run your MRN grid generator in [active_dust/mrn_test_writer] with the following number of grid sizes: ",nsizes)
+
+                        #raise Exception("[tributary_dust_add:] You have enabled the experimental feature OTF_EXTINCTION_MRN_FORCE.")
+#  Here, the MRN distribution that we are assuming does not have the same shape as the grid size distribution which can cause trouble if the Draine PAH model is enabled.  Therefore, please re-run your MRN grid generator in [active_dust/] with the following number of grid sizes")
+
+
 
                 #nbins = len(grain_size_left_edge_array)
 
@@ -97,6 +104,7 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
                 for i in range(nbins):
                         frac_grid[:,i] = dsf_grid[:,i]/np.max(dsf_grid[:,i])*frac[i]
             
+                
                 '''
                 import matplotlib.pyplot as plt
                 fig = plt.figure()
@@ -164,15 +172,14 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
                 frac_grid[np.isinf(frac_grid)] = 0
                 frac_grid[np.isnan(frac_grid)] = 0
 
-                #now add the dust grids to hyperion
-                for bin in range(nbins):
-                        file = dust_filenames[bin]
-                        d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
-
-                        m.add_density_grid(dustdens*frac_grid[:,bin],d,specific_energy=specific_energy)
+        #now add the dust grids to hyperion
+        for bin in range(nbins):
+                file = dust_filenames[bin]
+                d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
+                
+                m.add_density_grid(dustdens*frac_grid[:,bin],d,specific_energy=specific_energy)
                         #m.add_density_grid(dustdens*frac[bin],d,specific_energy=specific_energy)
 
-        
                         
         #finally, re-save the grid_of_sizes and grain sizes to the ds.paramteters so we can carry it around
         ds.parameters['reg_grid_of_sizes'] = grid_of_sizes #named 'reg_grid_of_sizes'
