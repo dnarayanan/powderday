@@ -298,8 +298,12 @@ cloudy_cleanup = True                       # If set to True, all the CLOUDY fil
 
 
 #===============================================
-#BIRTH CLOUD INFORMATION
+#BIRTH CLOUD and Dust Screen INFORMATION
 #===============================================
+
+dust_screen = True 
+dust1 = 0.7 #fsps parameters in case we use a dust screen
+dust2 = 0.7
 
 CF_on = False               # if set to true, then we enable the Charlot & Fall birthcloud models 
 
