@@ -10,9 +10,9 @@ from yt.geometry.selection_routines import AlwaysSelector
 from powderday.dust_grid_gen import dtm_grid_oct, remy_ruyer_oct, manual_oct,li_bestfit_oct,li_ml_oct
 
 #particle and/or mesh quantities for dust
-from powderday.dust_grid_gen import dtm_particle_mesh,remy_ruyer_particle_mesh,li_bestfit_particle_mesh,li_ml_particle_mesh
-
+from powderday.dust_grid_gen import dtm_particle_mesh,manual_particle_mesh,remy_ruyer_particle_mesh,li_bestfit_particle_mesh,li_ml_particle_mesh
 from powderday.dust_grid_gen import dtm_amr,remy_ruyer_amr,li_bestfit_amr,li_ml_amr
+from powderday.analytics import proj_plots
 
 import yt
 import pdb
@@ -64,7 +64,7 @@ def yt_octree_generate(fname, field_add):
     #pu = ParticleUnion("all", list(ds.particle_types_raw))
 
     
-    if  yt.__version__ == '4.0.dev0':
+    if float(yt.__version__[0:3]) >= 4:
         refined = reg.parameters['octree'][('index','refined')].astype('bool')
 
         #get central positions of cells as edges + width/2.
@@ -253,13 +253,13 @@ def arepo_vornoi_grid_generate(fname, field_add):
         if cfg.par.dust_grid_type == 'dtm':
             dustdens = dtm_particle_mesh(reg)
 
-
+        
         if cfg.par.dust_grid_type == 'rr':
             dustdens = remy_ruyer_particle_mesh(reg)
 
 
         if cfg.par.dust_grid_type == 'manual':
-            raise ValueError(' "manual" dust grids not currently supported with Arepo simulations. Please try another choice amongst [dtm, rr, li_bestfit, li_ml]')
+            dustdens = manual_particle_mesh(reg) 
         #if cfg.par.dust_grid_type == 'manual':
         #    dust_smoothed_manual = manual(reg, refined)
         #    dust_smoothed = dust_smoothed_manual

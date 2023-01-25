@@ -59,34 +59,65 @@ def stellar_sed_write(m):
 
     README = "Note: nu is in Hz, and fnu is in Lsun/Hz; lam is in micron and flam is in Lsun/micron"
     #saving: nu is in Hz and fnu is in Lsun/Hz
-    outfile = cfg.model.PD_output_dir+"stellar_seds."+cfg.model.snapnum_str+".npz"
 
-
+    
+    try: outfile = cfg.model.PD_output_dir+"/stellar_seds."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".npz"
+    except:
+        outfile = cfg.model.PD_output_dir+"/stellar_seds."+cfg.model.snapnum_str+".npz"
 
     np.savez(outfile,nu=nu,fnu=fnu,lam = lam.value, flam = flam.value, README=README)
    
 
 def dump_cell_info(refined,fc1,fw1,xmin,xmax,ymin,ymax,zmin,zmax):
-    outfile = cfg.model.PD_output_dir+"cell_info."+cfg.model.snapnum_str+".npz"
+    outfile = cfg.model.PD_output_dir+"cell_info."+cfg.model.snapnum_str+"_"+cfg.model.galaxy_num_str+".npz"
     np.savez(outfile,refined=refined,fc1=fc1,fw1=fw1,xmin=xmin,xmax=xmax,ymin=ymin,ymax=ymax,zmin=zmin,zmax=zmax)
 
 def dump_data(reg,model):
-
-    particle_fh2 = reg["gasfh2"]
+    
+    particle_fh2 = reg["gas","fh2"]
     particle_fh1 = np.ones(len(particle_fh2))-particle_fh2
-    particle_gas_mass = reg["gasmasses"]
-    particle_star_mass = reg["starmasses"]
-    particle_star_metallicity = reg["starmetals"]
-    particle_stellar_formation_time = reg["starformationtime"]
-    particle_sfr = reg['gassfr'].in_units('Msun/yr')
-    particle_dustmass = reg["dustmass"].in_units('Msun')
+    particle_gas_mass = reg["gas","masses"]
+    particle_star_mass = reg["star","masses"]
+    particle_star_metallicity = reg["star","metals"]
+    #particle_stellar_formation_time = reg["starformationtime"]
+    particle_stellar_formation_time = reg["stellar","ages"]
+    particle_sfr = reg['gas','sfr'].in_units('Msun/yr')
+    particle_dustmass = reg["dust","mass"].in_units('Msun')
 
     #these are in try/excepts in case we're not dealing with gadget and yt 3.x
-    try: grid_gas_mass = reg["gassmoothedmasses"]
-    except: grid_gas_mass = -1
-    try: grid_gas_metallicity = reg["gassmoothedmetals"]
-    except: grid_gas_metallicity = -1
-    try: grid_star_mass = reg["starsmoothedmasses"]
+    
+    if reg.parameters['dataset_type'] in ['gadget_hdf5','tipsy']:
+        try: 
+            grid_gas_mass = reg["gas","smoothedmasses"]
+        except: grid_gas_mass = -1
+    else:
+        try:
+            grid_gas_mass = reg["gas","masses"]
+        except: grid_gas_mass = -1
+        
+    #for sph we have a different nomenclature thanks to the smoothing onto an octree
+    if reg.parameters['dataset_type'] in ['gadget_hdf5','tipsy']:
+
+        try: 
+            grid_gas_metallicity = []
+            grid_gas_metallicity.append(reg["gas","smoothedmetals"].value)
+            abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+            for i in abund_el:
+                grid_gas_metallicity.append(reg["gas","smoothedmetals_"+str(i)].value)
+                
+        except: grid_gas_metallicity = reg["gas","smoothedmetals"].value
+    
+    else:
+        try:
+            grid_gas_metallicity = []
+            grid_gas_metallicity.append(reg["gas","metals"].value)
+            abund_el = ['He', 'C', 'N', 'O', 'Ne', 'Mg', 'Si', 'S', 'Ca', 'Fe']
+            for i in abund_el:
+                grid_gas_metallicity.append(reg["gas","metals_"+str(i)].value)
+
+        except: grid_gas_metallicity = reg["gas","metals"].value
+
+    try: grid_star_mass = reg["star","smoothedmasses"]
     except: grid_star_mass = -1
 
     #get tdust
@@ -104,7 +135,7 @@ def dump_data(reg,model):
     np.savez(outfile,particle_fh2=particle_fh2,particle_fh1 = particle_fh1,particle_gas_mass = particle_gas_mass,particle_star_mass = particle_star_mass,particle_star_metallicity = particle_star_metallicity,particle_stellar_formation_time = particle_stellar_formation_time,grid_gas_metallicity = grid_gas_metallicity,grid_gas_mass = grid_gas_mass,grid_star_mass = grid_star_mass,particle_sfr = particle_sfr,particle_dustmass = particle_dustmass)#,tdust = tdust)
 
 
-def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
+def SKIRT_data_dump(reg,ds,m,stars_list,bulgestars_list,diskstars_list,ds_type,sp,hsml_in_pc = 10):
     
     #the work flow for this function is: for all dataset types, we
     #dump stars in the same manner (since we don't allow for mappings
@@ -114,33 +145,36 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
 
     #create stars file.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 
-    spos_x = reg["starcoordinates"][:,0].in_units('pc').value
-    spos_y = reg["starcoordinates"][:,1].in_units('pc').value
-    spos_z = reg["starcoordinates"][:,2].in_units('pc').value
-    smasses = reg["starmasses"].in_units('Msun').value
+    spos_x = ([stars.positions[0] for stars in stars_list]*u.cm).to(u.pc).value
+    spos_y = ([stars.positions[1] for stars in stars_list]*u.cm).to(u.pc).value
+    spos_z = ([stars.positions[2] for stars in stars_list]*u.cm).to(u.pc).value
+    smasses = ([stars.mass for stars in stars_list]*u.g).to(u.Msun).value
 
     try:
-        disk_x = reg["diskstarcoordinates"][:,0].in_units('pc').value
-        disk_y = reg["diskstarcoordinates"][:,1].in_units('pc').value
-        disk_z = reg["diskstarcoordinates"][:,2].in_units('pc').value
-        diskmasses = reg["diskstarmasses"].in_units('Msun').value
-    except:
+        disk_x = ([diskstars.positions[0] for diskstars in diskstars_list]*u.cm).to(u.pc).value
+        disk_y = ([diskstars.positions[1] for diskstars in diskstars_list]*u.cm).to(u.pc).value
+        disk_z = ([diskstars.positions[2] for diskstars in diskstars_list]*u.cm).to(u.pc).value
+        diskmasses = ([diskstars.mass for diskstars in diskstars_list]*u.g).to(u.Msun).value
+
+    except: 
         disk_x, disk_y, disk_z, diskmasses = (np.array([]),)*4
 
     try:
-        bulge_x = reg["bulgestarcoordinates"][:,0].in_units('pc').value
-        bulge_y = reg["bulgestarcoordinates"][:,1].in_units('pc').value
-        bulge_z = reg["bulgestarcoordinates"][:,2].in_units('pc').value
-        bulgemasses = reg["bulgestarmasses"].in_units('Msun').value
+        bulge_x = ([bulgestars.positions[0] for bulgestars in bulgestars_list]*u.cm).to(u.pc).value
+        bulge_y = ([bulgestars.positions[1] for bulgestars in bulgestars_list]*u.cm).to(u.pc).value
+        bulge_z = ([bulgestars.positions[2] for bulgestars in bulgestars_list]*u.cm).to(u.pc).value
+        bulgemasses = ([bulgestars.mass for bulgstars in bulgestars_list]*u.g).to(u.Msun).value
     except:
         bulge_x, bulge_y, bulge_z, bulgemasses = (np.array([]),)*4
+
+
 
     spos_x = np.concatenate((spos_x, disk_x, bulge_x))
     spos_y = np.concatenate((spos_y, disk_y, bulge_y))
     spos_z = np.concatenate((spos_z, disk_z, bulge_z))
     smasses = np.concatenate((smasses, diskmasses, bulgemasses))
 
-    fsps_metals = np.loadtxt(cfg.par.metallicity_legend)
+    fsps_metals = np.array(sp.zlegend)
     
     if ds.cosmological_simulation:
         dmet = [0.]*len(diskmasses)
@@ -154,42 +188,54 @@ def SKIRT_data_dump(reg,ds,m,stars_list,ds_type,hsml_in_pc = 10):
         bmet = [fsps_metals[cfg.par.bulge_stars_metals]]*len(bulgemasses)
         bage = [(cfg.par.bulge_stars_age*u.Gyr).to(u.yr).value]*len(bulgemasses)
 
+
     #ages and metallicities need to come from the stars list in case
     #we do something in parameters master to change the values
     smetallicity = [stars.metals for stars in stars_list] + dmet + bmet
     sage = [(stars.age*u.Gyr).to(u.yr).value for stars in stars_list] + dage + bage
     shsml = np.repeat(hsml_in_pc,len(sage))
 
-    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".stars.particles.txt"
-    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".stars.particles.txt"
-    np.savetxt(outfile, np.column_stack((spos_x,spos_y,spos_z,shsml,smasses,smetallicity,sage)))
-    
     #create the gas file for SPH-oids.  this assumes the 'extragalactic [length in pc, distance in Mpc]' units for SKIRT
 
+    gpos_x = reg["gas","coordinates"][:,0].in_units('pc').value
+    gpos_y = reg["gas","coordinates"][:,1].in_units('pc').value
+    gpos_z = reg["gas","coordinates"][:,2].in_units('pc').value
+    gmass = reg["gas","masses"].in_units('Msun').value
+    gmetallicity = reg["gas","metals"].value
+    grho = (reg["gas","density"]*reg["gas","metals"].value*cfg.par.dusttometals_ratio).in_units('Msun/cm**3').value
 
-    gpos_x = reg["gascoordinates"][:,0].in_units('pc').value
-    gpos_y = reg["gascoordinates"][:,1].in_units('pc').value
-    gpos_z = reg["gascoordinates"][:,2].in_units('pc').value
-    gmass = reg["gasmasses"].in_units('Msun').value
-    ghsml = np.repeat(hsml_in_pc,len(gpos_x))
-    gmetallicity = reg["gasmetals"].value
-    grho = (reg["gasdensity"]*reg["gasmetals"].value*cfg.par.dusttometals_ratio).in_units('Msun/cm**3').value
-    try: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".gas.particles.txt"
-    except: outfile = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".gas.particles.txt"
+
+
+    #set the smoothing lengths. see if we have one defined from the front ends.  if not, then we just use a constant value
+    try:
+        ghsml = reg["gas","smoothinglength"].in_units('pc').value
+    except:
+        ghsml = np.repeat(hsml_in_pc,len(gpos_x))
+
+    #file I/O
+    #stars output
+    try: outfile_stars = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".stars.particles.txt"
+    except: outfile_stars = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".stars.particles.txt"
+    np.savetxt(outfile_stars, np.column_stack((spos_x,spos_y,spos_z,shsml,smasses,smetallicity,sage)))
+
+    #gas output
+    try: outfile_gas = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+'_galaxy'+cfg.model.galaxy_num_str+".gas.particles.txt"
+    except: outfile_gas = cfg.model.PD_output_dir+"SKIRT."+cfg.model.snapnum_str+".gas.particles.txt"
 
     
     if ds_type in ['gadget_hdf5','tipsy']:
-        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+        np.savetxt(outfile_gas, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
     else:
     #if we ever get the arepo SKIRT ski files working, this is
         #actually the line we need. but since we are currently running
         #SKIRT for arepo in SPH/octree mode, we have to
         # save as though it's an octree..
         #np.savetxt(outfile,np.column_stack((gpos_x,gpos_y,gpos_z,grho)))
-        np.savetxt(outfile, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+        np.savetxt(outfile_gas, np.column_stack((gpos_x,gpos_y,gpos_z,ghsml,gmass,gmetallicity)))
+
 
 # Saves logU, Q and other related parameters in a file (seperate file is created for each galaxy)
-def logu_diagnostic(logQ, Rin, LogU, mstar, cluster_mass, num_cluster, age, zmet, append = True):
+def logu_diagnostic(logQ, LogU, LogZ, Rin, cluster_mass, num_cluster, age, append = True):
     if append == False:
         try: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
         except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
@@ -199,10 +245,33 @@ def logu_diagnostic(logQ, Rin, LogU, mstar, cluster_mass, num_cluster, age, zmet
         try:outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy" + cfg.model.galaxy_num_str + ".txt"
         except: outfile = cfg.model.PD_output_dir + "nebular_properties_galaxy.txt"
         f = open(outfile, 'a+')
-        f.write(str(logQ) + "\t" + str(Rin) + "\t" + str(LogU) + "\t" + str(mstar) + "\t"+ str(cluster_mass) + "\t" + str(num_cluster) + "\t" + str(age) + "\t" + str(zmet) + "\n")
+        f.write(str(logQ) + "\t" + str(LogU) + "\t" + str(LogZ) + "\t" + str(Rin) + "\t"+ str(cluster_mass) + "\t" + str(num_cluster) + "\t" + str(age) + "\n")
         f.close()
 
-    # Dumps AGN SEDs
+
+# Dumps emission lines
+def dump_emlines(line_em, append=True):
+    if hasattr(cfg.model, 'galaxy_num_str'):
+        outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy" + cfg.model.galaxy_num_str + ".txt"
+    else:
+        outfile_lines = cfg.model.PD_output_dir + "emlines.galaxy.txt"
+
+    if append == False:
+        refline_file = cfg.par.pd_source_dir + "/powderday/nebular_emission/data/refLines.dat"
+        f = open(outfile_lines,'w')
+        wdat = np.genfromtxt(refline_file, delimiter=',')
+        wl = np.array([dat[0] for dat in wdat])
+        sinds = np.argsort(wl)
+        line_wav = wl[sinds]  
+        np.savetxt(f,np.expand_dims(line_wav,axis=0))
+        f.close()
+    else:
+        f = open(outfile_lines,'a+')
+        np.savetxt(f,np.expand_dims(line_em,axis=0))
+        
+        f.close()
+
+# Dumps AGN SEDs
 def dump_AGN_SEDs(nu,fnu,luminosity):
     
     if hasattr(cfg.model,'galaxy_num_str'):
@@ -213,7 +282,43 @@ def dump_AGN_SEDs(nu,fnu,luminosity):
     np.savez(outfile_bh,nu = nu,fnu = fnu, luminosity = luminosity)
                       
 
+def dump_NEB_SEDs(nu_arr, fnu_arr, pos_arr, append=True, clean_up=False):
+    
+    if hasattr(cfg.model,'galaxy_num_str'):
+        outfile = cfg.model.PD_output_dir+"/neb_seds_galaxy_"+cfg.model.galaxy_num_str+".npz"
+    else:
+        outfile = cfg.model.PD_output_dir+"/neb_seds.npz"
 
+    if clean_up:
+        os.remove(outfile)
+        return
+        
+    # If append is False then just save an empty npz file.
+    if not append:
+        np.savez(outfile)
+        return
+
+    data = np.load(outfile)
+    
+    # If the npz file is not empty then the new data is appeneded 
+    # to the previous arrays
+    if (len(list(data.keys())) == 0):
+        fnu_arr_tot = np.atleast_2d(fnu_arr)
+        pos_arr_tot = np.atleast_2d(pos_arr)
+        
+    else:
+        fnu_old = np.atleast_2d(data["fnu"])
+        pos_old = np.atleast_2d(data["positions"])
+        pos_arr = np.atleast_2d(pos_arr)
+        fnu_arr = np.atleast_2d(fnu_arr)
+        fnu_arr_tot = np.append(fnu_old, fnu_arr, axis=0)
+        pos_arr_tot = np.append(pos_old, pos_arr, axis=0)
+
+    np.savez(outfile, nu=nu_arr, fnu=fnu_arr_tot, positions=pos_arr_tot)
+
+
+
+'''
 #def dump_emline(emline_wavelengths,emline_luminosity,append=True):
 def dump_emline(emline_wave,emline_lum,append=True):
 
@@ -231,5 +336,4 @@ def dump_emline(emline_wave,emline_lum,append=True):
         f = open(outfile_lines,'a+')
         np.savetxt(f,emline_lum)#,fmt='%.18g', delimiter=' ', newline=os.linesep)
         f.close()
-
-
+'''
