@@ -427,4 +427,6 @@ def pah_source_add(ds,reg,m,boost):
     reg.parameters['simulation_sizes'] = simulation_sizes
 
 
-    
+    #just for funzies save the beta 
+    for i in range(beta_nnls.shape[1]): beta_nnls[:,i]/=np.max(beta_nnls[:,i])
+    reg.parameters['beta_nnls'] = beta_nnls
