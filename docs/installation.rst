@@ -6,7 +6,7 @@ Overview of Requirements
 
 * **python>=3.7**
 
-  * numpy (any version except 1.10.*)
+  * numpy (<1.24)
   * scipy
   * astropy (3.2.3)
   * h5py
@@ -285,6 +285,17 @@ You can test the installation by opening python and typing::
 
 Troubleshooting your Installation
 ============
+
+  .. numpy issues:
+
+Numpy Issues
+---------------
+
+* np versions >=1.24 have deprecated float that causes (waves hands wildly) everything to break.   Roll back via::
+
+  >conda install -c conda-forge numpy=1.23
+
+
 
   .. _fsps installation issues:
 
