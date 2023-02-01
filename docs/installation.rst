@@ -49,7 +49,7 @@ linked below in each subsection).
 python
 --------------
 
-`powderday <https://github.com/dnarayanan/powderday.git>`_ should work with python >=3.5 though is ideal with 3.6 (and some issues have been noted that may relate to python 3.7).
+`powderday <https://github.com/dnarayanan/powderday.git>`_ should work with python >=3.5 though is ideal with 3.8 (and some issues have been noted that may relate to python 3.7).
 Please file an issue if you encounter one.
 
 We very strongly recommend that the user set up a new python environment for the
@@ -363,6 +363,14 @@ your openmpi module that you previously had loaded for the `Hyperion
    >LDSHARED="icc -shared" CC=icc pip install -e .
 
 
+* Finally, even if you're installing mostly everything else from
+  source, there's no issue usually with installing yt via Conda.  This
+  can often times work well with intel compilers, which yt can be a
+  bit fussy about sometimes.::
+
+    >conda install --channel conda-forge yt
+
+   
 System Specific Installation Notes
 ============
 
@@ -388,9 +396,9 @@ yt::
   >cd yt
   >pip install -e .
 
+Note, if you have trouble, please see the troubleshooting below.
 
-
-fsps and python-fsps
+fsps and python-fsps:
 
 The development version of python-fsps now includes the Fortran FSPS source code::
 
