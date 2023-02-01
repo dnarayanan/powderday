@@ -200,11 +200,9 @@ Hyperion Dust Files
 Unless you've written your own dust files, you will likely want to use
 the pre-compiled dust files developed by Tom Robitaille (though don't
 ship with `Hyperion <http://www.hyperion-rt.org>`_ due to their size).
-To install these download them here:
-http://docs.hyperion-rt.org/en/stable/dust/dust.html.  Then to
-install::
 
-  >tar -xvzf hyperion-dust-xxx.tar.gz
+
+  >git clone https://github.com/hyperion-rt/hyperion-dust.git
   >cd hyperion-dust-0.1.0
   >python setup.py build_dust
 
@@ -425,8 +423,7 @@ hyperion::
 hyperion dust::
 
   >cd $HOME
-  >wget http://pypi.python.org/packages/source/h/hyperion-dust/hyperion-dust-0.1.0.tar.gz
-  >tar -xzvf hyperion-dust-0.1.0.tar.gz
+  >git clone https://github.com/hyperion-rt/hyperion-dust.git
   >cd hyperion-dust-0.1.0
   >python setup.py build_dust
 
@@ -487,8 +484,7 @@ hyperion::
 hyperion dust::
 
   >cd $HOME
-  >wget http://pypi.python.org/packages/source/h/hyperion-dust/hyperion-dust-0.1.0.tar.gz
-  >tar -xzvf hyperion-dust-0.1.0.tar.gz
+  >git clone https://github.com/hyperion-rt/hyperion-dust.git
   >cd hyperion-dust-0.1.0
   >python setup.py build_dust
 
