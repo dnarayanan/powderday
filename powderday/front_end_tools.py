@@ -116,8 +116,15 @@ def make_image(m_imaging, par, model,dx,dy,dz):
             raise ValueError("Filters not found. You may be running above changeset 'f1f16eb' with an outdated parameters_master file. Please update to the most recent parameters_master format or ensure that the'filterdir' and 'filterfiles' parameters are set properly.")
             
         # Extract and flatten all wavelengths in the filter files
-        wavs = [wav[0] for single_filter in filter_data for wav in single_filter]
-        wavs = list(set(wavs))      # Remove duplicates, if they exist
+        wavs = []
+        for single_filter in par.filterfiles:
+            filter_data = np.loadtxt(par.filterdir+'/'+single_filter)
+            wavs.append(filter_data[:,0])
+
+        wavs = np.unique(np.asarray(wavs)) #remove duplicates for efficiency
+
+        #wavs = [wav[0] for single_filter in filter_data for wav in single_filter]
+        #wavs = list(set(wavs))      # Remove duplicates, if they exist
 
         m_imaging.set_monochromatic(True, wavelengths=wavs)
         m_imaging.set_raytracing(True)
