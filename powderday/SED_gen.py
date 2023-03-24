@@ -377,6 +377,11 @@ def newstars_gen(star_object):
         sp.params["dust1"] = 1
         sp.params["dust2"] = 0
         sp.params["dust_tesc"] = tesc_age
+        
+    if cfg.par.dust_screen == True:
+            sp.params["dust_type"]=0
+            sp.params["dust1"]=cfg.par.dust1
+            sp.params["dust2"]=cfg.par.dust2
 
     spec_noneb = sp.get_spectrum(tage=star_object.age, zmet=star_object.fsps_zmet)
     f = spec_noneb[1]
@@ -843,17 +848,17 @@ def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
             mass_removed += stars_list[i].mass
 
 
-        if cfg.par.dust_screen == True:
-            sp.params["dust_type"]=0
-            sp.params["dust1"]=cfg.par.dust1
-            sp.params["dust2"]=cfg.par.dust2
+#        if cfg.par.dust_screen == True:
+#            sp.params["dust_type"]=0
+#            sp.params["dust1"]=cfg.par.dust1
+#            sp.params["dust2"]=cfg.par.dust2
 
 
-        if cfg.par.CF_on == True:
-            sp.params["dust_type"] = 0
-            sp.params["dust1"] = 1
-            sp.params["dust2"] = 0
-            sp.params["dust_tesc"] = tesc_age
+#        if cfg.par.CF_on == True:
+#            sp.params["dust_type"] = 0
+#            sp.params["dust1"] = 1
+#            sp.params["dust2"] = 0
+#            sp.params["dust_tesc"] = tesc_age
 
 
         if (len(bulgestars_list) > 0):
