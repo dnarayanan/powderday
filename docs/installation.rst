@@ -393,10 +393,9 @@ HiPerGator3.0 facility is to employ intel compilers, and to compile
 everything manually.  This allows the greatest flexibility, as well as
 the ability to use private forks of individual codes.
 
-First, load up the compilers that we'll use throughout::
+First, load up the compilers that we'll use throughout (though note: openmpi is not loaded until after yt is installed as yt will sometimes bork due to openmpi)::
 
   >module load intel/2018.1.163
-  >module load openmpi/4.0.3
   >module load hdf5/1.10.1
   >module load git
 
@@ -421,8 +420,11 @@ then in your .bashrc set the analog to::
   >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
   
   >cd python-fsps
-  >CC=icc F90=ifort python setup.py install
+  >CC=icc F90=ifort python -m pip install .
 
+Next, before installing hyperion, lets make sure our openmpi is loaded::
+
+    >module load openmpi/4.0.3
 
 
 hyperion::
@@ -458,7 +460,7 @@ powderday::
 
 First, load up the compilers that we'll use throughout::
 
-  >module load gcc/9.3.0 openmpi/4.1.1 libz/1.2.11 hdf5/1.10.1 git/2.30.1
+  >module load gcc/9.3.0  libz/1.2.11 hdf5/1.10.1 git/2.30.1
 
   
 yt::
@@ -482,8 +484,10 @@ then in your .bashrc set the analog to::
   >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
   
   >cd python-fsps
-  >CC=gcc F90=gfortran F77=gfortran python setup.py install
+  >CC=gcc F90=gfortran F77=gfortran python -m pip install .
 
+Now load up openmpi::
+  >ml  openmpi/4.1.1
 
 
 hyperion::
