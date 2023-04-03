@@ -115,20 +115,31 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
 
 
     def _particle_dust_carbon_fraction(field,data):
-        ad = data.ds.all_data()
-        return (ad['PartType3','Dust_MetalFractions'][:,2])
+        return data['PartType3','Dust_MetalFractions'][:,2]
+
+        #you need to be careful: flattening the ds via ad =
+        #ds.all_data() and then returning this value (vs just getting
+        #it from data[] as above) ends up in a bug where zoom does not
+        #take only the cut out data for this field for reg downstream.
+
+        #ad = data.ds.all_data() return
+        #(ad['PartType3','Dust_MetalFractions'][:,2])
 
     def _particle_dust_numgrains(field,data):
-        ad = data.ds.all_data()
-        return (ad['PartType3','Dust_NumGrains'])
+        return data['PartType3','Dust_NumGrains']
+        #ad = data.ds.all_data()
+        #return (ad['PartType3','Dust_NumGrains'])
 
     def _particle_dust_mass(field,data):
-        ad = data.ds.all_data()
-        return (ad['PartType3','Masses'])
+        dust_mass = (data[('PartType3','Masses')]).in_units('code_mass')
+        return dust_mass
+        #ad = data.ds.all_data()
+        #return (ad['PartType3','Masses'])
 
     def _particle_dust_coordinates(field,data):
-        ad = data.ds.all_data()
-        return (ad['PartType3','Coordinates'])
+        return data['PartType3','Coordinates']
+        #ad = data.ds.all_data()
+        #return (ad['PartType3','Coordinates'])
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
