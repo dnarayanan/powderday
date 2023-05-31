@@ -422,6 +422,20 @@ then in your .bashrc set the analog to::
   >cd python-fsps
   >CC=icc F90=ifort python -m pip install .
 
+
+Before going forward, pleae try::
+
+  >python
+  >import fsps
+
+and ensure that it does not throw any errors.  If you get an error along the lines of::
+
+  >ImportError: /blue/narayanan/desika.narayanan/conda/envs/test/lib/python3.8/site-packages/fsps/_fsps.cpython-38-x86_64-linux-gnu.so: undefined symbol: getenv_
+
+then try to install via pip::
+
+  >python -m pip install fsps
+  
 Next, before installing hyperion, lets make sure our openmpi is loaded::
 
     >module load openmpi/4.0.3
