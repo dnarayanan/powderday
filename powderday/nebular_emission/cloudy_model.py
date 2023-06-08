@@ -199,7 +199,7 @@ def write_cloudy_input(**kwargs):
     this_print('cosmic ray background')
     this_print('iterate to convergence max=5')
     this_print('stop temperature 100.0')
-    this_print('stop efrac {0:.2f}'.format(pars['efrac']))
+    this_print('stop efrac -1.0')
     this_print('save last linelist ".lin" "{}" absolute column'.format(linefile))
     this_print('save last outward continuum ".outwcont" units Angstrom no title')
     this_print('save last incident continuum ".inicont" units Angstrom no title')
@@ -248,6 +248,7 @@ def get_output(model_name, dir_, qq, fsps_lam, cell_width, id_val):
 
 def clean_files(dir_, model_name, id_val, error=False):
     logging.info("Cleaning up temporary files")
+    error = False
     if not error:
         os.remove(os.path.join(dir_ + "/temp_files", model_name + ".out"))
         os.remove(os.path.join(dir_ + "/temp_files", model_name + ".in"))

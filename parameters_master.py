@@ -121,6 +121,9 @@ age_dist_min = 3e-3                         # Star particle above this age are s
 age_dist_max = 1e-2                         # Star particles below this age are sub-divided into an age distribution if use_age_distribution is set to True
                                             # (Units: Gyr, Default = 1.e-2)
 
+alpha_enhacement = False                    # If set, then the metallicity of star particles is set to [Fe/H] rather than the total metals. 
+                                            # Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
+                                            # hardening of the radiation field due to alpha-enhancement. (Default: False)
 #***********************
 # COMMON PARAMETERS
 #***********************
@@ -202,10 +205,6 @@ HII_max_age = 1.e-2         			    # Sets the maximum age limit for calculating 
 
 HII_escape_fraction = 0.0   			    # Fraction of H-ionizaing photons that escape the HII region. 
                             			    # This is used only when add_neb_emission = True and use_cloudy_tables = False (Default = 0.0)
-
-HII_alpha_enhacement = False                # If set, then the metallicity of star particles is set to [Fe/H] rather than the total metals. 
-                                            # Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
-                                            # hardening of the radiation field due to alpha-enhancement. (Default: False)
 
 HII_dust = False                            # If set, then dust grains are included in the CLOUDY model. We use grains orion command to add
                                             # dust grains which specifies graphitic and silicate grains with a size distribution and abundance
