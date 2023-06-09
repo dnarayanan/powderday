@@ -3,15 +3,11 @@ from powderday.nebular_emission.ASCIItools import *
 from powderday.nebular_emission.cloudy_tools import air_to_vac, calc_LogQ, convert_metals
 import powderday.config as cfg
 from astropy import constants
-import logging
 import numpy as np
 import os
 from scipy.interpolate import interp1d
 import sys
 import uuid
-
-#logging.getLogger().setLevel(logging.INFO)
-#logging.basicConfig(format='Adding Nebular Emission : %(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 """
 ----------------------------------------------------------------------------------------------------------------
@@ -34,18 +30,15 @@ def write_input_sed(wav, spec):
     while compiled_exists(ascii_file):
         ascii_file = str(uuid.uuid4().hex) + ".ascii"
       
-    logging.info("Executing write ascii sequence...")
-    logging.info("Writing.....")
+    # Writing input SED file
     WriteASCII(ascii_file, wav, spec, nx=len(wav), nmod=1, par1_val=1.e6)
 
-    logging.info("Compiling {} with Cloudy".format(ascii_file))
+    # Compiling the input SED file with Cloudy
     compile_ascii(ascii_file)
 
-    logging.info("Checking to see if compilation was successful...")
-    if check_compiled(ascii_file):
-        logging.info("Your model {} is ready to run.".format(ascii_file))
-    else:
-        sys.exit()
+    # Checking to see if compilation was successful
+    if not check_compiled(ascii_file):
+        ValueError('CLOUDY run was unsucessful')
 
     return ascii_file
 
@@ -115,8 +108,8 @@ def write_cloudy_input(**kwargs):
     
     linefile = "cloudyLines.dat"
 
-    # Check to see if there was an error in getting metallicities from the simulation
-    # If so code revert back to using "dopita" abundances in place of "direct"
+    # If there was an error in getting metallicities from the simulation
+    # then the code reverts back to using "dopita" abundances in place of "direct"
     if (any(q <= -1.0 for q in pars["metals"][1:]) and pars["abundance"] == "direct"):
         pars["abundance"] = "dopita"
         print ("Warning: Unable to get metallicities from the simulation. This can be because you are binning the stars.\n \
@@ -187,9 +180,9 @@ def write_cloudy_input(**kwargs):
     
     cf = 1 - pars['efrac']
 
-    # For DIG since we are making use of the ionization parameter we do need
-    # to set the inner radius, the geometry is plane parallel and not spherical
-    # and we are considering the covering factor to be 1. 
+    # For DIG, since we are making use of the ionization parameter we do need
+    # to set the inner radius, the geometry is plane parallel
+    # and the covering factor is set to 1. 
     if _id != 3:
         this_print('radius {0:.3f} log'.format(r_out))
         this_print('sphere')
@@ -199,11 +192,10 @@ def write_cloudy_input(**kwargs):
     this_print('cosmic ray background')
     this_print('iterate to convergence max=5')
     this_print('stop temperature 100.0')
-    this_print('stop efrac {0:.2f}'.format(pars['efrac']))
+    this_print('stop efrac -1.0')
     this_print('save last linelist ".lin" "{}" absolute column'.format(linefile))
     this_print('save last outward continuum ".outwcont" units Angstrom no title')
     this_print('save last incident continuum ".inicont" units Angstrom no title')
-    logging.info("Input written in {0}".format(file_name))
     f.close()
 
 
@@ -247,7 +239,7 @@ def get_output(model_name, dir_, qq, fsps_lam, cell_width, id_val):
 
 
 def clean_files(dir_, model_name, id_val, error=False):
-    logging.info("Cleaning up temporary files")
+    # Cleaning up temporary files
     if not error:
         os.remove(os.path.join(dir_ + "/temp_files", model_name + ".out"))
         os.remove(os.path.join(dir_ + "/temp_files", model_name + ".in"))
@@ -277,11 +269,11 @@ def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu 
     clight = constants.c.cgs.value*1.e8
     nebular_smooth_init = 0
 
-    logging.info("Writing the input SED file")
+    # Writing the input SED file
     filename = write_input_sed(spec_lambda, sspi)
     model_name = filename.split(".")[0]
 
-    logging.info("Writing CLOUDY input file")
+    # Writing CLOUDY input file
     dir_= cfg.par.pd_source_dir + "powderday/nebular_emission"
     dir_base = os.getcwd()
     write_cloudy_input(dir_=dir_,
@@ -297,8 +289,7 @@ def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu 
                        efrac = frac_obrun,
                        metals = Metals)
 
-    logging.info("Input SED file written")
-    logging.info("Running CLOUDY")
+    # Running CLOUDY
     os.chdir(dir_ + "/temp_files/")
     os.system("$CLOUDY_EXE " + model_name + ".in")
     os.chdir(dir_base)
@@ -306,23 +297,21 @@ def get_nebular(spec_lambda, sspi, nh, Metals, logq = 0.0, radius = 1.e19, logu 
     content = f_out.readlines()
     check = np.all(['OK' in content[-1]])
     
-    if check:
-        logging.info("CLOUDY run finished sucessfully")
-
-    else:
+    # Checking if CLOUDY run finished sucessfully
+    if not check:
         print ("WARNING: The CLOUDY run was unsucessful. Please see the cloudy output file "+ model_name+".out"+
                " located in "+ dir_ + "/temp_files/"+" to figure out why this happened.")
         if clean_up:
             clean_files(dir_, model_name, index, error=True)
         raise ValueError('CLOUDY run was unsucessful')
 
-    logging.info("Getting output spectrum")
-
+    
+    # Getting output spectrum
     nebem_line_pos, nebem_line, readlambneb, readcontneb = get_output(model_name, dir_, 10**logq, spec_lambda, Cell_width, index)
     nebem_cont = interp1d(readlambneb, np.log10(readcontneb + 10 ** (-95.0)),
                           fill_value=-95.0, bounds_error=False)(spec_lambda)
 
-    logging.info("Adding nebular emission to input spectrum")
+    # Adding nebular emission to input spectrum
     nemline = len(np.where(nebem_line_pos < spec_lambda[-1])[0])
     neb_res_min = np.zeros(nemline)
     for i in range(nemline):

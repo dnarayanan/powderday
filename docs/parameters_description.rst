@@ -324,6 +324,13 @@ Nebular Emission Info
     Star particles below this age are sub-divided into an age distribution if use_age_distribution is set to True
     (Units: Gyr, Default = 1.e-2)
     
+
+:alpha_enhacement:
+
+    If set, then the metallicity of star particles to [Fe/H] rather than the total metals.
+    Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the
+    hardening of the radiaiton field due to alpha-enhancement. (Default: False)
+
 COMMON PARAMETERS
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -443,12 +450,6 @@ Young Stars
 :HII_escape_fraction:
     
     HII region escape fraction (Default = 0.0)
-
-:HII_alpha_enhacement:               
-    
-    If set, then the metallicity of star particles to [Fe/H] rather than the total metals. 
-    Since FSPS does not support non solar abundance ratios, this parameter can be used to mimic the 
-    hardening of the radiaiton field due to alpha-enhancement. (Default: False)
 
 :HII_dust:
     
