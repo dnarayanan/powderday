@@ -25,6 +25,10 @@ from datetime import datetime
 #2b. manually add the logU>4 sources
 
 
+def get_whole_ceil(n,near):
+    nn = np.divide(n,np.linspace(1,np.ceil(n/near),int(np.ceil(n/near))))
+    return(nn[nn%1==0][-1])
+
 def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,draine_sizes,draine_lam,f_ion,neutral_PAH_reference_objects,ion_PAH_reference_objects,draine_bins_idx):
 
     #these are re-defined for each pool thread.  when they're
@@ -245,14 +249,22 @@ def pah_source_add(ds,reg,m,boost):
     nprocesses = np.min([cfg.par.n_processes,ncells]) #pool.map will barf in the corner case that we have less cells than cores
 
 
-    p = Pool(processes = nprocesses)
-
     cell_list = np.arange(ncells)
 
     #chunking to speed up multiprocessing: since the processes are so
     #quick, we can lose a factor of 50% time in just spawning new
     #threads.  i saves a ton of time to chunk up the work and send it all off once.
+
+    #set the number of chunks to be divisble evenly by the number of
+    #cells: this will make the concatenation below work for the
+    #grid_PAH_luminosities.  this will force a small slowdown if
+    #nchunks>nprocessors, but it's not a big penalty.
+
     nchunks=nprocesses
+    print("nchunks = ",nchunks)
+    nchunks = int(get_whole_ceil(len(cell_list),nchunks))
+    print("modified nchunks = ",nchunks)
+
     chunk_start_indices = []
     chunk_start_indices.append(0) #the start index is obviously 0
     #this should just be int(ncells/nchunks) but in case ncells < nchunks, we need to ensure that this is at least  1
@@ -271,9 +283,9 @@ def pah_source_add(ds,reg,m,boost):
         list_of_chunks.append(cells_list_chunk)
 
 
-
-    print("Computing the PAH luminosities for every cell given its grain size distribution and logU. Entering Pool.map multiprocessing.")
     
+    print("Computing the PAH luminosities for every cell given its grain size distribution and logU. Entering Pool.map multiprocessing.")
+    p = Pool(processes = nprocesses)
     dum_numgrains = reg['particle_dust','numgrains'].value 
 
 
@@ -306,7 +318,6 @@ def pah_source_add(ds,reg,m,boost):
     #comprehension on all of the chunks [ so that we have a list of
     #lists, where each sublist is a chunk], nparray's it, and then
     #concatenates on the 0th axis to make one grand array.  
-
 
     grid_PAH_luminosity = np.concatenate( np.asarray([dum[i][0] for i in range(len(dum))] ),axis=0)
     grid_neutral_PAH_luminosity = np.concatenate( np.asarray([dum[i][1] for i in range(len(dum))] ),axis=0)
