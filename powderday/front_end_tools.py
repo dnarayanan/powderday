@@ -139,8 +139,9 @@ def make_image(m_imaging, par, model,dx,dy,dz):
 
         wavs = []
         for single_filter in par.filterfiles:
-            filter_data = np.loadtxt(par.filterdir+'/'+single_filter)
-            wavs.append(filter_data[:,0])
+            single_filter_data = np.loadtxt(par.filterdir+'/'+single_filter)
+            wavs.append(single_filter_data[:,0])
+
 
         wavs = np.unique(np.asarray(wavs)) #remove duplicates for efficiency
 

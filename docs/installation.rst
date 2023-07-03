@@ -6,7 +6,7 @@ Overview of Requirements
 
 * **python>=3.7**
 
-  * numpy (any version except 1.10.*)
+  * numpy (<1.24)
   * scipy
   * astropy (3.2.3)
   * h5py
@@ -49,7 +49,7 @@ linked below in each subsection).
 python
 --------------
 
-`powderday <https://github.com/dnarayanan/powderday.git>`_ should work with python >=3.5 though is ideal with 3.6 (and some issues have been noted that may relate to python 3.7).
+`powderday <https://github.com/dnarayanan/powderday.git>`_ should work with python >=3.5 though is ideal with 3.8 (and some issues have been noted that may relate to python 3.7).
 Please file an issue if you encounter one.
 
 We very strongly recommend that the user set up a new python environment for the
@@ -200,11 +200,9 @@ Hyperion Dust Files
 Unless you've written your own dust files, you will likely want to use
 the pre-compiled dust files developed by Tom Robitaille (though don't
 ship with `Hyperion <http://www.hyperion-rt.org>`_ due to their size).
-To install these download them here:
-http://docs.hyperion-rt.org/en/stable/dust/dust.html.  Then to
-install::
 
-  >tar -xvzf hyperion-dust-xxx.tar.gz
+
+  >git clone https://github.com/hyperion-rt/hyperion-dust.git
   >cd hyperion-dust-0.1.0
   >python setup.py build_dust
 
@@ -288,6 +286,17 @@ You can test the installation by opening python and typing::
 Troubleshooting your Installation
 ============
 
+  .. numpy issues:
+
+Numpy Issues
+---------------
+
+* np versions >=1.24 have deprecated float that causes (waves hands wildly) everything to break.   Roll back via::
+
+  >conda install -c conda-forge numpy=1.23
+
+
+
   .. _fsps installation issues:
 
 fsps Installation Issues
@@ -365,6 +374,14 @@ your openmpi module that you previously had loaded for the `Hyperion
    >LDSHARED="icc -shared" CC=icc pip install -e .
 
 
+* Finally, even if you're installing mostly everything else from
+  source, there's no issue usually with installing yt via Conda.  This
+  can often times work well with intel compilers, which yt can be a
+  bit fussy about sometimes.::
+
+    >conda install --channel conda-forge yt
+
+   
 System Specific Installation Notes
 ============
 
@@ -376,10 +393,9 @@ HiPerGator3.0 facility is to employ intel compilers, and to compile
 everything manually.  This allows the greatest flexibility, as well as
 the ability to use private forks of individual codes.
 
-First, load up the compilers that we'll use throughout::
+First, load up the compilers that we'll use throughout (though note: openmpi is not loaded until after yt is installed as yt will sometimes bork due to openmpi)::
 
   >module load intel/2018.1.163
-  >module load openmpi/4.0.3
   >module load hdf5/1.10.1
   >module load git
 
@@ -390,9 +406,9 @@ yt::
   >cd yt
   >pip install -e .
 
+Note, if you have trouble, please see the troubleshooting below.
 
-
-fsps and python-fsps
+fsps and python-fsps:
 
 The development version of python-fsps now includes the Fortran FSPS source code::
 
@@ -404,8 +420,25 @@ then in your .bashrc set the analog to::
   >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
   
   >cd python-fsps
-  >CC=icc F90=ifort python setup.py install
+  >CC=icc F90=ifort python -m pip install .
 
+
+Before going forward, pleae try::
+
+  >python
+  >import fsps
+
+and ensure that it does not throw any errors.  If you get an error along the lines of::
+
+  >ImportError: /blue/narayanan/desika.narayanan/conda/envs/test/lib/python3.8/site-packages/fsps/_fsps.cpython-38-x86_64-linux-gnu.so: undefined symbol: getenv_
+
+then try to install via pip::
+
+  >python -m pip install fsps
+  
+Next, before installing hyperion, lets make sure our openmpi is loaded::
+
+    >module load openmpi/4.0.3
 
 
 hyperion::
@@ -425,8 +458,7 @@ hyperion::
 hyperion dust::
 
   >cd $HOME
-  >wget http://pypi.python.org/packages/source/h/hyperion-dust/hyperion-dust-0.1.0.tar.gz
-  >tar -xzvf hyperion-dust-0.1.0.tar.gz
+  >git clone https://github.com/hyperion-rt/hyperion-dust.git
   >cd hyperion-dust-0.1.0
   >python setup.py build_dust
 
@@ -442,7 +474,7 @@ powderday::
 
 First, load up the compilers that we'll use throughout::
 
-  >module load gcc/9.3.0 openmpi/4.1.1 libz/1.2.11 hdf5/1.10.1 git/2.30.1
+  >module load gcc/9.3.0  libz/1.2.11 hdf5/1.10.1 git/2.30.1
 
   
 yt::
@@ -466,8 +498,10 @@ then in your .bashrc set the analog to::
   >export SPS_HOME=$HOME/python-fsps/src/fsps/libfsps
   
   >cd python-fsps
-  >CC=gcc F90=gfortran F77=gfortran python setup.py install
+  >CC=gcc F90=gfortran F77=gfortran python -m pip install .
 
+Now load up openmpi::
+  >ml  openmpi/4.1.1
 
 
 hyperion::
@@ -487,8 +521,7 @@ hyperion::
 hyperion dust::
 
   >cd $HOME
-  >wget http://pypi.python.org/packages/source/h/hyperion-dust/hyperion-dust-0.1.0.tar.gz
-  >tar -xzvf hyperion-dust-0.1.0.tar.gz
+  >git clone https://github.com/hyperion-rt/hyperion-dust.git
   >cd hyperion-dust-0.1.0
   >python setup.py build_dust
 

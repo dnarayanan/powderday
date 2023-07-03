@@ -29,7 +29,11 @@ import os
 
 gc.set_threshold(0)
 
-script, pardir, parfile, modelfile = sys.argv
+if (len(sys.argv)) == 4:
+    script, pardir, parfile, modelfile = sys.argv
+
+elif (len(sys.argv)) == 5:
+    script, pardir, parfile, neb_parfile, modelfile = sys.argv
 
 
 mpl.use('Agg')
@@ -42,7 +46,21 @@ model = __import__(modelfile)
 
 cfg.par = par  # re-write cfg.par for all modules that read this in now
 cfg.model = model
+neb_param_file = False
 
+if cfg.par.add_neb_emission and not cfg.par.use_cloudy_tables: 
+    # Checking to see if additional parameter file for nebular emission is provided or not when neublar emission is set to be 
+    # calculated without using lookup tables. If it is not provided then a warning is thrown.
+    if len(sys.argv) == 5:
+        neb_par = __import__(neb_parfile)
+        cfg.neb_par = neb_par
+        neb_param_file = True
+    else:
+        print("#-----------------------------------------------------------------------------------------------------#")
+        print("Warning Nebular Emission is turned on but parmeters master file for nebular emission is not provided.")
+        print("Reverting to using default values for including nebular emission. See documentation for more info")
+        print("#------------------------------------------------------------------------------------------------------#")
+    
 # =========================================================
 # CHECK FOR THE EXISTENCE OF A FEW CRUCIAL FILES FIRST
 # =========================================================
@@ -52,7 +70,11 @@ eh.file_exist(par.dustdir+par.dustfile)
 # =========================================================
 # Enforce Backwards Compatibility for Non-Critical Variables
 # =========================================================
-cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_BINNED, cfg.par.max_age_direct, cfg.par.imf1, cfg.par.imf2, cfg.par.imf3, cfg.par.use_cmdf, cfg.par.use_cloudy_tables, cfg.par.cmdf_min_mass, cfg.par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.par.cmdf_beta, cfg.par.use_age_distribution, cfg.par.age_dist_min, cfg.par.age_dist_max, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logu_init, cfg.par.FORCE_gas_logz, cfg.par.gas_logz, cfg.par.FORCE_logq, cfg.par.source_logq, cfg.par.FORCE_inner_radius, cfg.par.inner_radius, cfg.par.FORCE_N_O_Pilyugin, cfg.par.FORCE_N_O_ratio, cfg.par.N_O_ratio, cfg.par.neb_abund, cfg.par.add_young_stars, cfg.par.HII_Rinner_per_Rs, cfg.par.HII_nh, cfg.par.HII_min_age, cfg.par.HII_max_age, cfg.par.HII_escape_fraction, cfg.par.HII_alpha_enhance, cfg.par.add_pagb_stars, cfg.par.PAGB_min_age, cfg.par.PAGB_max_age, cfg.par.PAGB_N_enhancement, cfg.par.PAGB_C_enhancement, cfg.par.PAGB_Rinner_per_Rs, cfg.par.PAGB_nh, cfg.par.PAGB_escape_fraction, cfg.par.add_AGN_neb, cfg.par.AGN_nh, cfg.par.AGN_num_gas, cfg.par.dump_emlines, cfg.par.cloudy_cleanup, cfg.par.BH_SED, cfg.par.IMAGING, cfg.par.SED, cfg.par.IMAGING_TRANSMISSION_FILTER, cfg.par.SED_MONOCHROMATIC, cfg.par.SKIP_RT, cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS, cfg.par.n_MPI_processes, cfg.par.SOURCES_RANDOM_POSITIONS, cfg.par.SUBLIMATION, cfg.par.SUBLIMATION_TEMPERATURE, cfg.model.TCMB, cfg.model.THETA, cfg.model.PHI, cfg.par.MANUAL_ORIENTATION, cfg.par.dust_grid_type, cfg.par.BH_model, cfg.par.BH_modelfile, cfg.par.BH_var, cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE, cfg.par.FORCE_STELLAR_METALLICITIES, cfg.par.FORCE_STELLAR_METALLICITIES_VALUE, cfg.par.NEB_DEBUG, cfg.par.filterdir, cfg.par.filterfiles,  cfg.par.PAH_frac, cfg.par.otf_extinction, cfg.par.explicit_pah, cfg.par.draine21_pah_model, cfg.par.add_DIG_neb, cfg.par.DIG_nh, cfg.par.DIG_min_logU, cfg.par.stars_max_dist, cfg.par.max_stars_num, cfg.par.use_black_sed, cfg.par.n_photons_DIG, cfg.par.SKIRT_DATA_DUMP, cfg.par.SAVE_NEB_SEDS, cfg.par.REMOVE_INPUT_SEDS = bc.variable_set()
+cfg.par.FORCE_RANDOM_SEED, cfg.par.FORCE_BINNED, cfg.par.max_age_direct, cfg.par.imf1, cfg.par.imf2, cfg.par.imf3, cfg.par.use_cmdf, cfg.par.use_cloudy_tables, cfg.par.cmdf_min_mass, cfg.par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.par.cmdf_beta, cfg.par.use_age_distribution, cfg.par.age_dist_min, cfg.par.age_dist_max, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logu_init, cfg.par.FORCE_gas_logz, cfg.par.gas_logz, cfg.par.FORCE_logq, cfg.par.source_logq, cfg.par.FORCE_inner_radius, cfg.par.inner_radius, cfg.par.FORCE_N_O_Pilyugin, cfg.par.FORCE_N_O_ratio, cfg.par.N_O_ratio, cfg.par.neb_abund, cfg.par.add_young_stars, cfg.par.HII_Rinner_per_Rs, cfg.par.HII_nh, cfg.par.HII_min_age, cfg.par.HII_max_age, cfg.par.HII_dust, cfg.par.HII_escape_fraction, cfg.par.alpha_enhance, cfg.par.add_pagb_stars, cfg.par.PAGB_min_age, cfg.par.PAGB_max_age, cfg.par.PAGB_N_enhancement, cfg.par.PAGB_C_enhancement, cfg.par.PAGB_Rinner_per_Rs, cfg.par.PAGB_nh, cfg.par.PAGB_escape_fraction, cfg.par.add_AGN_neb, cfg.par.AGN_nh, cfg.par.AGN_num_gas, cfg.par.dump_emlines, cfg.par.cloudy_cleanup, cfg.par.BH_SED, cfg.par.IMAGING, cfg.par.SED, cfg.par.IMAGING_TRANSMISSION_FILTER, cfg.par.SED_MONOCHROMATIC, cfg.par.SKIP_RT, cfg.par.FIX_SED_MONOCHROMATIC_WAVELENGTHS, cfg.par.n_MPI_processes, cfg.par.SOURCES_RANDOM_POSITIONS, cfg.par.SUBLIMATION, cfg.par.SUBLIMATION_TEMPERATURE, cfg.model.TCMB, cfg.model.THETA, cfg.model.PHI, cfg.par.MANUAL_ORIENTATION, cfg.par.dust_grid_type, cfg.par.BH_model, cfg.par.BH_modelfile, cfg.par.BH_var, cfg.par.FORCE_STELLAR_AGES,cfg.par.FORCE_STELLAR_AGES_VALUE, cfg.par.FORCE_STELLAR_METALLICITIES, cfg.par.FORCE_STELLAR_METALLICITIES_VALUE, cfg.par.NEB_DEBUG, cfg.par.filterdir, cfg.par.filterfiles,  cfg.par.PAH_frac, cfg.par.otf_extinction, cfg.par.explicit_pah, cfg.par.draine21_pah_model, cfg.par.add_DIG_neb, cfg.par.DIG_nh, cfg.par.DIG_min_logU, cfg.par.stars_max_dist, cfg.par.max_stars_num, cfg.par.use_black_sed, cfg.par.n_photons_DIG, cfg.par.SKIRT_DATA_DUMP, cfg.par.SAVE_NEB_SEDS, cfg.par.REMOVE_INPUT_SEDS = bc.variable_set()
+
+# If a seperate parameter file is provided for nebular emission then overwrite the relevant variables based on that.
+if neb_param_file:
+    cfg.par.use_cmdf, cfg.par.cmdf_min_mass, cfg.par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.par.cmdf_beta, cfg.par.use_age_distribution, cfg.par.age_dist_min, cfg.par.age_dist_max, cfg.par.FORCE_gas_logu, cfg.par.gas_logu, cfg.par.gas_logu_init, cfg.par.FORCE_gas_logz, cfg.par.gas_logz, cfg.par.FORCE_logq, cfg.par.source_logq, cfg.par.FORCE_inner_radius, cfg.par.inner_radius, cfg.par.FORCE_N_O_Pilyugin, cfg.par.FORCE_N_O_ratio, cfg.par.N_O_ratio, cfg.par.neb_abund, cfg.par.add_young_stars, cfg.par.HII_Rinner_per_Rs, cfg.par.HII_nh, cfg.par.HII_min_age, cfg.par.HII_max_age, cfg.par.HII_dust, cfg.par.HII_escape_fraction, cfg.par.add_pagb_stars, cfg.par.PAGB_min_age, cfg.par.PAGB_max_age, cfg.par.PAGB_N_enhancement, cfg.par.PAGB_C_enhancement, cfg.par.PAGB_Rinner_per_Rs, cfg.par.PAGB_nh, cfg.par.PAGB_escape_fraction, cfg.par.add_AGN_neb, cfg.par.AGN_nh, cfg.par.AGN_num_gas, cfg.par.dump_emlines, cfg.par.cloudy_cleanup, cfg.par.NEB_DEBUG, cfg.par.add_DIG_neb, cfg.par.DIG_nh, cfg.par.DIG_min_logU, cfg.par.stars_max_dist, cfg.par.max_stars_num, cfg.par.SAVE_NEB_SEDS = cfg.neb_par.use_cmdf, cfg.neb_par.cmdf_min_mass, cfg.neb_par.cmdf_max_mass, cfg.par.cmdf_bins, cfg.neb_par.cmdf_beta, cfg.neb_par.use_age_distribution, cfg.neb_par.age_dist_min, cfg.neb_par.age_dist_max, cfg.neb_par.FORCE_gas_logu, cfg.neb_par.gas_logu, cfg.neb_par.gas_logu_init, cfg.neb_par.FORCE_gas_logz, cfg.neb_par.gas_logz, cfg.neb_par.FORCE_logq, cfg.neb_par.source_logq, cfg.neb_par.FORCE_inner_radius, cfg.neb_par.inner_radius, cfg.neb_par.FORCE_N_O_Pilyugin, cfg.neb_par.FORCE_N_O_ratio, cfg.neb_par.N_O_ratio, cfg.neb_par.neb_abund, cfg.neb_par.add_young_stars, cfg.neb_par.HII_Rinner_per_Rs, cfg.neb_par.HII_nh, cfg.neb_par.HII_min_age, cfg.neb_par.HII_max_age, cfg.neb_par.HII_dust, cfg.neb_par.HII_escape_fraction, cfg.neb_par.add_pagb_stars, cfg.neb_par.PAGB_min_age, cfg.neb_par.PAGB_max_age, cfg.neb_par.PAGB_N_enhancement, cfg.neb_par.PAGB_C_enhancement, cfg.neb_par.PAGB_Rinner_per_Rs, cfg.neb_par.PAGB_nh, cfg.neb_par.PAGB_escape_fraction, cfg.neb_par.add_AGN_neb, cfg.neb_par.AGN_nh, cfg.neb_par.AGN_num_gas, cfg.neb_par.dump_emlines, cfg.neb_par.cloudy_cleanup, cfg.neb_par.NEB_DEBUG, cfg.neb_par.add_DIG_neb, cfg.neb_par.DIG_nh, cfg.neb_par.DIG_min_logU, cfg.neb_par.stars_max_dist, cfg.neb_par.max_stars_num, cfg.neb_par.SAVE_NEB_SEDS
 
 # =========================================================
 # CHECK FOR COMPATIBLE PARAMETERS
@@ -238,6 +260,7 @@ if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
     DIG_source_add(m, reg, df_nu,boost)
     print ("Removing the DIG energy dumped input SED file")
     os.remove(cfg.model.inputfile + '_DIG_energy_dumped.sed')
+    os.remove(cfg.model.outputfile + '_DIG_energy_dumped.sed')
     if not cfg.par.SAVE_NEB_SEDS: dump_NEB_SEDs(None, None, None, append=False, clean_up=True)
 
 
@@ -255,7 +278,7 @@ if cfg.par.SED:
     make_SED(m, par, model)
     if cfg.par.REMOVE_INPUT_SEDS:
         print ("Removing the input SED file")
-        os.remove(cfg.model.inputfile)
+        os.remove(cfg.model.inputfile+'.sed')
 
 if cfg.par.IMAGING:
     make_image(m_imaging, par, model, dx, dy, dz)

@@ -456,46 +456,10 @@ def newstars_gen(star_object):
                     Rinner_per_Rs = cfg.par.PAGB_Rinner_per_Rs
                     nh = cfg.par.PAGB_nh
                     escape_fraction  = cfg.par.PAGB_escape_fraction
-
-                if cfg.par.HII_alpha_enhance: #Setting Zstar based on Fe/H
-                    Fe = star_object.all_metals[-1]
-
-                    # Gizmo metallicity structure, photospheric abundances from Asplund et al. 2009:
-                    # Photospheric mass fraction of H = 0.7381
-                    # Photospheric mass fraction of Fe = 1.31e-3
-
-                    # Converting from mass fraction to atomic fraction of Fe
-                    # Taking atmoic mass of H = 1.008u
-                    # Taking atmoic mass of Fe = 55.845u
-                    FeH = (Fe/0.7381)*(1.008/55.845)
-
-                    # Solar atomic fraction of Fe. Calculated by substituting Fe = 1.31e-3 in the previous equation
-                    FeH_sol = 3.22580645e-5
-
-                    Logzsol = np.log10(FeH/FeH_sol)
-                        
-                    sp1 = fsps.StellarPopulation(zcontinuous=1)
-                    sp1.params["tage"] = age
-                    sp1.params["imf_type"] = cfg.par.imf_type
-                    sp1.params["imf1"] = cfg.par.imf1
-                    sp1.params["imf2"] = cfg.par.imf2
-                    sp1.params["imf3"] = cfg.par.imf3
-                    sp1.params["pagb"] = cfg.par.pagb
-                    sp1.params["sfh"] = 0
-                    sp1.params["zmet"] = star_object.fsps_zmet
-                    sp1.params["add_neb_emission"] = False
-                    sp1.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
-                    sp1.params["logzsol"] = Logzsol
-
-                    if cfg.par.CF_on == True:
-                        sp1.params["dust_type"] = 0
-                        sp1.params["dust1"] = 1
-                        sp1.params["dust2"] = 0
-                        sp1.params["dust_tesc"] = tesc_age
-
-                    spec = sp1.get_spectrum(tage=age)
-                    mfrac_neb = sp1.stellar_mass
-
+                
+                if cfg.par.alpha_enhance: #Setting Zstar based on Fe/H
+                    spec, mfrac_neb = alpha_enhance(star_object.all_metals[-1], star_object.fsps_zmet, age, tesc_age)
+                    
                 else:
                     spec = sp.get_spectrum(tage=age,zmet=star_object.fsps_zmet)
                     mfrac_neb = sp.stellar_mass
@@ -513,8 +477,7 @@ def newstars_gen(star_object):
                     LogU = np.log10((10**LogQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))
 
                 else:
-                    LogQ = calc_LogQ(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value
-                            , efrac=escape_fraction, mstar=10**cluster_mass[j], mfrac=mfrac_neb)
+                    LogQ = calc_LogQ(1.e8*constants.c.cgs.value/spec[0], spec[1]*constants.L_sun.cgs.value, mstar=10**cluster_mass[j], mfrac=mfrac_neb)
                     Rs = ((3*(10 ** LogQ))/(4*np.pi*(nh**2)*alpha))**(1./3.)
                     LogU = np.log10((10**LogQ)/(4*np.pi*Rs*Rs*nh*constants.c.cgs.value))+cfg.par.gas_logu_init[id_val]
                     LogQ = np.log10((10 ** (3*LogU))*(36*np.pi*(constants.c.cgs.value**3))/((alpha**2)*nh))
@@ -554,8 +517,7 @@ def newstars_gen(star_object):
                 else:
                     try:
                         # Calculating ionizing photons again but for 1 Msun in order to scale the output for FSPS
-                        LogQ_1 = calc_LogQ(1.e8 * constants.c.cgs.value / spec[0], spec[1] * constants.L_sun.cgs.value,
-                                efrac=escape_fraction)
+                        LogQ_1 = calc_LogQ(1.e8 * constants.c.cgs.value / spec[0], spec[1] * constants.L_sun.cgs.value)
 
                         spec_neb, wave_line, line_lum = get_nebular(spec[0], spec[1], nh, star_object.all_metals, logq = LogQ, radius = Rin,
                                                  logu = LogU, logz = LogZ, logq_1 = LogQ_1, Dust=cfg.par.HII_dust, abund=cfg.par.neb_abund[id_val],
@@ -568,7 +530,12 @@ def newstars_gen(star_object):
                         line_lum = sp.emline_luminosity
 
             else:
-                lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=star_object.fsps_zmet)
+                if cfg.par.alpha_enhance:
+                    spec, mfrac_neb = alpha_enhance(star_object.all_metals[-1], star_object.fsps_zmet, age, tesc_age)
+                    lam_neb = spec[0]
+                    spec_neb = spec[1]
+                else:
+                    lam_neb, spec_neb = sp.get_spectrum(tage=age, zmet=star_object.fsps_zmet)
 
             weight = num_HII_clusters*(10**cluster_mass[j])/(star_object.mass/constants.M_sun.cgs.value)
             f = f + spec_neb*weight
@@ -874,3 +841,43 @@ def remove_stars_outside_grid(stars_list,bulgestars_list,diskstars_list,m):
     return stars_list,bulgestars_list,diskstars_list
         
     
+def alpha_enhance(star_Fe, star_zmet, age, tesc_age):
+    Fe = star_Fe
+    
+    # Gizmo metallicity structure, photospheric abundances from Asplund et al. 2009:
+    # Photospheric mass fraction of H = 0.7381
+    # Photospheric mass fraction of Fe = 1.31e-3
+
+    # Converting from mass fraction to atomic fraction of Fe
+    # Taking atmoic mass of H = 1.008u
+    # Taking atmoic mass of Fe = 55.845u
+    FeH = (Fe/0.7381)*(1.008/55.845)
+
+    # Solar atomic fraction of Fe. Calculated by substituting Fe = 1.31e-3 in the previous equation
+    FeH_sol = 3.22580645e-5
+
+    Logzsol = np.log10(FeH/FeH_sol)
+                        
+    sp1 = fsps.StellarPopulation(zcontinuous=1)
+    sp1.params["tage"] = age
+    sp1.params["imf_type"] = cfg.par.imf_type
+    sp1.params["imf1"] = cfg.par.imf1
+    sp1.params["imf2"] = cfg.par.imf2
+    sp1.params["imf3"] = cfg.par.imf3
+    sp1.params["pagb"] = cfg.par.pagb
+    sp1.params["sfh"] = 0
+    sp1.params["zmet"] = star_zmet
+    sp1.params["add_neb_emission"] = False
+    sp1.params["add_agb_dust_model"] = cfg.par.add_agb_dust_model
+    sp1.params["logzsol"] = Logzsol
+
+    if cfg.par.CF_on == True:
+        sp1.params["dust_type"] = 0
+        sp1.params["dust1"] = 1
+        sp1.params["dust2"] = 0
+        sp1.params["dust_tesc"] = tesc_age
+
+        spec = sp1.get_spectrum(tage=age)
+        mfrac_neb = sp1.stellar_mass
+
+    return spec, mfrac_neb
