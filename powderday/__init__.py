@@ -26,3 +26,4 @@ from . import source_creation
 from . import sph_tributary
 from . import mlt
 from . import tributary_dust_add
+from . import pah

@@ -103,6 +103,26 @@ def make_DIG_SED(m, par, model):
     
     print('[pd_front_end]: RT Stage For DIG calculation has ended')
 
+def compute_ISRF_SED(m, par, model):
+    m.set_raytracing(True)
+    m.set_n_photons(initial=par.n_photons_initial, imaging=par.n_photons_imaging,
+                    raytracing_sources=par.n_photons_raytracing_sources,
+                    raytracing_dust=par.n_photons_raytracing_dust)
+    m.set_n_initial_iterations(7)
+    m.set_convergence(True, percentile=99., absolute=1.01, relative=1.01)
+
+    sed = m.add_peeled_images(sed=True, image=False)
+    sed.set_wavelength_range(2500, 0.001, 1000.)
+    sed.set_viewing_angles(np.linspace(0, 90, 1).tolist(), np.repeat(np.linspace(0, 90, 1), 1))
+    sed.set_track_origin('basic')
+
+    print('[pd_front_end]: Beginning RT Stage: For ISRF calculation')
+
+    # Run the Model
+    m.write(model.inputfile + '_isrf.sed', overwrite=True)
+    m.run(model.outputfile + '_isrf.sed', mpi=True,n_processes=par.n_MPI_processes, overwrite=True)
+
+
     
 def make_image(m_imaging, par, model,dx,dy,dz):
     print("Beginning Monochromatic Imaging RT")
@@ -116,10 +136,12 @@ def make_image(m_imaging, par, model,dx,dy,dz):
             raise ValueError("Filters not found. You may be running above changeset 'f1f16eb' with an outdated parameters_master file. Please update to the most recent parameters_master format or ensure that the'filterdir' and 'filterfiles' parameters are set properly.")
             
         # Extract and flatten all wavelengths in the filter files
+
         wavs = []
         for single_filter in par.filterfiles:
             single_filter_data = np.loadtxt(par.filterdir+'/'+single_filter)
             wavs.append(single_filter_data[:,0])
+
 
         wavs = np.unique(np.asarray(wavs)) #remove duplicates for efficiency
 
