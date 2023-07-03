@@ -9,10 +9,11 @@ from powderday.nebular_emission.cloudy_tools import grouper
 #getting cfg.par accessible outside the definitions (ala pd_front_end.py)
 import powderday.config as cfg
 import sys
-script, pardir, parfile, modelfile = sys.argv
-sys.path.insert(0, pardir)
-par = __import__(parfile)
-model = __import__(modelfile)
+#script, pardir, parfile, modelfile = sys.argv
+print(sys.argv)
+sys.path.insert(0, sys.argv[1])
+par = __import__(sys.argv[2])
+model = __import__(sys.argv[3])
 cfg.par = par  # re-write cfg.par for all modules that read this in now
 cfg.model = model
 
@@ -25,7 +26,7 @@ retrieved in October 2019)
 """
 
 
-if (cfg.par.add_neb_emission) and (not cfg.par.use_cloudy_tables or cfg.par.add_pagb_stars or cfg.par.add_AGN_neb or cfg.par.add_DIG_neb):
+if (cfg.par.add_neb_emission) and not cfg.par.use_cloudy_tables:
 
     try:
         CLOUDY_EXE = os.environ['CLOUDY_EXE']
