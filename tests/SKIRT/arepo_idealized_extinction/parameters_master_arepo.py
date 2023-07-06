@@ -41,7 +41,7 @@ dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of 
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = False
 
-dust_grid_type = 'dtm' # needs to be in ['dtm','rr','manual','li_bestfit','li_ml']
+dust_grid_type = 'manual' # needs to be in ['dtm','rr','manual','li_bestfit','li_ml']
 dusttometals_ratio = 0.25 # skirt assumes 0.25: see http://www.skirt.ugent.be/tutorials/_tutorial_hydro_s_p_h.html ("dust system"subheading)
 enforce_energy_range = False # False is the default;  ensures energy conservation
 
@@ -55,12 +55,17 @@ SUBLIMATION_TEMPERATURE = 1600. #K -- meaningliess if SUBLIMATION == False
 #Experimental Dust -- Note, these features are not fully vetted
 #---------------------------------------------------------------
 
-otf_extinction = False #flag for on the fly extinction.  If set, then we
+otf_extinction = True #flag for on the fly extinction.  If set, then we
                                     #ignore the dustdir/dustfile extinction information above. if
                                     #false, all otf_extinction* quantities are meaningless
 otf_extinction_log_min_size = -3 #micron; must match what is set in the hydro simulation
 otf_extinction_log_max_size = 0 #micron; must match what is set in the hydro simulation
 
+draine21_pah_model = True
+draine21_pah_grid_write = True #this will write the PAH spectrum out
+                               #to the npz file for every cell in the
+                               #grid.  note, this causes the grid*.npz
+                               #files to be ~10 GB or more.
 
 
 #===============================================
