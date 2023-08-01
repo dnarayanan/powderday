@@ -241,6 +241,8 @@ m.add_density_grid(density, dust, specific_energy=energy_density_absorbed)
 m.set_specific_energy_type('additional')
 '''
 
+print('Done adding Sources')
+
 
 print('Setting up Model')
 m_imaging = copy.deepcopy(m)
@@ -269,10 +271,6 @@ if cfg.par.otf_extinction and cfg.par.draine21_pah_model:
     compute_ISRF_SED(m, par, model)
     pah_source_add(ds,reg,m,boost)
 
-if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
-    dump_data(reg, model)
-
-print('Done adding Sources')
 
 if cfg.par.SED:
     make_SED(m, par, model)
