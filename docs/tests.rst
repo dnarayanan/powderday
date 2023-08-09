@@ -70,7 +70,7 @@ similar.
 To run the `powderday
 <https://github.com/dnarayanan/powderday.git>`_ test code, run::
 
-  python pd_front_end.py tests/SKIRT/gizmo_mw_zoom parameters_master_gizmo parameters_model_gizmo
+  pd_front_end.py tests/SKIRT/gizmo_mw_zoom parameters_master_gizmo parameters_model_gizmo
 
 After having edited the ``parameters_master`` and ``parameters_model``
 file for your specific paths.  
