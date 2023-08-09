@@ -26,7 +26,6 @@ Overview of Requirements
   * git  <http://git-scm.com/>
   * powderday <https://github.com/dnarayanan/powderday.git>
   * yt <http://yt-project.org>
-  * FSPS <https://code.google.com/p/fsps/source/checkout>
   * python-fsps <https://dfm.io/python-fsps/current/>
   * Hyperion <http://www.hyperion-rt.org/>
   * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
@@ -235,29 +234,7 @@ Note, it is important to install this *after*  `Hyperion <http://www.hyperion-rt
 
 
 
-.. _fsps:
 
-fsps
---------------
-
-`fsps <https://code.google.com/p/fsps/source/checkout>`_ can be checked out with::
-  
-  > git clone https://github.com/cconroy20/fsps
-
-and directions to the installation are in the `Manual <https://www.cfa.harvard.edu/~cconroy/ FSPS_files/MANUAL.pdf>`_.
-
-To explicitly compile::
-
-  make clean
-  make
-  
-Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
-   
-  >export SPS_HOME=/Users/desika/fsps/
-
-Note that the same compilers used for `Hyperion
-<http://www.hyperion-rt.org>`_ and `yt <http://yt-project.org>`_ need
-to be used here.  An easy way to do this is in the Makefile to set F90=$(FC)
 
 
 .. _python-fsps:
@@ -278,6 +255,13 @@ You can test the installation by opening python and typing::
 >import fsps
 
 
+Note, we no longer need to actually install `fsps
+<https://code.google.com/p/fsps/source/checkout>`_ anymore.  This is
+installed within `python-fsps <https://dfm.io/python-fsps/current/>`_
+itself!  Please see the `python-fsps
+<https://dfm.io/python-fsps/current/>`_ docs for how to change
+underlying stellar physics when installing (i.e. the spectral
+libraries or the stellar isochrones).
 
 
 
@@ -423,7 +407,7 @@ then in your .bashrc set the analog to::
   >CC=icc F90=ifort python -m pip install .
 
 
-Before going forward, pleae try::
+Before going forward, please try::
 
   >python
   >import fsps
