@@ -128,8 +128,12 @@ The second and manual way to install `Hyperion
    the University of Florida HiPerGator supercomputing system, I would
    have::
 
-   >module load intel/2018.1.163 openmpi/4.0.3 hdf5/1.10.1
-     
+   
+  >module load intel/2020.0.166
+  >module load git
+  >module load hdf5/1.14.1
+  >module load openmpi/4.1.5
+  
 #. Install the python module::
 
    >cd hyperion
@@ -170,7 +174,13 @@ active (so, on a supercomputer you might need to load these modules
 such as [for example, on the University of Florida HiPerGator
 supercomputer])::
 
-  >module load  1) intel/2018.1.163   2) openmpi/4.0.3   3) hdf5/1.10.1
+  
+  
+  >module load intel/2020.0.166
+  >module load git
+  >module load hdf5/1.14.1
+  >module load openmpi/4.1.5
+  
 
 of course please be careful of mixing and matching compilers, and
 ensuring that you have the same compilers loaded for all
@@ -379,9 +389,10 @@ the ability to use private forks of individual codes.
 
 First, load up the compilers that we'll use throughout (though note: openmpi is not loaded until after yt is installed as yt will sometimes bork due to openmpi)::
 
-  >module load intel/2018.1.163
-  >module load hdf5/1.10.1
+  >module load intel/2020.0.166
   >module load git
+  >module load hdf5/1.14.1
+
 
 yt::
 
@@ -422,7 +433,7 @@ then try to install via pip::
   
 Next, before installing hyperion, lets make sure our openmpi is loaded::
 
-    >module load openmpi/4.0.3
+    >module load openmpi/4.1.5
 
 
 hyperion::
