@@ -469,7 +469,7 @@ powderday::
 
 First, load up the compilers that we'll use throughout::
 
-  >module load gcc/9.3.0  libz/1.2.11 hdf5/1.10.1 git/2.30.1
+  >module load gcc/12 openmpi/4.1.5 hdf5/1.14.1 git libz
 
   
 yt::
@@ -538,7 +538,7 @@ powderday::
 of `Hyperion <http://www.hyperion-rt.org>`_.  Thanks to Paul Torrey
 for these.::
 
-  >module load openmpi/4.1.1 libz/1.2.11 hdf5/1.10.1 conda/4.12.0 git/2.30.1 gcc
+  >module load  gcc/12 openmpi/4.1.5 hdf5/1.14.1 git libz 
   >conda install -c conda-forge hyperion
   >python -c "import hyperion" (just to ensure no errors thrown)
   >hyperion (just to ensure command is found)
