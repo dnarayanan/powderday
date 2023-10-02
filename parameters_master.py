@@ -67,6 +67,9 @@ draine21_pah_grid_write = True #this will write the PAH spectrum out
                                #grid.  note, this causes the grid*.npz
                                #files to be ~10 GB or more.
 
+dust_density = 2.4 #units are g/cm**3.  this *only* is used in the OTF
+                   #pah calculations, so if you do not have an active dust model, this will not be useful.
+                               
 #===============================================
 #STELLAR SEDS INFO
 #===============================================

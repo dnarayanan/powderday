@@ -21,6 +21,7 @@ setup(
         'astropy; python_version>="3.5"',
         'h5py>=2.9',
         'yt',
+        'unyt',
         'fsps',
         'sklearn',
         'p_tqdm'

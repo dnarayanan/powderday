@@ -9,6 +9,7 @@ Overview of Requirements
   * numpy (<1.24)
   * scipy
   * astropy (3.2.3)
+  * unyt
   * h5py
   * scikit-learn
   * six

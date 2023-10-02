@@ -11,8 +11,7 @@ import os,glob
 from multiprocessing import Pool
 from functools import partial
 from datetime import datetime
-
-
+from unyt import unyt_quantity,unyt_array
 
 #2a. have the code know if its neutral or ion and use that luminosity
 #f_ion(a) = 1 - 1/(1 + a/10 A).
@@ -127,7 +126,10 @@ def pah_source_add(ds,reg,m,boost):
     #hydro simulation
     grid_of_sizes = ds.parameters['reg_grid_of_sizes']
 
+    #these are the size bins from the hydro sim
     simulation_sizes = (ds.parameters['grain_sizes_in_micron']*u.micron)
+
+
     
     #second, use the Hensley & Draine fitting formula to determine
     #f_ion as a function of size: #f_ion(a) = 1 - 1/(1 + a/10 A)
@@ -141,23 +143,27 @@ def pah_source_add(ds,reg,m,boost):
     ad = ds.all_data()
 
 
+    #compute the PAH mass
+    #first set the dust density as 2.4 g/cm**3 (the assumed density) 
+    dust_density = np.ones(grid_of_sizes.shape)*ds.quan(cfg.par.dust_density,'g/cm**3')
+    mass_per_bin = dust_density* np.pi * 3./4 * unyt_array.from_astropy(simulation_sizes.to(u.cm))**3 * (ds.parameters['reg_grid_of_sizes_graphite']*ds.parameters['reg_grid_of_sizes_aromatic_fraction'])
+    #ensure mass_per_bin is in g since we'll lose the unit later
+    mass_per_bin = mass_per_bin.in_units('g')
     
-
-    dN_pah = np.sum(ds.parameters['reg_grid_of_sizes_graphite']*ds.parameters['reg_grid_of_sizes_aromatic_fraction'],axis=1)
-    dN_total = np.sum(ds.parameters['reg_grid_of_sizes'],axis=1)
-
-    #idx_pah = np.where(simulation_sizes.to(u.cm).value <= 3.e-7)[0]
-    #dN_pah = np.sum(reg['particle_dust','numgrains'][:,idx_pah],axis=1)
-    #dN_total = np.sum(reg['particle_dust','numgrains'],axis=1)
-
-    q_pah = dN_pah/dN_total
-    #q_pah = q_pah * reg['particle_dust','carbon_fraction']
-
+    #pah_idx = np.where(simulation_sizes.to(u.angstrom).value <= 13) #this is the sizes q_pah usually measures; 1000 carbon atoms and eq. 22 of Hensley and Draine
+    #mass_per_bin_only_pah_idx = np.zeros(mass_per_bin.shape)
+    #mass_per_bin_only_pah_idx[:,pah_idx]=mass_per_bin[:,pah_idx]
+    m_pah = ds.arr(np.sum(mass_per_bin,axis=1),'g')
+    reg.parameters['m_pah'] = m_pah
+    q_pah = m_pah.in_units('g')/reg['dust','mass'].in_units('g')
     #in case we have an errant cell with no dust information (super rare corner case)
     q_pah[np.isnan(q_pah)] = np.min(q_pah[~np.isnan(q_pah)])
-
     reg.parameters['q_pah'] = q_pah
 
+
+    
+    dN_pah = np.sum(ds.parameters['reg_grid_of_sizes_graphite']*ds.parameters['reg_grid_of_sizes_aromatic_fraction'],axis=1)
+    dN_total = np.sum(ds.parameters['reg_grid_of_sizes'],axis=1)
 
     #compute the mass weighted grain size distributions for comparison in analytics.py 
     #try: #for mesh based code
@@ -295,6 +301,7 @@ def pah_source_add(ds,reg,m,boost):
 
 
     pah_grid_of_sizes = ds.parameters['reg_grid_of_sizes_graphite']*ds.parameters['reg_grid_of_sizes_aromatic_fraction']
+    #pah_grid_of_sizes = ds.parameters['reg_grid_of_sizes_graphite']
 
     dum  = p.map(partial(compute_grid_PAH_luminosity,
                          beta_nnls = beta_nnls,
