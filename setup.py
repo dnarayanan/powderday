@@ -23,7 +23,7 @@ setup(
         'yt',
         'unyt',
         'fsps',
-        'sklearn',
+        'scikit-learn',
         'p_tqdm'
     ],
     scripts=["pd_front_end.py"],
