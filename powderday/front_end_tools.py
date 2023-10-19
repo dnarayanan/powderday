@@ -47,7 +47,10 @@ def make_SED(m, par, model):
 
         if cfg.par.SKIP_RT == False:
             m.write(model.inputfile + '.sed', overwrite=True)
-            m.run(model.outputfile + '.sed', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+            if par.n_MPI_processes > 1:
+                m.run(model.outputfile + '.sed', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+            else:
+                m.run(model.outputfile + '.sed', mpi=False, overwrite=True)
 
         print(
             '[pd_front_end]: Beginning RT Stage: Calculating SED using a monochromatic spectrum equal to the input SED')
@@ -76,8 +79,11 @@ def make_SED(m, par, model):
         # Run the Model
         if cfg.par.SKIP_RT == False:
             m.write(model.inputfile + '.sed', overwrite=True)
-            m.run(model.outputfile + '.sed', mpi=True,
-                  n_processes=par.n_MPI_processes, overwrite=True)
+            if par.n_MPI_processes > 1:
+                m.run(model.outputfile + '.sed', mpi=True,
+                      n_processes=par.n_MPI_processes, overwrite=True)
+            else:
+                m.run(model.outputfile + '.sed', mpi=False, overwrite=True)
 
 
 
@@ -99,7 +105,10 @@ def make_DIG_SED(m, par, model):
 
     # Run the Model
     m.write(model.inputfile + '_DIG_energy_dumped.sed', overwrite=True)
-    m.run(model.outputfile + '_DIG_energy_dumped.sed', mpi=True,n_processes=par.n_MPI_processes, overwrite=True)
+    if par.n_MPI_processes > 1:
+        m.run(model.outputfile + '_DIG_energy_dumped.sed', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+    else:
+        m.run(model.outputfile + '_DIG_energy_dumped.sed', mpi=False, overwrite=True)
     
     print('[pd_front_end]: RT Stage For DIG calculation has ended')
 
@@ -120,8 +129,10 @@ def compute_ISRF_SED(m, par, model):
 
     # Run the Model
     m.write(model.inputfile + '_isrf.sed', overwrite=True)
-    m.run(model.outputfile + '_isrf.sed', mpi=True,n_processes=par.n_MPI_processes, overwrite=True)
-
+    if par.n_MPI_processes > 1:
+        m.run(model.outputfile + '_isrf.sed', mpi=True,n_processes=par.n_MPI_processes, overwrite=True)
+    else:
+        m.run(model.outputfile + '_isrf.sed', mpi=False, overwrite=True)
 
     
 def make_image(m_imaging, par, model,dx,dy,dz):
@@ -176,6 +187,9 @@ def make_image(m_imaging, par, model,dx,dy,dz):
     image.set_image_limits(-dx/2., dx/2., -dy/2., dy/2.)
 
     m_imaging.write(model.inputfile+'.image', overwrite=True)
-    m_imaging.run(model.outputfile+'.image', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+    if par.n_MPI_processes > 1:
+        m_imaging.run(model.outputfile+'.image', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+    else:
+        m_imaging.run(model.outputfile+'.image', mpi=False, overwrite=True)
     
     convolve(model.outputfile+'.image', par.filterfiles, filter_data)
