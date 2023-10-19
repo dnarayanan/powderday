@@ -47,7 +47,10 @@ def make_SED(m, par, model):
 
         if cfg.par.SKIP_RT == False:
             m.write(model.inputfile + '.sed', overwrite=True)
-            m.run(model.outputfile + '.sed', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+            if par.n_MPI_processes > 1:
+                m.run(model.outputfile + '.sed', mpi=True, n_processes=par.n_MPI_processes, overwrite=True)
+            else:
+                m.run(model.outputfile + '.sed', mpi=False, overwrite=True)
 
         print(
             '[pd_front_end]: Beginning RT Stage: Calculating SED using a monochromatic spectrum equal to the input SED')
