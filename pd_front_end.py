@@ -253,8 +253,8 @@ print("Dumping grid information")
 
 
 
-if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
-    dump_data(reg, model)
+#if ds_type in ['gadget_hdf5','tipsy','arepo_hdf5']:
+#    dump_data(reg, model)
 
 
 if cfg.par.add_neb_emission and cfg.par.add_DIG_neb:
