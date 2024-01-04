@@ -66,8 +66,7 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
         frac_grid = np.zeros([dustdens.shape[0],nbins])
         debug_nearest_extinction_curve = np.zeros([nbins])
 
-        import pdb
-        pdb.set_trace()
+
         if cfg.par.OTF_EXTINCTION_MRN_FORCE == True:
                 grid_sum = np.zeros(nbins)
 
