@@ -19,7 +19,6 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
         dust_file_writer(nsizes)
         
 
-
         #first, save the grid_of_sizes to the ds.paramteters so we can carry it around
         ds.parameters['reg_grid_of_sizes'] = grid_of_sizes #named 'reg_grid_of_sizes' 
         ds.parameters['reg_grid_of_sizes_graphite'] = grid_of_sizes_graphite
@@ -184,7 +183,9 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
         #now add the dust grids to hyperion
         for bin in range(nbins):
                 file = dust_filenames[bin]
-                d = SphericalDust(cfg.par.pd_source_dir+'/powderday/active_dust/'+file)
+                
+                d = SphericalDust(file)
+                
                 
                 m.add_density_grid(dustdens*frac_grid[:,bin],d,specific_energy=specific_energy)
                         #m.add_density_grid(dustdens*frac[bin],d,specific_energy=specific_energy)

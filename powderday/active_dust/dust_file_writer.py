@@ -134,6 +134,7 @@ def extinction_law(x,dsf,wlen,cfrac,t_Qext,t_Qext_V):
 
 
 def dust_file_writer(nsizes):
+
 #if __name__ == "__main__":
 
     #grain size range that we're modeling.  we set it up as a linspace
@@ -242,13 +243,12 @@ def dust_file_writer(nsizes):
 
         d = IsotropicDust(nu.value,albedo,kappa_lambda)
 
-        if not os.path.exists('dust_files/'):
-            os.makedirs('dust_files/')
-        filename = 'dust_files/binned_dust_sizes.'+str(counter)+'.hdf5'
+        if not os.path.exists(cfg.par.pd_source_dir+'/powderday/active_dust/dust_files/'):
+            os.makedirs(cfg.par.pd_source_dir+'/powderday/active_dust/dust_files/')
+        filename = cfg.par.pd_source_dir+'/powderday/active_dust/dust_files/binned_dust_sizes.'+str(counter)+'.hdf5'
         outfile_filenames.append(filename)
 
         d.write(filename)
-
 
 
 
@@ -262,7 +262,7 @@ def dust_file_writer(nsizes):
     z = np.asarray(outfile_filenames)
     #np.savetxt('dust_files/binned_dust_sizes.key',np.transpose([grain_size_left_edge_array[0:-1],grain_size_right_edge_array,np.asarray(outfile_filenames)]))
 
-    np.savez('dust_files/binned_dust_sizes.npz',grain_size_left_edge_array = grain_size_left_edge_array,grain_size_right_edge_array = grain_size_right_edge_array,outfile_filenames = outfile_filenames)
+    np.savez(cfg.par.pd_source_dir+'/powderday/active_dust/dust_files/binned_dust_sizes.npz',grain_size_left_edge_array = grain_size_left_edge_array,grain_size_right_edge_array = grain_size_right_edge_array,outfile_filenames = outfile_filenames)
 
 
 
