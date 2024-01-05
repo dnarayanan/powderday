@@ -47,6 +47,25 @@ def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,drai
         neutral_pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
         ion_pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
 
+        #=================================================================
+        
+        #DEBUG NOTE FOR LOGU: what if here i feed log U in also which
+        #is ncells big, and then have the reference objects be a
+        #multidimensional array.  then i can do the janky thing of
+        #just using the logU reference object closest to the log U of
+        #that cell.  that may not add much time and will add a ton of
+        #luminosity.  steps are:
+
+        #1. first thing to do is to figure out why logU values seem to
+        #be fairly large...likely due to Cabs values?
+
+        #2. then take out the calling of this function from pool.map so i can put some pdb's in to actually test stuff out
+
+        #3. then put this back into multi processing and profit (hopefully)
+
+        #=================================================================
+
+        
         for j in np.flatnonzero(beta_cell): #for j in range(len(Beta_cell))
         #for j in range(len(beta_cell)):
 
@@ -220,7 +239,6 @@ def pah_source_add(ds,reg,m,boost):
     #get the logU and beta_nnls for the local ISRF
     beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
     
-
     #in regions where the radiation field has been poorly sampled (due
     #to low photon count) we can have beta_nnls for the whole cell is
     #0.  then, due to the normalization of beta_nnls in get_beta_nnls,
