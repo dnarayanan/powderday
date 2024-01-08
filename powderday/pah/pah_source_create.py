@@ -13,6 +13,7 @@ from functools import partial
 from datetime import datetime
 from unyt import unyt_quantity,unyt_array
 
+
 #2a. have the code know if its neutral or ion and use that luminosity
 #f_ion(a) = 1 - 1/(1 + a/10 A).
 
@@ -28,7 +29,9 @@ def get_whole_ceil(n,near):
     nn = np.divide(n,np.linspace(1,np.ceil(n/near),int(np.ceil(n/near))))
     return(nn[nn%1==0][-1])
 
-def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,draine_sizes,draine_lam,f_ion,neutral_PAH_reference_objects,ion_PAH_reference_objects,draine_bins_idx):
+
+def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,draine_sizes,draine_lam,f_ion,neutral_PAH_reference_objects,ion_PAH_reference_objects,
+                                neutral_logU_iout_files,ion_logU_iout_files,logU,basis_logU_values, draine_bins_idx):
 
     #these are re-defined for each pool thread.  when they're
     #returned, they'll be packed into a master list with one extra
@@ -47,34 +50,41 @@ def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,drai
         neutral_pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
         ion_pah_grid = np.zeros([len(draine_sizes),len(draine_lam)])
 
-        #=================================================================
-        
-        #DEBUG NOTE FOR LOGU: what if here i feed log U in also which
-        #is ncells big, and then have the reference objects be a
-        #multidimensional array.  then i can do the janky thing of
-        #just using the logU reference object closest to the log U of
-        #that cell.  that may not add much time and will add a ton of
-        #luminosity.  steps are:
-
-        #1. first thing to do is to figure out why logU values seem to
-        #be fairly large...likely due to Cabs values?
-
-        #2. then take out the calling of this function from pool.map so i can put some pdb's in to actually test stuff out
-
-        #3. then put this back into multi processing and profit (hopefully)
-
-        #=================================================================
-
-        
+        logU_cell = logU[cell]
+                
         for j in np.flatnonzero(beta_cell): #for j in range(len(Beta_cell))
         #for j in range(len(beta_cell)):
 
-            neutral_PAH_list = neutral_PAH_reference_objects[j]
+            #find the logU that is closest to what draine has computed in their basis computations
+            nearest_logU_idx = find_nearest(logU_cell,np.asarray(basis_logU_values))
+            
+            
+            
+            #DEBUG DEBUG DEBUG 01/08/24 here, get the correct
+            #reference object that corresponds to both the beta_cell
+            #(j), but also which logU value it is.  i think this is a
+            #matter of identifying the correct neutral_PAH_reference
+            #objets (and ion) that corresponds to the logU of the cell
+
+            #here, the beta_cell has dimensions [n_draine_directories]
+            #because every SED shape is the same for each directory,
+            #and the only thing that changes is the PAH heating rate
+            #from logU.  this said, the neutral_PAH_reference_objects
+            #list is as long as n_directories * basis_log_U_values
+            #since there is one for every logU.  we therefore take the
+            #jth index (i.e. the directory [==SED shape] we're on) *
+            #the basis_logU index closest to the logU index of this
+            #working cell to get the right index in the PAH reference
+            #objects.  
+
+            
+            
+            neutral_PAH_list = neutral_PAH_reference_objects[j,nearest_logU_idx]
             temp_neutral_pah_grid = np.array([x.lum for x in neutral_PAH_list])
             temp_neutral_pah_grid *= beta_cell[j]
             neutral_pah_grid += temp_neutral_pah_grid #this is the running summation of the (n_sizes,n_lam) pah grid for the i-th cell
             
-            ion_PAH_list = ion_PAH_reference_objects[j]
+            ion_PAH_list = ion_PAH_reference_objects[j,nearest_logU_idx]
             temp_ion_pah_grid = np.array([x.lum for x in ion_PAH_list])
             temp_ion_pah_grid *= beta_cell[j]
             ion_pah_grid += temp_ion_pah_grid #this is the running summation of the (n_sizes,n_lam) pah grid for the i-th cell
@@ -204,6 +214,11 @@ def pah_source_add(ds,reg,m,boost):
     draine_lam = temp_PAH_list[0].lam*u.micron
 
 
+    #get the logU and beta_nnls for the local ISRF
+    beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
+
+
+    #DEBUG DEBUG DEBUG 01/08/24 UPDATE COMMENT
     #now read in the full PAH_list for all logU = 0 files (note, we'll
     #fill in any logU>>4 PAH spectra on a case by case basis later in
     #this module. these are relatively rare, and not worth the effort
@@ -212,32 +227,104 @@ def pah_source_add(ds,reg,m,boost):
     #identical, and also the vast majority of cells are logU<4.  So we
     #can treat the logU>=4 on an indvidiaul basis.)
     
-    neutral_logU_iout_files = []
-    ion_logU_iout_files = []
-    for directory in draine_directories:
-        neutral_logU_iout_files.append(glob.glob(directory+'/*iout_graD16*nb*_0.00')[0])
-        ion_logU_iout_files.append(glob.glob(directory+'/*iout_graD16*ib*_0.00')[0])
+    #read in a single draine directory, get the files, and from this
+    #grab the logU values that the draine heating rates have been
+    #computed for. note that this assumes that every single basis ISRF
+    #sed shape has been computed for the exact same logU files.  pd
+    #will throw some error around here if for some reason this isn't
+    #true and it tries to read in a file that doesn't exist.
 
-    neutral_PAH_reference_objects = np.zeros([len(neutral_logU_iout_files),len(temp_PAH_list)],dtype=object)
-    ion_PAH_reference_objects = np.zeros([len(ion_logU_iout_files),len(temp_PAH_list)],dtype=object)
 
-    print("[pah/pah_source_create:] building the reference PAH list for neutrals")
-    for counter,neutral_file in tqdm(enumerate(neutral_logU_iout_files)):
-        neutral_PAH_reference_objects[counter,:] = np.asarray(read_draine_file(neutral_file))
+    temp_neutral_draine_files = np.sort(glob.glob(draine_directories[0]+'/*iout_graD16*nb*_*.*0'))
 
-    print("[pah/pah_source_create:] building the reference PAH list for ions")
-    for counter,ion_file in tqdm(enumerate(ion_logU_iout_files)):
-        ion_PAH_reference_objects[counter,:] = np.asarray(read_draine_file(ion_file))
+    basis_logU_values = []
+    for file in temp_neutral_draine_files:
+        basis_logU_values.append(float(file[-4::]))
+    
+    
 
-    #third, on a cell-by-cell basis, interpolate the luminosity for
-    #each grain size bin, and multiply by the number of grains in that
+
+    #DEBUG DEBUG DEBUG 01/08/24 REMOVE COMMENT
+    #LOGU PLAN:
+    #1 sort the reference objects (maybe even for a single draine directory)
+    #2. grab the logUs out and make a single array
+    #3. make the neutral objects/ion objects array have space for the files
+    #4. maybe loop through those files for each draine directory rather than globbing it
+    
+    #DEBUG DEBUG DEBUG 01/08/24 REMOVE COMMENT
+    #glob the actual draine PAH files so that we can build the reference list
+    #neutral_logU_iout_files = []
+    #ion_logU_iout_files = []
+    #for directory in draine_directories:
+    #    neutral_logU_iout_files.append(np.sort(glob.glob(directory+'/*iout_graD16*nb*_*.*0')))
+    #    ion_logU_iout_files.append(np.sort(glob.glob(directory+'/*iout_graD16*ib*_*.*0')))
+
+    #DEBUG DEBUG DEBUG 01/08/24 REMOVE COMMENT
+    #flatten the lists of arrays
+    #neutral_logU_iout_files = np.concatenate(neutral_logU_iout_files).ravel().tolist()
+    #ion_logU_iout_files = np.concatenate(ion_logU_iout_files).ravel().tolist()
+
+
+
+    pdb.set_trace()
+
+    #DEBUG DEBUG DEBUG 01/08/24: REMOVE THIS BLOCK OF CODE
+    try:
+        data = np.load(cfg.par.pd_source_dir+'draine_reference_objects.npz',allow_pickle=True)
+        neutral_PAH_reference_objects = data['neutral_PAH_reference_objects']
+        ion_PAH_reference_objects = data['ion_PAH_reference_objects']
+
+
+    except:
+        print("[pah/pah_source_create:] Draine Reference Objects file does not exist: Creating now [may take 5 min]")
+
+        
+        #we will build the PAH reference objects as [n_draine_directories
+        #[i.e., SED shapes], nlogU, len(temp_PAH_list)].  we can then
+        #reference the correct SED shape and logU idx when actually
+        #computing the SEd.  i'm sure there's some cool
+        #pandas/pythonic/object oriented way to do this but whatever. this
+        #country was built on endlessly cumbersome multidimensional
+        #arrays.
+              
+        neutral_PAH_reference_objects = np.zeros([len(draine_directories),len(basis_logU_values),len(temp_PAH_list)],dtype=object)
+        ion_PAH_reference_objects = np.zeros([len(draine_directories),len(basis_logU_values),len(temp_PAH_list)],dtype=object)
+        
+        print("[pah/pah_source_create:] building the reference PAH list for neutrals and ions")
+        for draine_directory_idx,draine_directory in enumerate(draine_directories):
+            neutral_logU_iout_files = np.sort(glob.glob(draine_directory+'/*iout_graD16*nb*_*.*0'))
+            ion_logU_iout_files = np.sort(glob.glob(draine_directory+'/*iout_graD16*ib*_*.*0'))
+
+            for logU_idx in range(len(basis_logU_values)):
+                neutral_file = neutral_logU_iout_files[logU_idx]
+                ion_file = ion_logU_iout_files[logU_idx]
+                
+                print('[pah/pah_source_create: ] processing PAH file: '+neutral_file)
+                neutral_PAH_reference_objects[draine_directory_idx,logU_idx,:] = np.asarray(read_draine_file(neutral_file))
+                
+                print('[pah/pah_source_create: ] processing PAH file: '+ion_file)
+                ion_PAH_reference_objects[draine_directory_idx,logU_idx,:] = np.asarray(read_draine_file(ion_file))
+
+
+    
+
+        
+    
+    #print("[pah/pah_source_create:] building the reference PAH list for neutrals")
+    #for counter,neutral_file in tqdm(enumerate(neutral_logU_iout_files)):
+    #    neutral_PAH_reference_objects[counter,:] = np.asarray(read_draine_file(neutral_file))
+
+    #print("[pah/pah_source_create:] building the reference PAH list for ions")
+    #for counter,ion_file in tqdm(enumerate(ion_logU_iout_files)):
+    #    ion_PAH_reference_objects[counter,:] = np.asarray(read_draine_file(ion_file))
+            
+              #third, on a cell-by-cell basis, interpolate the luminosity for
+              #each grain size bin, and multiply by the number of grains in that
     #bin
     ncells = grid_of_sizes.shape[0]
 
     total_PAH_luminosity = np.zeros(len(temp_PAH_list[0].lam))
     
-    #get the logU and beta_nnls for the local ISRF
-    beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
     
     #in regions where the radiation field has been poorly sampled (due
     #to low photon count) we can have beta_nnls for the whole cell is
@@ -277,7 +364,7 @@ def pah_source_add(ds,reg,m,boost):
 
     #chunking to speed up multiprocessing: since the processes are so
     #quick, we can lose a factor of 50% time in just spawning new
-    #threads.  i saves a ton of time to chunk up the work and send it all off once.
+    #threads.  it saves a ton of time to chunk up the work and send it all off once.
 
     #set the number of chunks to be divisble evenly by the number of
     #cells: this will make the concatenation below work for the
@@ -321,6 +408,26 @@ def pah_source_add(ds,reg,m,boost):
     pah_grid_of_sizes = ds.parameters['reg_grid_of_sizes_graphite']*ds.parameters['reg_grid_of_sizes_aromatic_fraction']
     #pah_grid_of_sizes = ds.parameters['reg_grid_of_sizes_graphite']
 
+
+    #DEBUG 01/08/24
+
+              
+    dum  = compute_grid_PAH_luminosity(cell_list,
+                                       beta_nnls = beta_nnls,
+                                       grid_of_sizes = pah_grid_of_sizes.value,
+                                       numgrains = dum_numgrains,
+                                       draine_sizes = draine_sizes,
+                                       draine_lam = draine_lam.value,
+                                       f_ion=f_ion,
+                                       neutral_PAH_reference_objects = neutral_PAH_reference_objects,
+                                       ion_PAH_reference_objects = ion_PAH_reference_objects,
+                                       neutral_logU_iout_files = neutral_logU_iout_files,
+                                       ion_logU_iout_files = ion_logU_iout_files,
+                                       logU = logU,
+                                       basis_logU_values = basis_logU_values,
+                                       draine_bins_idx = draine_bins_idx)
+    '''
+
     dum  = p.map(partial(compute_grid_PAH_luminosity,
                          beta_nnls = beta_nnls,
                          grid_of_sizes = pah_grid_of_sizes.value,
@@ -330,8 +437,14 @@ def pah_source_add(ds,reg,m,boost):
                          f_ion=f_ion,
                          neutral_PAH_reference_objects = neutral_PAH_reference_objects,
                          ion_PAH_reference_objects = ion_PAH_reference_objects,
+                        neutral_logU_iout_files = neutral_logU_iout_files,
+                         ion_logU_iout_files = ion_logU_iout_files,
+                         logU = logU,
+                         basis_logU_values = basis_logU_values,
                          draine_bins_idx = draine_bins_idx),[arg for arg in list_of_chunks])
+    '''
 
+    
     #this is some crazy business here, so let me explain.  dum returns
     #a tuple that is nprocesses big.  each element of this tuple is 3
     #elements long, each of which is (ncells/nprocessors,n_draine_lam)
@@ -344,6 +457,7 @@ def pah_source_add(ds,reg,m,boost):
     #lists, where each sublist is a chunk], nparray's it, and then
     #concatenates on the 0th axis to make one grand array.  
 
+    pdb.set_trace()
     grid_PAH_luminosity = np.concatenate( np.asarray([dum[i][0] for i in range(len(dum))] ),axis=0)
     grid_neutral_PAH_luminosity = np.concatenate( np.asarray([dum[i][1] for i in range(len(dum))] ),axis=0)
     grid_ion_PAH_luminosity = np.concatenate( np.asarray([dum[i][2] for i in range(len(dum))] ),axis=0)
@@ -376,6 +490,8 @@ def pah_source_add(ds,reg,m,boost):
     #end up getting renormalized by the luminosity, so the exact units
     #don't matter as long as they're consistent across all the sources
     #(and types of sources) being added to the grid.
+
+    pdb.set_trace()
     fnu = np.divide((grid_PAH_luminosity*u.erg/u.s).to(u.Lsun).value,nu.to(u.Hz).value)
 
     #Because the Draine templates include re-emission, but we want to
