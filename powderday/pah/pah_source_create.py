@@ -31,7 +31,7 @@ def get_whole_ceil(n,near):
 
 
 def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,draine_sizes,draine_lam,f_ion,neutral_PAH_reference_objects,ion_PAH_reference_objects,
-                                neutral_logU_iout_files,ion_logU_iout_files,logU,basis_logU_values, draine_bins_idx):
+                                logU,basis_logU_values, draine_bins_idx):
 
     #these are re-defined for each pool thread.  when they're
     #returned, they'll be packed into a master list with one extra
@@ -266,11 +266,15 @@ def pah_source_add(ds,reg,m,boost):
 
 
 
-    pdb.set_trace()
 
-    #DEBUG DEBUG DEBUG 01/08/24: REMOVE THIS BLOCK OF CODE
+    
+    for draine_directory in draine_directories:
+        neutral_logU_iout_files = np.sort(glob.glob(draine_directory+'/*iout_graD16*nb*_*.*0'))
+        ion_logU_iout_files = np.sort(glob.glob(draine_directory+'/*iout_graD16*ib*_*.*0'))
+        
     try:
-        data = np.load(cfg.par.pd_source_dir+'draine_reference_objects.npz',allow_pickle=True)
+        print("attempting to read in Draine reference objects from file: "+cfg.par.draine_data_dir+'/draine_reference_objects.npz')
+        data = np.load(cfg.par.draine_data_dir+'/draine_reference_objects.npz',allow_pickle=True)
         neutral_PAH_reference_objects = data['neutral_PAH_reference_objects']
         ion_PAH_reference_objects = data['ion_PAH_reference_objects']
 
@@ -291,10 +295,9 @@ def pah_source_add(ds,reg,m,boost):
         ion_PAH_reference_objects = np.zeros([len(draine_directories),len(basis_logU_values),len(temp_PAH_list)],dtype=object)
         
         print("[pah/pah_source_create:] building the reference PAH list for neutrals and ions")
-        for draine_directory_idx,draine_directory in enumerate(draine_directories):
-            neutral_logU_iout_files = np.sort(glob.glob(draine_directory+'/*iout_graD16*nb*_*.*0'))
-            ion_logU_iout_files = np.sort(glob.glob(draine_directory+'/*iout_graD16*ib*_*.*0'))
 
+        for draine_directory_idx,draine_directory in enumerate(draine_directories):
+        
             for logU_idx in range(len(basis_logU_values)):
                 neutral_file = neutral_logU_iout_files[logU_idx]
                 ion_file = ion_logU_iout_files[logU_idx]
@@ -305,7 +308,7 @@ def pah_source_add(ds,reg,m,boost):
                 print('[pah/pah_source_create: ] processing PAH file: '+ion_file)
                 ion_PAH_reference_objects[draine_directory_idx,logU_idx,:] = np.asarray(read_draine_file(ion_file))
 
-
+        np.savez(cfg.par.draine_data_dir+'/draine_reference_objects.npz',neutral_PAH_reference_objects=neutral_PAH_reference_objects,ion_PAH_reference_objects=ion_PAH_reference_objects)
     
 
         
@@ -411,7 +414,7 @@ def pah_source_add(ds,reg,m,boost):
 
     #DEBUG 01/08/24
 
-              
+
     dum  = compute_grid_PAH_luminosity(cell_list,
                                        beta_nnls = beta_nnls,
                                        grid_of_sizes = pah_grid_of_sizes.value,
@@ -421,8 +424,6 @@ def pah_source_add(ds,reg,m,boost):
                                        f_ion=f_ion,
                                        neutral_PAH_reference_objects = neutral_PAH_reference_objects,
                                        ion_PAH_reference_objects = ion_PAH_reference_objects,
-                                       neutral_logU_iout_files = neutral_logU_iout_files,
-                                       ion_logU_iout_files = ion_logU_iout_files,
                                        logU = logU,
                                        basis_logU_values = basis_logU_values,
                                        draine_bins_idx = draine_bins_idx)
@@ -437,12 +438,10 @@ def pah_source_add(ds,reg,m,boost):
                          f_ion=f_ion,
                          neutral_PAH_reference_objects = neutral_PAH_reference_objects,
                          ion_PAH_reference_objects = ion_PAH_reference_objects,
-                        neutral_logU_iout_files = neutral_logU_iout_files,
-                         ion_logU_iout_files = ion_logU_iout_files,
                          logU = logU,
                          basis_logU_values = basis_logU_values,
                          draine_bins_idx = draine_bins_idx),[arg for arg in list_of_chunks])
-    '''
+    
 
     
     #this is some crazy business here, so let me explain.  dum returns
@@ -457,18 +456,17 @@ def pah_source_add(ds,reg,m,boost):
     #lists, where each sublist is a chunk], nparray's it, and then
     #concatenates on the 0th axis to make one grand array.  
 
-    pdb.set_trace()
     grid_PAH_luminosity = np.concatenate( np.asarray([dum[i][0] for i in range(len(dum))] ),axis=0)
     grid_neutral_PAH_luminosity = np.concatenate( np.asarray([dum[i][1] for i in range(len(dum))] ),axis=0)
     grid_ion_PAH_luminosity = np.concatenate( np.asarray([dum[i][2] for i in range(len(dum))] ),axis=0)
 
-    
-    #DEBUG DEBUG DEBUG REMOVE THIS 
-    #np.savez('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/grid_pah_luminosity.npz',
-    #         grid_PAH_luminosity=grid_PAH_luminosity,
-    #         grid_neutral_PAH_luminosity=grid_neutral_PAH_luminosity,
-    #         grid_ion_PAH_luminosity=grid_ion_PAH_luminosity)
+    '''
 
+    grid_PAH_luminosity = dum[0]
+    grid_neutral_PAH_luminosity = dum[1]
+    grid_ion_PAH_luminosity = dum[2]
+
+    
     t2 = datetime.now()
     print ('Execution time for PAH dot producting [is that a word?] across the grid = '+str(t2-t1))
 
@@ -491,7 +489,7 @@ def pah_source_add(ds,reg,m,boost):
     #don't matter as long as they're consistent across all the sources
     #(and types of sources) being added to the grid.
 
-    pdb.set_trace()
+
     fnu = np.divide((grid_PAH_luminosity*u.erg/u.s).to(u.Lsun).value,nu.to(u.Hz).value)
 
     #Because the Draine templates include re-emission, but we want to
