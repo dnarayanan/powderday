@@ -58,27 +58,10 @@ def compute_grid_PAH_luminosity(cell_list,beta_nnls,grid_of_sizes,numgrains,drai
             #find the logU that is closest to what draine has computed in their basis computations
             nearest_logU_idx = find_nearest(logU_cell,np.asarray(basis_logU_values))
             
-            
-            
-            #DEBUG DEBUG DEBUG 01/08/24 here, get the correct
-            #reference object that corresponds to both the beta_cell
-            #(j), but also which logU value it is.  i think this is a
-            #matter of identifying the correct neutral_PAH_reference
-            #objets (and ion) that corresponds to the logU of the cell
+            #here, identify the correct reference object that
+            #corresponds to both the beta_cell (j), but also which
+            #logU value it is.
 
-            #here, the beta_cell has dimensions [n_draine_directories]
-            #because every SED shape is the same for each directory,
-            #and the only thing that changes is the PAH heating rate
-            #from logU.  this said, the neutral_PAH_reference_objects
-            #list is as long as n_directories * basis_log_U_values
-            #since there is one for every logU.  we therefore take the
-            #jth index (i.e. the directory [==SED shape] we're on) *
-            #the basis_logU index closest to the logU index of this
-            #working cell to get the right index in the PAH reference
-            #objects.  
-
-            
-            
             neutral_PAH_list = neutral_PAH_reference_objects[j,nearest_logU_idx]
             temp_neutral_pah_grid = np.array([x.lum for x in neutral_PAH_list])
             temp_neutral_pah_grid *= beta_cell[j]
@@ -218,54 +201,18 @@ def pah_source_add(ds,reg,m,boost):
     beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
 
 
-    #DEBUG DEBUG DEBUG 01/08/24 UPDATE COMMENT
-    #now read in the full PAH_list for all logU = 0 files (note, we'll
-    #fill in any logU>>4 PAH spectra on a case by case basis later in
-    #this module. these are relatively rare, and not worth the effort
-    #to carry around all that information otherwise. the logic here is
-    #that the majority of spectra from logU=[0,4] are nearly
-    #identical, and also the vast majority of cells are logU<4.  So we
-    #can treat the logU>=4 on an indvidiaul basis.)
-    
     #read in a single draine directory, get the files, and from this
     #grab the logU values that the draine heating rates have been
     #computed for. note that this assumes that every single basis ISRF
     #sed shape has been computed for the exact same logU files.  pd
     #will throw some error around here if for some reason this isn't
     #true and it tries to read in a file that doesn't exist.
-
-
     temp_neutral_draine_files = np.sort(glob.glob(draine_directories[0]+'/*iout_graD16*nb*_*.*0'))
 
     basis_logU_values = []
     for file in temp_neutral_draine_files:
         basis_logU_values.append(float(file[-4::]))
     
-    
-
-
-    #DEBUG DEBUG DEBUG 01/08/24 REMOVE COMMENT
-    #LOGU PLAN:
-    #1 sort the reference objects (maybe even for a single draine directory)
-    #2. grab the logUs out and make a single array
-    #3. make the neutral objects/ion objects array have space for the files
-    #4. maybe loop through those files for each draine directory rather than globbing it
-    
-    #DEBUG DEBUG DEBUG 01/08/24 REMOVE COMMENT
-    #glob the actual draine PAH files so that we can build the reference list
-    #neutral_logU_iout_files = []
-    #ion_logU_iout_files = []
-    #for directory in draine_directories:
-    #    neutral_logU_iout_files.append(np.sort(glob.glob(directory+'/*iout_graD16*nb*_*.*0')))
-    #    ion_logU_iout_files.append(np.sort(glob.glob(directory+'/*iout_graD16*ib*_*.*0')))
-
-    #DEBUG DEBUG DEBUG 01/08/24 REMOVE COMMENT
-    #flatten the lists of arrays
-    #neutral_logU_iout_files = np.concatenate(neutral_logU_iout_files).ravel().tolist()
-    #ion_logU_iout_files = np.concatenate(ion_logU_iout_files).ravel().tolist()
-
-
-
 
     
     for draine_directory in draine_directories:
@@ -412,8 +359,6 @@ def pah_source_add(ds,reg,m,boost):
     #pah_grid_of_sizes = ds.parameters['reg_grid_of_sizes_graphite']
 
 
-    #DEBUG 01/08/24
-
 
     dum  = compute_grid_PAH_luminosity(cell_list,
                                        beta_nnls = beta_nnls,
@@ -427,7 +372,14 @@ def pah_source_add(ds,reg,m,boost):
                                        logU = logU,
                                        basis_logU_values = basis_logU_values,
                                        draine_bins_idx = draine_bins_idx)
+
+    
     '''
+
+#THIS COMMENTED BLOCK IS FOR DOING THE PAH LUMINOSITY COMPUTATIONS IN
+PARALLEL WITH PARTIAL.  HONESTLY, IT DOESN'T SEEM A LOT FASTER, AND
+WITH THE OVERHEAD IT CAN ACTUALLY CAUSE SLOWDOWNS AT TIME.  WITH SOME
+TESTING IT MAY BE WORTH RE-INTRODUCING.
 
     dum  = p.map(partial(compute_grid_PAH_luminosity,
                          beta_nnls = beta_nnls,
