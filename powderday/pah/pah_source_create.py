@@ -199,8 +199,9 @@ def pah_source_add(ds,reg,m,boost):
 
     #get the logU and beta_nnls for the local ISRF
     beta_nnls,logU = get_beta_nnls(draine_directories,grid_of_sizes,simulation_sizes,reg)
-
-
+    #just sto save it through analytics
+    reg.parameters['logU'] = logU
+    
     #read in a single draine directory, get the files, and from this
     #grab the logU values that the draine heating rates have been
     #computed for. note that this assumes that every single basis ISRF
