@@ -31,6 +31,10 @@ def manual_oct(reg,refined):
     vol_fact = reg.parameters['octree'][('index','dx')][~refined].to('kpc')*reg.parameters['octree'][('index','dy')][~refined].to('kpc')*reg.parameters['octree'][('index','dz')][~refined].to('kpc')
 
     # correct for dtg issues
+    # yt does not necessarily have the smoothed dust and gas masses
+    # offset from the true values by the same amount, i.e.
+    # total smoothed gas mass/total particle gas mass not =
+    # total smoothed dust mass/total particle dust mass
     cor_fact = (np.sum(masses_smoothed.to('Msun'))/np.sum(reg['gas','mass'].to('Msun')))/(np.sum(smoothed_dust_masses.to('Msun'))/np.sum(reg['dust','mass'].to('Msun')))
     # correct for total gas normalization
     cor_fact = cor_fact * np.sum(reg['gas','mass'].to('Msun'))/np.sum(density_smoothed.to('Msun/kpc**3')*vol_fact)
@@ -193,7 +197,8 @@ def li_ml_oct(reg,refined):
     # correct for total gas normalization
     vol_fact = reg.parameters['octree'][('index','dx')][~refined].to('kpc')*reg.parameters['octree'][('index','dy')][~refined].to('kpc')*reg.parameters['octree'][('index','dz')][~refined].to('kpc')
     cor_fact = np.sum(gas_mass_particle)/np.sum(density_smoothed.to('Msun/kpc**3')*vol_fact)
-    # correct for dtg issues
+    # correct for dtg issues                                                                                                                                    # yt does not necessarily have the smoothed dust and gas masses                                                                                             # offset from the true values by the same amount, i.e.                                                                                                      # total smoothed gas mass/total particle gas mass not =
+    # total smoothed dust mass/total particle dust mass  
     cor_fact = cor_fact*(np.sum(masses_smoothed.to('Msun'))/np.sum(reg['gas','mass'].to('Msun')))/(np.sum(smoothed_dust_masses.to('Msun'))/np.sum(reg['dust','mass'].to('Msun')))
     
     dust_to_gas_ratio = np.nan_to_num(dust_to_gas_ratio)
