@@ -35,6 +35,7 @@ def get_Cabs(draine_directories,simulation_sizes,gsd):
         #this works bc PAH_list is an n_sizes long list of PAH objects
         Cabs_neutral[i,:] = PAH_list_neutral[i].cabs
 
+        
     #We now have Cabs (for neutrals and cations) in terms of (size,nu),
     #and we want to get these in terms of just (nu). To do this, we need
     #to regrid (i.e. downsample) the first dimension so that the GSD is at
@@ -90,10 +91,20 @@ def get_Cabs(draine_directories,simulation_sizes,gsd):
     
     #get the units right since they're not faithfully followed throughout
 
-
     Cabs_cation_regrid_lam_cells = (Cabs_cation_regrid_lam_cells)*u.cm**2
     Cabs_neutral_regrid_lam_cells = (Cabs_neutral_regrid_lam_cells)*u.cm**2
 
+
+    #DEBUG DEBUG DEBUG - these 5 lines are garbage and remove them.
+    #they're intended to only grab Cabs for the 0.1micron value since
+    #that's whats in the draine paper.  we may wantto keep something
+    #like this at the end, but not in it's current form.
+    #Cabs_cation_regrid_lam_cells = Cabs_cation_regrid_lam_cells.value
+    #Cabs_neutral_regrid_lam_cells = Cabs_neutral_regrid_lam_cells.value
+    #for i in range(Cabs_cation_regrid_lam_cells.shape[1]):
+    #    Cabs_cation_regrid_lam_cells[:,i] = Cabs_cation[19,:]
+    #    Cabs_neutral_regrid_lam_cells[:,i] = Cabs_neutral[19,:]
+        
     return Cabs_cation_regrid_lam_cells,Cabs_neutral_regrid_lam_cells
 
 
@@ -115,8 +126,26 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
     #get the simulation_isrf in units of erg/s
     grid_dust_masses = reg['dust','mass'].in_units('g').to_astropy() #getting the dust masses out of yt units and into astropy units
     simulation_specific_energy_sum *= grid_dust_masses.cgs #now in erg/s
-    ncells = grid_dust_masses.shape[0]
 
+    #clip values that are MC noise too high
+    simulation_specific_energy_sum[simulation_specific_energy_sum.value > 1.e50] = np.median(simulation_specific_energy_sum)
+
+
+    ncells = grid_dust_masses.shape[0]
+        
+    #convolve the simulation specific energy (ISRF) with the GSD to
+    #get rid of the size dimension:
+    simulation_specific_energy_gsd_convolved = np.zeros([simulation_specific_energy_sum.shape[0],simulation_specific_energy_sum.shape[2]])
+
+    
+    print("[isrf_decompose/get_beta_nnls]: Convolving the simulation specific energy grid with the dust types")
+    for i in tqdm(range(ncells)):
+        #x = simulation_specific_energy_sum[:,:,i]
+        simulation_specific_energy_gsd_convolved[:,i] = np.dot(simulation_specific_energy_sum[:,:,i],gsd[i,:])
+        simulation_specific_energy_gsd_convolved[:,i]/=np.sum(gsd[i,:])
+
+    simulation_specific_energy_gsd_convolved *= u.erg/u.s #attach units back to it
+    
     #we have read in the draine directories explicitly to ensure that the ordering of them is identical from pah_source_create
     isrf_files = []
     for directory in draine_directories:
@@ -170,7 +199,7 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
 
     #4 now resample the hyperion ISRF to the wavelengths of the Draine
     #basis ISRFs so that we can NNLS
-    f_1d_interp_lam = interp1d(simulation_isrf_lam.to(u.micron).value,simulation_specific_energy_sum.cgs.T.value,kind='cubic')
+    f_1d_interp_lam = interp1d(simulation_isrf_lam.to(u.micron).value,simulation_specific_energy_gsd_convolved.cgs.T.value,kind='cubic')
     simulation_specific_energy_sum_regrid = f_1d_interp_lam(draine_lam.to(u.micron).value).T
 
     #the regridding can turn some wavelengths where there was 0 emission
@@ -182,18 +211,15 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
     simulation_specific_energy_sum_regrid *= u.erg/u.s
 
 
-
-
+    
+    
+    
     simulation_sizes = np.broadcast_to(simulation_sizes,(ncells,simulation_sizes.shape[0]))*u.micron
     gsd = gsd.value
     
-    #DEBUG DEBUG DEBUG THIS NEEDS TO BE UNCOMMENTED AND DELETE THE READ IN FROM NPZ FILES 3 lines  BECAUSE THAT'S INSANE AND JUST USED FOR DEBUGGING FAST 
+    
     Cabs_cation_regrid,Cabs_neutral_regrid = get_Cabs(draine_directories,simulation_sizes,gsd)
-    #np.savez('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/Cabs.npz',Cabs_cation_regrid=Cabs_cation_regrid.value,Cabs_neutral_regrid=Cabs_neutral_regrid.value)
-    #Cabs_data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/Cabs.npz')
-    #Cabs_cation_regrid = Cabs_data['Cabs_cation_regrid']*u.cm**2
-    #Cabs_neutral_regrid = Cabs_data['Cabs_neutral_regrid']*u.cm**2
-
+     
     if cfg.par.SKIP_LOGU_CALC == False:
         logU_grid = get_logU(simulation_specific_energy_sum_regrid,Cabs_cation_regrid,Cabs_neutral_regrid,draine_lam,reg)
     else:
@@ -215,8 +241,8 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
     #be useful to renormalize things so that we don't have 10s of orders
     #of mag difference bewteen the ISRF field and basis vectors.
     
-    beta_nnls = np.zeros([basis_isrf_vectors.shape[0],simulation_specific_energy_sum_regrid.shape[2]])
-    ncells = simulation_specific_energy_sum_regrid.shape[2]
+    beta_nnls = np.zeros([basis_isrf_vectors.shape[0],simulation_specific_energy_sum_regrid.shape[1]])
+    ncells = simulation_specific_energy_sum_regrid.shape[1]
 
 
 
@@ -226,18 +252,17 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
     #cut off everything after 1 micron
     idx = (np.abs(draine_lam.to(u.micron).value - 1)).argmin()
     x = x[:,0:idx]
-    y = y[0:idx,:,:]
+    y = y[0:idx,:]
     
 
 
     
     for i in tqdm(range(ncells)):
-        beta_nnls[:,i] = nnls(x.T,y[:,0,i])[0]
-        isrf_lum = np.trapz(simulation_specific_energy_sum_regrid[:,0,i]/draine_lam,draine_lam)
+        beta_nnls[:,i] = nnls(x.T,y[:,i])[0]
+        isrf_lum = np.trapz(simulation_specific_energy_sum_regrid[:,i]/draine_lam,draine_lam)
         nnls_lum = np.trapz(np.dot(x.T,beta_nnls[:,i])/draine_lam[0:idx],draine_lam[0:idx])
         beta_nnls[:,i]*=isrf_lum.value/nnls_lum.value
     
-
 
     return beta_nnls,logU_grid
 
@@ -245,13 +270,12 @@ def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
 def get_logU(cell_isrf,Cabs_cation,Cabs_neutral,draine_lam,reg):
     #get the cell sizes since ISRF is not per cm^2 (and it needs to be
     #so that we can convert to erg/cm^3)
-    
+
     
     #for some reason the units attached in reg.parameters needs to be reattached for it to carry through in the upcoming arithmetic
     cell_sizes = reg.parameters['cell_size'].value*u.cm
 
 
-    
     cell_isrf = (cell_isrf/(cell_sizes**2.))
     
 
@@ -259,19 +283,17 @@ def get_logU(cell_isrf,Cabs_cation,Cabs_neutral,draine_lam,reg):
     cell_isrf /=const.c
     cell_isrf = cell_isrf.to(u.erg/u.cm**3)
 
-    
-    #import matplotlib.pyplot as plt
-    #fig = plt.figure()
-    #ax = fig.add_subplot(111)
-    #x = np.trapz(cell_isrf.value,draine_lam.value,axis=0)
-    #plt.hist(np.log10(cell_isrf[cell_isrf > 0].value),log=True)
-    #fig.savefig('hist.png',dpi=300)
-
-
     h_ref = 1.958e-12*u.erg/u.s
     draine_nu = (const.c/draine_lam).to(u.Hz)
 
-    cell_isrf = (cell_isrf.T/draine_nu).T
+
+
+    #DEBUG DEBUG DEBUG
+    #cell_isrf = np.ones(cell_isrf.shape)*1.043e-12*u.erg/u.cm**3
+
+
+    
+    cell_isrf = (cell_isrf.T/draine_nu[::-1]).T
     
     #eq. 5 from Draine et al. 2021, 917, 3, ApJ
     #U = int(d_nu u * c* C_abs)/h_ref
@@ -279,14 +301,24 @@ def get_logU(cell_isrf,Cabs_cation,Cabs_neutral,draine_lam,reg):
 
     print('[pah/isrf_decompose/get_logU:] Computing logU for PAH calculation')
 
-    y = cell_isrf * const.c*Cabs_neutral[:,None,:]/h_ref
+    y = cell_isrf * const.c*Cabs_neutral/h_ref
     U= (np.trapz(y,draine_nu[::-1],axis=0)).decompose()
-    U = np.average(U,axis=0)
-
+    
+    #DEBUG DEBUG DEBUG
+    '''
+    import matplotlib.pyplot as plt
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.hist(np.log10(U.value).flatten())
+    ax.set_yscale('log')
+    fig.savefig('hist_logu.png',dpi=300)
+    '''
+    
     #just to make any numerical isseues with U<~0 not impact our logU calc
     U[U<=0] = 1.e-10
     logU = np.log10(U)
 
+    
     return logU
 
     
