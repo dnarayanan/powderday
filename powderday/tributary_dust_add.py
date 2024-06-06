@@ -9,9 +9,16 @@ import powderday.config as cfg
 from hyperion.dust import SphericalDust
 import pdb
 from powderday.helpers import find_nearest
-
+from powderday.active_dust.dust_file_writer import *
 
 def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[False],grid_of_sizes_graphite = [-1], grid_of_sizes_silicates = [-1], grid_of_sizes_aromatic_fraction = [-1]):
+
+        #go ahead and call the active dust writer to write dust
+        #extinction files at the exact sizes of the hydro sim.  this
+        #will help later convolution if needed in the PAH modules
+        dust_file_writer(nsizes)
+        
+
         #first, save the grid_of_sizes to the ds.paramteters so we can carry it around
         ds.parameters['reg_grid_of_sizes'] = grid_of_sizes #named 'reg_grid_of_sizes' 
         ds.parameters['reg_grid_of_sizes_graphite'] = grid_of_sizes_graphite
@@ -29,7 +36,7 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
 
 
         #now load the mapping between grain bin and filename for the lookup table
-        data = np.load(cfg.par.pd_source_dir+'active_dust/dust_files/binned_dust_sizes.npz')
+        data = np.load(cfg.par.pd_source_dir+'/powderday/active_dust/dust_files/binned_dust_sizes.npz')
         grain_size_left_edge_array = data['grain_size_left_edge_array']
         grain_size_right_edge_array  = data['grain_size_right_edge_array']
         dust_filenames = data['outfile_filenames']
@@ -58,13 +65,14 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
         frac_grid = np.zeros([dustdens.shape[0],nbins])
         debug_nearest_extinction_curve = np.zeros([nbins])
 
+
         if cfg.par.OTF_EXTINCTION_MRN_FORCE == True:
                 grid_sum = np.zeros(nbins)
 
                 #how DNSF was set up.  not needed other than for testing
                 #x=np.linspace(-4,0,41)
                 #load an example dust size function for testing against
-                dsf = np.loadtxt(cfg.par.pd_source_dir+'active_dust/mrn_dn.txt')#DNSF_example.txt')
+                dsf = np.loadtxt(cfg.par.pd_source_dir+'/powderday/active_dust/mrn_dn.txt')#DNSF_example.txt')
                 if dsf.shape[0] != nsizes:
                         raise Exception("[tributary_dust_add:] You have enabled the experimental feature OTF_EXTINCTION_MRN_FORCE. Here, the MRN distribution that we are assuming does not have the same shape as the grid size distribution which can cause trouble if the Draine PAH model is enabled.  Therefore, please re-run your MRN grid generator in [active_dust/mrn_test_writer] with the following number of grid sizes: ",nsizes)
 
@@ -175,7 +183,9 @@ def active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined=[
         #now add the dust grids to hyperion
         for bin in range(nbins):
                 file = dust_filenames[bin]
-                d = SphericalDust(cfg.par.pd_source_dir+'active_dust/'+file)
+                
+                d = SphericalDust(file)
+                
                 
                 m.add_density_grid(dustdens*frac_grid[:,bin],d,specific_energy=specific_energy)
                         #m.add_density_grid(dustdens*frac[bin],d,specific_energy=specific_energy)

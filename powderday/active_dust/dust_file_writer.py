@@ -3,7 +3,7 @@
 import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
-
+import powderday.config as cfg
 import astropy.units as u
 import astropy.constants as constants
 from hyperion.dust import IsotropicDust
@@ -26,7 +26,7 @@ def Q_interp_wl(wlen,Q0):
 	Q_wl = Q(wlen)
 	return Q_wl
 
-def Qext_tab_load(fin_xtab = 'grain_size.txt',fin_gra='Gra_Optical/Gra_LD93_',fin_sil='Sil_Optical/Sil_LD93_'):
+def Qext_tab_load(fin_xtab = cfg.par.pd_source_dir+'/powderday/active_dust/grain_size.txt',fin_gra=cfg.par.pd_source_dir+'/powderday/active_dust/Gra_Optical/Gra_LD93_',fin_sil=cfg.par.pd_source_dir+'/powderday/active_dust/Sil_Optical/Sil_LD93_'):
 	# Return
 	#  xtab, tuple Qtab = (Qabs_C, Qabs_Si, Qsca_C, Qsca_Si)
 	xtab = np.log10(np.loadtxt(fin_xtab))
@@ -133,8 +133,9 @@ def extinction_law(x,dsf,wlen,cfrac,t_Qext,t_Qext_V):
 	return A, R, Qext
 
 
+def dust_file_writer(nsizes):
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
 
     #grain size range that we're modeling.  we set it up as a linspace
     #array so that it can have two purposes: (a) to serve as an input
@@ -142,7 +143,8 @@ if __name__ == "__main__":
     #distribution function read in from DNSF_example.txt, and then (b)
     #to set the limits for the grain size bins that we're going to
     #create for powderday
-    x=np.linspace(-4,0,41)
+    x = np.linspace(cfg.par.otf_extinction_log_min_size,cfg.par.otf_extinction_log_max_size,41)
+    #x=np.linspace(-4,0,41)
         
     #avelength array that we're modeling: 0.1-1000 micron
     wlen = 1. / np.logspace(-4,3,201)*u.micron
@@ -151,7 +153,7 @@ if __name__ == "__main__":
     nu = (constants.c/wlen).to(u.Hz)
     
     #load an example dust size function for testing against
-    dsf = np.loadtxt('DNSF_example.txt')
+    dsf = np.loadtxt(cfg.par.pd_source_dir+'powderday/active_dust/DNSF_example.txt')
 
     #assumed graphite fraction
     cfrac = 0.54
@@ -166,7 +168,7 @@ if __name__ == "__main__":
     #scale wiht the loaded up DSF to see if their co-added
     #extinction laws look reasonable or not.
     
-    nbins = 25
+    nbins = nsizes
     
     #array that holds the left edge, right edge, and edges of bins in between.  we use this to set the left and right edge arrays
     edges = np.linspace(np.min(x),np.max(x),nbins+1) 
@@ -241,13 +243,12 @@ if __name__ == "__main__":
 
         d = IsotropicDust(nu.value,albedo,kappa_lambda)
 
-        if not os.path.exists('dust_files/'):
-            os.makedirs('dust_files/')
-        filename = 'dust_files/binned_dust_sizes.'+str(counter)+'.hdf5'
+        if not os.path.exists(cfg.par.pd_source_dir+'/powderday/active_dust/dust_files/'):
+            os.makedirs(cfg.par.pd_source_dir+'/powderday/active_dust/dust_files/')
+        filename = cfg.par.pd_source_dir+'/powderday/active_dust/dust_files/binned_dust_sizes.'+str(counter)+'.hdf5'
         outfile_filenames.append(filename)
 
         d.write(filename)
-
 
 
 
@@ -261,7 +262,7 @@ if __name__ == "__main__":
     z = np.asarray(outfile_filenames)
     #np.savetxt('dust_files/binned_dust_sizes.key',np.transpose([grain_size_left_edge_array[0:-1],grain_size_right_edge_array,np.asarray(outfile_filenames)]))
 
-    np.savez('dust_files/binned_dust_sizes.npz',grain_size_left_edge_array = grain_size_left_edge_array,grain_size_right_edge_array = grain_size_right_edge_array,outfile_filenames = outfile_filenames)
+    np.savez(cfg.par.pd_source_dir+'/powderday/active_dust/dust_files/binned_dust_sizes.npz',grain_size_left_edge_array = grain_size_left_edge_array,grain_size_right_edge_array = grain_size_right_edge_array,outfile_filenames = outfile_filenames)
 
 
 
@@ -271,8 +272,6 @@ if __name__ == "__main__":
     final_Aext = np.average(Aext_array,axis=1,weights=frac)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    #ax.loglog(1/wlen,final_Aext/np.max(final_Aext),label='coadded')
-    #ax.loglog(1/wlen,Aext/np.max(Aext),label='original')
     ax.loglog(wlen,final_Aext,label='coadded')
     ax.loglog(wlen,Aext,label='original')
 
