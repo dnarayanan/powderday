@@ -13,18 +13,6 @@ from functools import partial
 from datetime import datetime
 from unyt import unyt_quantity,unyt_array
 
-
-#2a. have the code know if its neutral or ion and use that luminosity
-#f_ion(a) = 1 - 1/(1 + a/10 A).
-
-#2c. make beta_cell in compute_grid_PAH_luminosity to have it do 
-
-# for j in beta_cell[beta_cell > 0]: print(j)
-
-
-#2b. manually add the logU>4 sources
-
-
 def get_whole_ceil(n,near):
     nn = np.divide(n,np.linspace(1,np.ceil(n/near),int(np.ceil(n/near))))
     return(nn[nn%1==0][-1])
@@ -426,12 +414,6 @@ TESTING IT MAY BE WORTH RE-INTRODUCING.
 
 
  
-    #DEBUG DEBUG DEBUG REMOVE THE NEXT TWO LINES THEY'RE CRAZY TALK AND JUST FOR DEBUGGING
-    #data = np.load('/blue/narayanan/desika.narayanan/pd_runs/powderday_testing/tests/SKIRT/MW_ultra_lowres/grid_pah_luminosity.npz')
-    #grid_PAH_luminosity = data['grid_PAH_luminosity']
-    #grid_neutral_PAH_luminosity = data['grid_neutral_PAH_luminosity']
-    #grid_ion_PAH_luminosity = data['grid_ion_PAH_lumionsity']
-
     grid_PAH_luminosity[np.isnan(grid_PAH_luminosity)] = 0
     grid_neutral_PAH_luminosity[np.isnan(grid_neutral_PAH_luminosity)] = 0
     grid_ion_PAH_luminosity[np.isnan(grid_ion_PAH_luminosity)] = 0
@@ -474,8 +456,6 @@ TESTING IT MAY BE WORTH RE-INTRODUCING.
     for i in only_important_PAH_idx:#range(grid_PAH_luminosity.shape[0]): #np.arange(2500)
 
         fnu_reverse = fnu[i,:][::-1]
-        #if np.where(fnu_reverse == 0)[0] > 0:
-        #    fnu_reverse[fnu_reverse ==0 ] = np.min(fnu_reverse[fnu_reverse > 0])
 
         lum = (np.absolute(np.trapz(nu_reverse[wpah_nu_reverse].cgs.value,fnu_reverse[wpah_nu_reverse])).item()*u.Lsun).to(u.erg/u.s).value
 
@@ -491,9 +471,6 @@ TESTING IT MAY BE WORTH RE-INTRODUCING.
         m.add_point_source(luminosity=lum,spectrum=(nu_reverse[wpah_nu_reverse].value,fnu_reverse[wpah_nu_reverse]),position=reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
 
 
-        #reg.parameters['cell_position'][i,:].in_units('cm').value-boost)
-        #reg['particle_dust','coordinates'][i,:].in_units('cm').value-boost)
-        
 
     if cfg.par.draine21_pah_grid_write: #else, the try/except in analytics.py will get caught and will just write a single -1 to the output npzfile
         reg.parameters['grid_PAH_luminosity'] = grid_PAH_luminosity
