@@ -174,7 +174,8 @@ def pah_source_add(ds,reg,m,boost):
 
 
     
-    dN_pah = np.sum(ds.parameters['reg_grid_of_sizes_graphite']*ds.parameters['reg_grid_of_sizes_aromatic_fraction'],axis=1)
+    #dN_pah = np.sum(ds.parameters['reg_grid_of_sizes_graphite']*ds.parameters['reg_grid_of_sizes_aromatic_fraction'],axis=1)
+    dN_pah = np.sum(ds.parameters['reg_grid_of_sizes_graphite'],axis=1)
     dN_total = np.sum(ds.parameters['reg_grid_of_sizes'],axis=1)
 
     #compute the mass weighted grain size distributions for comparison in analytics.py 

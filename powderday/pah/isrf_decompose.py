@@ -304,15 +304,16 @@ def get_logU(cell_isrf,Cabs_cation,Cabs_neutral,draine_lam,reg):
     y = cell_isrf * const.c*Cabs_neutral/h_ref
     U= (np.trapz(y,draine_nu[::-1],axis=0)).decompose()
     
-
     #DEBUG DEBUG DEBUG
+    '''
     import matplotlib.pyplot as plt
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.hist(np.log10(U.value).flatten())
     ax.set_yscale('log')
     fig.savefig('hist_logu.png',dpi=300)
-
+    '''
+    
     #just to make any numerical isseues with U<~0 not impact our logU calc
     U[U<=0] = 1.e-10
     logU = np.log10(U)

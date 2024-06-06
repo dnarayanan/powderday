@@ -24,8 +24,7 @@ setup(
         'unyt',
         'fsps',
         'scikit-learn',
-        'p_tqdm',
-        'itertools'
+        'p_tqdm'
     ],
     scripts=["pd_front_end.py"],
     project_urls={
