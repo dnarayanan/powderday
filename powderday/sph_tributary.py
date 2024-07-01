@@ -95,15 +95,23 @@ def sph_m_gen(fname,field_add):
 
 
     pto.test_octree(refined,max_level)
-    
+
+    #save some information that can be used in the PAH model compute
+    #an effective 'size' of a cell by density = mass/volume and assume
+    #spherical geometry.  similarly, saving the particle location information
     if float(yt.__version__[0:3]) >= 4:
         dump_cell_info(refined,fc1.to('cm'),fw1.to('cm'),xmin,xmax,ymin,ymax,zmin,zmax)
     else:
         dump_cell_info(refined,fc1.convert_to_units('cm'),fw1.convert_to_units('cm'),xmin,xmax,ymin,ymax,zmin,zmax)
-    
+    reg.parameters['cell_size']=fw1.convert_to_units('cm') #so that we can have a uniform naming scheme for different front ends for saving in analytics/dump_data(
+    reg.parameters['cell_position'] = fc1
+
     np.save('refined.npy',refined)
     np.save('density.npy',dustdens)
     
+
+    #save some information that can be used in the PAH model
+    reg.parameters['fw1'] = fw1.convert_to_units('cm')
 
     #========================================================================
     #Initialize Hyperion Model
@@ -178,8 +186,17 @@ def sph_m_gen(fname,field_add):
         #define the grid of sizes that will be used in tributary_dust_add
         grid_of_sizes = reg.parameters["octree_of_sizes"]
         
-        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined)
+        #for now, we just include these grids as -1 because there's no
+        #gizmo model [that we know of] that delineates different
+        #species.  when this occurs, we should fix this section,
+        #modeled after arepo_tributary.
+        grid_of_sizes_graphite = [-1]
+        grid_of_sizes_silicates = [-1]
+        grid_of_sizes_aromatic_fraction = [-1]
         
+
+
+        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined,grid_of_sizes_graphite,grid_of_sizes_silicates,grid_of_sizes_aromatic_fraction)
 
     m.set_specific_energy_type('additional')
 

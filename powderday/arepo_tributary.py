@@ -43,12 +43,21 @@ def arepo_m_gen(fname,field_add):
         particle_x = reg["gas","coordinates"][:,0].to('cm')
         particle_y = reg["gas","coordinates"][:,1].to('cm')
         particle_z = reg["gas","coordinates"][:,2].to('cm')
+        try: reg.parameters["cell_position"] = reg["gas","coordinates"]
+        except:
+            reg.parameters = {}
+            reg.parameters["cell_position"] = reg["gas","coordinates"]
     else:
         print("Computing Voronoi Tessellation on PartType3 dust particles")
         particle_x = reg["dust","coordinates"][:,0].to('cm')
         particle_y = reg["dust","coordinates"][:,1].to('cm')
         particle_z = reg["dust","coordinates"][:,2].to('cm')
 
+
+        try: reg.parameters["cell_position"] = reg["dust","coordinates"]
+        except:
+            reg.parameters = {}
+            reg.parameters["cell_position"] = reg["dust","coordinates"]
     #just for the sake of symmetry, pass on a dx,dy,dz since it can be
     #used optionally downstream in other functions.
     dx = 2.* ds.quan(cfg.par.zoom_box_len,'kpc').to('cm')
@@ -68,11 +77,31 @@ def arepo_m_gen(fname,field_add):
     z_pos_boost = (particle_z-zcent).to('cm')
     
     m.set_voronoi_grid(x_pos_boost.value, y_pos_boost.value, z_pos_boost.value)
-
+    print ('Finished computing the Voronoi Grid')
     #get CMB:
     
     energy_density_absorbed=energy_density_absorbed_by_CMB()
     specific_energy = np.repeat(energy_density_absorbed.value,dustdens.shape)
+
+    #save some information that can be used in the PAH model compute
+    #an effective 'size' of a cell by density = mass/volume and assume
+    #spherical geometry.  similarly, saving the particle location information
+
+    if cfg.par.otf_extinction == False:
+        mass = reg['PartType0','Masses']
+        density = reg['PartType0','Density']
+    else:
+        mass = reg['PartType3','Masses']
+        density = ds.arr(reg['PartType3','Dust_DustDensity'],'code_mass/code_length**3')
+ 
+    rad_dens = (mass*3/(4.*np.pi*density))**(1./3)
+    rad_dens = rad_dens.in_units('cm')
+
+    try: 
+        reg.parameters['cell_size'] = rad_dens*2 #so that we return a diameter 
+    except:
+        reg.parameters = {}
+        reg.parameters['cell_size'] = rad_dens*2 #so that we return a diameter
 
     if cfg.par.otf_extinction==False:
 
@@ -105,13 +134,32 @@ def arepo_m_gen(fname,field_add):
           #the simulation itself.
 
         ad = ds.all_data()
-        nsizes = reg['PartType3','Dust_NumGrains'].shape[1]
+
         try:
             assert(np.sum(ad['PartType3','Dust_NumGrains']) > 0)
         except AssertionError:
             raise AssertionError("[arepo_tributary:] There are no dust grains in this simulation.  This can sometimes happen in an early snapshot of a simulation where the dust has not yet had time to form.")
-        grid_of_sizes = reg['PartType3','Dust_NumGrains']
-        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy)
+
+        #we call this total sizes, but thats a weird name thats a misnomer - its really just the total shape of the array, but is 3x the number of size bins!
+        ntotalsizes = reg['PartType3','Dust_NumGrains'].shape[1]
+
+        #the first third are graphites; second third silicates; third third are aromatics/graphites ratio
+        grid_of_sizes = reg['PartType3','Dust_NumGrains'][:,0:int(ntotalsizes/3)] + reg['PartType3','Dust_NumGrains'][:,int(ntotalsizes/3):int(2*ntotalsizes/3)]
+
+        if cfg.par.separate_into_dust_species:
+            grid_of_sizes_silicates = reg['PartType3','Dust_NumGrains'][:,0:int(ntotalsizes/3)]
+            grid_of_sizes_graphite = reg['PartType3','Dust_NumGrains'][:,int(ntotalsizes/3):int(2*ntotalsizes/3)]
+            grid_of_sizes_aromatic_fraction = reg['PartType3','Dust_NumGrains'][:,int(2*ntotalsizes/3)::]
+            nsizes = int(ntotalsizes/3)
+        else:
+            grid_of_sizes_graphite = [-1]
+            grid_of_sizes_silicates = [-1]
+            grid_of_sizes_aromatic_fraction = [-1]
+            nsizes = ntotalsizes
+        
+
+        refined=[False]
+        active_dust_add(ds,m,grid_of_sizes,nsizes,dustdens,specific_energy,refined,grid_of_sizes_graphite,grid_of_sizes_silicates,grid_of_sizes_aromatic_fraction)
 
 
     m.set_specific_energy_type('additional')

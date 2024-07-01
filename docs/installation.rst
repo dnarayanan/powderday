@@ -9,6 +9,7 @@ Overview of Requirements
   * numpy (<1.24)
   * scipy
   * astropy (3.2.3)
+  * unyt
   * h5py
   * scikit-learn
   * six
@@ -26,7 +27,6 @@ Overview of Requirements
   * git  <http://git-scm.com/>
   * powderday <https://github.com/dnarayanan/powderday.git>
   * yt <http://yt-project.org>
-  * FSPS <https://code.google.com/p/fsps/source/checkout>
   * python-fsps <https://dfm.io/python-fsps/current/>
   * Hyperion <http://www.hyperion-rt.org/>
   * Hyperion Dust Files <http://docs.hyperion-rt.org/en/stable/dust/dust.html>
@@ -129,8 +129,12 @@ The second and manual way to install `Hyperion
    the University of Florida HiPerGator supercomputing system, I would
    have::
 
-   >module load intel/2018.1.163 openmpi/4.0.3 hdf5/1.10.1
-     
+   
+  >module load intel/2020.0.166
+  >module load git
+  >module load hdf5/1.14.1
+  >module load openmpi/4.1.5
+  
 #. Install the python module::
 
    >cd hyperion
@@ -171,7 +175,13 @@ active (so, on a supercomputer you might need to load these modules
 such as [for example, on the University of Florida HiPerGator
 supercomputer])::
 
-  >module load  1) intel/2018.1.163   2) openmpi/4.0.3   3) hdf5/1.10.1
+  
+  
+  >module load intel/2020.0.166
+  >module load git
+  >module load hdf5/1.14.1
+  >module load openmpi/4.1.5
+  
 
 of course please be careful of mixing and matching compilers, and
 ensuring that you have the same compilers loaded for all
@@ -235,29 +245,7 @@ Note, it is important to install this *after*  `Hyperion <http://www.hyperion-rt
 
 
 
-.. _fsps:
 
-fsps
---------------
-
-`fsps <https://code.google.com/p/fsps/source/checkout>`_ can be checked out with::
-  
-  > git clone https://github.com/cconroy20/fsps
-
-and directions to the installation are in the `Manual <https://www.cfa.harvard.edu/~cconroy/ FSPS_files/MANUAL.pdf>`_.
-
-To explicitly compile::
-
-  make clean
-  make
-  
-Finally, the SPS_HOME variable must be set in your environment to point to the FSPS/src directory.  For example, if your environment is bash, in your .bashrc set something along the lines of::
-   
-  >export SPS_HOME=/Users/desika/fsps/
-
-Note that the same compilers used for `Hyperion
-<http://www.hyperion-rt.org>`_ and `yt <http://yt-project.org>`_ need
-to be used here.  An easy way to do this is in the Makefile to set F90=$(FC)
 
 
 .. _python-fsps:
@@ -278,6 +266,13 @@ You can test the installation by opening python and typing::
 >import fsps
 
 
+Note, we no longer need to actually install `fsps
+<https://code.google.com/p/fsps/source/checkout>`_ anymore.  This is
+installed within `python-fsps <https://dfm.io/python-fsps/current/>`_
+itself!  Please see the `python-fsps
+<https://dfm.io/python-fsps/current/>`_ docs for how to change
+underlying stellar physics when installing (i.e. the spectral
+libraries or the stellar isochrones).
 
 
 
@@ -395,9 +390,10 @@ the ability to use private forks of individual codes.
 
 First, load up the compilers that we'll use throughout (though note: openmpi is not loaded until after yt is installed as yt will sometimes bork due to openmpi)::
 
-  >module load intel/2018.1.163
-  >module load hdf5/1.10.1
+  >module load intel/2020.0.166
   >module load git
+  >module load hdf5/1.14.1
+
 
 yt::
 
@@ -423,7 +419,7 @@ then in your .bashrc set the analog to::
   >CC=icc F90=ifort python -m pip install .
 
 
-Before going forward, pleae try::
+Before going forward, please try::
 
   >python
   >import fsps
@@ -438,7 +434,7 @@ then try to install via pip::
   
 Next, before installing hyperion, lets make sure our openmpi is loaded::
 
-    >module load openmpi/4.0.3
+    >module load openmpi/4.1.5
 
 
 hyperion::
@@ -474,7 +470,7 @@ powderday::
 
 First, load up the compilers that we'll use throughout::
 
-  >module load gcc/9.3.0  libz/1.2.11 hdf5/1.10.1 git/2.30.1
+  >module load gcc/12 openmpi/4.1.5 hdf5/1.14.1 git libz
 
   
 yt::
@@ -543,7 +539,7 @@ powderday::
 of `Hyperion <http://www.hyperion-rt.org>`_.  Thanks to Paul Torrey
 for these.::
 
-  >module load openmpi/4.1.1 libz/1.2.11 hdf5/1.10.1 conda/4.12.0 git/2.30.1 gcc
+  >module load  gcc/12 openmpi/4.1.5 hdf5/1.14.1 git libz 
   >conda install -c conda-forge hyperion
   >python -c "import hyperion" (just to ensure no errors thrown)
   >hyperion (just to ensure command is found)

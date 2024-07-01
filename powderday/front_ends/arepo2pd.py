@@ -1,3 +1,11 @@
+#FIELD NOMENCLATURE
+
+#For the arepo front end, we only pull in particle information.  This
+#is because in arepo_tributary, we end up re-building the Voronoi
+#tesslation via the built in voro++ calls in Hyperion.  As a result,
+#there's (for example) only one field nomenclature that looks like
+#[('dust','mass')] which represents the particle information.
+
 from __future__ import print_function
 import numpy as np
 import yt
@@ -75,6 +83,9 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     def _dustmass_dtm(field,data):
         return (data["PartType0","metalmass"]*cfg.par.dusttometals_ratio)
 
+    #def _dust_numgrains(field,data):
+    #    return (data[('PartType0', 'NumGrains')])
+
 
     def _li_ml_dustmass(field,data):
         li_ml_dgr = dgr_ert(data["PartType0","GFM_Metallicity"],data["PartType0","StarFormationRate"],data["PartType0","Masses"])
@@ -103,8 +114,32 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         return dust_to_gas_ratio * data["PartType0","Masses"]
 
 
+    def _particle_dust_carbon_fraction(field,data):
+        return data['PartType3','Dust_MetalFractions'][:,2]
 
+        #you need to be careful: flattening the ds via ad =
+        #ds.all_data() and then returning this value (vs just getting
+        #it from data[] as above) ends up in a bug where zoom does not
+        #take only the cut out data for this field for reg downstream.
 
+        #ad = data.ds.all_data() return
+        #(ad['PartType3','Dust_MetalFractions'][:,2])
+
+    def _particle_dust_numgrains(field,data):
+        return data['PartType3','Dust_NumGrains']
+        #ad = data.ds.all_data()
+        #return (ad['PartType3','Dust_NumGrains'])
+
+    def _particle_dust_mass(field,data):
+        dust_mass = (data[('PartType3','Masses')]).in_units('code_mass')
+        return dust_mass
+        #ad = data.ds.all_data()
+        #return (ad['PartType3','Masses'])
+
+    def _particle_dust_coordinates(field,data):
+        return data['PartType3','Coordinates']
+        #ad = data.ds.all_data()
+        #return (ad['PartType3','Coordinates'])
 
     def _stellarages(field, data):
         ad = data.ds.all_data()
@@ -225,33 +260,33 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
     yt.add_particle_filter("newstars",function=_newstars,filtered_type='PartType4')
     ds.add_particle_filter("newstars")
     
-    ds.add_field(('star','metals'), function=_starmetals, sampling_type='particle',units="code_metallicity", particle_type=True)
+    ds.add_field(('star','metals'), function=_starmetals, sampling_type='particle',units="code_metallicity")
 
-    ds.add_field(('gas','metals'), function=_gasmetals, sampling_type='particle', units="code_metallicity", particle_type=True)
-    ds.add_field(('metal','dens'), function=_metaldens,  sampling_type='particle',units="g/cm**3", particle_type=True)
-    ds.add_field(('PartType0', 'metalmass'), function=_metalmass,  sampling_type='particle', units="g", particle_type=True)
+    ds.add_field(('gas','metals'), function=_gasmetals, sampling_type='particle', units="code_metallicity")
+    ds.add_field(('metal','dens'), function=_metaldens,  sampling_type='particle',units="g/cm**3")
+    ds.add_field(('PartType0', 'metalmass'), function=_metalmass,  sampling_type='particle', units="g")
 
-    
-    ds.add_field(('gas','masses'), function=_gasmasses,  sampling_type='particle', units='g', particle_type=True)
-    ds.add_field(('gas','fh2'), function=_gasfh2,  sampling_type='particle', units='dimensionless', particle_type=True)
-    ds.add_field(('gas','sfr'), function=_gassfr,  sampling_type='particle', units='g/s', particle_type=True)
-    ds.add_field(('gas','smoothinglength'),function=_gassmoothinglength, sampling_type='particle', units='pc',particle_type=True)
+    ds.add_field(('gas','density'), function=_gasdensity, sampling_type='particle', units='g')
+    ds.add_field(('gas','masses'), function=_gasmasses,  sampling_type='particle', units='g')
+    ds.add_field(('gas','fh2'), function=_gasfh2,  sampling_type='particle', units='dimensionless')
+    ds.add_field(('gas','sfr'), function=_gassfr,  sampling_type='particle', units='g/s')
+    ds.add_field(('gas','smoothinglength'),function=_gassmoothinglength, sampling_type='particle', units='pc')
 
     # get the dust mass
 
     if cfg.par.dust_grid_type == 'dtm':
-        ds.add_field(('dust','mass'), function=_dustmass_dtm,  sampling_type='particle', units='code_mass',particle_type=True)
+        ds.add_field(('dust','mass'), function=_dustmass_dtm,  sampling_type='particle', units='code_mass')
     if cfg.par.dust_grid_type == 'manual':
-        ds.add_field(('dust','mass'), function=_dustmass_manual,  sampling_type='particle', units='code_mass', particle_type=True)
+        ds.add_field(('dust','mass'), function=_dustmass_manual,  sampling_type='particle', units='code_mass')
                 
         #ds.add_deposited_particle_field(("PartType0", "Dust_Masses"), "sum")
         #if add_smoothed_quantities == True: ds.add_field(('dustsmoothedmasses'), function=_dustsmoothedmasses,  sampling_type='particle', units='code_mass', particle_type=True)
 
 
     if cfg.par.dust_grid_type == 'rr':
-        ds.add_field(("dust","mass"),function=_dustmass_rr, sampling_type='particle', units='code_mass',particle_type=True)
+        ds.add_field(("dust","mass"),function=_dustmass_rr, sampling_type='particle', units='code_mass')
     if cfg.par.dust_grid_type == 'li_bestfit':
-        ds.add_field(("dust","mass"),function=_dustmass_li_bestfit, sampling_type='particle', units='code_mass',particle_type=True)
+        ds.add_field(("dust","mass"),function=_dustmass_li_bestfit, sampling_type='particle', units='code_mass')
 
 
     #if we have the Li, Narayanan & Dave 2019 Extreme Randomized Trees
@@ -265,23 +300,29 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
         #this is an icky way to pass this to the function for ds.add_field in the next line. but such is life.
         #ds.parameters['li_ml_dustmass'] = li_ml_dustmass
         #ds.add_field(('li_ml_dustmass'),function=_li_ml_dustmass, sampling_type='particle', units='code_mass',particle_type=True)
-        ds.add_field(("dust","mass"),function=_li_ml_dustmass, sampling_type='particle', units='code_mass',particle_type=True)
+        ds.add_field(("dust","mass"),function=_li_ml_dustmass, sampling_type='particle', units='code_mass')
 
 
 
-    if cfg.par.otf_extinction == True:
-        ds.add_field(("dust","coordinates"),function=_dustcoordinates, sampling_type='particle',units='code_length',particle_type=True)
+    #add the numgrains (in case we're in OTF extinction mode)
+    if cfg.par.otf_extinction:
+        ds.add_field(("dust","coordinates"),function=_dustcoordinates, sampling_type='particle',units='code_length')
+        #ds.add_field(('dust','numgrains'),function=_dust_numgrains,units='dimensionless',sampling_type='particle',particle_type=True)
+        ds.add_field(('particle_dust','carbon_fraction'),function=_particle_dust_carbon_fraction,units='dimensionless',sampling_type='particle')
+        ds.add_field(('particle_dust','numgrains'),function=_particle_dust_numgrains,units='dimensionless',sampling_type='particle')
+        ds.add_field(('particle_dust','mass'),function=_particle_dust_mass,units='code_mass',sampling_type='particle')
+        ds.add_field(('particle_dust','coordinates'),function=_particle_dust_coordinates,units='code_length',sampling_type='particle')
 
 
-    ds.add_field(('star','masses'), function=_starmasses,  sampling_type='particle', units='g', particle_type=True)
-    ds.add_field(('star','coordinates'), function=_starcoordinates,  sampling_type='particle', units='cm', particle_type=True)
-    ds.add_field(('star','formationtime'), function=_starformationtime,  sampling_type='particle', units='dimensionless', particle_type=True)
-    ds.add_field(('stellar','ages'),function=_stellarages, sampling_type='particle', units='Gyr',particle_type=True)
+    ds.add_field(('star','masses'), function=_starmasses,  sampling_type='particle', units='g')
+    ds.add_field(('star','coordinates'), function=_starcoordinates,  sampling_type='particle', units='cm')
+    ds.add_field(('star','formationtime'), function=_starformationtime,  sampling_type='particle', units='dimensionless')
+    ds.add_field(('stellar','ages'),function=_stellarages, sampling_type='particle', units='Gyr')
 
 
-    ds.add_field(('gas','density'), function=_gasdensity, sampling_type='particle',units='g/cm**3', particle_type=True)
+    ds.add_field(('gas','density'), function=_gasdensity, sampling_type='particle',units='g/cm**3')
     # Gas Coordinates need to be in Comoving/h as they'll get converted later.
-    ds.add_field(('gas','coordinates'), function=_gascoordinates, sampling_type='particle',units='cm', particle_type=True)
+    ds.add_field(('gas','coordinates'), function=_gascoordinates, sampling_type='particle',units='cm')
 
 
     if cfg.par.BH_SED == True:
@@ -298,10 +339,10 @@ def arepo_field_add(fname, bounding_box=None, ds=None):
                     from powderday.agn_models.hickox import vary_bhluminosity
                     cfg.par.bhlfrac = vary_bhluminosity(nholes)
 
-                ds.add_field(("bh","luminosity"),function=_bhluminosity,sampling_type='particle',units='erg/s',particle_type=True)
-                ds.add_field(("bh","coordinates"),function=_bhcoordinates,sampling_type='particle',units="cm",particle_type=True)
-                ds.add_field(("bh","nu"),function=_bhsed_nu,sampling_type='particle',units='Hz',particle_type=True)
-                ds.add_field(("bh","sed"),function=_bhsed_sed,sampling_type='particle',units="erg/s",particle_type=True)
+                ds.add_field(("bh","luminosity"),function=_bhluminosity,sampling_type='particle',units='erg/s')
+                ds.add_field(("bh","coordinates"),function=_bhcoordinates,sampling_type='particle',units="cm")
+                ds.add_field(("bh","nu"),function=_bhsed_nu,sampling_type='particle',units='Hz')
+                ds.add_field(("bh","sed"),function=_bhsed_sed,sampling_type='particle',units="erg/s")
             else:
                 print('No black holes found (length of BH_Mass field is 0)')
         except:

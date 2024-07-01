@@ -25,27 +25,45 @@ def manual_oct(reg,refined):
     #masses_smoothed can be 0 at some places; this will make dtg nan
     #out even though it would eventually get multiplied to 0 when we
     #multiply by density smoothed.  So, to be stable we nan_to_num it.
+    
+    #print('[dust_grid_gen/manual_oct:] gas smoothed total :',np.sum(masses_smoothed.to('Msun')))
+    
+    vol_fact = reg.parameters['octree'][('index','dx')][~refined].to('kpc')*reg.parameters['octree'][('index','dy')][~refined].to('kpc')*reg.parameters['octree'][('index','dz')][~refined].to('kpc')
+
+    # correct for dtg issues
+    # yt does not necessarily have the smoothed dust and gas masses
+    # offset from the true values by the same amount, i.e.
+    # total smoothed gas mass/total particle gas mass not =
+    # total smoothed dust mass/total particle dust mass
+    cor_fact = (np.sum(masses_smoothed.to('Msun'))/np.sum(reg['gas','mass'].to('Msun')))/(np.sum(smoothed_dust_masses.to('Msun'))/np.sum(reg['dust','mass'].to('Msun')))
+    # correct for total gas normalization
+    cor_fact = cor_fact * np.sum(reg['gas','mass'].to('Msun'))/np.sum(density_smoothed.to('Msun/kpc**3')*vol_fact)
+
     dust_to_gas_ratio = np.nan_to_num(dust_to_gas_ratio)
     dust_smoothed = np.zeros(len(refined))
-    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
+    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed * cor_fact
     return dust_smoothed
 
 def dtm_grid_oct(reg,refined):
     wTrue = np.where(np.array(refined) == True)[0]
     wFalse = np.where(np.array(refined) == False)[0]
 
-    
 
     density_smoothed = reg["gas","smootheddensity"]
     metallicity_smoothed = reg["gas","smoothedmetals"]
     masses_smoothed = reg["gas","smoothedmasses"]
-    
+
+    gas_mass_particle = reg['gas','mass'].to('Msun')
+    # correct for total gas normalization
+    vol_fact = reg.parameters['octree'][('index','dx')][~refined].to('kpc')*reg.parameters['octree'][('index','dy')][~refined].to('kpc')*reg.parameters['octree'][('index','dz')][~refined].to('kpc')
+    cor_fact = np.sum(gas_mass_particle)/np.sum(density_smoothed.to('Msun/kpc**3')*vol_fact)
+
     dust_smoothed = np.zeros(len(refined))
     
     print ('[grid_construction/dust_grid_gen/dtm_grid: ] len(wFalse) = ',len(wFalse))
     print ('[grid_construction/dust_grid_gen/dtm_grid: ] len(metallicity_smoothed) = ',len(metallicity_smoothed))
 
-    dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio
+    dust_smoothed[wFalse] = metallicity_smoothed * density_smoothed * cfg.par.dusttometals_ratio * cor_fact
     return dust_smoothed
 
 
@@ -73,7 +91,11 @@ def remy_ruyer_oct(reg,refined):
     density_smoothed = reg["gas","smootheddensity"]
     metallicity_smoothed = reg["gas","smoothedmetals"]
     masses_smoothed = reg["gas","smoothedmasses"]
- 
+    gas_mass_particle = reg['gas','mass'].to('Msun')
+    # correct for total gas normalization
+    vol_fact = reg.parameters['octree'][('index','dx')][~refined].to('kpc')*reg.parameters['octree'][('index','dy')][~refined].to('kpc')*reg.parameters['octree'][('index','dz')][~refined].to('kpc')
+    cor_fact = np.sum(gas_mass_particle)/np.sum(density_smoothed.to('Msun/kpc**3')*vol_fact)
+
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
     metallicity_smoothed[metallicity_smoothed == 0] = 1.e-10
@@ -86,7 +108,7 @@ def remy_ruyer_oct(reg,refined):
     dust_to_gas_ratio = 1./gas_to_dust_ratio
 
     dust_smoothed = np.zeros(len(refined))
-    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
+    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed * cor_fact
     
     return dust_smoothed
 
@@ -110,6 +132,11 @@ def li_bestfit_oct(reg,refined):
     metallicity_smoothed = reg["gas","smoothedmetals"]
     masses_smoothed = reg["gas","smoothedmasses"]
 
+    gas_mass_particle = reg['gas','mass'].to('Msun')
+    # correct for total gas normalization
+    vol_fact = reg.parameters['octree'][('index','dx')][~refined].to('kpc')*reg.parameters['octree'][('index','dy')][~refined].to('kpc')*reg.parameters['octree'][('index','dz')][~refined].to('kpc')
+    cor_fact = np.sum(gas_mass_particle)/np.sum(density_smoothed.to('Msun/kpc**3')*vol_fact)
+
     #anywhere the smoothing finds a cell with zero metallicity, set
     #this to some very low value
     metallicity_smoothed[metallicity_smoothed == 0] = 1.e-10
@@ -118,7 +145,7 @@ def li_bestfit_oct(reg,refined):
     dust_to_gas_ratio = 10.**(log_dust_to_gas_ratio)
 
     dust_smoothed = np.zeros(len(refined))
-    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
+    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed * cor_fact
 
     return dust_smoothed
 
@@ -164,9 +191,19 @@ def li_ml_oct(reg,refined):
     #masses_smoothed can be 0 at some places; this will make dtg nan
     #out even though it would eventually get multiplied to 0 when we
     #multiply by density smoothed.  So, to be stable we nan_to_num it.
+    
+    
+    gas_mass_particle = reg['gas','mass'].to('Msun')
+    # correct for total gas normalization
+    vol_fact = reg.parameters['octree'][('index','dx')][~refined].to('kpc')*reg.parameters['octree'][('index','dy')][~refined].to('kpc')*reg.parameters['octree'][('index','dz')][~refined].to('kpc')
+    cor_fact = np.sum(gas_mass_particle)/np.sum(density_smoothed.to('Msun/kpc**3')*vol_fact)
+    # correct for dtg issues                                                                                                                                    # yt does not necessarily have the smoothed dust and gas masses                                                                                             # offset from the true values by the same amount, i.e.                                                                                                      # total smoothed gas mass/total particle gas mass not =
+    # total smoothed dust mass/total particle dust mass  
+    cor_fact = cor_fact*(np.sum(masses_smoothed.to('Msun'))/np.sum(reg['gas','mass'].to('Msun')))/(np.sum(smoothed_dust_masses.to('Msun'))/np.sum(reg['dust','mass'].to('Msun')))
+    
     dust_to_gas_ratio = np.nan_to_num(dust_to_gas_ratio)
     dust_smoothed = np.zeros(len(refined))
-    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed
+    dust_smoothed[wFalse]  = dust_to_gas_ratio * density_smoothed * cor_fact
     return dust_smoothed
 
 

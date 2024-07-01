@@ -24,7 +24,7 @@ chi_wd = f['optical_properties']['chi']
 albedo_wd = f['optical_properties']['albedo']
 
 
-loga = np.linspace(-4,0,41)
+loga = np.linspace(-4,0,16)
 a = 10.**loga
 mrn_dn_da = a**(-3.5)
 mrn_dn_da /= np.max(mrn_dn_da)

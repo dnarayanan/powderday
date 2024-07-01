@@ -21,8 +21,9 @@ setup(
         'astropy; python_version>="3.5"',
         'h5py>=2.9',
         'yt',
+        'unyt',
         'fsps',
-        'sklearn',
+        'scikit-learn',
         'p_tqdm'
     ],
     scripts=["pd_front_end.py"],
