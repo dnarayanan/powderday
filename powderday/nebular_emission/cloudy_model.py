@@ -69,7 +69,7 @@ def write_cloudy_input(**kwargs):
         pars[key] = value
 
     file_name = os.path.join(pars["dir_"]+"/temp_files", pars["model_name"] + ".in")
-    f = open(file_name, "w")
+    f = open(file_name, "w+")
 
     def this_print(s, eol=True):
         if s is None:
