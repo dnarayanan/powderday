@@ -69,7 +69,7 @@ def write_cloudy_input(**kwargs):
         pars[key] = value
 
     file_name = os.path.join(pars["dir_"]+"/temp_files", pars["model_name"] + ".in")
-    f = open(file_name, "w")
+    f = open(file_name, "w+")
 
     def this_print(s, eol=True):
         if s is None:
@@ -240,15 +240,15 @@ def get_output(model_name, dir_, qq, fsps_lam, cell_width, id_val):
 
 def clean_files(dir_, model_name, id_val, error=False):
     # Cleaning up temporary files
-    if not error:
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".out"))
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".in"))
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".inicont"))
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".lin"))
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".outwcont"))
-        if id_val != 3:
-            os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".ascii"))
-
+    
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".out"))
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".in"))
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".inicont"))
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".lin"))
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".outwcont"))
+    if id_val != 3:
+        os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".ascii"))
+        
     if id_val != 3:
         os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".mod"))
         os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".in"))
