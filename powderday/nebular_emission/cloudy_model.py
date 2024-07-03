@@ -240,15 +240,15 @@ def get_output(model_name, dir_, qq, fsps_lam, cell_width, id_val):
 
 def clean_files(dir_, model_name, id_val, error=False):
     # Cleaning up temporary files
-    if not error:
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".out"))
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".in"))
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".inicont"))
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".lin"))
-        os.remove(os.path.join(dir_ + "/temp_files", model_name + ".outwcont"))
-        if id_val != 3:
-            os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".ascii"))
-
+    
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".out"))
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".in"))
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".inicont"))
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".lin"))
+    os.remove(os.path.join(dir_ + "/temp_files", model_name + ".outwcont"))
+    if id_val != 3:
+        os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".ascii"))
+        
     if id_val != 3:
         os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".mod"))
         os.remove(os.path.join(os.environ['CLOUDY_DATA_PATH'], model_name + ".in"))
