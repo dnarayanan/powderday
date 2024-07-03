@@ -2,7 +2,7 @@
 
 #-----------------------------------------------------------
 # Parameters that can tuned for running CLOUDY models individually for each star particle. 
-# There is an option to include nebular emission fro Young stars, post-AGB stars, Diffuse Ionized Gas and AGNs.
+# There is an option to include nebular emission for Young stars, post-AGB stars, Diffuse Ionized Gas and AGNs.
 # These only work when add_nebular_emission is set to true and use_cloudy_tables is set to false in parameters_master.py
 #-----------------------------------------------------------
 
