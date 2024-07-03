@@ -400,8 +400,9 @@ def newstars_gen(star_object):
     if cfg.par.add_neb_emission and cfg.par.use_cloudy_tables and star_object.age <= 1.e-2:
         LogZ = np.log10(star_object.metals/cfg.par.solar)
         Rin = 1.e19   # Rinner is fixed at 1.e19 cm for lookup tables
+        nh = 1e3 # Hydrogen Density is fixed at 1.e3 cm for lookup tables
         LogQ = calc_LogQ(1.e8*constants.c.cgs.value/spec_noneb[0], spec_noneb[1]*constants.L_sun.cgs.value, 
-                            mstar=star_object.mass/constants.M_sun.cgs.value, mfrac=mfrac_neb)
+                            mstar=star_object.mass/constants.M_sun.cgs.value, mfrac=mfrac)
         LogU = np.log10((10**LogQ)/(4*np.pi*Rin*Rin*nh*constants.c.cgs.value))
 
         sp.params['gas_logu'] = LogU
