@@ -255,11 +255,11 @@ python-fsps
 
 To install::
 
-  >git clone --recursive https://github.com/dfm/python-fsps.git
-  >cd python-fsps
-  >python setup.py install
+  >export SPS_HOME="/path/where/you/want/to/download/fsps"
+  >git clone https://github.com/cconroy20/fsps.git $SPS_HOME
+  >python -m pip install fsps
 
-`python-fsps <https://dfm.io/python-fsps/current/>`_  will be installed automatically by the `powderday` setup.py script.
+    
   
 You can test the installation by opening python and typing::
 
