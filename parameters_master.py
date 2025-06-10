@@ -37,6 +37,10 @@ seed = -12345 # has to be an int, and negative.
 #===============================================
 #DUST INFORMATION 
 #===============================================
+#----------------
+#DUST EXTINCTION
+#----------------
+
 dustdir = '/home/desika.narayanan/hyperion-dust-0.1.0/dust_files/' #location of your dust files
 dustfile = 'd03_3.1_6.0_A.hdf5'
 PAH = True
@@ -61,11 +65,40 @@ otf_extinction = False #flag for on the fly extinction.  If set, then we
 otf_extinction_log_min_size = -4 #micron; must match what is set in the hydro simulation
 otf_extinction_log_max_size = 0 #micron; must match what is set in the hydro simulation
 
+percentile_LPAH_to_include = 0.99 #we run into memory problems if we
+                                 #include every single PAH as a
+                                 #source. however, you can usually
+                                 #include 90-99% of the luminosity
+                                 #without a problem and just ditch the
+                                 #cells that don't contribute much.
+                                 #lower this value if you run into
+                                 #memory issues (though knowing of
+                                 #course that you're missing PAH
+                                 #flux...)
+
 draine21_pah_model = True
 draine21_pah_grid_write = True #this will write the PAH spectrum out
                                #to the npz file for every cell in the
                                #grid.  note, this causes the grid*.npz
                                #files to be ~10 GB or more.
+
+draine_data_dir = '/blue/narayanan/desika.narayanan/powderday_files/PAHs/dataverse_files/'
+
+separate_into_dust_species = True #if set to true, we're assuming that
+                                  #there are graphites, silicates, and
+                                  #an aromatic fraction designated in
+                                  #some way.  these are handled in
+                                  #powderday/*_tributaries.
+
+SKIP_LOGU_CALC = False #default is False -- if this is set, then we
+                      #assume logU for the PAH calculations are all 0
+                      #across the grid.  This can be set if there are
+                      #memory troubles in calculating logU for massive
+                      #grids (which can happen quickly).  Note -- logU
+                      #only tends to impact things at logU>>4, which
+                      #is hard to achieve in most galaxy evolution
+                      #simulations (owing to resolution).
+
 
 dust_density = 2.4 #units are g/cm**3.  this *only* is used in the OTF
                    #pah calculations, so if you do not have an active dust model, this will not be useful.
@@ -254,3 +287,9 @@ FORCE_STELLAR_METALLICITIES_VALUE = 0.013 # absolute values (so 0.013 ~ solar)
 SKIRT_DATA_DUMP = True # if set, various data files useful for running SKIRT are saved.
 
 REMOVE_INPUT_SEDS = False # If set, the hyperion input SED file is deleted after RT finishes
+
+NEB_DEBUG = False # Dumps parameters related to nebular line emission in a file for debugging.
+                  # The file includes the ionization parameter, number of ionizing photons,
+                  # metallicity, inner radius, stellar mass and age for each particle.
+                  # Naming convention: nebular_properties_galaxy*.txt where * is the galaxy number
+OTF_EXTINCTION_MRN_FORCE = False
