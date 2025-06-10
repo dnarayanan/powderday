@@ -14,7 +14,10 @@ from powderday.grid_construction import stars_coordinate_boost
 from multiprocessing import Pool
 from functools import partial
 from itertools import repeat
-from scipy.integrate import simps
+try: #scipy versioning check
+    from scipy.integrate import simps
+except:
+    from scipy.integrate import simpson as simps
 
 from powderday.nebular_emission.cloudy_tools import calc_LogQ, age_dist, cmdf, get_nearest,convert_metals
 from powderday.analytics import logu_diagnostic,dump_emlines
