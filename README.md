@@ -1,12 +1,3 @@
-Welcome to Powderday!  
+If you are looking for Powderday dust radiative transfer, you are in the wrong place!  This is Desika Narayanan's fork for software development, and is likely unstable/unreliable.  The main stable codebase is at:
 
-Powderday is a dust radiative transfer package designed to interface
-with galaxy formation simulations in order to produce spectral energy
-distributions, as well as realistic images.
-
-For documentation, please see the docs at:
-
-[http://powderday.readthedocs.org](http://powderday.readthedocs.org)
-
-The manual contains full installation instructions.  
-
+github.com/powderday-rt/powderday
