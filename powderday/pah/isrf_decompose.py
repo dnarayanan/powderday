@@ -4,7 +4,8 @@ import powderday.config as cfg
 from astropy import units as u
 from astropy import constants as const
 from powderday.pah.pah_file_read import read_draine_file
-from scipy.interpolate import interp1d,interp2d
+from scipy.interpolate import interp1d
+from scipy.interpolate import RectBivariateSpline
 from scipy.optimize import nnls
 from tqdm import tqdm
 
@@ -45,8 +46,12 @@ def get_Cabs(draine_directories, simulation_sizes, gsd, target_lam):
     simulation_sizes = simulation_sizes.to(u.cm)
 
     # CREATE INTERPOLATION FUNCTION (Size, Lam_Draine) -> Cabs
-    f_2d_interp_cation = interp2d(draine_sizes.value, draine_lam.value, Cabs_cation.T, kind='cubic')
-    f_2d_interp_neutral = interp2d(draine_sizes.value, draine_lam.value, Cabs_neutral.T, kind='cubic')
+    f_2d_interp_cation = RectBivariateSpline(draine_sizes.value, draine_lam.value, Cabs_cation, kx=3, ky=3)
+    f_2d_interp_neutral = RectBivariateSpline(draine_sizes.value, draine_lam.value, Cabs_neutral, kx=3, ky=3)
+
+    # The spline is evaluated on ascending size and wavelength grids, so
+    # the regridded Cabs arrays are ordered by increasing wavelength.
+    target_lam_sorted = np.sort(target_lam.value)
 
     # Arrays now sized to target_lam.shape[0] instead of draine_lam.shape[0]
     Cabs_cation_regrid_sizes_lam_cells = np.empty([n_simulation_sizes, target_lam.shape[0], ncells])
@@ -59,8 +64,9 @@ def get_Cabs(draine_directories, simulation_sizes, gsd, target_lam):
     
     for i in tqdm(range(ncells)):
         #Evaluate interpolation at target_lam.value
-        Cabs_cation_regrid_sizes_lam_cells[:,:,i] = f_2d_interp_cation(simulation_sizes[i,:], target_lam.value).T
-        Cabs_neutral_regrid_sizes_lam_cells[:,:,i] = f_2d_interp_neutral(simulation_sizes[i,:], target_lam.value).T
+        sizes_sorted = np.sort(simulation_sizes[i,:].value)
+        Cabs_cation_regrid_sizes_lam_cells[:,:,i] = f_2d_interp_cation(sizes_sorted, target_lam_sorted)
+        Cabs_neutral_regrid_sizes_lam_cells[:,:,i] = f_2d_interp_neutral(sizes_sorted, target_lam_sorted)
         
         # Normalize GSD
         gsd_normalized[:,i] = gsd[i,:]/np.trapz(gsd[i,:], simulation_sizes[i,:])
