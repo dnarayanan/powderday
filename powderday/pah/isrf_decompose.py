@@ -75,7 +75,7 @@ def get_Cabs(draine_directories, simulation_sizes, gsd, target_lam):
     return Cabs_cation_regrid_lam_cells, Cabs_neutral_regrid_lam_cells
 
 
-def get_isrf(gsd,reg,ds=None):
+def get_isrf(gsd,reg):
     #get the wavelengths of the simulation
     f = h5py.File(cfg.model.outputfile + '_isrf.sed')
     
@@ -92,77 +92,64 @@ def get_isrf(gsd,reg,ds=None):
     #clip values that are MC noise too high
     simulation_specific_energy_sum[simulation_specific_energy_sum.value > 1.e50] = np.median(simulation_specific_energy_sum)
 
-    #dust_file_writer may split each size bin into per-species dust types
-    #(graphite, silicate), flattened size-major: i_size*n_species+i_species.
-    #the size-distribution weighting below expects one dust type per size
-    #bin, so collapse the species axis first.  each species slice carries
-    #that species' opacity-weighted field, so the collapse is a per-cell
-    #average over species weighted by the cell's own grain counts in that
-    #size bin -- i.e. the field weighted by the local graphite/silicate
-    #blend.  this reduces to a no-op when the dust files are single-species.
-    _dust_data = np.load(cfg.model.PD_output_dir + '/dust_files/binned_dust_sizes.npz')
-    n_species = int(_dust_data['n_species']) if 'n_species' in _dust_data.files else 1
-    if n_species > 1:
-        n_nu_isrf, n_dust, ncells_isrf = simulation_specific_energy_sum.shape
-        n_sizes = n_dust // n_species
-        assert n_dust == n_sizes * n_species, \
-            "[get_isrf] n_dust (%d) is not a multiple of n_species (%d)" % (n_dust, n_species)
-        #per-cell species weights, in the same species order as the dust
-        #files; fall back to equal weights if any species' per-cell size
-        #grid is unavailable (non-species-resolved front ends).  the size
-        #grids are registered on the parameters of the dataset the grid
-        #was built from -- the ds argument -- which can be a different
-        #instance from reg.ds, so prefer it and fall back to the region.
-        _species_grid_keys = {'graphite': 'reg_grid_of_sizes_graphite',
-                              'silicate': 'reg_grid_of_sizes_silicate'}
-        _param_sources = [_p for _p in
-                          (getattr(ds, 'parameters', None),
-                           getattr(reg, 'parameters', None),
-                           getattr(getattr(reg, 'ds', None), 'parameters', None))
-                          if _p is not None]
-        w = np.ones([ncells_isrf, n_sizes, n_species])
-        _have_all_species_grids = True
-        for _i_sp, _sp in enumerate(_dust_data['species_order']):
-            _sp = _sp.decode() if isinstance(_sp, bytes) else str(_sp)
-            _key = _species_grid_keys.get(_sp)
-            _g = None
-            if _key is not None:
-                for _params in _param_sources:
-                    if _key in _params:
-                        _g = _params[_key]
-                        break
-            _g = np.asarray(getattr(_g, 'value', _g), dtype=float) if _g is not None else None
-            if _g is not None and _g.ndim == 2 and _g.shape == (ncells_isrf, n_sizes):
-                w[:, :, _i_sp] = _g
-            else:
-                _have_all_species_grids = False
-                print("[isrf_decompose/get_isrf]: species '%s' weight grid unusable: "
-                      "key=%s, found in %d of %d parameter dicts, shape=%s, expected=(%d, %d)"
-                      % (_sp, _key,
-                         sum(1 for _p in _param_sources if _key in _p), len(_param_sources),
-                         'None' if _g is None else str(_g.shape), ncells_isrf, n_sizes))
-        if not _have_all_species_grids:
-            print("[isrf_decompose/get_isrf]: per-cell species size grids unavailable; "
-                  "collapsing species-split dust types with equal weights")
-            w = np.ones([ncells_isrf, n_sizes, n_species])
-        #normalize over species per (cell, size); bins with no grains of
-        #either species get equal weights
-        _wsum = w.sum(axis=2, keepdims=True)
-        w = np.where(_wsum > 0, w / np.where(_wsum > 0, _wsum, 1.), 1. / n_species)
-        simulation_specific_energy_sum = (
-            simulation_specific_energy_sum.reshape(n_nu_isrf, n_sizes, n_species, ncells_isrf)
-            * w.transpose(1, 2, 0)[np.newaxis, :, :, :]).sum(axis=2)
-
     ncells = grid_dust_masses.shape[0]
+
+    # -----------------------------------------------------------------
+    # DIVIDE OUT THE DUST ABSORPTION OPACITY.
+    # Hyperion's specific_energy_nu is an ABSORBED quantity, per dust
+    # type d:  specific_energy_nu[nu,d] = kappa_abs,d(nu) * c*u_nu*Dnu.
+    # Feeding it to pah_spec as if it were the ambient field u_lambda
+    # over-weights the FUV (kappa rises steeply to the UV) and biases the
+    # aging trend.  We recover the ambient field by dividing each
+    # dust-type slice by that type's kappa_abs(nu) BEFORE the GSD
+    # convolution -- every type then yields the same u_nu, so the
+    # number-weighting no longer skews the result toward small grains.
+    # kappa_abs = chi*(1-albedo) is read from the SAME per-bin dust files,
+    # in the SAME order, that tributary_dust_add used to build the n_dust
+    # axis (via binned_dust_sizes.npz['outfile_filenames']).
+    # NB: the per-bin Dnu (proportional to nu on the log ISRF grid) is
+    # removed downstream in the SPA conversion, mirroring get_logU.
+    # -----------------------------------------------------------------
+    _dust_npz = np.load(cfg.model.PD_output_dir + '/dust_files/binned_dust_sizes.npz')
+    _dust_files = _dust_npz['outfile_filenames']
+    _nu_grid = simulation_isrf_nu.to(u.Hz).value
+    kappa_abs = np.empty([len(_nu_grid), len(_dust_files)])
+    for _d, _fn in enumerate(_dust_files):
+        _fn = _fn.decode() if isinstance(_fn, bytes) else str(_fn)
+        _op = h5py.File(_fn, 'r')['optical_properties'][:]
+        _nn = np.asarray(_op['nu'], float)
+        _order = np.argsort(_nn)
+        _kabs = np.asarray(_op['chi'], float) * (1. - np.asarray(_op['albedo'], float))
+        kappa_abs[:, _d] = np.interp(_nu_grid, _nn[_order], _kabs[_order])
+    assert kappa_abs.shape[1] == simulation_specific_energy_sum.shape[1], \
+        "[get_isrf] kappa_abs n_dust (%d) != specific_energy_nu n_dust (%d)" % (
+            kappa_abs.shape[1], simulation_specific_energy_sum.shape[1])
+    # floor kappa to tame MC-noise blow-up where kappa_abs -> 0 (far-IR)
+    kappa_floor = np.maximum(kappa_abs, 1.e-3 * kappa_abs.max(axis=0, keepdims=True))
+    specific_energy_ambient = simulation_specific_energy_sum.value / kappa_floor[:, :, None]
+
+    #if the dust types are species-split (n_dust = nsizes*n_species,
+    #flattened size-major so index = i_size*n_species+i_species), collapse
+    #the species dimension before the GSD convolution.  specific_energy_
+    #ambient is the ambient field times the per-type dust mass, so summing
+    #over species within each size recovers field*M_total per size -- the
+    #single-species quantity this size-only convolution expects.
+    n_dust_ambient = specific_energy_ambient.shape[1]
+    n_gsd_sizes = gsd.shape[1]
+    if n_dust_ambient != n_gsd_sizes and n_dust_ambient % n_gsd_sizes == 0:
+        n_sp = n_dust_ambient // n_gsd_sizes
+        specific_energy_ambient = specific_energy_ambient.reshape(
+            specific_energy_ambient.shape[0], n_gsd_sizes, n_sp,
+            specific_energy_ambient.shape[2]).sum(axis=2)
 
     #convolve the simulation specific energy (ISRF) with the GSD to
     #get rid of the size dimension:
     simulation_specific_energy_gsd_convolved = np.zeros([simulation_specific_energy_sum.shape[0],simulation_specific_energy_sum.shape[2]])
 
-    print("[isrf_decompose/get_beta_nnls]: Convolving the simulation specific energy grid with the dust types")
+    print("[isrf_decompose/get_beta_nnls]: Convolving the (kappa-divided) specific energy grid with the dust types")
     for i in tqdm(range(ncells)):
-        #x = simulation_specific_energy_sum[:,:,i]
-        simulation_specific_energy_gsd_convolved[:,i] = np.dot(simulation_specific_energy_sum[:,:,i],gsd[i,:])
+        #x = specific_energy_ambient[:,:,i]  (kappa_abs already divided out)
+        simulation_specific_energy_gsd_convolved[:,i] = np.dot(specific_energy_ambient[:,:,i],gsd[i,:])
         simulation_specific_energy_gsd_convolved[:,i]/=np.sum(gsd[i,:])
 
     simulation_specific_energy_gsd_convolved *= u.erg/u.s #attach units back to it
@@ -170,9 +157,133 @@ def get_isrf(gsd,reg,ds=None):
     return simulation_specific_energy_gsd_convolved,simulation_isrf_nu,simulation_isrf_lam
 
 
-def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg, ds=None):
+def get_u_lambda():
+    """Compute the per-cell radiation field spectral energy density u_lambda.
 
-    simulation_specific_energy_gsd_convolved,simulation_isrf_nu,simulation_isrf_lam = get_isrf(gsd,reg,ds=ds)
+    The frequency-resolved specific energy that hyperion writes out
+    ('specific_energy_nu') is the absorbed power per unit dust mass summed
+    within each frequency bin, i.e. for dust type d and bin b:
+
+        E_bin(b, d, cell) ~= 4 pi J_nu kappa_abs,nu(d) dnu_b    [erg/s/g]
+
+    It is *not* an energy density: it carries the absorption opacity
+    weighting, the bin width, and is a rate.  Because hyperion's
+    path-length estimator deposits tmin * kappa_d * energy for *every*
+    dust type present in a cell, E_bin(d)/kappa_d is identical for all
+    dust types present, so we can invert to the mean intensity via
+
+        4 pi J_nu dnu_b = sum_d E_bin(d) / sum_{d present} kappa_abs,nu(d)
+
+    and the energy density follows from u_nu = 4 pi J_nu / c and
+    u_lambda = u_nu c / lambda^2:
+
+        u_lambda = 4 pi J_nu / lambda^2    [erg/cm^4]
+
+    Note this is a complete inversion: unlike get_isrf it involves no
+    dust masses, no cell volumes, and divides by the actual per-bin
+    widths dnu (so it does not assume a log-uniform frequency grid).
+
+    Returns
+    -------
+    u_lambda : astropy Quantity [n_cells, n_nu] in erg/cm^4
+    nu : astropy Quantity [n_nu] in Hz (same ordering as the ISRF file)
+    lam : astropy Quantity [n_nu] in micron
+    """
+
+    f = h5py.File(cfg.model.outputfile + '_isrf.sed', 'r')
+    iteration_list = [i for i in f.keys() if 'iteration_' in i]
+    dset = f[iteration_list[-1]]
+    nu = dset['ISRF_frequency_bins'][:] * u.Hz
+    lam = (const.c / nu).to(u.micron)
+
+    #E_bin is [n_nu, n_dust, n_cells]
+    E_bin = np.array(dset['specific_energy_nu'])
+    scalar = np.array(dset['specific_energy'])
+    f.close()
+    E_bin[~np.isfinite(E_bin)] = 0.
+
+    #sanitize the frequency-resolved array against corrupted elements:
+    #physically, no single frequency bin can carry more absorbed power
+    #than the bolometric (scalar) specific energy of the same dust type
+    #and cell, since the scalar is the sum over bins.  isolated elements
+    #violating this bound by many orders of magnitude have been traced
+    #to uninitialized-memory values in the file and would otherwise
+    #propagate into unphysically luminous PAH point sources.
+    try:
+        bound = scalar.reshape(E_bin.shape[1:])[None, ...] * (1. + 1.e-3)
+        bad = E_bin > bound
+        if bad.any():
+            print("[pah/isrf_decompose]: WARNING: zeroing %d "
+                  "specific_energy_nu elements that exceed the bolometric "
+                  "bound (corrupt frequency-resolved data)" % int(bad.sum()))
+            E_bin[bad] = 0.
+    except ValueError:
+        print("[pah/isrf_decompose]: WARNING: could not apply the "
+              "bolometric sanity bound (unexpected specific_energy shape)")
+
+    #read the absorption opacity of each dust type from the same dust
+    #files that were handed to hyperion.  the ISRF frequency bins are
+    #the first dust file's frequency grid, so for matching grids the
+    #log-log interpolation below is exact.
+    dust_data = np.load(cfg.model.PD_output_dir + '/dust_files/binned_dust_sizes.npz')
+    dust_filenames = dust_data['outfile_filenames']
+
+    n_dust = E_bin.shape[1]
+    if len(dust_filenames) != n_dust:
+        raise ValueError("[pah/isrf_decompose]: number of dust files (%d) does not match the "
+                         "dust dimension of specific_energy_nu (%d)" % (len(dust_filenames), n_dust))
+
+    kappa_abs = np.zeros([n_dust, len(nu)])
+    for idust in range(n_dust):
+        fn = dust_filenames[idust]
+        fn = fn.decode() if isinstance(fn, bytes) else str(fn)
+        df = h5py.File(fn, 'r')
+        topt = df['optical_properties']
+        dust_nu = np.array(topt['nu'])
+        dust_kappa = np.array(topt['chi']) * (1. - np.array(topt['albedo']))
+        df.close()
+        order = np.argsort(dust_nu)
+        kappa_abs[idust, :] = 10.**np.interp(np.log10(nu.value),
+                                             np.log10(dust_nu[order]),
+                                             np.log10(dust_kappa[order]))
+
+    #dust types with zero density in a cell never accumulate specific
+    #energy, so they must be left out of the opacity sum for that cell
+    present = np.any(E_bin > 0, axis=0)  #[n_dust, n_cells]
+
+    E_sum = np.sum(E_bin, axis=1)                #[n_nu, n_cells], erg/s/g
+    kappa_eff = np.dot(kappa_abs.T, present)     #[n_nu, n_cells], cm^2/g
+
+    #floor the opacity at a small fraction of each cell's own spectral
+    #peak before inverting.  in cells whose present dust types have a
+    #negligible opacity at some frequencies (e.g. only very small grains,
+    #which are nearly transparent in the far-infrared), the deposited
+    #energy there is Monte Carlo noise, and dividing it by a vanishing
+    #opacity would amplify that noise into unphysically large radiation
+    #fields (and, downstream, PAH point-source luminosities).  the same
+    #protection, with the same threshold, is used on the per-type
+    #opacities in get_isrf.
+    kappa_eff = np.maximum(kappa_eff,
+                           1.e-3 * kappa_eff.max(axis=0, keepdims=True))
+
+    fourpi_Jnu_dnu = np.zeros(E_sum.shape)
+    w = kappa_eff > 0
+    fourpi_Jnu_dnu[w] = E_sum[w] / kappa_eff[w]
+    fourpi_Jnu_dnu = fourpi_Jnu_dnu * u.erg / u.s / u.cm**2
+
+    #bin widths (midpoint to midpoint).  the end bins are half-open in
+    #hyperion and collect all out-of-range flux, so their width is a
+    #one-sided approximation there.
+    dnu = np.abs(np.gradient(nu.value)) * u.Hz
+
+    u_lambda = (fourpi_Jnu_dnu.T / dnu / lam.to(u.cm)**2).to(u.erg / u.cm**4)
+
+    return u_lambda, nu, lam
+
+
+def get_beta_nnls(draine_directories, gsd, simulation_sizes, reg):
+
+    simulation_specific_energy_gsd_convolved,simulation_isrf_nu,simulation_isrf_lam = get_isrf(gsd,reg)
     
     #we have read in the draine directories explicitly to ensure that the ordering of them is identical from pah_source_create
     isrf_files = []
